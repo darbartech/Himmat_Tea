@@ -55,7 +55,7 @@ export default function AdminUsers() {
   // Fetch admin users from API on mount
   const fetchAdminUsers = async () => {
     try {
-      const users = await api.get('/admin-users');
+      const users = await api.get<any[]>('/admin-users');
       setAdminUsers(users);
     } catch (error) {
       console.error('Failed to fetch admin users:', error);

@@ -19,29 +19,29 @@ export default function ProductCard({ product }: ProductCardProps) {
   const reviewCount = product.reviews?.length || 0;
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden group border border-[rgba(28,25,23,0.06)] hover:shadow-xl hover:border-[#2d5a3d]/20 transition-all duration-300">
+    <div className="bg-white rounded-2xl overflow-hidden group border border-[rgba(28,25,23,0.08)] hover:shadow-[0_10px_40px_rgba(45,90,61,0.12)] hover:border-[#2d5a3d]/25 transition-all duration-400">
       {/* Image */}
       <Link
         href={`/products/${product.id}`}
-        className="relative overflow-hidden bg-[#f0ede8] block aspect-[4/5]"
+        className="relative overflow-hidden bg-[#f8f6f2] block aspect-[4/3] md:aspect-[1/1]"
       >
         <img
           src={product.imageUrl}
           alt={product.name}
-          className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
         />
         {product.isBestseller && (
-          <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-medium bg-[#2d5a3d] text-white">
+          <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-[#2d5a3d] text-white shadow-sm">
             Bestseller
           </span>
         )}
       </Link>
 
       {/* Details */}
-      <div className="p-5">
-        <div className="flex items-center gap-1 mb-2">
-          <Star className="h-3.5 w-3.5 fill-[#c8a96e] text-[#c8a96e]" />
-          <span className="text-sm font-medium text-[#1c1917]">
+      <div className="p-3.5 md:p-4">
+        <div className="flex items-center gap-1 mb-1.5">
+          <Star className="h-3 w-3 fill-[#c8a96e] text-[#c8a96e]" />
+          <span className="text-xs font-medium text-[#1c1917]">
             {averageRating}
           </span>
           {reviewCount > 0 && (
@@ -53,40 +53,35 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <Link href={`/products/${product.id}`} className="block">
           <h3
-            className="text-[16px] font-semibold text-[#1c1917] mb-1 leading-snug group-hover:text-[#2d5a3d] transition-colors"
+            className="text-sm md:text-[15px] font-semibold text-[#1c1917] leading-tight group-hover:text-[#2d5a3d] transition-colors"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
             {product.name}
           </h3>
         </Link>
-        <p className="text-sm text-[#78746e] mb-3">
+        <p className="text-xs text-[#78746e] mt-0.5">
           {product.category}
         </p>
-
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-lg font-bold text-[#1c1917]">
-              Rs.{product.price.toLocaleString()}
-            </span>
-          </div>
+        <div className="flex items-center justify-between mt-2">
+          <span className="text-sm font-bold text-[#2d5a3d]">
+            Rs.{product.price.toLocaleString()}
+          </span>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              addToCart({
+                id: product.id.toString(),
+                productId: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.imageUrl,
+              });
+            }}
+            className="cursor-pointer p-2 bg-[#2d5a3d] text-white rounded-lg hover:bg-[#234832] transition-colors"
+          >
+            <ShoppingBag className="h-4 w-4" />
+          </button>
         </div>
-
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            addToCart({
-              id: product.id.toString(),
-              productId: product.id,
-              name: product.name,
-              price: product.price,
-              image: product.imageUrl,
-            });
-          }}
-          className="cursor-pointer w-full mt-3 flex items-center justify-center gap-2 py-2.5 bg-[#2d5a3d] text-white text-sm font-medium rounded-lg hover:bg-[#234832] transition-colors"
-        >
-          <ShoppingBag className="h-4 w-4" />
-          Add to Cart
-        </button>
       </div>
     </div>
   );

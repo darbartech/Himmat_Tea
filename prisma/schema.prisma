@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -43,6 +43,8 @@ model Product {
   hasVariants           Boolean                @default(false)
   variantOptions        String?
   isBestseller          Boolean                @default(false)
+  isActive              Boolean                @default(true)
+  sortOrder             Int                    @default(0)
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   batches               Batch[]
@@ -87,6 +89,7 @@ model Customer {
   email         String   @unique
   phone         String
   address       String
+  passwordHash  String?
   ordersCount   Int      @default(0)
   totalSpent    Float    @default(0)
   loyaltyPoints Int      @default(0)
@@ -321,6 +324,17 @@ model Settings {
   lowStockThreshold    Int      @default(30)
   gstNumber            String?
   updatedAt            DateTime @updatedAt
+}
+
+model HeroVisual {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  title     String?
+  subtitle  String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model LoyaltyProgram {

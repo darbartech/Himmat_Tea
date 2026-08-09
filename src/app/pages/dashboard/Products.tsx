@@ -118,7 +118,7 @@ export default function Products() {
   // Add Product Mutation
   const addProductMutation = useMutation({
     mutationFn: async (product: any) => {
-      const response = await api.post('/products', product);
+      const response = await api.post<any>('/products', product);
       return response.data || response;
     },
     onSuccess: () => {
@@ -133,7 +133,7 @@ export default function Products() {
   // Update Product Mutation
   const updateProductMutation = useMutation({
     mutationFn: async ({ id, product }: { id: number; product: any }) => {
-      const response = await api.put(`/products/${id}`, product);
+      const response = await api.put<any>(`/products/${id}`, product);
       return response.data || response;
     },
     onSuccess: () => {
@@ -179,7 +179,7 @@ export default function Products() {
   };
 
   const handleExportCSV = () => {
-    const csvData = filteredProducts.map(product => ({
+    const csvData = filteredProducts.map((product: any) => ({
       "Product ID": product.id,
       "Name": product.name,
       "Category": product.category,
@@ -355,7 +355,7 @@ export default function Products() {
                     <Select
                       value={newProduct.productLineId}
                       onValueChange={(value) => {
-                        const pl = storeProductLines.find(p => p.id === value);
+                        const pl = storeProductLines.find((p: any) => p.id === value);
                         setNewProduct({ ...newProduct, productLineId: value, productLine: pl?.name || "" });
                       }}
                     >
@@ -363,7 +363,7 @@ export default function Products() {
                         <SelectValue placeholder="Select product line" />
                       </SelectTrigger>
                       <SelectContent>
-                        {storeProductLines.filter(pl => pl.isActive).map((pl) => (
+                        {storeProductLines.filter((pl: any) => pl.isActive).map((pl: any) => (
                           <SelectItem key={pl.id} value={pl.id}>{pl.name}</SelectItem>
                         ))}
                       </SelectContent>
@@ -499,7 +499,7 @@ export default function Products() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="All">All Product Lines</SelectItem>
-            {storeProductLines.filter(pl => pl.isActive).map((pl) => (
+            {storeProductLines.filter((pl: any) => pl.isActive).map((pl: any) => (
               <SelectItem key={pl.id} value={pl.id}>{pl.name}</SelectItem>
             ))}
           </SelectContent>

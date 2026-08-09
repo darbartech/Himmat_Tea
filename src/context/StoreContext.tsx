@@ -2,14 +2,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { toast } from "sonner";
 
-interface Variant {
+export interface Variant {
   id: number;
   name: string;
   value: string;
   priceModifier: number;
 }
 
-interface ProductVariant {
+export interface ProductVariant {
   id: number;
   sku: string;
   variants: Variant[];
@@ -18,7 +18,7 @@ interface ProductVariant {
   imageUrl?: string;
 }
 
-interface Batch {
+export interface Batch {
   id: number;
   batchNumber: string;
   quantity: number;
@@ -28,7 +28,7 @@ interface Batch {
   costPrice: number;
 }
 
-interface ProductLine {
+export interface ProductLine {
   id: string;
   slug: string;
   name: string;
@@ -52,7 +52,29 @@ interface ProductLine {
   updatedAt: string;
 }
 
-interface Product {
+export interface HeroVisual {
+  id: string;
+  imageUrl: string;
+  title?: string;
+  subtitle?: string;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Review {
+  id: number;
+  productId: number;
+  name: string;
+  initials: string;
+  rating: number;
+  date: string;
+  comment: string;
+  status: "Approved" | "Pending" | "Rejected";
+}
+
+export interface Product {
   id: number;
   productLineId: string;
   productLine?: ProductLine;
@@ -71,9 +93,10 @@ interface Product {
   productVariants: ProductVariant[];
   variantOptions: string[];
   isBestseller: boolean;
+  reviews: Review[];
 }
 
-interface Customer {
+export interface Customer {
   id: number;
   name: string;
   email: string;
@@ -93,17 +116,6 @@ interface LoyaltyProgram {
     minPoints: number;
     discountPercentage: number;
   }[];
-}
-
-interface Review {
-  id: number;
-  productId: number;
-  name: string;
-  initials: string;
-  rating: number;
-  date: string;
-  comment: string;
-  status: "Approved" | "Pending" | "Rejected";
 }
 
 interface BlogPost {
@@ -291,6 +303,10 @@ interface StoreContextType {
   addProductLine: (productLine: Omit<ProductLine, "id" | "createdAt" | "updatedAt">) => void;
   updateProductLine: (id: string, productLine: Partial<ProductLine>) => void;
   deleteProductLine: (id: string) => void;
+  heroVisuals: HeroVisual[];
+  addHeroVisual: (heroVisual: Omit<HeroVisual, "id" | "createdAt" | "updatedAt">) => void;
+  updateHeroVisual: (id: string, heroVisual: Partial<HeroVisual>) => void;
+  deleteHeroVisual: (id: string) => void;
   products: Product[];
   orders: Order[];
   customers: Customer[];
@@ -372,6 +388,19 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
+
+const sampleHeroVisuals: HeroVisual[] = [
+    {
+      id: "hv-1",
+      imageUrl: "/Hero%20section.png",
+      title: "Premium Tea Collection",
+      subtitle: "Hand-picked, slow-dried, small-batch blends",
+      isActive: true,
+      sortOrder: 0,
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+  ];
 
 const sampleProductLines: ProductLine[] = [
   {
@@ -717,6 +746,7 @@ const sampleAdminUsers: AdminUser[] = [
 
 export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [productLines, setProductLines] = useState<ProductLine[]>(sampleProductLines);
+  const [heroVisuals, setHeroVisuals] = useState<HeroVisual[]>(sampleHeroVisuals);
   const [products, setProducts] = useState<Product[]>(sampleProducts);
   const [inventoryTransactions, setInventoryTransactions] = useState<InventoryTransaction[]>([]);
   const [orders, setOrders] = useState<Order[]>(sampleOrders);
@@ -742,6 +772,14 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedProductLines) {
         try {
           setProductLines(JSON.parse(savedProductLines));
+        } catch (e) {}
+      }
+
+      // Hero Visuals
+      const savedHeroVisuals = localStorage.getItem("godgifted_hero_visuals");
+      if (savedHeroVisuals) {
+        try {
+          setHeroVisuals(JSON.parse(savedHeroVisuals));
         } catch (e) {}
       }
       
@@ -901,6 +939,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       localStorage.setItem("godgifted_product_lines", JSON.stringify(productLines));
     }
   }, [productLines, isInitialized]);
+
+  useEffect(() => {
+    if (isInitialized && typeof window !== "undefined") {
+      localStorage.setItem("godgifted_hero_visuals", JSON.stringify(heroVisuals));
+    }
+  }, [heroVisuals, isInitialized]);
   
   useEffect(() => {
     if (isInitialized && typeof window !== "undefined") {
@@ -1615,6 +1659,32 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     toast.error("Product line deleted!");
   };
 
+  // Hero Visual functions
+  const addHeroVisual = (heroVisual: Omit<HeroVisual, "id" | "createdAt" | "updatedAt">) => {
+    const newHeroVisual: HeroVisual = {
+      ...heroVisual,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setHeroVisuals((prev) => [...prev, newHeroVisual]);
+    toast.success("Hero visual added successfully!");
+  };
+
+  const updateHeroVisual = (id: string, updates: Partial<HeroVisual>) => {
+    setHeroVisuals((prev) =>
+      prev.map((visual) =>
+        visual.id === id ? { ...visual, ...updates, updatedAt: new Date().toISOString() } : visual
+      )
+    );
+    toast.success("Hero visual updated!");
+  };
+
+  const deleteHeroVisual = (id: string) => {
+    setHeroVisuals((prev) => prev.filter((visual) => visual.id !== id));
+    toast.error("Hero visual deleted!");
+  };
+
   const getProductReviews = (productId: number) => {
     return reviews.filter((review) => review.productId === productId);
   };
@@ -1746,6 +1816,10 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         addProductLine,
         updateProductLine,
         deleteProductLine,
+        heroVisuals,
+        addHeroVisual,
+        updateHeroVisual,
+        deleteHeroVisual,
         products,
         orders,
         customers,

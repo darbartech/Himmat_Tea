@@ -31,7 +31,8 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useStore } from "@/context/StoreContext";
-import { BRAND } from "@/config/brand";
+import { BRAND } from '@/config/brand';
+import { AuthModal } from '@/modules/auth';
 
 /* ─────────────────────────────────────────────────────────
    Announcement messages  (auto-rotate every 4 s)
@@ -163,6 +164,16 @@ const SEARCH_PRODUCTS = [
   },
 ];
 
+/* ─────────────────────────────────────────────────────────
+   Quick links for search default state
+───────────────────────────────────────────────────────── */
+const QUICK_LINKS = [
+  { icon: Leaf, label: "Green Tea", href: "/products?category=green" },
+  { icon: Coffee, label: "Black Tea", href: "/products?category=black" },
+  { icon: Flame, label: "Oolong Tea", href: "/products?category=oolong" },
+  { icon: Star, label: "Best Sellers", href: "/collections/best-sellers" },
+];
+
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -173,6 +184,7 @@ export default function Navigation() {
   const [dismissed, setDismissed] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -630,13 +642,13 @@ export default function Navigation() {
                   </button>
                 </>
               ) : (
-                <Link
-                  href="/customer-auth"
+                <button
+                  onClick={() => setAuthModalOpen(true)}
                   className="flex items-center gap-1.5 px-3.5 py-2 bg-[#2d5a3d] text-white text-sm font-semibold rounded-lg hover:bg-[#234832] transition-all duration-200 group"
                 >
                   <User className="h-3.5 w-3.5 opacity-80 group-hover:opacity-100 transition-opacity" />
                   Sign In
-                </Link>
+                </button>
               )}
             </div>
 
@@ -900,14 +912,16 @@ export default function Navigation() {
               </button>
             </>
           ) : (
-            <Link
-              href="/customer-auth"
-              onClick={() => setMobileOpen(false)}
+            <button
+              onClick={() => {
+                setMobileOpen(false);
+                setAuthModalOpen(true);
+              }}
               className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#2d5a3d] text-white text-sm font-semibold rounded-xl hover:bg-[#234832] transition-colors"
             >
               <User className="h-4 w-4 opacity-80" />
               Sign In
-            </Link>
+            </button>
           )}
         </div>
       </div>
@@ -1106,6 +1120,14 @@ export default function Navigation() {
           </div>
         </>
       )}
+
+      {/* ═════════════════════════════════════════════════
+          AUTH MODAL
+      ═════════════════════════════════════════════════ */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+      />
     </>
   );
 }

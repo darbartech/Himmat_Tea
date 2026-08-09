@@ -10,7 +10,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
     const post = await prisma.blogPost.findUnique({
-      where: { id: parseInt(id) }
+      where: { id }
     })
     
     if (!post) {
@@ -29,7 +29,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const body = await request.json()
     
     const post = await prisma.blogPost.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: body
     })
     
@@ -44,7 +44,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     const { id } = await params
     
     await prisma.blogPost.delete({
-      where: { id: parseInt(id) }
+      where: { id }
     })
     
     return createResponse({ message: 'Blog post deleted successfully' })

@@ -3,13 +3,13 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 
 export interface CartItem {
   id: string;
-  productId: number;
+  productId?: number;
   variantId?: number;
   name: string;
   price: number;
   image: string;
   quantity: number;
-  weight: string;
+  weight?: string;
 }
 
 interface CartContextType {
@@ -51,10 +51,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addToCart = (item: Omit<CartItem, "quantity">) => {
     setCart((prev) => {
-      const existing = prev.find((i) => i.id === item.id && i.weight === item.weight);
+      const existing = prev.find((i) => i.id === item.id && i.variantId === item.variantId && i.weight === item.weight);
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id && i.weight === item.weight
+          i.id === item.id && i.variantId === item.variantId && i.weight === item.weight
             ? { ...i, quantity: i.quantity + 1 }
             : i
         );

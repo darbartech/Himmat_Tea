@@ -39,7 +39,10 @@ async function main() {
         imageUrl: "https://images.unsplash.com/photo-1514733670139-4d87a1941d55?w=800&h=800&fit=crop&q=80",
         sku: "GREEN-001",
         reorderPoint: 20,
-        hasVariants: false
+        hasVariants: false,
+        isActive: true,
+        sortOrder: 1,
+        isBestseller: true
       }
     }),
     prisma.product.create({
@@ -53,7 +56,10 @@ async function main() {
         imageUrl: "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=800&h=800&fit=crop&q=80",
         sku: "BLACK-001",
         reorderPoint: 15,
-        hasVariants: false
+        hasVariants: false,
+        isActive: true,
+        sortOrder: 2,
+        isBestseller: true
       }
     }),
     prisma.product.create({
@@ -67,7 +73,9 @@ async function main() {
         imageUrl: "https://images.unsplash.com/photo-1596344084757-b83f2081da8b?w=800&h=800&fit=crop&q=80",
         sku: "HERBAL-001",
         reorderPoint: 30,
-        hasVariants: false
+        hasVariants: false,
+        isActive: true,
+        sortOrder: 3
       }
     }),
     prisma.product.create({
@@ -81,7 +89,9 @@ async function main() {
         imageUrl: "https://images.unsplash.com/photo-1563822249548-9a72b6353cd1?w=800&h=800&fit=crop&q=80",
         sku: "OOLONG-001",
         reorderPoint: 10,
-        hasVariants: false
+        hasVariants: false,
+        isActive: true,
+        sortOrder: 4
       }
     }),
     prisma.product.create({
@@ -95,7 +105,10 @@ async function main() {
         imageUrl: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=800&h=800&fit=crop&q=80",
         sku: "WHITE-001",
         reorderPoint: 8,
-        hasVariants: false
+        hasVariants: false,
+        isActive: true,
+        sortOrder: 5,
+        isBestseller: true
       }
     }),
     prisma.product.create({
@@ -109,7 +122,9 @@ async function main() {
         imageUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=800&fit=crop&q=80",
         sku: "GREEN-002",
         reorderPoint: 25,
-        hasVariants: false
+        hasVariants: false,
+        isActive: true,
+        sortOrder: 6
       }
     }),
     prisma.product.create({
@@ -123,7 +138,9 @@ async function main() {
         imageUrl: "https://images.unsplash.com/photo-1593618998160-e34014e67546?w=800&h=800&fit=crop&q=80",
         sku: "BLACK-002",
         reorderPoint: 50,
-        hasVariants: false
+        hasVariants: false,
+        isActive: true,
+        sortOrder: 7
       }
     }),
     prisma.product.create({
@@ -137,7 +154,9 @@ async function main() {
         imageUrl: "https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?w=800&h=800&fit=crop&q=80",
         sku: "HERBAL-002",
         reorderPoint: 25,
-        hasVariants: false
+        hasVariants: false,
+        isActive: true,
+        sortOrder: 8
       }
     })
   ])

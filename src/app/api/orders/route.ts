@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     })
     const existingProductIds = new Set(existingProducts.map(p => p.id))
     
-    const invalidProductIds = productIds.filter(id => !existingProductIds.has(id))
+    const invalidProductIds = productIds.filter((id: number) => !existingProductIds.has(id))
     if (invalidProductIds.length > 0) {
       return createErrorResponse(`Invalid product IDs: ${invalidProductIds.join(', ')}`, 400)
     }

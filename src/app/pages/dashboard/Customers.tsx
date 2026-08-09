@@ -35,6 +35,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Badge } from "../../components/ui/badge";
 
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+}
+
 export default function Customers() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,7 +69,7 @@ export default function Customers() {
 
   const fetchCustomers = async () => {
     try {
-      const response = await api.get('/customers');
+      const response = await api.get<ApiResponse<any[]>>('/customers');
       if (response.success && response.data) {
         setCustomers(response.data);
       }

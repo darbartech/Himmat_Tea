@@ -7,6 +7,7 @@ import ProductsSection from "@/app/components/ProductsSection";
 import Testimonials from "@/app/components/Testimonials";
 import Footer from "@/app/components/Footer";
 import { prisma } from "@/lib/prisma";
+import CTA from "../components/CTA";
 
 export default async function LandingPage() {
   // Fetch product lines and products directly from database as server component
@@ -15,14 +16,11 @@ export default async function LandingPage() {
     where: { isActive: true },
     orderBy: { sortOrder: "asc" },
   });
-  
+
   const products = await prisma.product.findMany({
-    include: {
-      productVariants: true,
-      batches: true,
-      reviews: true,
-    },
-    orderBy: { id: "desc" },
+    take: 8,
+    // where: { isActive: true },
+    // orderBy: { sortOrder: "asc" },
   });
 
   return (
@@ -31,8 +29,9 @@ export default async function LandingPage() {
       <Hero />
       <ProductSlider products={products} />
       <ProductLinesShowcase productLines={productLines} />
-      <Features />
       <ProductsSection />
+      <Features />
+      <CTA />
       <Testimonials />
       <Footer />
     </div>

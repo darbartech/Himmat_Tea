@@ -10,7 +10,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
     const order = await prisma.order.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
       include: {
         customer: true,
         items: true,
@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const body = await request.json()
     
     const order = await prisma.order.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: body,
       include: {
         customer: true,
@@ -54,7 +54,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     const { id } = await params
     
     await prisma.order.delete({
-      where: { id: parseInt(id) }
+      where: { id }
     })
     
     return createResponse({ message: 'Order deleted successfully' })

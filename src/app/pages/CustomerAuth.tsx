@@ -1,48 +1,23 @@
 'use client';
 
-import { useState, useEffect, FormEvent } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import Navigation from "@/app/components/Navigation";
-import Footer from "@/app/components/Footer";
-import { useAuth } from "@/context/AuthContext";
-import { 
-  ArrowRight, 
-  Lock, 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Github,
-  Chrome
-} from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Navigation from '@/app/components/Navigation';
+import Footer from '@/app/components/Footer';
+import { useAuth } from '@/context/AuthContext';
+import { Github, Chrome } from 'lucide-react';
+import { LoginForm, SignupForm } from '@/modules/auth';
 
 export default function CustomerAuth() {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
-  const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<'google' | 'github' | null>(null);
-  const [error, setError] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/';
   
-  // Form states - MUST be declared before any early returns
-  const [loginForm, setLoginForm] = useState({
-    email: '',
-    password: ''
-  });
-
-  const [signupForm, setSignupForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    address: ''
-  });
+  const { socialLogin, isLoggedIn, userType } = useAuth();
   
-  const { customerLogin, customerSignup, socialLogin, isLoggedIn, userType } = useAuth();
-  
-  // Redirect if already logged in - MUST be in useEffect
+  // Redirect if already logged in
   useEffect(() => {
     if (isLoggedIn) {
       if (userType === 'customer') {
@@ -57,68 +32,21 @@ export default function CustomerAuth() {
     return null;
   }
 
-
-  const handleLogin = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    
-    try {
-      const success = await customerLogin(loginForm.email, loginForm.password);
-      if (success) {
-        router.push(redirectTo);
-      } else {
-        setError('Invalid email or password');
-      }
-    } catch (err) {
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignup = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    
-    try {
-      const success = await customerSignup(
-        signupForm.name,
-        signupForm.email,
-        signupForm.phone,
-        signupForm.password,
-        signupForm.address
-      );
-      
-      if (success) {
-        router.push(redirectTo);
-      } else {
-        setError('Email already exists');
-      }
-    } catch (err) {
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSocialLogin = async (provider: 'google' | 'github') => {
-    setError('');
     setSocialLoading(provider);
     
     try {
       const success = await socialLogin(provider);
       if (success) {
         router.push(redirectTo);
-      } else {
-        setError(`Failed to login with ${provider}`);
       }
-    } catch (err) {
-      setError(`Failed to login with ${provider}`);
     } finally {
       setSocialLoading(null);
     }
+  };
+
+  const handleAuthSuccess = () => {
+    router.push(redirectTo);
   };
 
   return (
@@ -207,163 +135,21 @@ export default function CustomerAuth() {
               </button>
             </div>
 
-            {/* Error */}
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Login Form */}
+            {/* Reusable LoginForm Component */}
             {mode === 'login' && (
-              <form onSubmit={handleLogin} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-[#1c1917] mb-1.5">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
-                    <input
-                      type="email"
-                      value={loginForm.email}
-                      onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="your@email.com"
-                      className="w-full pl-12 pr-4 py-3 rounded-xl border border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] text-[#1c1917] focus:outline-none focus:border-[#2d5a3d] transition-colors text-sm"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#1c1917] mb-1.5">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
-                    <input
-                      type="password"
-                      value={loginForm.password}
-                      onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                      placeholder="Your name (demo mode)"
-                      className="w-full pl-12 pr-4 py-3 rounded-xl border border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] text-[#1c1917] focus:outline-none focus:border-[#2d5a3d] transition-colors text-sm"
-                      required
-                    />
-                  </div>
-                  <p className="text-xs text-[#78746e] mt-2">
-                    Demo: Use email from our customers list, password = customer name
-                  </p>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-4 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {loading ? 'Signing In...' : 'Sign In'}
-                  {!loading && <ArrowRight className="h-5 w-5" />}
-                </button>
-              </form>
+              <LoginForm 
+                onSuccess={handleAuthSuccess}
+                redirectTo={redirectTo}
+                showForgotPassword={true}
+              />
             )}
 
-            {/* Signup Form */}
+            {/* Reusable SignupForm Component */}
             {mode === 'signup' && (
-              <form onSubmit={handleSignup} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-[#1c1917] mb-1.5">
-                    Full Name
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
-                    <input
-                      type="text"
-                      value={signupForm.name}
-                      onChange={(e) => setSignupForm(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="John Doe"
-                      className="w-full pl-12 pr-4 py-3 rounded-xl border border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] text-[#1c1917] focus:outline-none focus:border-[#2d5a3d] transition-colors text-sm"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[#1c1917] mb-1.5">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
-                      <input
-                        type="email"
-                        value={signupForm.email}
-                        onChange={(e) => setSignupForm(prev => ({ ...prev, email: e.target.value }))}
-                        placeholder="john@example.com"
-                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] text-[#1c1917] focus:outline-none focus:border-[#2d5a3d] transition-colors text-sm"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#1c1917] mb-1.5">
-                      Phone Number
-                    </label>
-                    <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
-                      <input
-                        type="tel"
-                        value={signupForm.phone}
-                        onChange={(e) => setSignupForm(prev => ({ ...prev, phone: e.target.value }))}
-                        placeholder="+977 98XXXXXXXX"
-                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] text-[#1c1917] focus:outline-none focus:border-[#2d5a3d] transition-colors text-sm"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#1c1917] mb-1.5">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
-                    <input
-                      type="password"
-                      value={signupForm.password}
-                      onChange={(e) => setSignupForm(prev => ({ ...prev, password: e.target.value }))}
-                      placeholder="Create a password"
-                      className="w-full pl-12 pr-4 py-3 rounded-xl border border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] text-[#1c1917] focus:outline-none focus:border-[#2d5a3d] transition-colors text-sm"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#1c1917] mb-1.5">
-                    Address
-                  </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-3 h-4 w-4 text-[#78746e]" />
-                    <textarea
-                      value={signupForm.address}
-                      onChange={(e) => setSignupForm(prev => ({ ...prev, address: e.target.value }))}
-                      placeholder="Your delivery address"
-                      rows={3}
-                      className="w-full pl-12 pr-4 py-3 rounded-xl border border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] text-[#1c1917] focus:outline-none focus:border-[#2d5a3d] transition-colors text-sm resize-none"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-4 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {loading ? 'Creating Account...' : 'Create Account'}
-                  {!loading && <ArrowRight className="h-5 w-5" />}
-                </button>
-              </form>
+              <SignupForm 
+                onSuccess={handleAuthSuccess}
+                redirectTo={redirectTo}
+              />
             )}
 
             <div className="mt-6 text-center">

@@ -20,7 +20,7 @@ export default function ProductLinePage({ params }: { params: Promise<{ slug: st
   }
 
   const productLineProducts = products.filter(
-    (p) => p.productLineId === productLine.slug || p.productLine === productLine.name
+    (p) => p.productLineId === productLine.id
   );
 
   return (

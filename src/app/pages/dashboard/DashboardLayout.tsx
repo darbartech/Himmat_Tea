@@ -27,6 +27,7 @@ import {
   FileText,
   Shield,
   Check,
+  Image,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar";
 import {
@@ -99,6 +100,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       name: "Product Lines", 
       href: "/himmat_admin_8526/dashboard/product-lines", 
       icon: LayoutDashboard 
+    },
+    { 
+      name: "Hero Visuals", 
+      href: "/himmat_admin_8526/dashboard/hero-visuals", 
+      icon: Image 
     },
     { 
       name: t("dashboard.nav.orders"), 

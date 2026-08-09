@@ -51,6 +51,11 @@ interface Order {
   trackingHistory?: { status: string; date: string; description: string }[];
 }
 
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+}
+
 export default function CustomerAccount() {
   const [activeTab, setActiveTab] = useState<'orders' | 'profile'>('orders');
   const { currentUser, userType, logout } = useAuth();
@@ -73,7 +78,7 @@ export default function CustomerAccount() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await api.get('/orders');
+      const response = await api.get<ApiResponse<Order[]>>('/orders');
       if (response.success && response.data) {
         setOrders(response.data);
       }
