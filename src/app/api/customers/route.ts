@@ -1,11 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createResponse, handleApiError } from '@/lib/api-utils'
+import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
+import { getCurrentAdmin } from '@/lib/auth'
+
+const CUSTOMER_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  phone: true,
+  address: true,
+  loyaltyPoints: true,
+  tier: true,
+  ordersCount: true,
+  totalSpent: true,
+  createdAt: true,
+  updatedAt: true
+}
 
 export async function GET() {
   try {
+    const admin = await getCurrentAdmin()
+    if (!admin) {
+      return createErrorResponse('Unauthorized', 401)
+    }
+
     const customers = await prisma.customer.findMany({
-      include: {
+      select: {
+        ...CUSTOMER_SELECT,
         orders: true
       },
       orderBy: { id: 'desc' }
@@ -18,10 +39,17 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const admin = await getCurrentAdmin()
+    if (!admin) {
+      return createErrorResponse('Unauthorized', 401)
+    }
+
     const body = await request.json()
+    const { passwordHash, ...rest } = body
     const customer = await prisma.customer.create({
-      data: body,
-      include: {
+      data: rest,
+      select: {
+        ...CUSTOMER_SELECT,
         orders: true
       }
     })

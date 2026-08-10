@@ -9,6 +9,7 @@ interface AdminUser {
   role: "admin" | "superadmin";
   isActive: boolean;
   createdAt: string;
+  type?: "admin";
 }
 
 interface CustomerUser {
@@ -22,6 +23,7 @@ interface CustomerUser {
   ordersCount: number;
   totalSpent: number;
   createdAt: string;
+  type?: "customer";
 }
 
 interface AuthContextType {
@@ -36,17 +38,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>({
-  isLoggedIn: false,
-  currentUser: null,
-  userType: null,
-  isLoading: true,
-  login: async () => false,
-  customerLogin: async () => false,
-  customerSignup: async () => false,
-  socialLogin: async () => false,
-  logout: async () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -55,30 +47,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   const checkSession = async () => {
-    console.log("AuthContext: Checking session...");
-    // First check localStorage
-    if (typeof window !== "undefined") {
-      const savedUser = localStorage.getItem("himmat_auth_user");
-      const savedUserType = localStorage.getItem("himmat_auth_user_type");
-      if (savedUser && savedUserType) {
-        try {
-          const user = JSON.parse(savedUser);
-          setCurrentUser(user);
-          setIsLoggedIn(true);
-          setUserType(savedUserType as "admin" | "customer");
-          console.log("AuthContext: Session restored from localStorage");
-          setIsLoading(false);
-          return;
-        } catch (e) {
-          console.error("AuthContext: Failed to parse saved session");
-        }
-      }
-    }
-    
-    // If no localStorage session, try API (though we don't have proper session handling yet)
     try {
-      const response = await api.get('/auth/me');
-      console.log("AuthContext: checkSession response:", response);
+      const response: any = await api.get('/auth/me');
       if (response.success && response.user) {
         const user = response.user;
         setCurrentUser(user);
@@ -88,12 +58,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } else {
           setUserType('customer');
         }
-        console.log("AuthContext: Session restored from API");
       }
-    } catch (e) {
-      console.log("AuthContext: No active session found");
+    } catch {
     } finally {
-      console.log("AuthContext: Finished checking session, setting isLoading to false");
       setIsLoading(false);
     }
   };
@@ -102,74 +69,49 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     checkSession();
   }, []);
 
-  // Admin login
   const login = async (username: string, password: string): Promise<boolean> => {
-    console.log("AuthContext: Attempting login with username:", username);
     try {
-      const response = await api.post('/auth/login', { username, password });
-      console.log("AuthContext: Login response:", response);
+      const response: any = await api.post('/auth/login', { username, password });
       if (response.success && response.user) {
-        console.log("AuthContext: Login successful, setting user");
         setCurrentUser(response.user);
         setIsLoggedIn(true);
         setUserType("admin");
-        // Save to localStorage
-        if (typeof window !== "undefined") {
-          localStorage.setItem("himmat_auth_user", JSON.stringify(response.user));
-          localStorage.setItem("himmat_auth_user_type", "admin");
-        }
         return true;
       }
     } catch (error) {
-      console.error("AuthContext: Login failed:", error);
     }
     return false;
   };
 
-  // Customer login
   const customerLogin = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await api.post('/customer/login', { email, password });
+      const response: any = await api.post('/customer/login', { email, password });
       if (response.success && response.user) {
         setCurrentUser(response.user);
         setIsLoggedIn(true);
         setUserType("customer");
-        // Save to localStorage
-        if (typeof window !== "undefined") {
-          localStorage.setItem("himmat_auth_user", JSON.stringify(response.user));
-          localStorage.setItem("himmat_auth_user_type", "customer");
-        }
         return true;
       }
     } catch (error) {
-      console.error("Customer login failed:", error);
     }
     return false;
   };
 
-  // Customer signup
   const customerSignup = async (name: string, email: string, phone: string, password: string, address: string): Promise<boolean> => {
     try {
-      const response = await api.post('/customer/signup', { name, email, phone, password, address });
+      const response: any = await api.post('/customer/signup', { name, email, phone, password, address });
       if (response.success && response.user) {
         setCurrentUser(response.user);
         setIsLoggedIn(true);
         setUserType("customer");
-        // Save to localStorage
-        if (typeof window !== "undefined") {
-          localStorage.setItem("himmat_auth_user", JSON.stringify(response.user));
-          localStorage.setItem("himmat_auth_user_type", "customer");
-        }
         return true;
       }
     } catch (error) {
-      console.error("Customer signup failed:", error);
     }
     return false;
   };
 
   const socialLogin = async (provider: 'google' | 'github'): Promise<boolean> => {
-    // Simulate social login (in real app, this would be OAuth flow)
     return false;
   };
 
@@ -177,16 +119,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await api.post('/auth/logout', {});
     } catch (e) {
-      console.error("Logout API error:", e);
     }
     setIsLoggedIn(false);
     setCurrentUser(null);
     setUserType(null);
-    // Clear localStorage
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("himmat_auth_user");
-      localStorage.removeItem("himmat_auth_user_type");
-    }
   };
 
   return (

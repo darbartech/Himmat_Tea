@@ -13,13 +13,9 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  console.log("ProtectedRoute: isLoading=", isLoading, "isLoggedIn=", isLoggedIn, "userType=", userType, "pathname=", pathname);
-
   useEffect(() => {
     if (!isLoading && (!isLoggedIn || userType !== 'admin')) {
-      // Redirect to login if not on login page already
       if (pathname !== '/himmat_admin_8526') {
-        console.log("ProtectedRoute: Redirecting to login");
         router.push("/himmat_admin_8526");
       }
     }
@@ -37,6 +33,5 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <>{children}</>;
   }
 
-  // If not logged in, redirect (handled in useEffect)
   return null;
 }

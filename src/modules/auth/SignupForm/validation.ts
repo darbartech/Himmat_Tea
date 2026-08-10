@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Zod validation schema for signup form
- */
 export const signupFormSchema = z.object({
   name: z.string()
     .min(2, 'Name must be at least 2 characters')
@@ -13,11 +10,12 @@ export const signupFormSchema = z.object({
     .email('Please enter a valid email address')
     .min(1, 'Email is required'),
   password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
-    ),
+    .min(12, 'Password must be at least 12 characters')
+    .max(128, 'Password must be less than 128 characters')
+    .refine(pw => /[a-z]/.test(pw), 'Must include a lowercase letter')
+    .refine(pw => /[A-Z]/.test(pw), 'Must include an uppercase letter')
+    .refine(pw => /\d/.test(pw), 'Must include a number')
+    .refine(pw => /[^A-Za-z0-9]/.test(pw), 'Must include a special character'),
   confirmPassword: z.string()
     .min(1, 'Please confirm your password'),
   phone: z.string()
@@ -33,7 +31,4 @@ export const signupFormSchema = z.object({
   path: ['confirmPassword']
 });
 
-/**
- * Type definition for signup form data derived from the Zod schema
- */
 export type SignupFormData = z.infer<typeof signupFormSchema>;

@@ -126,14 +126,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
       {/* Modal panel */}
       <div 
-        className="fixed inset-0 z-[101] flex items-center justify-center px-4 sm:px-6"
+        className="fixed inset-0 z-[101] flex items-center justify-center px-4 sm:px-6 py-6 overflow-y-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
       >
         <div
           ref={modalRef}
-          className={`w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ease-out ${
+          className={`w-full max-w-md max-h-[calc(100vh-3rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl transition-all duration-300 ease-out ${
             isVisible 
               ? 'opacity-100 scale-100 translate-y-0' 
               : 'opacity-0 scale-95 translate-y-4'

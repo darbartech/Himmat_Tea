@@ -1,25 +1,28 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createResponse, handleApiError } from '@/lib/api-utils'
+import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
 import bcrypt from 'bcryptjs'
 
-// Accept both GET and POST for easy seeding
 export async function GET() {
-  return POST();
+  if (process.env.NODE_ENV === 'production') {
+    return createErrorResponse('Not found', 404)
+  }
+  return POST()
 }
 
 export async function POST() {
+  if (process.env.NODE_ENV === 'production') {
+    return createErrorResponse('Not found', 404)
+  }
+
   try {
-    // Check if already seeded
     const existingAdmin = await prisma.adminUser.findFirst()
     if (existingAdmin) {
       return createResponse({ message: 'Database already seeded' })
     }
 
-    // Hash password
     const passwordHash = await bcrypt.hash('admin123', 10)
 
-    // Create admin user
     await prisma.adminUser.create({
       data: {
         username: 'admin',
@@ -30,7 +33,6 @@ export async function POST() {
       }
     })
 
-    // Create product lines first
     const himmatTea = await prisma.productLine.create({
       data: {
         slug: 'himmat-tea',
@@ -53,7 +55,6 @@ export async function POST() {
       }
     })
 
-    // Create sample products, linked to product lines
     const teaProducts = await prisma.product.createMany({
       data: [
         {
@@ -158,7 +159,6 @@ export async function POST() {
       ]
     })
 
-    // Create sample customers
     const sampleCustomers = await prisma.customer.createMany({
       data: [
         {
@@ -194,7 +194,6 @@ export async function POST() {
       ]
     })
 
-    // Create settings
     await prisma.settings.create({
       data: {
         taxRate: 18,

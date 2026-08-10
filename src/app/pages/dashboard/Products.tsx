@@ -522,7 +522,7 @@ export default function Products() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2d5a3d]/5">
-              {filteredProducts.map((product) => (
+              {filteredProducts.map((product: any) => (
                 <tr key={product.id} className="group hover:bg-[#f9f7f4] transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">

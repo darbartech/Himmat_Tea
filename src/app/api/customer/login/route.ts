@@ -4,49 +4,60 @@ import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-u
 import { setAuthCookie } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 
+const CUSTOMER_USER_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  phone: true,
+  address: true,
+  loyaltyPoints: true,
+  tier: true,
+  ordersCount: true,
+  totalSpent: true,
+  createdAt: true,
+  updatedAt: true
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { email, password } = body
-    console.log("/api/customer/login: Login attempt for email:", email);
 
     const customer = await prisma.customer.findUnique({
       where: { email }
     })
-    console.log("/api/customer/login: Found customer:", customer ? customer.email : "none");
 
     if (!customer) {
-      console.log("/api/customer/login: No such customer");
       return createErrorResponse('Invalid credentials', 401)
     }
 
-    // Verify password - in our case, let's check if the password matches the hashed one or plain for demo
-    let passwordMatch = false;
+    let passwordMatch = false
     try {
-      passwordMatch = await bcrypt.compare(password, customer.passwordHash || '');
-    } catch (e) {
-      passwordMatch = customer.name === password; // fallback for demo
+      passwordMatch = await bcrypt.compare(password, customer.passwordHash ?? '')
+    } catch {
+      return createErrorResponse('Invalid credentials', 401)
     }
 
     if (!passwordMatch) {
-      console.log("/api/customer/login: Password mismatch");
       return createErrorResponse('Invalid credentials', 401)
     }
 
-    const token = await setAuthCookie({
+    await setAuthCookie({
       id: customer.id,
       email: customer.email,
       type: 'customer'
     })
-    
-    console.log("/api/customer/login: Success!");
-    
+
+    const user = await prisma.customer.findUnique({
+      where: { id: customer.id },
+      select: CUSTOMER_USER_SELECT
+    })
+
     return createResponse({
-      user: customer,
+      user,
       success: true
     })
   } catch (error) {
-    console.error("/api/customer/login: Error:", error);
     return handleApiError(error)
   }
 }
