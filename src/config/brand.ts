@@ -3,7 +3,7 @@ export const BRAND = {
   companyName: "Godgifted",
   legalName: "Godgifted Pvt. Ltd.",
   domain: "godgifted.com",
-  supportEmail: "support@godgifted.com",
+  supportEmail: "info@godgifted.com",
   supportPhone: "+977-98XXXXXXXX",
   tagline: "Pure, Traceable, God-Gifted.",
   productLines: [

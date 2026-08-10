@@ -114,11 +114,11 @@ export default function ProductsCatalog() {
   }
 
   const filtered = useMemo(() => {
-    let list = allProducts.filter((p) => {
-      const productLineForProduct = productLines.find(pl => pl.id === p.productLineId);
+    let list = allProducts.filter((p: any) => {
+      const productLineForProduct = productLines.find((pl: any) => pl.id === p.productLineId);
       const matchFilter = filter === "all" || 
         productLineForProduct?.slug === filter || 
-        p.productLine === productLines.find(pl => pl.slug === filter)?.name;
+        p.productLine === productLines.find((pl: any) => pl.slug === filter)?.name;
       const matchSearch =
         search.trim() === "" ||
         p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -132,8 +132,8 @@ export default function ProductsCatalog() {
       list = [...list].sort((a, b) => b.price - a.price);
     else if (sort === "rating") {
       list = [...list].sort((a, b) => {
-        const aRating = a.reviews.length > 0 ? a.reviews.reduce((sum, r) => sum + r.rating, 0) / a.reviews.length : 0;
-        const bRating = b.reviews.length > 0 ? b.reviews.reduce((sum, r) => sum + r.rating, 0) / b.reviews.length : 0;
+        const aRating = a.reviews.length > 0 ? a.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / a.reviews.length : 0;
+        const bRating = b.reviews.length > 0 ? b.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / b.reviews.length : 0;
         return bRating - aRating;
       });
     }
@@ -202,7 +202,7 @@ export default function ProductsCatalog() {
             {/* Type filter tabs */}
             <div className="flex flex-wrap gap-2">
               {filterTabs(productLines).map((tab) => {
-                const pl = productLines.find(p => p.slug === tab.key);
+                const pl = productLines.find((p: any) => p.slug === tab.key);
                 return (
                   <button
                     key={tab.key}
@@ -276,7 +276,7 @@ export default function ProductsCatalog() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {paginated.map((product) => {
+              {paginated.map((product: any) => {
                 const rating = getAverageRating(product);
                 return (
                   <div

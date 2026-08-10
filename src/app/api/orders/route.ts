@@ -1,7 +1,144 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
-import { getCurrentUser } from '@/lib/auth'
+import { createResponse, createErrorResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
+import { getCurrentUser, getCurrentAdmin } from '@/lib/auth'
+import { rateLimitOrderCreate } from '@/lib/rate-limit'
+import { z } from 'zod'
+
+const ORDER_STATUSES = ['AWAITING_PAYMENT', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'] as const
+const PAYMENT_STATUSES = ['PENDING', 'PAID', 'FAILED', 'REFUNDED'] as const
+const VALID_PAYMENT_METHODS = ['MANUAL_QR', 'ESEWA', 'KHALTI', 'FONEPAY', 'CARD', 'COD'] as const
+
+const orderItemSchema = z.object({
+  productId: z.number().int().positive(),
+  variantId: z.number().int().positive().optional().nullable(),
+  productName: z.string().min(1).optional(),
+  quantity: z.number().int().min(1, 'Quantity must be at least 1'),
+  weight: z.string().optional(),
+})
+
+const createOrderSchema = z.object({
+  customerId: z.number().int().positive().optional(),
+  customerName: z.string().min(1, 'Customer name is required'),
+  customerEmail: z.string().email('Valid email is required'),
+  customerPhone: z.string().min(1, 'Phone number is required'),
+  items: z.array(orderItemSchema).min(1, 'At least one item is required'),
+  shippingAddress: z.string().min(1, 'Shipping address is required'),
+  idempotencyKey: z.string().min(1, 'Idempotency key is required'),
+}).strict()
+
+function generateOrderNumber(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  const rand = String(Math.floor(Math.random() * 900000) + 100000)
+  return `HT-${y}${m}${d}-${rand}`
+}
+
+function isMissingColumnError(error: any, column: string) {
+  return !!(
+    error?.code === 'P2021' ||
+    error?.message?.includes(`column \"${column}\"`) ||
+    error?.message?.includes(`column \"${column}\" of relation`) ||
+    error?.message?.includes(`column ${column}`)
+  )
+}
+
+async function findAdminOrders() {
+  try {
+    return await prisma.order.findMany({
+      include: {
+        customer: { select: SAFE_CUSTOMER_SELECT },
+        items: true,
+        payment: true,
+      },
+      orderBy: { orderDate: 'desc' }
+    })
+  } catch (error) {
+    if (isMissingColumnError(error, 'orderNumber')) {
+      return await prisma.order.findMany({
+        select: {
+          id: true,
+          customerId: true,
+          customerName: true,
+          customerEmail: true,
+          customerPhone: true,
+          shippingAddress: true,
+          total: true,
+          shippingCost: true,
+          tax: true,
+          grandTotal: true,
+          status: true,
+          orderDate: true,
+          trackingNumber: true,
+          courierPartner: true,
+          createdAt: true,
+          updatedAt: true,
+          customer: { select: SAFE_CUSTOMER_SELECT },
+          items: true,
+          payment: {
+            select: {
+              method: true,
+              status: true,
+              amount: true,
+              transactionReference: true,
+            }
+          }
+        },
+        orderBy: { orderDate: 'desc' }
+      })
+    }
+    throw error
+  }
+}
+
+async function findCustomerOrders(customerId: number) {
+  try {
+    return await prisma.order.findMany({
+      where: { customerId },
+      include: {
+        items: true,
+        payment: true,
+      },
+      orderBy: { orderDate: 'desc' }
+    })
+  } catch (error) {
+    if (isMissingColumnError(error, 'orderNumber')) {
+      return await prisma.order.findMany({
+        where: { customerId },
+        select: {
+          id: true,
+          customerId: true,
+          customerName: true,
+          customerEmail: true,
+          customerPhone: true,
+          shippingAddress: true,
+          total: true,
+          shippingCost: true,
+          tax: true,
+          grandTotal: true,
+          status: true,
+          orderDate: true,
+          trackingNumber: true,
+          courierPartner: true,
+          createdAt: true,
+          updatedAt: true,
+          items: true,
+          payment: {
+            select: {
+              method: true,
+              status: true,
+              amount: true,
+              transactionReference: true,
+            }
+          }
+        },
+        orderBy: { orderDate: 'desc' }
+      })
+    }
+    throw error
+  }
+}
 
 export async function GET() {
   try {
@@ -11,28 +148,48 @@ export async function GET() {
       return createErrorResponse('Unauthorized', 401)
     }
 
-    let orders
-    if ('username' in currentUser) {
-      // Admin user - get all orders
-      orders = await prisma.order.findMany({
-        include: {
-          customer: true,
-          items: true
-        },
-        orderBy: { orderDate: 'desc' }
-      })
-    } else {
-      // Customer user - get only their orders
-      orders = await prisma.order.findMany({
-        where: { customerId: currentUser.id },
-        include: {
-          items: true
-        },
-        orderBy: { orderDate: 'desc' }
-      })
+    const isAdmin = currentUser.type === 'admin'
+
+    if (isAdmin) {
+      const adminUser = await getCurrentAdmin()
+      if (!adminUser) {
+        return createErrorResponse('Forbidden', 403)
+      }
+
+      const orders = await findAdminOrders()
+      return createResponse({ success: true, data: orders })
     }
 
-    return createResponse({ success: true, data: orders })
+    const orders = await findCustomerOrders(currentUser.id)
+
+    const sanitizedOrders = orders.map(order => ({
+      id: order.id,
+      orderNumber: 'orderNumber' in order ? order.orderNumber : undefined,
+      customerId: order.customerId,
+      customerName: order.customerName,
+      customerEmail: order.customerEmail,
+      customerPhone: order.customerPhone,
+      shippingAddress: order.shippingAddress,
+      total: order.total,
+      shippingCost: order.shippingCost,
+      tax: order.tax,
+      grandTotal: order.grandTotal,
+      status: order.status,
+      orderDate: order.orderDate,
+      trackingNumber: order.trackingNumber,
+      courierPartner: order.courierPartner,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+      items: order.items,
+      payment: order.payment ? {
+        method: order.payment.method,
+        status: order.payment.status,
+        amount: order.payment.amount,
+        transactionReference: order.payment.transactionReference,
+      } : null,
+    }))
+
+    return createResponse({ success: true, data: sanitizedOrders })
   } catch (error) {
     return handleApiError(error)
   }
@@ -40,60 +197,249 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser()
-    const body = await request.json()
-    const { items, ...orderData } = body
-    
-    // Validate all productIds exist in the database
-    const productIds = items.map((item: any) => item.productId)
-    const existingProducts = await prisma.product.findMany({
-      where: { id: { in: productIds } },
-      select: { id: true }
-    })
-    const existingProductIds = new Set(existingProducts.map(p => p.id))
-    
-    const invalidProductIds = productIds.filter((id: number) => !existingProductIds.has(id))
-    if (invalidProductIds.length > 0) {
-      return createErrorResponse(`Invalid product IDs: ${invalidProductIds.join(', ')}`, 400)
+    const rl = rateLimitOrderCreate(request)
+    if (!rl.allowed) {
+      return createErrorResponse(rl.error || 'Too many requests. Please try again later.', 429)
     }
-    
-    let customerId = orderData.customerId
-    if (!customerId && currentUser && !('username' in currentUser)) {
+
+    const currentUser = await getCurrentUser()
+
+    if (!currentUser) {
+      return createErrorResponse('Unauthorized', 401)
+    }
+
+    const isAdmin = 'username' in currentUser
+
+    const body = await request.json()
+    const parsed = createOrderSchema.safeParse(body)
+
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]
+      const field = firstError.path.join('.') || 'request'
+      return createErrorResponse(`${field}: ${firstError.message}`, 400)
+    }
+
+    const data = parsed.data
+
+    let customerId: number
+    if (isAdmin) {
+      if (!data.customerId) {
+        return createErrorResponse('customerId is required when creating orders as admin', 400)
+      }
+      customerId = data.customerId
+    } else {
       customerId = currentUser.id
     }
-    
-    const order = await prisma.order.create({
-      data: {
-        ...orderData,
-        customerId: customerId || 1,
-        items: {
-          create: items.map((item: any) => ({
-            productId: item.productId,
-            name: item.productName || item.name,
-            quantity: item.quantity,
-            price: item.price
-          }))
-        }
+
+    const customerExists = await prisma.customer.findUnique({
+      where: { id: customerId },
+      select: { id: true }
+    })
+    if (!customerExists) {
+      return createErrorResponse('Customer not found', 404)
+    }
+
+    const existingIdempotent = await prisma.order.findFirst({
+      where: {
+        customerId,
+        idempotencyKey: data.idempotencyKey,
       },
-      include: {
-        customer: true,
-        items: true
+      include: { items: true, payment: true, customer: { select: SAFE_CUSTOMER_SELECT } }
+    })
+    if (existingIdempotent) {
+      return createResponse({ success: true, data: existingIdempotent, duplicate: true }, 200)
+    }
+
+    const productIds = data.items.map(i => i.productId)
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, price: true, stock: true, name: true, isActive: true }
+    })
+
+    const productMap = new Map(products.map(p => [p.id, p]))
+    for (const item of data.items) {
+      const product = productMap.get(item.productId)
+      if (!product) {
+        return createErrorResponse(`Product not found: ID ${item.productId}`, 400)
+      }
+      if (!product.isActive) {
+        return createErrorResponse(`Product "${product.name}" is not available for purchase`, 400)
+      }
+      if (product.stock < item.quantity) {
+        return createErrorResponse(
+          `Sorry, "${product.name}" is no longer available in the requested quantity.`,
+          409
+        )
+      }
+    }
+
+    const lineItems = data.items.map(item => {
+      const product = productMap.get(item.productId)!
+      return {
+        productId: item.productId,
+        variantId: item.variantId,
+        name: item.productName || product.name,
+        quantity: item.quantity,
+        price: product.price,
+        weight: item.weight,
       }
     })
-    
-    // Update customer stats
-    if (order.customerId) {
-      await prisma.customer.update({
-        where: { id: order.customerId },
-        data: {
-          ordersCount: { increment: 1 },
-          totalSpent: { increment: order.grandTotal }
+
+    const subtotal = lineItems.reduce((s, i) => s + i.price * i.quantity, 0)
+
+    const settings = await prisma.settings.findFirst({
+      select: { taxRate: true, shippingFlatRate: true }
+    })
+    const taxRate = settings?.taxRate ?? 0
+    const shippingCost = settings?.shippingFlatRate ?? 0
+    const tax = Number((subtotal * (taxRate / 100)).toFixed(2))
+    const total = subtotal
+    const grandTotal = Number((total + shippingCost + tax).toFixed(2))
+
+    const now = new Date()
+    let orderNumber = generateOrderNumber(now)
+    let orderUniqAttempts = 0
+    while (orderUniqAttempts < 5) {
+      const taken = await prisma.order.findUnique({ where: { orderNumber }, select: { id: true } })
+      if (!taken) break
+      orderNumber = generateOrderNumber(now)
+      orderUniqAttempts++
+    }
+
+    try {
+      const createdOrder = await prisma.$transaction(async (tx) => {
+        for (const item of lineItems) {
+          const updated = await tx.product.updateMany({
+            where: {
+              id: item.productId,
+              stock: { gte: item.quantity }
+            },
+            data: {
+              stock: { decrement: item.quantity }
+            }
+          })
+          if (updated.count === 0) {
+            const product = productMap.get(item.productId)!
+            throw new Error(
+              `STOCK_RACE:Sorry, "${product.name}" is no longer available in the requested quantity. Please refresh and try again.`
+            )
+          }
+
+          const freshProduct = await tx.product.findUnique({
+            where: { id: item.productId },
+            select: { stock: true, name: true }
+          })
+          if (freshProduct) {
+            await tx.inventoryTransaction.create({
+              data: {
+                productId: item.productId,
+                productName: freshProduct.name,
+                type: 'ORDER_RESERVED',
+                quantity: item.quantity,
+                previousStock: freshProduct.stock + item.quantity,
+                newStock: freshProduct.stock,
+                reason: `Order reserved at checkout`,
+              }
+            })
+          }
+        }
+
+        const order = await tx.order.create({
+          data: {
+            orderNumber,
+            customerId,
+            customerName: data.customerName,
+            customerEmail: data.customerEmail,
+            customerPhone: data.customerPhone,
+            shippingAddress: data.shippingAddress,
+            total: subtotal,
+            shippingCost,
+            tax,
+            grandTotal,
+            status: 'AWAITING_PAYMENT',
+            idempotencyKey: data.idempotencyKey,
+            items: {
+              create: lineItems.map(li => ({
+                productId: li.productId,
+                name: li.name,
+                quantity: li.quantity,
+                price: li.price,
+                weight: li.weight,
+              }))
+            }
+          },
+          include: { items: true }
+        })
+
+        await tx.payment.create({
+          data: {
+            orderId: order.id,
+            method: 'MANUAL_QR',
+            status: 'PENDING',
+            amount: grandTotal,
+          }
+        })
+
+        await tx.customer.update({
+          where: { id: customerId },
+          data: {
+            ordersCount: { increment: 1 },
+            totalSpent: { increment: grandTotal },
+          }
+        })
+
+        if (isAdmin) {
+          const adminForNote = await getCurrentAdmin()
+          if (adminForNote) {
+            await tx.internalNote.create({
+              data: {
+                orderId: order.id,
+                text: `Order created manually by admin ${adminForNote.username}`,
+                adminId: String(adminForNote.id),
+                adminName: adminForNote.username,
+              }
+            })
+          }
+        }
+
+        return order
+      })
+
+      const finalOrder = await prisma.order.findUnique({
+        where: { id: createdOrder.id },
+        include: {
+          customer: { select: SAFE_CUSTOMER_SELECT },
+          items: true,
+          payment: true,
         }
       })
+
+      return createResponse({ success: true, data: finalOrder }, 201)
+    } catch (txErr: any) {
+      if (txErr?.code === 'P2002' && Array.isArray(txErr.meta?.target)) {
+        const target = txErr.meta.target.join(',')
+        if (target.includes('idempotencyKey') && target.includes('customerId')) {
+          const existing = await prisma.order.findFirst({
+            where: { customerId, idempotencyKey: data.idempotencyKey },
+            include: { items: true, payment: true, customer: { select: SAFE_CUSTOMER_SELECT } }
+          })
+          if (existing) {
+            return createResponse({ success: true, data: existing, duplicate: true }, 200)
+          }
+        }
+        if (target.includes('orderNumber')) {
+          return createErrorResponse('Order number conflict, please retry.', 409)
+        }
+      }
+      if (txErr?.message?.startsWith('STOCK_RACE:')) {
+        return createErrorResponse(txErr.message.replace('STOCK_RACE:', ''), 409)
+      }
+      throw txErr
     }
-    
-    return createResponse({ success: true, data: order }, 201)
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.message?.startsWith('STOCK_RACE:')) {
+      return createErrorResponse(error.message.replace('STOCK_RACE:', ''), 409)
+    }
     return handleApiError(error)
   }
 }

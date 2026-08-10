@@ -103,20 +103,22 @@ export default function CustomerAccount() {
   const customer = currentUser as any;
 
   const statusColors: Record<string, string> = {
-    'Pending': 'bg-yellow-100 text-yellow-800',
-    'Processing': 'bg-blue-100 text-blue-800',
-    'Shipped': 'bg-purple-100 text-purple-800',
-    'Delivered': 'bg-green-100 text-green-800',
-    'Cancelled': 'bg-red-100 text-red-800',
-    'Refunded': 'bg-gray-100 text-gray-800'
+    'AWAITING_PAYMENT': 'bg-yellow-100 text-yellow-800',
+    'CONFIRMED': 'bg-emerald-100 text-emerald-800',
+    'PROCESSING': 'bg-blue-100 text-blue-800',
+    'SHIPPED': 'bg-purple-100 text-purple-800',
+    'DELIVERED': 'bg-green-100 text-green-800',
+    'CANCELLED': 'bg-red-100 text-red-800',
+    'REFUNDED': 'bg-gray-100 text-gray-800'
   };
 
   const trackingSteps = (status: string) => {
     const steps = [
       { id: 1, label: 'Order Placed', status: 'completed', icon: CheckCircle2 },
-      { id: 2, label: 'Processing', status: status !== 'Pending' ? 'completed' : 'pending', icon: Clock },
-      { id: 3, label: 'Shipped', status: ['Shipped', 'Delivered'].includes(status) ? 'completed' : 'pending', icon: Truck },
-      { id: 4, label: 'Delivered', status: status === 'Delivered' ? 'completed' : 'pending', icon: PackageCheck },
+      { id: 2, label: 'Payment Verified', status: ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'REFUNDED'].includes(status) ? 'completed' : 'pending', icon: CheckCircle2 },
+      { id: 3, label: 'Processing', status: ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'].includes(status) ? 'completed' : 'pending', icon: Clock },
+      { id: 4, label: 'Shipped', status: ['SHIPPED', 'DELIVERED'].includes(status) ? 'completed' : 'pending', icon: Truck },
+      { id: 5, label: 'Delivered', status: status === 'DELIVERED' ? 'completed' : 'pending', icon: PackageCheck },
     ];
     return steps;
   };

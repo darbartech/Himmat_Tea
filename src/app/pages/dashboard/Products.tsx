@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Plus, Search, Edit, Trash2, MoreHorizontal, X, Save, Package } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -39,6 +39,25 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../../lib/api-client";
 import { BRAND } from "../../../config/brand";
 
+type ProductLineRef = {
+  id: number;
+  slug: string;
+  name: string;
+  description?: string | null;
+  heroHeadline?: string | null;
+  heroImage?: string | null;
+  color?: string | null;
+  categories?: string | null;
+  ctaTitle?: string | null;
+  ctaDescription?: string | null;
+  ctaLinkText?: string | null;
+  ctaLink?: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type Product = {
   id: number;
   name: string;
@@ -48,22 +67,47 @@ type Product = {
   status: string;
   description: string;
   imageUrl: string;
-  sku?: string;
-  reorderPoint?: number;
+  sku?: string | null;
+  reorderPoint?: number | null;
   hasVariants: boolean;
   variantOptions?: any;
   isBestseller: boolean;
+  isActive: boolean;
+  sortOrder: number;
   createdAt: string;
   updatedAt: string;
-  productLine?: string;
-  productLineId: string;
+  productLineId: number | null;
+  productLine?: ProductLineRef | string | null;
 };
+
+function getProductLineName(product: Product, storeProductLines: any[]): string {
+  if (!product) return "";
+  if (product.productLine && typeof product.productLine === "object") {
+    return (product.productLine as ProductLineRef).name || "";
+  }
+  if (typeof product.productLine === "string") {
+    return product.productLine;
+  }
+  if (product.productLineId != null) {
+    const pl = storeProductLines.find((l: any) => l.id === product.productLineId);
+    return pl?.name || "";
+  }
+  return "";
+}
+
+function getProductLineId(product: Product): number | null {
+  if (product.productLineId != null) return product.productLineId;
+  if (product.productLine && typeof product.productLine === "object") {
+    return (product.productLine as ProductLineRef).id || null;
+  }
+  return null;
+}
 
 export default function Products() {
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProductLine, setSelectedProductLine] = useState("All");
+  const [selectedProductLine, setSelectedProductLine] = useState<string>("All");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isStockDialogOpen, setIsStockDialogOpen] = useState(false);
@@ -87,6 +131,10 @@ export default function Products() {
     }
   });
 
+  const firstActiveLineId = storeProductLines.find((pl: any) => pl.isActive)?.id
+    ?? storeProductLines[0]?.id
+    ?? null;
+
   const [newProduct, setNewProduct] = useState({
     name: "",
     category: "green",
@@ -99,8 +147,7 @@ export default function Products() {
     hasVariants: false,
     isBestseller: false,
     status: "In Stock",
-    productLineId: storeProductLines[0]?.id || "",
-    productLine: storeProductLines[0]?.name || ""
+    productLineId: firstActiveLineId,
   });
 
   const [stockAdjustment, setStockAdjustment] = useState({
@@ -108,17 +155,33 @@ export default function Products() {
     reason: "",
   });
 
-  const productLines = ["All", ...storeProductLines.filter((pl: any) => pl.isActive).map((pl: any) => pl.id)];
+  useEffect(() => {
+    if (firstActiveLineId != null && newProduct.productLineId == null) {
+      setNewProduct(prev => ({ ...prev, productLineId: firstActiveLineId }));
+    }
+  }, [firstActiveLineId]);
 
-  const filteredProducts = products.filter((product: any) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (selectedProductLine === "All" || product.productLineId === selectedProductLine)
-  );
+  const productLineOptions = ["All", ...storeProductLines
+    .filter((pl: any) => pl.isActive)
+    .map((pl: any) => String(pl.id))];
 
-  // Add Product Mutation
+  const filteredProducts = products.filter((product: Product) => {
+    const matchesName = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const plId = getProductLineId(product);
+    const matchesLine = selectedProductLine === "All"
+      ? true
+      : plId != null && String(plId) === String(selectedProductLine);
+    return matchesName && matchesLine;
+  });
+
   const addProductMutation = useMutation({
     mutationFn: async (product: any) => {
-      const response = await api.post<any>('/products', product);
+      const payload = { ...product };
+      if (payload.productLineId != null && typeof payload.productLineId !== "number") {
+        payload.productLineId = Number(payload.productLineId);
+      }
+      if (payload.productLine) delete payload.productLine;
+      const response = await api.post<any>('/products', payload);
       return response.data || response;
     },
     onSuccess: () => {
@@ -130,10 +193,14 @@ export default function Products() {
     },
   });
 
-  // Update Product Mutation
   const updateProductMutation = useMutation({
     mutationFn: async ({ id, product }: { id: number; product: any }) => {
-      const response = await api.put<any>(`/products/${id}`, product);
+      const payload = { ...product };
+      if (payload.productLineId != null && typeof payload.productLineId !== "number") {
+        payload.productLineId = Number(payload.productLineId);
+      }
+      if (payload.productLine) delete payload.productLine;
+      const response = await api.put<any>(`/products/${id}`, payload);
       return response.data || response;
     },
     onSuccess: () => {
@@ -145,7 +212,6 @@ export default function Products() {
     },
   });
 
-  // Delete Product Mutation
   const deleteProductMutation = useMutation({
     mutationFn: async (id: number) => {
       await api.delete(`/products/${id}`);
@@ -179,7 +245,7 @@ export default function Products() {
   };
 
   const handleExportCSV = () => {
-    const csvData = filteredProducts.map((product: any) => ({
+    const csvData = filteredProducts.map((product: Product) => ({
       "Product ID": product.id,
       "Name": product.name,
       "Category": product.category,
@@ -195,6 +261,23 @@ export default function Products() {
     if (tableRef.current) {
       printElement(tableRef.current, { title: "Products List" });
     }
+  };
+
+  const resetForm = () => {
+    setNewProduct({
+      name: "",
+      category: "green",
+      price: 0,
+      stock: 0,
+      description: "",
+      imageUrl: "",
+      sku: "",
+      reorderPoint: 20,
+      hasVariants: false,
+      isBestseller: false,
+      status: "In Stock",
+      productLineId: firstActiveLineId,
+    });
   };
 
   const handleSaveProduct = async () => {
@@ -234,24 +317,6 @@ export default function Products() {
     }
   };
 
-  const resetForm = () => {
-    setNewProduct({
-      name: "",
-      category: "green",
-      price: 0,
-      stock: 0,
-      description: "",
-      imageUrl: "",
-      sku: "",
-      reorderPoint: 20,
-      hasVariants: false,
-      isBestseller: false,
-      status: "In Stock",
-      productLineId: storeProductLines[0]?.id || "",
-      productLine: storeProductLines[0]?.name || ""
-    });
-  };
-
   const handleAdjustStock = async () => {
     if (!selectedStockProduct || stockAdjustment.quantity === 0 || !stockAdjustment.reason) {
       toast.error("Please fill all fields");
@@ -265,7 +330,7 @@ export default function Products() {
       await updateProductMutation.mutateAsync({
         id: selectedStockProduct.id,
         product: {
-          ...selectedStockProduct,
+          id: selectedStockProduct.id,
           stock: newStock,
           status
         }
@@ -283,6 +348,7 @@ export default function Products() {
 
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
+    const lineId = getProductLineId(product);
     setNewProduct({
       name: product.name,
       category: product.category,
@@ -295,8 +361,7 @@ export default function Products() {
       hasVariants: product.hasVariants,
       isBestseller: product.isBestseller,
       status: product.status,
-      productLineId: product.productLineId || storeProductLines[0]?.id || "",
-      productLine: product.productLine || storeProductLines.find((pl: any) => pl.id === product.productLineId)?.name || storeProductLines[0]?.name || ""
+      productLineId: lineId ?? firstActiveLineId,
     });
     setIsAddDialogOpen(true);
   };
@@ -311,7 +376,6 @@ export default function Products() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -353,10 +417,10 @@ export default function Products() {
                   <div className="grid gap-2">
                     <Label htmlFor="productLine">Product Line</Label>
                     <Select
-                      value={newProduct.productLineId}
+                      value={newProduct.productLineId != null ? String(newProduct.productLineId) : ""}
                       onValueChange={(value) => {
-                        const pl = storeProductLines.find((p: any) => p.id === value);
-                        setNewProduct({ ...newProduct, productLineId: value, productLine: pl?.name || "" });
+                        const id = value ? Number(value) : null;
+                        setNewProduct({ ...newProduct, productLineId: id });
                       }}
                     >
                       <SelectTrigger>
@@ -364,7 +428,7 @@ export default function Products() {
                       </SelectTrigger>
                       <SelectContent>
                         {storeProductLines.filter((pl: any) => pl.isActive).map((pl: any) => (
-                          <SelectItem key={pl.id} value={pl.id}>{pl.name}</SelectItem>
+                          <SelectItem key={pl.id} value={String(pl.id)}>{pl.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -478,7 +542,6 @@ export default function Products() {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#2d5a3d]/5 flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
@@ -500,13 +563,12 @@ export default function Products() {
           <SelectContent>
             <SelectItem value="All">All Product Lines</SelectItem>
             {storeProductLines.filter((pl: any) => pl.isActive).map((pl: any) => (
-              <SelectItem key={pl.id} value={pl.id}>{pl.name}</SelectItem>
+              <SelectItem key={pl.id} value={String(pl.id)}>{pl.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      {/* Products Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-[#2d5a3d]/5 overflow-hidden">
         <div className="overflow-x-auto" ref={tableRef}>
           <table className="w-full">
@@ -522,7 +584,7 @@ export default function Products() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2d5a3d]/5">
-              {filteredProducts.map((product: any) => (
+              {filteredProducts.map((product: Product) => (
                 <tr key={product.id} className="group hover:bg-[#f9f7f4] transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -551,7 +613,9 @@ export default function Products() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[#2d5a3d] font-medium">{product.productLine || storeProductLines[0]?.name}</span>
+                    <span className="text-[#2d5a3d] font-medium">
+                      {getProductLineName(product, storeProductLines) || "—"}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-[#78746e]">{product.category}</span>

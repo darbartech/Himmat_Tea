@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
 import { setAuthCookie, passwordSchema } from '@/lib/auth'
+import { rateLimitAuth } from '@/lib/rate-limit'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
@@ -29,6 +30,11 @@ const signupServerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const rl = rateLimitAuth(request)
+    if (!rl.allowed) {
+      return createErrorResponse(rl.error || 'Too many requests. Please try again later.', 429)
+    }
+
     const body = await request.json()
     const { name, email, phone, password, address } = body
 

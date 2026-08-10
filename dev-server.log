@@ -1,0 +1,56 @@
+
+> Himmat Tea@0.0.1 dev
+> next dev
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\Nepal\Downloads\package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * C:\Users\Nepal\Downloads\Godgifted\Himmat_Tea\package-lock.json
+
+   ▲ Next.js 15.5.19
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.3:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 3s
+ ○ Compiling /forgot-password ...
+ ✓ Compiled /forgot-password in 3.2s (1035 modules)
+ GET /forgot-password 200 in 3954ms
+ ○ Compiling /api/auth/forgot-password ...
+ ✓ Compiled /api/auth/forgot-password in 2s (1274 modules)
+[email:dev] Password reset code for testing@gmail.com: 393846 (expires in 15 minutes). Set SMTP_HOST/SMTP_USER/SMTP_PASS to send real email.
+ POST /api/auth/forgot-password 200 in 6372ms
+ ✓ Compiled /api/auth/verify-reset-otp in 312ms (771 modules)
+ POST /api/auth/verify-reset-otp 200 in 2078ms
+ POST /api/auth/verify-reset-otp 400 in 1239ms
+ POST /api/auth/verify-reset-otp 200 in 692ms
+ ✓ Compiled /api/auth/reset-password in 232ms (773 modules)
+ POST /api/auth/reset-password 200 in 2931ms
+ ✓ Compiled /api/customer/login in 465ms (722 modules)
+ POST /api/customer/login 200 in 2093ms
+ POST /api/customer/login 401 in 424ms
+ POST /api/auth/reset-password 400 in 311ms
+ ✓ Compiled /api/auth/forgot-password in 112ms (329 modules)
+ POST /api/auth/forgot-password 200 in 771ms
+[email:dev] Password reset code for emma@example.com: 779769 (expires in 15 minutes). Set SMTP_HOST/SMTP_USER/SMTP_PASS to send real email.
+ POST /api/auth/forgot-password 200 in 964ms
+ ✓ Compiled /api/auth/verify-reset-otp in 137ms (331 modules)
+ POST /api/auth/verify-reset-otp 400 in 1190ms
+ POST /api/auth/verify-reset-otp 400 in 951ms
+ POST /api/auth/verify-reset-otp 400 in 967ms
+ POST /api/auth/verify-reset-otp 400 in 976ms
+ POST /api/auth/verify-reset-otp 400 in 1012ms
+ POST /api/auth/verify-reset-otp 400 in 1119ms
+ ✓ Compiled in 1649ms (458 modules)
+ ✓ Compiled /api/auth/resend-reset-otp in 275ms (773 modules)
+[email:dev] Password reset code for emma@example.com: 312853 (expires in 15 minutes). Set SMTP_HOST/SMTP_USER/SMTP_PASS to send real email.
+ POST /api/auth/resend-reset-otp 200 in 1685ms
+ POST /api/auth/verify-reset-otp 200 in 702ms
+ ○ Compiling /verify-reset ...
+ ✓ Compiled /verify-reset in 1842ms (1278 modules)
+ GET /verify-reset?email=testing@gmail.com 200 in 2422ms
+ ✓ Compiled /reset-password in 458ms (1286 modules)
+ GET /reset-password 200 in 960ms

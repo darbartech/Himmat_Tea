@@ -84,33 +84,49 @@ model Batch {
 }
 
 model Customer {
-  id            Int      @id @default(autoincrement())
-  name          String
-  email         String   @unique
-  phone         String
-  address       String
-  passwordHash  String?
-  ordersCount   Int      @default(0)
-  totalSpent    Float    @default(0)
-  loyaltyPoints Int      @default(0)
-  tier          String   @default("Bronze")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  orders        Order[]
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  email              String               @unique
+  phone              String
+  address            String
+  passwordHash       String?
+  ordersCount        Int                  @default(0)
+  totalSpent         Float                @default(0)
+  loyaltyPoints      Int                  @default(0)
+  tier               String               @default("Bronze")
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  orders             Order[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  otpHash    String
+  expiresAt  DateTime
+  attempts   Int      @default(0)
+  usedAt     DateTime?
+  createdAt  DateTime @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
 }
 
 model Order {
   id              String         @id @default(cuid())
+  orderNumber     String         @unique
   customerId      Int
   customerName    String
   customerEmail   String
   customerPhone   String
   shippingAddress String
   total           Float
+  shippingCost    Float          @default(0)
   tax             Float
   grandTotal      Float
-  status          String         @default("Pending")
-  paymentStatus   String         @default("Unpaid")
+  status          String         @default("AWAITING_PAYMENT")
+  idempotencyKey  String
   orderDate       DateTime       @default(now())
   trackingNumber  String?
   courierPartner  String?
@@ -121,6 +137,10 @@ model Order {
   internalNotes   InternalNote[]
   customer        Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
   items           OrderItem[]
+  payment         Payment?
+
+  @@unique([customerId, idempotencyKey])
+  @@index([customerId, status])
 }
 
 model OrderItem {
@@ -313,9 +333,26 @@ model PurchaseOrderItem {
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
 }
 
+model Payment {
+  id                    String   @id @default(cuid())
+  orderId               String   @unique
+  order                 Order    @relation(fields: [orderId], references: [id])
+  method                String   @default("MANUAL_QR")
+  status                String   @default("PENDING")
+  amount                Float
+  transactionReference  String?
+  verifiedByAdminId     Int?
+  verifiedAt            DateTime?
+  paidAt                DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
 model Settings {
   id                   String   @id @default(cuid())
   taxRate              Float    @default(18)
+  shippingFlatRate     Float    @default(0)
+  qrImageUrl           String?
   currency             String   @default("₹")
   storeName            String   @default("Himmat Tea")
   storeEmail           String   @default("support@himmattea.com")

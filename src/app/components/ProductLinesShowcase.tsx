@@ -8,7 +8,7 @@ interface ProductLine {
   name: string;
   slug: string;
   description: string;
-  heroImage?: string;
+  heroImage?: string | null;
   [key: string]: any;
 }
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createResponse, handleApiError } from '@/lib/api-utils'
+import { createResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
 
 export async function GET() {
   try {
@@ -23,7 +23,7 @@ export async function GET() {
       prisma.order.findMany({
         take: 10,
         orderBy: { orderDate: 'desc' },
-        include: { customer: true }
+        include: { customer: { select: SAFE_CUSTOMER_SELECT } }
       }),
       prisma.product.findMany({
         take: 5,

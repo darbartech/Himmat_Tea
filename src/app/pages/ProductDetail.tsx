@@ -768,7 +768,7 @@ export default function ProductDetail() {
                 You May Also Like
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {relatedProducts.map((relatedProduct) => (
+                {relatedProducts.map((relatedProduct: any) => (
                   <Link
                     key={relatedProduct.id}
                     href={`/products/${relatedProduct.id}`}

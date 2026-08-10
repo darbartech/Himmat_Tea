@@ -3,13 +3,16 @@ import { prisma } from '@/lib/prisma'
 import jwt from 'jsonwebtoken'
 import { z } from 'zod'
 
-function getJwtSecret(): string {
+export function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET
   if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('JWT_SECRET environment variable is required in production')
+    if (process.env.NODE_ENV === 'development') {
+      return 'himmat-tea-dev-secret-change-in-production'
     }
-    return 'himmat-tea-dev-secret-change-in-production'
+    throw new Error(
+      `JWT_SECRET environment variable is required in ${process.env.NODE_ENV || 'unspecified'} environment. ` +
+      'It is only allowed to fall back to the dev default when NODE_ENV is exactly "development".'
+    )
   }
   return secret
 }

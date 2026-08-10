@@ -94,6 +94,8 @@ export interface Product {
   variantOptions: string[];
   isBestseller: boolean;
   reviews: Review[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Customer {
@@ -228,16 +230,6 @@ interface Order {
   internalNotes: InternalNote[];
   refundReason?: string;
   refundAmount?: number;
-}
-
-interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  ordersCount: number;
-  totalSpent: number;
 }
 
 interface InventoryTransaction {
@@ -376,6 +368,7 @@ interface StoreContextType {
   loyaltyProgram: LoyaltyProgram;
   settings: {
     taxRate: number;
+    shippingFlatRate: number;
     currency: string;
     storeName: string;
     storeEmail: string;
@@ -383,6 +376,7 @@ interface StoreContextType {
     notificationsEnabled: boolean;
     lowStockThreshold: number;
     gstNumber?: string;
+    qrImageUrl?: string | null;
   };
   updateSettings: (settings: Partial<StoreContextType["settings"]>) => void;
 }
@@ -679,6 +673,7 @@ const sampleOrders: Order[] = [
 
 const defaultSettings = {
   taxRate: 18,
+  shippingFlatRate: 0,
   currency: "₹",
   storeName: "Godgifted",
   storeEmail: "support@godgifted.com",
@@ -686,6 +681,7 @@ const defaultSettings = {
   notificationsEnabled: true,
   lowStockThreshold: 30,
   gstNumber: "27AABCU9603R1ZX",
+  qrImageUrl: null,
 };
 
 const loyaltyProgramConfig: LoyaltyProgram = {
@@ -1229,7 +1225,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const newProduct: Product = {
       ...product,
       id: Date.now(),
-      productLine: (product.productLine || foundProductLine?.name || storeProductLines[0]?.name) as string,
+      productLine: product.productLine || foundProductLine,
       hasVariants: product.hasVariants || false,
       productVariants: product.productVariants || [],
       variantOptions: product.variantOptions || [],
@@ -1254,7 +1250,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             ...product, 
             ...updates, 
             updatedAt: new Date().toISOString(),
-            productLine: (updates.productLine || foundProductLine?.name || product.productLine) as string
+            productLine: updates.productLine || product.productLine || foundProductLine
           };
         }
         return product;

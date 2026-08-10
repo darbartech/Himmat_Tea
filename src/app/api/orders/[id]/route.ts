@@ -1,28 +1,80 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
+import { createResponse, createErrorResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
+import { getCurrentUser, getCurrentAdmin } from '@/lib/auth'
+import { z } from 'zod'
 
 interface Params {
   params: Promise<{ id: string }>
 }
 
+const customerOrderUpdateSchema = z.object({
+  customerName: z.string().min(1).optional(),
+  customerPhone: z.string().min(1).optional(),
+  shippingAddress: z.string().min(1).optional(),
+}).strict()
+
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
+    const currentUser = await getCurrentUser()
+
+    if (!currentUser) {
+      return createErrorResponse('Please sign in to view this order.', 401)
+    }
+
+    const isAdmin = 'username' in currentUser
+
     const order = await prisma.order.findUnique({
       where: { id },
       include: {
-        customer: true,
+        customer: { select: SAFE_CUSTOMER_SELECT },
         items: true,
-        internalNotes: true
+        internalNotes: isAdmin,
+        payment: true,
       }
     })
-    
+
     if (!order) {
-      return createErrorResponse('Order not found', 404)
+      return createErrorResponse('This order could not be found.', 404)
     }
-    
-    return createResponse(order)
+
+    const isOwner = !isAdmin && order.customerId === currentUser.id
+
+    if (!isOwner && !isAdmin) {
+      return createErrorResponse('This order could not be found.', 404)
+    }
+
+    const responseOrder = isAdmin
+      ? order
+      : {
+          id: order.id,
+          orderNumber: order.orderNumber,
+          customerId: order.customerId,
+          customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          customerPhone: order.customerPhone,
+          shippingAddress: order.shippingAddress,
+          total: order.total,
+          shippingCost: order.shippingCost,
+          tax: order.tax,
+          grandTotal: order.grandTotal,
+          status: order.status,
+          orderDate: order.orderDate,
+          trackingNumber: order.trackingNumber,
+          courierPartner: order.courierPartner,
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt,
+          items: order.items,
+          payment: order.payment ? {
+            method: order.payment.method,
+            status: order.payment.status,
+            amount: order.payment.amount,
+            transactionReference: order.payment.transactionReference,
+          } : null,
+        }
+
+    return createResponse({ success: true, data: responseOrder })
   } catch (error) {
     return handleApiError(error)
   }
@@ -31,33 +83,91 @@ export async function GET(request: NextRequest, { params }: Params) {
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
-    const body = await request.json()
-    
-    const order = await prisma.order.update({
+    const currentUser = await getCurrentUser()
+
+    if (!currentUser) {
+      return createErrorResponse('Unauthorized', 401)
+    }
+
+    const isAdmin = 'username' in currentUser
+
+    if (!isAdmin) {
+      return createErrorResponse('Forbidden - customers may not update orders via this endpoint.', 403)
+    }
+
+    const adminUser = await getCurrentAdmin()
+    if (!adminUser) {
+      return createErrorResponse('Forbidden', 403)
+    }
+
+    const order = await prisma.order.findUnique({
       where: { id },
-      data: body,
+      include: { customer: { select: SAFE_CUSTOMER_SELECT } }
+    })
+
+    if (!order) {
+      return createErrorResponse('Order not found', 404)
+    }
+
+    const body = await request.json()
+    const validated = customerOrderUpdateSchema.safeParse(body)
+    if (!validated.success) {
+      const firstError = validated.error.issues[0]
+      return createErrorResponse(
+        `Invalid field: ${firstError.path.join('.')} - ${firstError.message}. Use the admin PATCH endpoints for status/payment changes.`,
+        400
+      )
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data: validated.data,
       include: {
-        customer: true,
+        customer: { select: SAFE_CUSTOMER_SELECT },
         items: true,
-        internalNotes: true
+        internalNotes: true,
+        payment: true,
       }
     })
-    
-    return createResponse(order)
+
+    await prisma.internalNote.create({
+      data: {
+        orderId: id,
+        text: `Admin ${adminUser.username} updated contact/shipping details`,
+        adminId: String(adminUser.id),
+        adminName: adminUser.username,
+      }
+    })
+
+    return createResponse({ success: true, data: updatedOrder })
   } catch (error) {
     return handleApiError(error)
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: Params) {
+export async function DELETE(_request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
-    
-    await prisma.order.delete({
-      where: { id }
-    })
-    
-    return createResponse({ message: 'Order deleted successfully' })
+    const currentUser = await getCurrentUser()
+
+    if (!currentUser) {
+      return createErrorResponse('Unauthorized', 401)
+    }
+
+    const isAdmin = 'username' in currentUser
+    if (!isAdmin) {
+      return createErrorResponse('Forbidden', 403)
+    }
+
+    const adminUser = await getCurrentAdmin()
+    if (!adminUser) {
+      return createErrorResponse('Forbidden', 403)
+    }
+
+    return createErrorResponse(
+      'Hard delete is disabled. Use PATCH /api/admin/orders/' + id + '/status with status "CANCELLED" to preserve audit history.',
+      405
+    )
   } catch (error) {
     return handleApiError(error)
   }

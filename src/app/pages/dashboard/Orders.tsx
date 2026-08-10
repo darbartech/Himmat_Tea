@@ -1,11 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Plus, Search, Eye, CheckCircle, Truck, Clock,
   Package, XCircle, RefreshCw, Download, Printer, Undo2,
-  CheckSquare, Square, ChevronLeft, ChevronRight
+  CheckSquare, Square, ChevronLeft, ChevronRight, AlertTriangle
 } from "lucide-react";
 import { useStore } from "../../../context/StoreContext";
 import { useTranslation } from "../../../hooks/useTranslation";
+import { api, ApiError } from "../../../lib/api-client";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "../../components/ui/dialog";
@@ -27,15 +28,31 @@ import { jsPDF } from "jspdf";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type OrderStatus = "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled" | "Refunded";
-type PaymentStatus = "Paid" | "Unpaid" | "Refunded";
+type OrderStatus = "AWAITING_PAYMENT" | "CONFIRMED" | "Pending" | "Processing" | "PROCESSING" | "Shipped" | "SHIPPED" | "Delivered" | "DELIVERED" | "Cancelled" | "CANCELLED" | "Refunded" | "REFUNDED";
+type PaymentStatus = "Paid" | "Unpaid" | "Refunded" | "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+
+interface PaymentObj {
+  id?: string;
+  orderId?: string;
+  method?: string;
+  status: PaymentStatus | string;
+  amount?: number;
+  transactionReference?: string | null;
+  verifiedByAdminId?: number | null;
+  verifiedAt?: string | null;
+  paidAt?: string | null;
+}
 
 interface OrderItem {
-  id: number;
+  id?: number | string;
   productId: number;
-  name: string;
+  variantId?: number | null;
+  name?: string;
+  productName?: string;
   quantity: number;
-  price: number;
+  price?: number;
+  amount?: number;
+  weight?: string;
 }
 
 interface InternalNote {
@@ -44,10 +61,12 @@ interface InternalNote {
   adminId: string;
   adminName: string;
   timestamp: string;
+  createdAt?: string;
 }
 
 interface Order {
   id: string;
+  orderNumber?: string;
   customerId: number;
   customerName: string;
   customerEmail: string;
@@ -56,34 +75,72 @@ interface Order {
   orderDate: string;
   items: OrderItem[];
   total: number;
+  shippingCost?: number;
   tax: number;
   grandTotal: number;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
-  trackingNumber?: string;
-  courierPartner?: string;
+  payment?: PaymentObj | null;
+  trackingNumber?: string | null;
+  courierPartner?: string | null;
   internalNotes: InternalNote[];
   refundReason?: string;
   refundAmount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const STATUS_META: Record<string, { icon: React.ElementType; pill: string }> = {
-  delivered:  { icon: CheckCircle, pill: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  completed:  { icon: CheckCircle, pill: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  processing: { icon: Clock,       pill: "bg-sky-50 text-sky-700 border-sky-200" },
-  shipped:    { icon: Truck,       pill: "bg-violet-50 text-violet-700 border-violet-200" },
-  pending:    { icon: Package,     pill: "bg-amber-50 text-amber-700 border-amber-200" },
-  cancelled:  { icon: XCircle,    pill: "bg-red-50 text-red-700 border-red-200" },
-  refunded:   { icon: RefreshCw,  pill: "bg-orange-50 text-orange-700 border-orange-200" },
+  delivered:         { icon: CheckCircle, pill: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  completed:         { icon: CheckCircle, pill: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  processing:        { icon: Clock,       pill: "bg-sky-50 text-sky-700 border-sky-200" },
+  shipped:           { icon: Truck,       pill: "bg-violet-50 text-violet-700 border-violet-200" },
+  pending:           { icon: Package,     pill: "bg-amber-50 text-amber-700 border-amber-200" },
+  awaiting_payment:  { icon: Clock,       pill: "bg-amber-50 text-amber-700 border-amber-200" },
+  confirmed:         { icon: CheckCircle, pill: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  cancelled:         { icon: XCircle,     pill: "bg-red-50 text-red-700 border-red-200" },
+  refunded:          { icon: RefreshCw,   pill: "bg-orange-50 text-orange-700 border-orange-200" },
 };
 
 const PAYMENT_PILL: Record<string, string> = {
   Paid:     "bg-emerald-50 text-emerald-700 border-emerald-200",
+  PAID:     "bg-emerald-50 text-emerald-700 border-emerald-200",
   Unpaid:   "bg-red-50 text-red-700 border-red-200",
+  PENDING:  "bg-amber-50 text-amber-700 border-amber-200",
+  FAILED:   "bg-red-50 text-red-700 border-red-200",
   Refunded: "bg-orange-50 text-orange-700 border-orange-200",
+  REFUNDED: "bg-orange-50 text-orange-700 border-orange-200",
 };
+
+function normalizePaymentStatus(order: Order): PaymentStatus {
+  if (order.payment?.status) {
+    const s = order.payment.status as string;
+    if (s === 'PAID') return 'Paid';
+    if (s === 'PENDING') return 'Unpaid';
+    if (s === 'FAILED') return 'Unpaid';
+    if (s === 'REFUNDED') return 'Refunded';
+    if (s === 'Paid' || s === 'Unpaid' || s === 'Refunded') return s;
+  }
+  return order.paymentStatus || 'Unpaid';
+}
+
+function itemName(item: OrderItem): string {
+  return item.productName || item.name || `Product ${item.productId}`;
+}
+
+function itemPrice(item: OrderItem): number {
+  return item.price ?? (item.amount ? item.amount / Math.max(item.quantity, 1) : 0);
+}
+
+function itemAmount(item: OrderItem): number {
+  return item.amount ?? (item.price ? item.price * item.quantity : 0);
+}
+
+function noteTs(note: InternalNote): string {
+  return note.timestamp || note.createdAt || new Date().toISOString();
+}
 
 const fmt = (n: number) =>
   n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -371,13 +428,13 @@ function OrderInvoice({
                   {item.quantity}
                 </td>
                 <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", fontSize: "12px", color: "#555555" }}>
-                  ₹{fmt(item.price)}
+                  ₹{fmt(itemPrice(item))}
                 </td>
                 <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", fontSize: "12px", color: "#aaaaaa" }}>
                   —
                 </td>
                 <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", fontSize: "13px", fontWeight: 700, color: "#1a1a1a" }}>
-                  ₹{fmt(item.price * item.quantity)}
+                  ₹{fmt(itemAmount(item))}
                 </td>
               </tr>
             ))}
@@ -575,20 +632,108 @@ const buildPrintStyles = () => `
 
 // ─── Main Orders page ─────────────────────────────────────────────────────────
 
-const ALL_STATUSES = ["All", "Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Refunded"];
-const PAYMENT_STATUSES = ["Paid", "Unpaid", "Refunded"];
+const FILTER_STATUSES = ["All", "AWAITING_PAYMENT", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"];
+const CHANGEABLE_STATUSES = ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"];
+const ORDER_TRANSITIONS: Record<string, string[]> = {
+  AWAITING_PAYMENT: ['CONFIRMED', 'CANCELLED'],
+  CONFIRMED: ['PROCESSING', 'CANCELLED'],
+  PROCESSING: ['SHIPPED', 'CANCELLED'],
+  SHIPPED: ['DELIVERED', 'CANCELLED'],
+  DELIVERED: ['REFUNDED'],
+  CANCELLED: [],
+  REFUNDED: [],
+};
+
+function adaptOrder(raw: any): Order {
+  const items: OrderItem[] = Array.isArray(raw.items)
+    ? raw.items.map((it: any) => ({
+        ...it,
+        name: it.productName || it.name || `Product ${it.productId}`,
+      }))
+    : [];
+
+  const notes: InternalNote[] = Array.isArray(raw.internalNotes) ? raw.internalNotes : [];
+  const order: Order = {
+    ...raw,
+    items,
+    internalNotes: notes,
+    orderDate: raw.orderDate || raw.createdAt || new Date().toISOString(),
+    paymentStatus: 'Unpaid' as PaymentStatus,
+  };
+  order.paymentStatus = normalizePaymentStatus(order);
+  return order;
+}
 
 export default function Orders() {
-  const { 
-    orders, 
-    updateOrder, 
-    settings, 
-    refundOrder,
-    addInternalNote,
-    updateTrackingInfo,
-    bulkUpdateOrderStatus
-  } = useStore();
+  const { settings: storeSettings } = useStore();
   const { t } = useTranslation();
+
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [settings, setSettings] = useState<any>(storeSettings || {});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const refreshOrders = useCallback(async (showError = false) => {
+    try {
+      const ordRes: any = await api.get('/orders');
+      const list = ordRes?.success ? ordRes.data : (Array.isArray(ordRes) ? ordRes : (ordRes?.data || []));
+      const normalized: Order[] = (Array.isArray(list) ? list : []).map(adaptOrder);
+      setOrders(normalized);
+      return normalized;
+    } catch (err: any) {
+      console.error('Failed to load orders:', err);
+      if (showError) {
+        setLoadError(err instanceof ApiError ? err.message : 'Failed to load orders');
+      }
+      return null;
+    }
+  }, []);
+
+  const refreshOne = useCallback(async (orderId?: string) => {
+    try {
+      if (orderId) {
+        const res: any = await api.get(`/orders/${orderId}`);
+        const raw = res?.success ? res.data : res;
+        if (raw) {
+          const updated = adaptOrder(raw);
+          setOrders((prev) => prev.map((o) => (o.id === orderId ? updated : o)));
+          return updated;
+        }
+      } else {
+        await refreshOrders();
+      }
+    } catch (err) {
+      console.error('refreshOne failed:', err);
+    }
+    return undefined;
+  }, [refreshOrders]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const [settRes] = await Promise.all([
+          (async () => {
+            try {
+              const r: any = await api.get('/settings');
+              return r?.success ? r.data : (r && typeof r === 'object' ? r : null);
+            } catch {
+              return storeSettings;
+            }
+          })(),
+        ]);
+        if (!cancelled) {
+          if (settRes) setSettings(settRes);
+          await refreshOrders(true);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [refreshOrders, storeSettings]);
 
   const [refundReason, setRefundReason] = useState("");
   const [refundAmount, setRefundAmount] = useState<string>("");
@@ -602,13 +747,16 @@ export default function Orders() {
   const [newInternalNote, setNewInternalNote] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
   const [courierPartner, setCourierPartner] = useState("");
-  const [bulkStatus, setBulkStatus] = useState<OrderStatus>("Processing");
+  const [bulkStatus, setBulkStatus] = useState<OrderStatus>("CONFIRMED");
+  const [paymentReference, setPaymentReference] = useState("");
   
   const invoiceRef = useRef<HTMLDivElement>(null);
 
   const filteredOrders = orders.filter((o) =>
     (o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.id.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (o.orderNumber || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      o.customerEmail.toLowerCase().includes(searchQuery.toLowerCase())) &&
     (selectedStatus === "All" || o.status === selectedStatus)
   );
 
@@ -638,44 +786,104 @@ export default function Orders() {
   };
 
   // Handle bulk status update
-  const handleBulkUpdate = () => {
-    if (selectedOrderIds.length > 0) {
-      bulkUpdateOrderStatus(selectedOrderIds, bulkStatus);
-      setSelectedOrderIds([]);
+  const handleBulkUpdate = async () => {
+    if (selectedOrderIds.length === 0) return;
+    let succeeded = 0;
+    for (const id of selectedOrderIds) {
+      try {
+        await api.patch(`/admin/orders/${id}/status`, { status: bulkStatus });
+        succeeded++;
+      } catch (e: any) {
+        console.error(`Bulk update failed for ${id}:`, e);
+        alert((e instanceof ApiError ? e.message : 'Failed to update order ' + id));
+      }
     }
+    setSelectedOrderIds([]);
+    if (succeeded > 0) await refreshOrders();
   };
 
   // Handle adding internal note
-  const handleAddInternalNote = () => {
-    if (selectedOrder && newInternalNote.trim()) {
-      addInternalNote(selectedOrder.id, newInternalNote, "1", "Admin");
+  const handleAddInternalNote = async () => {
+    if (!selectedOrder || !newInternalNote.trim()) return;
+    try {
+      await api.post(`/admin/orders/${selectedOrder.id}/notes`, { text: newInternalNote.trim() });
+      const refreshed = await refreshOne(selectedOrder.id);
+      if (refreshed) setSelectedOrder(refreshed);
       setNewInternalNote("");
-      // Refresh selected order
-      const updatedOrder = orders.find(o => o.id === selectedOrder.id);
-      if (updatedOrder) {
-        setSelectedOrder(updatedOrder as unknown as Order);
-      }
+    } catch (e: any) {
+      console.error('Failed to add note:', e);
+      alert(e instanceof ApiError ? e.message : 'Could not add note.');
     }
   };
 
   // Handle updating tracking info
-  const handleUpdateTracking = () => {
-    if (selectedOrder) {
-      updateTrackingInfo(selectedOrder.id, trackingNumber, courierPartner);
-      // Refresh selected order
-      const updatedOrder = orders.find(o => o.id === selectedOrder.id);
-      if (updatedOrder) {
-        setSelectedOrder(updatedOrder as unknown as Order);
+  const handleUpdateTracking = async () => {
+    if (!selectedOrder) return;
+    try {
+      const payload: any = {
+        trackingNumber: trackingNumber || null,
+        courierPartner: courierPartner || null,
+      };
+      if (selectedOrder.status === 'AWAITING_PAYMENT') {
+        payload.status = 'CONFIRMED';
       }
+      const res: any = await api.patch(`/admin/orders/${selectedOrder.id}/status`, payload);
+      const refreshed = res?.success ? adaptOrder(res.data) : await refreshOne(selectedOrder.id) || selectedOrder;
+      setSelectedOrder(refreshed);
+      await refreshOrders();
+    } catch (e: any) {
+      console.error('Failed to update tracking:', e);
+      alert(e instanceof ApiError ? e.message : 'Could not update tracking info.');
     }
   };
 
   // Handle refund
-  const handleRefund = (order: Order) => {
-    const amount = refundAmount ? parseFloat(refundAmount) : undefined;
-    refundOrder(order.id, refundReason, amount);
-    setRefundReason("");
-    setRefundAmount("");
+  const handleRefund = async (order: Order) => {
+    try {
+      const amount = refundAmount ? parseFloat(refundAmount) : undefined;
+      const payload: any = { status: 'REFUNDED', refundReason: refundReason || 'Admin-initiated refund' };
+      if (amount !== undefined && !isNaN(amount)) payload.refundAmount = amount;
+      await api.patch(`/admin/orders/${order.id}/status`, payload);
+      setRefundReason("");
+      setRefundAmount("");
+      const refreshed = await refreshOne(order.id);
+      if (refreshed && selectedOrder?.id === order.id) setSelectedOrder(refreshed);
+      await refreshOrders();
+    } catch (e: any) {
+      console.error('Failed to refund order:', e);
+      alert(e instanceof ApiError ? e.message : 'Could not process refund.');
+    }
+  };
+
+  // Handle order status change (state-machine validated server-side)
+  const handleStatusChange = async (order: Order, nextStatus: string) => {
+    if (nextStatus === order.status) return;
+    try {
+      const res: any = await api.patch(`/admin/orders/${order.id}/status`, { status: nextStatus });
+      const refreshed = res?.success ? adaptOrder(res.data) : await refreshOne(order.id) || order;
+      setOrders((prev) => prev.map((o) => (o.id === order.id ? refreshed : o)));
+      if (selectedOrder?.id === order.id) setSelectedOrder(refreshed);
+    } catch (e: any) {
+      console.error('Failed to update order status:', e);
+      alert(e instanceof ApiError ? e.message : 'Could not update order status.');
+    }
+  };
+
+  // Handle payment verification / rejection (real admin payment actions)
+  const handlePaymentDecision = async (order: Order, decision: 'PAID' | 'FAILED') => {
+    try {
+      const payload: any = { decision };
+      if (paymentReference.trim()) payload.transactionReference = paymentReference.trim();
+      const res: any = await api.patch(`/admin/orders/${order.id}/payment`, payload);
+      const refreshed = res?.success ? adaptOrder(res.data) : await refreshOne(order.id) || order;
+      setOrders((prev) => prev.map((o) => (o.id === order.id ? refreshed : o)));
+      if (selectedOrder?.id === order.id) setSelectedOrder(refreshed);
+      setPaymentReference("");
+      await refreshOrders();
+    } catch (e: any) {
+      console.error('Failed to update payment:', e);
+      alert(e instanceof ApiError ? e.message : 'Could not update payment.');
+    }
   };
 
   // ── Print ──────────────────────────────────────────────────────────────────
@@ -773,6 +981,37 @@ export default function Orders() {
         </Button>
       </div>
 
+      {(loading || loadError) && (
+        <div className={`rounded-2xl p-4 flex items-start gap-3 border ${
+          loadError
+            ? 'bg-red-50 border-red-200'
+            : 'bg-[#2d5a3d]/5 border-[#2d5a3d]/15'
+        }`}>
+          {loadError ? (
+            <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+          ) : (
+            <div className="w-5 h-5 rounded-full border-2 border-[#2d5a3d]/30 border-t-[#2d5a3d] animate-spin shrink-0 mt-0.5" />
+          )}
+          <div className="flex-1 min-w-0">
+            <p className={`text-sm font-medium ${loadError ? 'text-red-800' : 'text-[#1c1917]'}`}>
+              {loading && !loadError ? 'Loading orders…' : 'Could not load orders'}
+            </p>
+            {loadError && <p className="text-sm text-red-700 mt-1 break-words">{loadError}</p>}
+          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={async () => {
+              setLoadError(null);
+              await refreshOrders(true);
+            }}
+          >
+            <RefreshCw className="h-4 w-4 mr-1.5" />
+            Retry
+          </Button>
+        </div>
+      )}
+
       {/* Search + filter */}
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#2d5a3d]/5 flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
@@ -790,7 +1029,7 @@ export default function Orders() {
             <SelectValue placeholder={t("dashboard.orders.allStatuses")} />
           </SelectTrigger>
           <SelectContent>
-            {ALL_STATUSES.map((s) => (
+            {FILTER_STATUSES.map((s) => (
               <SelectItem key={s} value={s}>{s}</SelectItem>
             ))}
           </SelectContent>
@@ -809,7 +1048,7 @@ export default function Orders() {
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
-                {ALL_STATUSES.slice(1).map((s) => (
+                {CHANGEABLE_STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>{s}</SelectItem>
                 ))}
               </SelectContent>
@@ -918,7 +1157,7 @@ export default function Orders() {
                           <Eye className="h-4 w-4" />
                         </Button>
 
-                        {order.status !== "Refunded" && order.status !== "Cancelled" && (
+                        {order.status === "DELIVERED" && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="destructive" size="sm">
@@ -1065,37 +1304,66 @@ export default function Orders() {
                     </Label>
                     <Select
                       value={selectedOrder.status}
-                      onValueChange={(value) => {
-                        updateOrder(selectedOrder.id, { status: value as OrderStatus });
-                        setSelectedOrder({ ...selectedOrder, status: value as OrderStatus });
-                      }}
+                      onValueChange={(value) => handleStatusChange(selectedOrder, value)}
                     >
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {ALL_STATUSES.slice(1).map((s) => (
+                        {(ORDER_TRANSITIONS[selectedOrder.status] || []).map((s) => (
                           <SelectItem key={s} value={s}>{s}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {(ORDER_TRANSITIONS[selectedOrder.status] || []).length === 0 && (
+                      <p className="text-xs text-[#78746e] mt-1.5">
+                        No further status changes allowed from {selectedOrder.status}.
+                      </p>
+                    )}
                   </div>
                   <div>
                     <Label className="text-xs font-semibold text-[#78746e] uppercase tracking-wide mb-1.5 block">
                       {t("dashboard.orders.updatePaymentStatus")}
                     </Label>
-                    <Select
-                      value={selectedOrder.paymentStatus}
-                      onValueChange={(value) => {
-                        updateOrder(selectedOrder.id, { paymentStatus: value as PaymentStatus });
-                        setSelectedOrder({ ...selectedOrder, paymentStatus: value as PaymentStatus });
-                      }}
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {PAYMENT_STATUSES.map((s) => (
-                          <SelectItem key={s} value={s}>{s}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {selectedOrder.payment?.status === 'PENDING' ? (
+                      <div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                            onClick={() => handlePaymentDecision(selectedOrder, 'PAID')}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1.5" />
+                            Verify Payment
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="flex-1"
+                            onClick={() => handlePaymentDecision(selectedOrder, 'FAILED')}
+                          >
+                            <XCircle className="h-4 w-4 mr-1.5" />
+                            Reject Payment
+                          </Button>
+                        </div>
+                        <Input
+                          type="text"
+                          placeholder="Transaction reference (optional)"
+                          value={paymentReference}
+                          onChange={(e) => setPaymentReference(e.target.value)}
+                          className="mt-2 text-sm"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Badge className={PAYMENT_PILL[selectedOrder.paymentStatus] ?? "bg-gray-100 text-gray-700"}>
+                          {selectedOrder.payment?.status || selectedOrder.paymentStatus}
+                        </Badge>
+                        {selectedOrder.payment?.status === 'FAILED' && (
+                          <span className="text-xs text-[#78746e]">
+                            Order was cancelled and stock restored.
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

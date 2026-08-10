@@ -1,42 +1,27 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
 import { useTranslation } from "@/hooks/useTranslation";
-import { ArrowRight, Check, Lock, User } from "lucide-react";
+import { ArrowRight, Check, Lock, User, AlertTriangle, RefreshCw, ShoppingBag, QrCode } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useStore } from "@/context/StoreContext";
 import { useAuth } from "@/context/AuthContext";
-import { api } from "@/lib/api-client";
+import { api, ApiError } from "@/lib/api-client";
 import Link from "next/link";
 
-const STEPS = [
-  { num: 1, label: "Shipping" },
-  { num: 2, label: "Payment" },
-  { num: 3, label: "Confirmation" },
-];
+type SettingsType = {
+  taxRate: number;
+  shippingFlatRate: number;
+  currency: string;
+  qrImageUrl?: string | null;
+};
 
-const PAYMENT_METHODS = [
-  {
-    key: "esewa",
-    label: "eSewa",
-    description: "Pay securely with eSewa",
-    icon: "💳",
-  },
-  {
-    key: "khalti",
-    label: "Khalti",
-    description: "Pay with Khalti digital wallet",
-    icon: "💜",
-  },
-  {
-    key: "card",
-    label: "Credit / Debit Card",
-    description: "Visa, Mastercard, and local cards",
-    icon: "💳",
-  },
+const STEPS = [
+  { num: 1, label: "Delivery" },
+  { num: 2, label: "Review & Place" },
 ];
 
 function Field({
@@ -81,23 +66,35 @@ function Field({
   );
 }
 
+function generateIdempotencyKey(): string {
+  const rand = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  return `chk-${rand}`
+}
+
 export default function Checkout() {
   const { t } = useTranslation();
   const router = useRouter();
   const { cart, cartTotal, clearCart } = useCart();
-  const { addOrder, settings } = useStore();
+  const { addOrder, settings: fallbackSettings } = useStore();
   const { isLoggedIn, userType, currentUser } = useAuth();
   const [step, setStep] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState("esewa");
   const [saveAddress, setSaveAddress] = useState(false);
-  const [cardData, setCardData] = useState({
-    number: "",
-    expiry: "",
-    cvv: "",
-  });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const idempotencyKeyRef = useRef<string | null>(null);
+  const [liveSettings, setLiveSettings] = useState<SettingsType | null>(null);
 
-  // Prefill from customer profile if logged in
+  const taxRate = liveSettings?.taxRate ?? fallbackSettings.taxRate ?? 18;
+  const shippingFlatRate = liveSettings?.shippingFlatRate ?? fallbackSettings.shippingFlatRate ?? 0;
+  const currency = liveSettings?.currency ?? fallbackSettings.currency ?? "Rs.";
+
+  const subtotal = cartTotal;
+  const taxAmount = Math.round(subtotal * (taxRate / 100));
+  const grandTotal = subtotal + taxAmount + shippingFlatRate;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -108,6 +105,20 @@ export default function Checkout() {
     postal: "",
     country: "np"
   });
+
+  const fullAddress = [formData.address, formData.city, formData.province, formData.postal, formData.country.toUpperCase()]
+    .filter(part => part.trim()).join(", ");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res: any = await api.get('/settings');
+        if (res?.success && res.data) {
+          setLiveSettings(res.data);
+        }
+      } catch (_) { /* noop - fall back to store defaults */ }
+    })();
+  }, []);
 
   useEffect(() => {
     if (isLoggedIn && userType === 'customer' && currentUser) {
@@ -122,7 +133,6 @@ export default function Checkout() {
     }
   }, [isLoggedIn, userType, currentUser]);
 
-  // If not logged in as customer, show login prompt
   if (!isLoggedIn || userType !== 'customer') {
     return (
       <div className="min-h-screen bg-[#f9f7f4]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -167,99 +177,43 @@ export default function Checkout() {
     return postalRegex.test(postal);
   };
 
-  const validateCardNumber = (number: string) => {
-    const cleanNumber = number.replace(/\s/g, "");
-    return cleanNumber.length >= 13 && cleanNumber.length <= 19;
-  };
-
-  const validateExpiry = (expiry: string) => {
-    const expiryRegex = /^(0[1-9]|1[0-2])\s*\/\s*\d{2}$/;
-    if (!expiryRegex.test(expiry)) return false;
-    
-    const [month, year] = expiry.split("/").map(s => parseInt(s.trim(), 10));
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1;
-    const currentYear = currentDate.getFullYear() % 100;
-    
-    if (year < currentYear) return false;
-    if (year === currentYear && month < currentMonth) return false;
-    
-    return true;
-  };
-
-  const validateCVV = (cvv: string) => {
-    const cvvRegex = /^[0-9]{3,4}$/;
-    return cvvRegex.test(cvv);
-  };
-
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = "Full name is required";
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = "Email address is required";
     } else if (!validateEmail(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
-    
+
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
     } else if (!validatePhone(formData.phone)) {
       newErrors.phone = "Please enter a valid phone number";
     }
-    
+
     if (!formData.address.trim()) {
       newErrors.address = "Address is required";
     }
-    
+
     if (!formData.city.trim()) {
       newErrors.city = "City is required";
     }
-    
+
     if (!formData.province.trim()) {
       newErrors.province = "Province is required";
     }
-    
-    if (!formData.postal.trim()) {
-      newErrors.postal = "Postal code is required";
-    } else if (!validatePostal(formData.postal)) {
+
+    if (formData.postal.trim() && !validatePostal(formData.postal)) {
       newErrors.postal = "Please enter a valid postal code";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const validateStep2 = () => {
-    if (paymentMethod === "card") {
-      const newErrors: Record<string, string> = {};
-      
-      if (!cardData.number.trim()) {
-        newErrors.cardNumber = "Card number is required";
-      } else if (!validateCardNumber(cardData.number)) {
-        newErrors.cardNumber = "Please enter a valid card number";
-      }
-      
-      if (!cardData.expiry.trim()) {
-        newErrors.expiry = "Expiry date is required";
-      } else if (!validateExpiry(cardData.expiry)) {
-        newErrors.expiry = "Please enter a valid expiry date (MM / YY)";
-      }
-      
-      if (!cardData.cvv.trim()) {
-        newErrors.cvv = "CVV is required";
-      } else if (!validateCVV(cardData.cvv)) {
-        newErrors.cvv = "Please enter a valid CVV";
-      }
-      
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
-    }
-    
-    return true;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -276,74 +230,29 @@ export default function Checkout() {
     }
   };
 
-  const handleCardInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCardData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-    if (errors[e.target.name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[e.target.name];
-        return newErrors;
-      });
-    }
-  };
-
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-    const matches = v.match(/\d{4,16}/g);
-    const match = (matches && matches[0]) || "";
-    const parts = [];
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-    if (parts.length) {
-      return parts.join(" ");
-    } else {
-      return value;
-    }
-  };
-
-  const formatExpiry = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-    if (v.length >= 2) {
-      return `${v.substring(0, 2)} / ${v.substring(2, 4)}`;
-    }
-    return v;
-  };
-
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCardNumber(e.target.value);
-    handleCardInputChange({ ...e, target: { ...e.target, name: "number", value: formatted } });
-  };
-
-  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatExpiry(e.target.value);
-    handleCardInputChange({ ...e, target: { ...e.target, name: "expiry", value: formatted } });
-  };
-
-  const handleCVVChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-    handleCardInputChange({ ...e, target: { ...e.target, name: "cvv", value: v } });
-  };
-
   async function handlePlaceOrder() {
-    if (!validateStep2()) {
+    setSubmitError(null);
+
+    if (cart.length === 0) {
+      setSubmitError("Your cart is empty. Please add items before placing an order.");
       return;
     }
 
-    // Validate all cart items have valid productId
     const invalidItems = cart.filter(item => !item.productId || isNaN(item.productId));
     if (invalidItems.length > 0) {
-      alert("One or more items in your cart are invalid. Please remove them and try again.");
+      setSubmitError("One or more items in your cart are invalid. Please remove them and try again.");
       return;
     }
-    
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    if (!idempotencyKeyRef.current) {
+      idempotencyKeyRef.current = generateIdempotencyKey();
+    }
+
     try {
-      const tax = cartTotal * (settings.taxRate / 100);
       const orderData = {
-        customerId: (currentUser as any)?.id,
         customerName: formData.name,
         customerEmail: formData.email,
         customerPhone: formData.phone,
@@ -351,28 +260,62 @@ export default function Checkout() {
           productId: item.productId,
           variantId: item.variantId,
           productName: item.name,
-          price: item.price,
-          quantity: item.quantity
+          quantity: item.quantity,
+          weight: item.weight,
         })),
-        total: cartTotal,
-        tax: tax,
-        grandTotal: cartTotal + tax,
-        status: "Pending",
-        paymentStatus: paymentMethod === "card" ? "Paid" : "Unpaid",
-        shippingAddress: `${formData.address}, ${formData.city}, ${formData.province}, ${formData.postal}, ${formData.country}`
+        shippingAddress: fullAddress,
+        idempotencyKey: idempotencyKeyRef.current,
       };
-      
-      await api.post('/orders', orderData);
+
+      const response: any = await api.post('/orders', orderData);
+      const createdOrder = response?.data || response;
+      if (addOrder && createdOrder) {
+        try { addOrder(createdOrder) } catch (_) { /* noop */ }
+      }
       clearCart();
-      router.push("/order-confirmed");
-    } catch (error) {
+      idempotencyKeyRef.current = null;
+
+      const orderRef = encodeURIComponent(createdOrder?.id || createdOrder?.orderNumber || '');
+      router.push(`/order-confirmed?ref=${orderRef}`);
+    } catch (error: any) {
       console.error("Error placing order:", error);
-      alert("Failed to place order. Please try again.");
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 400:
+            setSubmitError(error.message || "Invalid order details. Please review and try again.");
+            break;
+          case 401:
+            setSubmitError("Your session has expired. Please sign in again.");
+            break;
+          case 403:
+            setSubmitError("You are not authorized to place this order.");
+            break;
+          case 409:
+            setSubmitError(error.message || "Stock or conflict error. Please review your cart and try again.");
+            break;
+          case 404:
+            setSubmitError("A product or customer record was not found.");
+            break;
+          default:
+            setSubmitError(
+              error.message ||
+              `We couldn't place your order (server error). Please try again in a moment.`
+            );
+        }
+      } else {
+        setSubmitError(
+          "A network error occurred. Please check your connection and try again."
+        );
+      }
+      idempotencyKeyRef.current = null;
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
-  const handleContinueToPayment = () => {
+  const handleContinueToReview = () => {
     if (validateStep1()) {
+      setSubmitError(null);
       setStep(2);
     }
   };
@@ -385,7 +328,6 @@ export default function Checkout() {
       <Navigation />
       <main className="pt-[180px] pb-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          {/* ── Page Header ── */}
           <div className="mb-10">
             <p className="text-xs uppercase tracking-widest text-[#c8a96e] font-semibold mb-3">
               Purchase
@@ -398,7 +340,6 @@ export default function Checkout() {
             </h1>
           </div>
 
-          {/* ── Step Progress Indicator ── */}
           <div className="flex items-center justify-center mb-12">
             <div className="flex items-center gap-0">
               {STEPS.map((s, i) => (
@@ -437,17 +378,37 @@ export default function Checkout() {
             </div>
           </div>
 
+          {submitError && (
+            <div className="max-w-7xl mx-auto mb-8">
+              <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl p-4">
+                <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-red-800">
+                    Could not place your order
+                  </p>
+                  <p className="text-sm text-red-700 mt-1 break-words">
+                    {submitError}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSubmitError(null)}
+                  className="text-red-500 hover:text-red-700 text-xs font-medium"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="grid lg:grid-cols-3 gap-10">
-            {/* ── Form Panel ── */}
             <div className="lg:col-span-2 bg-white p-8 rounded-2xl border border-[rgba(28,25,23,0.06)]">
-              {/* STEP 1 — Shipping */}
               {step === 1 && (
                 <div>
                   <h2
                     className="text-xl font-semibold text-[#1c1917] mb-7"
                     style={{ fontFamily: "'Playfair Display', serif" }}
                   >
-                    Shipping Information
+                    Delivery Information
                   </h2>
                   <div className="space-y-4">
                     <Field
@@ -487,10 +448,10 @@ export default function Checkout() {
                       error={errors.address}
                     />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Field 
-                        label="City" 
-                        name="city" 
-                        placeholder="Kathmandu" 
+                      <Field
+                        label="City"
+                        name="city"
+                        placeholder="Kathmandu"
                         value={formData.city}
                         onChange={handleInputChange}
                         error={errors.city}
@@ -508,12 +469,12 @@ export default function Checkout() {
                       <Field
                         label="Postal Code"
                         name="postal"
-                        placeholder="44600"
+                        placeholder="44600 (optional)"
                         value={formData.postal}
                         onChange={handleInputChange}
                         error={errors.postal}
+                        required={false}
                       />
-                      {/* Country as select dropdown */}
                       <div>
                         <label className="block text-sm font-medium text-[#1c1917] mb-1.5">
                           Country<span className="text-red-500 ml-1">*</span>
@@ -534,7 +495,6 @@ export default function Checkout() {
                       </div>
                     </div>
 
-                    {/* Save this address */}
                     <label className="flex items-center gap-3 cursor-pointer group">
                       <div className="relative">
                         <input
@@ -562,16 +522,15 @@ export default function Checkout() {
                   </div>
 
                   <button
-                    onClick={handleContinueToPayment}
+                    onClick={handleContinueToReview}
                     className="w-full mt-8 py-4 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] transition-colors flex items-center justify-center gap-2"
                   >
-                    Continue to Payment
+                    Review Order
                     <ArrowRight className="h-5 w-5" />
                   </button>
                 </div>
               )}
 
-              {/* STEP 2 — Payment */}
               {step === 2 && (
                 <div>
                   <div className="flex items-center gap-3 mb-7">
@@ -585,130 +544,96 @@ export default function Checkout() {
                       className="text-xl font-semibold text-[#1c1917]"
                       style={{ fontFamily: "'Playfair Display', serif" }}
                     >
-                      Payment Method
+                      Review &amp; Place Order
                     </h2>
                   </div>
 
-                  {/* Payment option cards */}
-                  <div className="space-y-3 mb-6">
-                    {PAYMENT_METHODS.map((method) => (
-                      <button
-                        key={method.key}
-                        onClick={() => setPaymentMethod(method.key)}
-                        className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
-                          paymentMethod === method.key
-                            ? "border-[#2d5a3d] bg-[#2d5a3d]/5"
-                            : "border-[rgba(28,25,23,0.1)] hover:border-[#2d5a3d]/40 bg-white"
-                        }`}
-                      >
-                        <div className="w-12 h-12 rounded-xl bg-[#f9f7f4] flex items-center justify-center text-2xl shrink-0">
-                          {method.icon}
-                        </div>
-                        <div className="flex-1 text-left">
-                          <p className="font-semibold text-[#1c1917]">
-                            {method.label}
-                          </p>
-                          <p className="text-sm text-[#78746e]">
-                            {method.description}
-                          </p>
-                        </div>
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                            paymentMethod === method.key
-                              ? "border-[#2d5a3d] bg-[#2d5a3d]"
-                              : "border-[rgba(28,25,23,0.2)]"
-                          }`}
-                        >
-                          {paymentMethod === method.key && (
-                            <div className="w-2 h-2 rounded-full bg-white" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
+                  <div className="mb-6 rounded-2xl border border-[rgba(28,25,23,0.08)] overflow-hidden">
+                    <div className="p-5 bg-[#f9f7f4] border-b border-[rgba(28,25,23,0.06)] flex items-center gap-3">
+                      <User className="h-4 w-4 text-[#2d5a3d]" />
+                      <h3 className="font-semibold text-[#1c1917] text-sm">
+                        Delivery Details
+                      </h3>
+                    </div>
+                    <div className="p-5 text-sm text-[#1c1917] space-y-1.5">
+                      <p><span className="text-[#78746e] w-28 inline-block">Name:</span> {formData.name}</p>
+                      <p><span className="text-[#78746e] w-28 inline-block">Email:</span> {formData.email}</p>
+                      <p><span className="text-[#78746e] w-28 inline-block">Phone:</span> {formData.phone}</p>
+                      <p className="leading-relaxed">
+                        <span className="text-[#78746e] w-28 inline-block align-top">Address:</span>
+                        {fullAddress}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Card fields — shown only when card is selected */}
-                  {paymentMethod === "card" && (
-                    <div className="bg-[#f9f7f4] rounded-xl p-5 space-y-4 mb-6 border border-[rgba(28,25,23,0.08)]">
-                      <div>
-                        <label className="block text-sm font-medium text-[#1c1917] mb-1.5">
-                          Card Number<span className="text-red-500 ml-1">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="cardNumber"
-                          placeholder="1234 5678 9012 3456"
-                          maxLength={19}
-                          value={cardData.number}
-                          onChange={handleCardNumberChange}
-                          className={`w-full px-4 py-3 rounded-xl border bg-white text-sm focus:outline-none transition-colors ${
-                            errors.cardNumber
-                              ? "border-red-500 focus:border-red-500"
-                              : "border-[rgba(28,25,23,0.12)] focus:border-[#2d5a3d]"
-                          }`}
-                        />
-                        {errors.cardNumber && <p className="text-xs text-red-500 mt-1">{errors.cardNumber}</p>}
+                  <div className="mb-6 rounded-2xl border border-[rgba(28,25,23,0.08)] overflow-hidden">
+                    <div className="p-5 bg-[#f9f7f4] border-b border-[rgba(28,25,23,0.06)] flex items-center gap-3">
+                      <ShoppingBag className="h-4 w-4 text-[#2d5a3d]" />
+                      <h3 className="font-semibold text-[#1c1917] text-sm">
+                        Items ({cart.length})
+                      </h3>
+                    </div>
+                    <div className="p-5 space-y-3">
+                      {cart.map((item) => (
+                        <div key={item.id + item.weight} className="flex items-center gap-3 text-sm">
+                          <p className="flex-1 text-[#1c1917] truncate">
+                            <span className="font-medium">{item.name}</span>
+                            <span className="text-[#78746e] ml-2">{item.weight} × {item.quantity}</span>
+                          </p>
+                          <span className="font-semibold text-[#1c1917] shrink-0">
+                            {currency}&nbsp;{(item.price * item.quantity).toLocaleString()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div
+                    className="mb-6 p-5 rounded-2xl border border-[#c8a96e]/30 bg-gradient-to-br from-[#fff9ee] to-[#fffdf6]"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#c8a96e]/15 flex items-center justify-center shrink-0">
+                        <QrCode className="h-5 w-5 text-[#8a6a2f]" />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-[#1c1917] mb-1.5">
-                            Expiry Date<span className="text-red-500 ml-1">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="expiry"
-                            placeholder="MM / YY"
-                            maxLength={7}
-                            value={cardData.expiry}
-                            onChange={handleExpiryChange}
-                            className={`w-full px-4 py-3 rounded-xl border bg-white text-sm focus:outline-none transition-colors ${
-                              errors.expiry
-                                ? "border-red-500 focus:border-red-500"
-                                : "border-[rgba(28,25,23,0.12)] focus:border-[#2d5a3d]"
-                            }`}
-                          />
-                          {errors.expiry && <p className="text-xs text-red-500 mt-1">{errors.expiry}</p>}
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-[#1c1917] mb-1.5">
-                            CVV<span className="text-red-500 ml-1">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="cvv"
-                            placeholder="123"
-                            maxLength={4}
-                            value={cardData.cvv}
-                            onChange={handleCVVChange}
-                            className={`w-full px-4 py-3 rounded-xl border bg-white text-sm focus:outline-none transition-colors ${
-                              errors.cvv
-                                ? "border-red-500 focus:border-red-500"
-                                : "border-[rgba(28,25,23,0.12)] focus:border-[#2d5a3d]"
-                            }`}
-                          />
-                          {errors.cvv && <p className="text-xs text-red-500 mt-1">{errors.cvv}</p>}
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-[#1c1917] text-sm mb-1">
+                          Payment by Bank / Wallet QR Transfer
+                        </p>
+                        <p className="text-xs text-[#6f5e3d] leading-relaxed">
+                          After placing this order you will receive a confirmation screen with QR code and your
+                          unique order number. Scan the QR with any bank app or digital wallet, make the transfer,
+                          and mention your order number in the payment remark. Admin will verify and confirm shortly.
+                        </p>
                       </div>
                     </div>
-                  )}
+                  </div>
 
                   <button
                     onClick={handlePlaceOrder}
-                    className="w-full py-4 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] transition-colors flex items-center justify-center gap-2"
+                    disabled={isSubmitting || cart.length === 0}
+                    className="w-full py-4 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                   >
-                    Place Order — Rs.&nbsp;{cartTotal.toLocaleString()}
-                    <ArrowRight className="h-5 w-5" />
+                    {isSubmitting ? (
+                      <>
+                        <RefreshCw className="h-5 w-5 animate-spin" />
+                        Placing Order…
+                      </>
+                    ) : (
+                      <>
+                        Place Order — {currency}&nbsp;{grandTotal.toLocaleString()}
+                        <ArrowRight className="h-5 w-5" />
+                      </>
+                    )}
                   </button>
 
                   <p className="text-xs text-center text-[#78746e] mt-4 flex items-center justify-center gap-1">
                     <span>🔒</span>
-                    Your payment information is encrypted and secure.
+                    Pricing, tax, and totals are verified server-side before order creation.
                   </p>
                 </div>
               )}
             </div>
 
-            {/* ── Order Summary (sticky) ── */}
             <div className="lg:col-span-1">
               <div className="bg-white p-7 rounded-2xl border border-[rgba(28,25,23,0.06)] sticky top-32">
                 <h3
@@ -750,7 +675,7 @@ export default function Checkout() {
                             </p>
                           </div>
                           <span className="text-sm font-semibold text-[#1c1917] shrink-0">
-                            Rs.&nbsp;
+                            {currency}&nbsp;
                             {(item.price * item.quantity).toLocaleString()}
                           </span>
                         </div>
@@ -762,12 +687,16 @@ export default function Checkout() {
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between text-sm text-[#78746e]">
                         <span>Subtotal</span>
-                        <span>Rs.&nbsp;{cartTotal.toLocaleString()}</span>
+                        <span>{currency}&nbsp;{subtotal.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-[#78746e]">
+                        <span>Tax ({taxRate}%)</span>
+                        <span>{currency}&nbsp;{taxAmount.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-sm text-[#78746e]">
                         <span>Shipping</span>
-                        <span className="text-[#2d5a3d] font-semibold">
-                          Free
+                        <span className={shippingFlatRate > 0 ? "text-[#1c1917] font-semibold" : "text-[#2d5a3d] font-semibold"}>
+                          {shippingFlatRate > 0 ? `{currency} ${shippingFlatRate.toLocaleString()}` : "Free"}
                         </span>
                       </div>
                     </div>
@@ -776,7 +705,7 @@ export default function Checkout() {
 
                     <div className="flex justify-between text-lg font-bold text-[#1c1917]">
                       <span>Total</span>
-                      <span>Rs.&nbsp;{cartTotal.toLocaleString()}</span>
+                      <span>{currency}&nbsp;{grandTotal.toLocaleString()}</span>
                     </div>
                   </>
                 )}
