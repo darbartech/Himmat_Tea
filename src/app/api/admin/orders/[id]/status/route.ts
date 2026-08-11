@@ -27,14 +27,28 @@ const statusUpdateSchema = z.object({
   refundAmount: z.number().min(0).optional().nullable(),
 }).strict()
 
+async function resolveOrderByIdentifier(idOrOrderNumber: string) {
+  let order = await prisma.order.findUnique({ where: { id: idOrOrderNumber } })
+  if (!order) {
+    order = await prisma.order.findUnique({ where: { orderNumber: idOrOrderNumber } })
+  }
+  return order
+}
+
 export async function PATCH(request: NextRequest, { params }: Params) {
   try {
-    const { id: orderId } = await params
+    const { id } = await params
     const adminUser = await getCurrentAdmin()
 
     if (!adminUser) {
       return createErrorResponse('Unauthorized - admin only', 401)
     }
+
+    const resolved = await resolveOrderByIdentifier(id)
+    if (!resolved) {
+      return createErrorResponse('Order not found', 404)
+    }
+    const orderId = resolved.id
 
     const body = await request.json()
     const parsed = statusUpdateSchema.safeParse(body)

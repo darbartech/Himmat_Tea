@@ -4,20 +4,17 @@ import Link from "next/link";
 import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
 import { ArrowRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function NotFound() {
-  const [bubbles, setBubbles] = useState<{ id: number; size: number; left: number; delay: number }[]>([]);
-
-  useEffect(() => {
-    const newBubbles = Array.from({ length: 12 }, (_, i) => ({
+  const [bubbles] = useState<{ id: number; size: number; left: number; delay: number }[]>(() =>
+    Array.from({ length: 12 }, (_, i) => ({
       id: i,
       size: Math.random() * 20 + 10,
       left: Math.random() * 100,
       delay: Math.random() * 5,
-    }));
-    setBubbles(newBubbles);
-  }, []);
+    }))
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f9f7f4] via-[#f0f9f4] to-[#f9f7f4] relative overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -72,7 +69,7 @@ export default function NotFound() {
 
           {/* Description */}
           <p className="text-lg md:text-xl text-[#78746e] mb-10 max-w-lg mx-auto leading-relaxed">
-            It seems like this page got lost in the tea fields! No worries, let's get you back to the perfect cup of tea.
+            It seems like this page got lost in the tea fields! No worries, let&apos;s get you back to the perfect cup of tea.
           </p>
 
           {/* Buttons */}

@@ -71,7 +71,7 @@ export default function PrivacyPolicy() {
             <div className="lg:col-span-3 space-y-10">
               <div className="bg-white rounded-2xl border border-[rgba(28,25,23,0.06)] p-8 lg:p-10">
                 <p className="text-[#444] leading-relaxed">
-                  Godgifted ("we", "us", or "our") is committed to protecting
+                  Godgifted (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is committed to protecting
                   your personal information. This Privacy Policy explains what
                   data we collect when you visit our website or make a purchase,
                   how we use it, and what rights you have. By using our website,
@@ -391,7 +391,7 @@ export default function PrivacyPolicy() {
                 </div>
                 <p className="text-white/60 text-xs leading-relaxed mt-6">
                   We may update this Privacy Policy from time to time. When we
-                  do, we will revise the "Last updated" date at the top of this
+                  do, we will revise the &quot;Last updated&quot; date at the top of this
                   page. Continued use of our website after changes are posted
                   constitutes your acceptance of the updated policy.
                 </p>

@@ -161,7 +161,7 @@ export const VerifyResetForm: React.FC<VerifyResetFormProps> = ({
             <>Resend code in {resendIn}s</>
           ) : (
             <>
-              Didn't get it?{' '}
+              Didn&apos;t get it?{' '}
               <button
                 type="button"
                 onClick={handleResend}

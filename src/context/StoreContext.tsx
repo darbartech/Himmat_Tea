@@ -762,13 +762,14 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Initialize from localStorage on mount
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window === "undefined") return;
+    queueMicrotask(() => {
       // Product Lines
       const savedProductLines = localStorage.getItem("godgifted_product_lines");
       if (savedProductLines) {
         try {
           setProductLines(JSON.parse(savedProductLines));
-        } catch (e) {}
+        } catch {}
       }
 
       // Hero Visuals
@@ -776,22 +777,22 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedHeroVisuals) {
         try {
           setHeroVisuals(JSON.parse(savedHeroVisuals));
-        } catch (e) {}
+        } catch {}
       }
       
       // Products
       const savedProducts = localStorage.getItem("godgifted_products");
       if (savedProducts) {
         try {
-          const parsed = JSON.parse(savedProducts);
-          setProducts(parsed.map((product: any) => ({
+          const parsed = JSON.parse(savedProducts) as Product[];
+          setProducts(parsed.map((product: Product) => ({
             ...product,
             batches: product.batches || [],
             productVariants: product.productVariants || [],
             variantOptions: product.variantOptions || [],
             reviews: product.reviews || [],
           })));
-        } catch (e) {}
+        } catch {}
       }
 
       // Inventory Transactions
@@ -799,15 +800,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedInventory) {
         try {
           setInventoryTransactions(JSON.parse(savedInventory));
-        } catch (e) {}
+        } catch {}
       }
 
       // Orders
       const savedOrders = localStorage.getItem("godgifted_orders");
       if (savedOrders) {
         try {
-          const parsed = JSON.parse(savedOrders);
-          setOrders(parsed.map((order: any) => ({
+          const parsed = JSON.parse(savedOrders) as Order[];
+          setOrders(parsed.map((order: Order) => ({
             ...order,
             internalNotes: order.internalNotes || [],
             trackingNumber: order.trackingNumber || undefined,
@@ -815,21 +816,21 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             refundReason: order.refundReason || undefined,
             refundAmount: order.refundAmount || undefined,
           })));
-        } catch (e) {}
+        } catch {}
       }
 
       // Customers
       const savedCustomers = localStorage.getItem("godgifted_customers");
       if (savedCustomers) {
         try {
-          const parsed = JSON.parse(savedCustomers);
-          setCustomers(parsed.map((customer: any) => ({
+          const parsed = JSON.parse(savedCustomers) as Customer[];
+          setCustomers(parsed.map((customer: Customer) => ({
             ...customer,
             loyaltyPoints: customer.loyaltyPoints || 0,
             tier: customer.tier || "Bronze",
             createdAt: customer.createdAt || new Date().toISOString(),
           })));
-        } catch (e) {}
+        } catch {}
       }
 
       // Notifications
@@ -837,7 +838,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedNotifications) {
         try {
           setNotifications(JSON.parse(savedNotifications));
-        } catch (e) {}
+        } catch {}
       }
 
       // Blog Posts
@@ -845,7 +846,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedBlogPosts) {
         try {
           setBlogPosts(JSON.parse(savedBlogPosts));
-        } catch (e) {}
+        } catch {}
       }
 
       // Reviews
@@ -853,7 +854,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedReviews) {
         try {
           setReviews(JSON.parse(savedReviews));
-        } catch (e) {}
+        } catch {}
       }
 
       // Coupons
@@ -861,7 +862,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedCoupons) {
         try {
           setCoupons(JSON.parse(savedCoupons));
-        } catch (e) {}
+        } catch {}
       }
 
       // Collections
@@ -869,7 +870,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedCollections) {
         try {
           setCollections(JSON.parse(savedCollections));
-        } catch (e) {}
+        } catch {}
       }
 
       // Brewing Guides
@@ -877,7 +878,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedBrewingGuides) {
         try {
           setBrewingGuides(JSON.parse(savedBrewingGuides));
-        } catch (e) {}
+        } catch {}
       }
 
       // FAQs
@@ -885,7 +886,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedFaqs) {
         try {
           setFaqs(JSON.parse(savedFaqs));
-        } catch (e) {}
+        } catch {}
       }
 
       // About Page
@@ -893,7 +894,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedAboutPage) {
         try {
           setAboutPage(JSON.parse(savedAboutPage));
-        } catch (e) {}
+        } catch {}
       }
 
       // Settings
@@ -901,7 +902,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedSettings) {
         try {
           setSettings(JSON.parse(savedSettings));
-        } catch (e) {}
+        } catch {}
       }
 
       // Purchase Orders
@@ -909,7 +910,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (savedPurchaseOrders) {
         try {
           setPurchaseOrders(JSON.parse(savedPurchaseOrders));
-        } catch (e) {}
+        } catch {}
       }
 
       // Admin Users
@@ -921,11 +922,11 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           if (defaultAdmin && defaultAdmin.passwordHash === ADMIN_PASSWORD_HASH) {
             setAdminUsers(parsed);
           }
-        } catch (e) {}
+        } catch {}
       }
 
       setIsInitialized(true);
-    }
+    });
   }, []);
 
   const loyaltyProgram = loyaltyProgramConfig;
@@ -1043,9 +1044,13 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Calculate customer tier based on loyalty points
   const calculateCustomerTier = (points: number): "Bronze" | "Silver" | "Gold" | "Platinum" => {
+    const tierNames: readonly ("Bronze" | "Silver" | "Gold" | "Platinum")[] = ["Bronze", "Silver", "Gold", "Platinum"];
     for (let i = loyaltyProgram.tiers.length - 1; i >= 0; i--) {
       if (points >= loyaltyProgram.tiers[i].minPoints) {
-        return loyaltyProgram.tiers[i].name as any;
+        const name = loyaltyProgram.tiers[i].name;
+        if (tierNames.includes(name as (typeof tierNames)[number])) {
+          return name as (typeof tierNames)[number];
+        }
       }
     }
     return "Bronze";
@@ -1231,8 +1236,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       variantOptions: product.variantOptions || [],
       batches: product.batches || [],
       reviews: product.reviews || [],
-      reviewsEnabled: (product as any).reviewsEnabled !== false,
-      isBestseller: (product as any).isBestseller || false,
+      reviewsEnabled: (product as Partial<Product>).reviewsEnabled !== false,
+      isBestseller: (product as Partial<Product>).isBestseller || false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

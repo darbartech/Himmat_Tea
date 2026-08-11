@@ -260,7 +260,7 @@ function OrderInvoice({
                       INVOICE NO.
                     </td>
                     <td style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a1a", paddingBottom: "5px", textAlign: "right" }}>
-                      {order.id}
+                      {order.orderNumber || order.id}
                     </td>
                   </tr>
                   <tr>
@@ -351,7 +351,7 @@ function OrderInvoice({
           <table style={{ borderCollapse: "collapse", width: "100%" }}>
             <tbody>
               {[
-                ["Order ID", order.id],
+                ["Order No.", order.orderNumber || order.id],
                 ["Status", order.status],
                 ["Items", String(order.items.length)],
                 ["Order Date", fmtDate(invoiceDate)],
@@ -893,7 +893,7 @@ export default function Orders() {
     const win = window.open("", "_blank");
     if (!win) return;
     win.document.write(`<!DOCTYPE html><html><head>
-      <title>Invoice – ${selectedOrder.id}</title>
+      <title>Invoice – ${selectedOrder.orderNumber || selectedOrder.id}</title>
       <meta charset="UTF-8">
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -950,7 +950,7 @@ export default function Orders() {
       pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, imgWidth, imgHeight);
       
       console.log("Saving PDF...");
-      pdf.save(`invoice-${selectedOrder.id}.pdf`);
+      pdf.save(`invoice-${selectedOrder.orderNumber || selectedOrder.id}.pdf`);
       
       console.log("PDF saved successfully!");
     } catch (err) {
@@ -1116,7 +1116,7 @@ export default function Orders() {
                         )}
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-[#1c1917]">{order.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-[#1c1917] font-mono tracking-wide">{order.orderNumber || order.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <p className="text-[#1c1917]">{order.customerName}</p>
                       <p className="text-xs text-[#78746e]">{order.customerEmail}</p>
@@ -1168,7 +1168,7 @@ export default function Orders() {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>{t("dashboard.orders.refundOrder")}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  {t("dashboard.orders.refundConfirm", { orderId: order.id })}
+                                  {t("dashboard.orders.refundConfirm", { orderId: order.orderNumber || order.id })}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <div className="py-4 space-y-4">
@@ -1277,7 +1277,7 @@ export default function Orders() {
               <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-6 py-4 flex items-start justify-between gap-4">
                 <div>
                   <DialogTitle className="text-xl font-bold text-[#1c1917]">
-                    {t("dashboard.orders.orderDetailsTitle")} {selectedOrder.id}
+                    {t("dashboard.orders.orderDetailsTitle")} {selectedOrder.orderNumber || selectedOrder.id}
                   </DialogTitle>
                   <DialogDescription className="text-sm text-[#78746e] mt-0.5">
                     {t("dashboard.orders.orderDetailsDesc")}

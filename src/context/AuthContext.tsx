@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, startTransition, ReactNode } from "react";
 import { api } from "@/lib/api-client";
 
 interface AdminUser {
@@ -46,9 +46,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [userType, setUserType] = useState<"admin" | "customer" | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  interface AuthEnvelope { success?: boolean; user?: AdminUser | CustomerUser }
+
   const checkSession = async () => {
     try {
-      const response: any = await api.get('/auth/me');
+      const response = await api.get<AuthEnvelope>('/auth/me');
       if (response.success && response.user) {
         const user = response.user;
         setCurrentUser(user);
@@ -66,47 +68,49 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
-    checkSession();
+    startTransition(() => {
+      checkSession();
+    });
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      const response: any = await api.post('/auth/login', { username, password });
+      const response = await api.post<AuthEnvelope>('/auth/login', { username, password });
       if (response.success && response.user) {
         setCurrentUser(response.user);
         setIsLoggedIn(true);
         setUserType("admin");
         return true;
       }
-    } catch (error) {
+    } catch {
     }
     return false;
   };
 
   const customerLogin = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response: any = await api.post('/customer/login', { email, password });
+      const response = await api.post<AuthEnvelope>('/customer/login', { email, password });
       if (response.success && response.user) {
         setCurrentUser(response.user);
         setIsLoggedIn(true);
         setUserType("customer");
         return true;
       }
-    } catch (error) {
+    } catch {
     }
     return false;
   };
 
   const customerSignup = async (name: string, email: string, phone: string, password: string, address: string): Promise<boolean> => {
     try {
-      const response: any = await api.post('/customer/signup', { name, email, phone, password, address });
+      const response = await api.post<AuthEnvelope>('/customer/signup', { name, email, phone, password, address });
       if (response.success && response.user) {
         setCurrentUser(response.user);
         setIsLoggedIn(true);
         setUserType("customer");
         return true;
       }
-    } catch (error) {
+    } catch {
     }
     return false;
   };

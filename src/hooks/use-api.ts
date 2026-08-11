@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, startTransition, useCallback } from 'react'
 import { api } from '@/lib/api-client'
 
 export function useApi<T>(
@@ -9,7 +9,7 @@ export function useApi<T>(
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -20,13 +20,15 @@ export function useApi<T>(
     } finally {
       setLoading(false)
     }
-  }
+  }, [endpoint])
 
   useEffect(() => {
     if (autoFetch) {
-      fetchData()
+      startTransition(() => {
+        fetchData()
+      })
     }
-  }, [endpoint])
+  }, [autoFetch, fetchData])
 
   return {
     data,

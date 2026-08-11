@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer'
+import nodemailer, { Transporter, SendMailOptions } from 'nodemailer'
 import { BRAND } from '@/config/brand'
 
 interface SmtpConfig {
@@ -10,26 +10,187 @@ interface SmtpConfig {
   from: string
 }
 
+const IMAP_POP3_PORTS = new Set([110, 143, 993, 995])
+const VALID_SMTP_PORTS = new Set([25, 465, 587, 2525, 2526, 25025])
+
+type ErrorLike = { message?: unknown; code?: unknown }
+
+function readErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message
+  if (err && typeof err === 'object') {
+    const obj = err as ErrorLike
+    if (typeof obj.message === 'string') return obj.message
+  }
+  return String(err)
+}
+
 function getSmtpConfig(): SmtpConfig {
+  const port = Number(process.env.SMTP_PORT || 587)
+  const secure = process.env.SMTP_SECURE === 'true'
   return {
     host: process.env.SMTP_HOST || undefined,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: process.env.SMTP_SECURE === 'true',
+    port,
+    secure,
     user: process.env.SMTP_USER || undefined,
     pass: process.env.SMTP_PASS || undefined,
     from: process.env.SMTP_FROM || `${BRAND.companyName} <${BRAND.supportEmail}>`
   }
 }
 
+export function validateSmtpConfig(cfg: SmtpConfig): { ok: true } | { ok: false; reason: string; hint?: string } {
+  if (!cfg.host) return { ok: false, reason: 'SMTP_HOST is not set.' }
+  if (!cfg.user) return { ok: false, reason: 'SMTP_USER is not set.' }
+  if (!cfg.pass) return { ok: false, reason: 'SMTP_PASS is not set.' }
+  if (!Number.isFinite(cfg.port) || cfg.port <= 0 || cfg.port > 65535) {
+    return { ok: false, reason: `SMTP_PORT "${cfg.port}" is not a valid port number.` }
+  }
+  if (IMAP_POP3_PORTS.has(cfg.port)) {
+    return {
+      ok: false,
+      reason: `SMTP_PORT is set to ${cfg.port}, which is an IMAP/POP3 mail-reading port, not an SMTP mail-sending port.`,
+      hint: cfg.secure ? 'Use port 465 (SMTP/SSL) and keep SMTP_SECURE=true.' : 'Use port 587 (SMTP+STARTTLS) and set SMTP_SECURE=false.'
+    }
+  }
+  if (!VALID_SMTP_PORTS.has(cfg.port)) {
+    return {
+      ok: false,
+      reason: `SMTP_PORT ${cfg.port} is not a standard SMTP port.`,
+      hint: 'Standard SMTP ports are 465 (SSL), 587 (STARTTLS), or 25 (plain). If your host uses a non-standard port, verify with your email provider.'
+    }
+  }
+  if (cfg.secure && cfg.port === 587) {
+    return {
+      ok: false,
+      reason: 'SMTP_SECURE=true is incompatible with port 587.',
+      hint: 'Port 587 uses STARTTLS (not implicit SSL). Either set SMTP_SECURE=false for port 587, or switch to port 465 with SMTP_SECURE=true.'
+    }
+  }
+  if (!cfg.secure && cfg.port === 465) {
+    return {
+      ok: false,
+      reason: 'SMTP_SECURE=false is incompatible with port 465.',
+      hint: 'Port 465 requires implicit SSL (SMTPS). Set SMTP_SECURE=true for port 465, or use port 587 with SMTP_SECURE=false.'
+    }
+  }
+  return { ok: true }
+}
+
 export function isSmtpConfigured(): boolean {
   const cfg = getSmtpConfig()
-  return Boolean(cfg.host && cfg.user)
+  const v = validateSmtpConfig(cfg)
+  return v.ok
+}
+
+let cachedTransporter: { cfg: SmtpConfig; instance: Transporter } | null = null
+
+function getOrCreateTransporter(cfg: SmtpConfig): Transporter {
+  if (
+    cachedTransporter &&
+    cachedTransporter.cfg.host === cfg.host &&
+    cachedTransporter.cfg.port === cfg.port &&
+    cachedTransporter.cfg.secure === cfg.secure &&
+    cachedTransporter.cfg.user === cfg.user &&
+    cachedTransporter.cfg.pass === cfg.pass
+  ) {
+    return cachedTransporter.instance
+  }
+  const transporter = nodemailer.createTransport({
+    host: cfg.host,
+    port: cfg.port,
+    secure: cfg.secure,
+    auth: { user: cfg.user, pass: cfg.pass },
+    connectionTimeout: 15_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
+  })
+  cachedTransporter = { cfg, instance: transporter }
+  return transporter
+}
+
+function extractFromAddress(from: string): string {
+  const m = from.match(/<([^>]+)>/)
+  return m ? m[1].trim() : from.trim()
+}
+
+function extractDomain(email: string): string {
+  const at = email.indexOf('@')
+  return at >= 0 ? email.slice(at + 1).toLowerCase() : ''
 }
 
 /**
- * Sends a password reset code. When SMTP is not configured (e.g. local dev),
- * the code is logged to the server console so the flow can be tested end-to-end.
+ * Builds the standard set of deliverability headers that Gmail / Outlook /
+ * Yahoo spam filters look for on transactional mail. Without List-Unsubscribe
+ * and a proper Message-ID, deliverability degrades noticeably.
  */
+function buildDeliverabilityHeaders(cfg: SmtpConfig, recipient: string, kind: 'reset' | 'order' | 'generic') {
+  const envelope = extractFromAddress(cfg.from)
+  const domain = extractDomain(envelope) || 'localhost'
+  const rand = Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
+  const msgId = `<${kind}-${rand}@${domain}>`
+  const support = envelope
+
+  const headers: Record<string, string> = {
+    'Message-ID': msgId,
+    'Auto-Submitted': 'auto-generated',
+    'X-Auto-Response-Suppress': 'All',
+    'Precedence': 'bulk',
+    'List-Unsubscribe': `<mailto:${support}?subject=Unsubscribe>`,
+    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    'X-Mailer': `${BRAND.companyName} OrderSystem`,
+    'X-Report-Abuse': `Please report abuse to: ${support}`,
+    'References': msgId,
+    'In-Reply-To': msgId,
+    'Reply-To': cfg.from,
+    'Return-Path': envelope,
+  }
+
+  if (recipient) {
+    headers['To'] = recipient
+  }
+  return headers
+}
+
+/**
+ * Verifies the SMTP connection end-to-end (EHLO + login). Throws a descriptive
+ * error on failure. Safe to call on server startup or from a health-check route.
+ */
+export async function verifySmtpConnection(): Promise<{ ok: true; host: string; port: number }> {
+  const cfg = getSmtpConfig()
+  const v = validateSmtpConfig(cfg)
+  if (!v.ok) {
+    const msg = v.hint ? `${v.reason} ${v.hint}` : v.reason
+    throw new Error(`SMTP configuration error: ${msg}`)
+  }
+  const transporter = getOrCreateTransporter(cfg)
+  try {
+    await transporter.verify()
+    return { ok: true, host: cfg.host!, port: cfg.port }
+  } catch (err) {
+    const raw = readErrorMessage(err)
+    let hint = ''
+    if (raw.includes('Invalid greeting') || raw.includes('IMAP') || raw.includes('Dovecot') || raw.includes('OK [CAPABILITY')) {
+      hint = ' The server is speaking IMAP/POP3 instead of SMTP — double-check SMTP_PORT. Expected SMTP ports: 465 (SSL) or 587 (STARTTLS).'
+    } else if (raw.includes('ETIMEDOUT') || raw.includes('ECONNREFUSED') || raw.includes('ENOTFOUND')) {
+      hint = ` Network error reaching ${cfg.host}:${cfg.port}. Confirm host/port with your email provider; also check that outbound traffic on port ${cfg.port} is not firewalled.`
+    } else if (raw.includes('Authentication') || /auth|login|credentials/i.test(raw)) {
+      hint = ' SMTP login failed — verify SMTP_USER and SMTP_PASS, and confirm the account exists and is allowed to use SMTP.'
+    } else if (raw.includes('SSL') || raw.includes('TLS') || raw.includes('STARTTLS')) {
+      hint = ' TLS negotiation failed — check the SMTP_SECURE vs. port pairing: 465 needs SMTP_SECURE=true, 587 needs SMTP_SECURE=false.'
+    }
+    const prefix = `SMTP verification failed for ${cfg.user}@${cfg.host}:${cfg.port}.${hint}`
+    throw new Error(`${prefix} Underlying error: ${raw}`, { cause: err instanceof Error ? err : undefined })
+  }
+}
+
+function formatSendError(cfg: SmtpConfig, err: unknown): Error {
+  const raw = readErrorMessage(err)
+  let hint = ''
+  if (raw.includes('Invalid greeting') || raw.includes('IMAP') || raw.includes('Dovecot') || raw.includes('OK [CAPABILITY')) {
+    hint = ' (Server sent an IMAP/POP3 greeting on this port — SMTP_PORT is wrong. Use 465 with SMTP_SECURE=true, or 587 with SMTP_SECURE=false.)'
+  }
+  return new Error(`Failed to send email via ${cfg.host}:${cfg.port}${hint}: ${raw}`, { cause: err instanceof Error ? err : undefined })
+}
+
 export async function sendPasswordResetEmail(
   to: string,
   otp: string,
@@ -38,54 +199,104 @@ export async function sendPasswordResetEmail(
 ): Promise<void> {
   const cfg = getSmtpConfig()
 
-  if (!cfg.host || !cfg.user) {
+  const v = validateSmtpConfig(cfg)
+  if (!v.ok) {
     console.log(
-      `[email:dev] Password reset code for ${to}: ${otp} (expires in ${expiresInMinutes} minutes). ` +
-        'Set SMTP_HOST/SMTP_USER/SMTP_PASS to send real email.'
+      `[email:dev] Skipping real email to ${to} because SMTP is misconfigured. ${v.reason}${v.hint ? ` ${v.hint}` : ''} ` +
+        `Password reset code for ${to}: ${otp} (expires in ${expiresInMinutes} minutes).`
     )
     return
   }
 
-  const transporter = nodemailer.createTransport({
-    host: cfg.host,
-    port: cfg.port,
-    secure: cfg.secure,
-    auth: { user: cfg.user, pass: cfg.pass }
-  })
+  const transporter = getOrCreateTransporter(cfg)
+  const headers = buildDeliverabilityHeaders(cfg, to, 'reset')
 
   const name = customerName ? ` ${customerName}` : ''
-  const subject = `${BRAND.companyName} — Reset your password`
+  const subject = `Password reset code for your ${BRAND.companyName} account`
+
+  const fromAddr = extractFromAddress(cfg.from)
+  const support = fromAddr
+  const safeSenderLine =
+    `To keep our emails out of your spam or promotions folder, please add ${fromAddr} to your contacts or safe senders list.`
+
   const text = `Hi${name},
 
-We received a request to reset the password for your ${BRAND.companyName} account.
+We received a request to reset the password for your ${BRAND.companyName} account (${to}).
 
 Your verification code is: ${otp}
 
-This code expires in ${expiresInMinutes} minutes. If you didn't request this, you can safely ignore this email.
+This code expires in ${expiresInMinutes} minutes. If you did not request a password reset, you can safely ignore this email — your account remains secure and no changes will be made.
 
-If you need help, contact us at ${BRAND.supportEmail}.
+If you are having trouble entering the code, you can reply to this email or contact support at ${support} and we will help you.
 
-— The ${BRAND.companyName} Team`
+${safeSenderLine}
+
+Why you received this email: This message was automatically sent because a password reset was requested using your email address on the ${BRAND.companyName} website. If this was not you, no further action is required.
+
+— The ${BRAND.companyName} Team
+${BRAND.companyName}
+Reply to: ${fromAddr}`
 
   const html = `
-    <div style="font-family:Arial,Helvetica,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#1c1917;">
-      <h2 style="color:#2d5a3d;">${BRAND.companyName}</h2>
-      <p>Hi${name},</p>
-      <p>We received a request to reset the password for your ${BRAND.companyName} account.</p>
-      <div style="margin:24px 0;padding:20px;background:#f2f5ee;border-radius:12px;text-align:center;">
-        <div style="font-size:12px;color:#6d6a63;text-transform:uppercase;letter-spacing:0.1em;">Your verification code</div>
-        <div style="font-size:36px;font-weight:700;letter-spacing:0.35em;color:#2d5a3d;margin-top:8px;">${otp}</div>
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1c1917;line-height:1.55;font-size:15px;">
+      <div style="border-bottom:1px solid #e7e5e0;padding-bottom:16px;margin-bottom:20px;">
+        <span style="font-size:18px;font-weight:700;color:#2d5a3d;letter-spacing:0.02em;">${BRAND.companyName}</span>
       </div>
-      <p style="font-size:14px;color:#6d6a63;">This code expires in ${expiresInMinutes} minutes. If you didn't request this, you can safely ignore this email.</p>
-      <p style="font-size:14px;color:#6d6a63;">If you need help, contact us at <a href="mailto:${BRAND.supportEmail}" style="color:#2d5a3d;">${BRAND.supportEmail}</a>.</p>
-      <p style="font-size:12px;color:#a8a39b;margin-top:32px;">— The ${BRAND.companyName} Team</p>
+
+      <p style="margin:0 0 12px 0;">Hi${name},</p>
+      <p style="margin:0 0 20px 0;">
+        We received a request to reset the password for your ${BRAND.companyName} account
+        (<span style="color:#57534e;">${to}</span>).
+      </p>
+
+      <div style="margin:24px 0 28px 0;padding:22px;background:#f6f7f3;border-radius:12px;text-align:center;border:1px solid #e7e5e0;">
+        <div style="font-size:12px;color:#6d6a63;text-transform:uppercase;letter-spacing:0.14em;">Your verification code</div>
+        <div style="font-size:34px;font-weight:700;letter-spacing:0.3em;color:#2d5a3d;margin-top:10px;font-family:Courier,'Courier New',monospace;">${otp}</div>
+        <div style="font-size:12px;color:#78716c;margin-top:10px;">Valid for ${expiresInMinutes} minutes</div>
+      </div>
+
+      <p style="margin:0 0 12px 0;color:#44403c;">
+        If you did not request this password reset, you can safely ignore this email.
+        No changes will be made to your account.
+      </p>
+
+      <p style="margin:0 0 22px 0;font-size:14px;color:#57534e;">
+        Need help? Contact us any time at
+        <a href="mailto:${support}" style="color:#2d5a3d;text-decoration:underline;">${support}</a>.
+      </p>
+
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin:0 0 24px 0;">
+        <div style="font-weight:600;color:#92400e;margin:0 0 4px 0;">Keep our emails out of spam</div>
+        <div style="color:#854d0e;font-size:14px;margin:0;">
+          Add <span style="font-family:Courier,'Courier New',monospace;">${fromAddr}</span> to your contacts or safe senders list
+          so future password-reset and order emails land in your inbox.
+        </div>
+      </div>
+
+      <div style="border-top:1px solid #e7e5e0;padding-top:16px;color:#78716c;font-size:12px;line-height:1.55;">
+        <p style="margin:0 0 6px 0;">
+          Why you received this email: This message was automatically sent because a password reset was
+          requested using your email address on the ${BRAND.companyName} website. If this was not you, no
+          further action is required — your account remains secure.
+        </p>
+        <p style="margin:0;">
+          &copy; ${new Date().getFullYear()} ${BRAND.companyName}. All rights reserved.
+        </p>
+      </div>
     </div>`
 
-  await transporter.sendMail({
-    from: cfg.from,
-    to,
-    subject,
-    text,
-    html
-  })
+  try {
+    const mail: SendMailOptions = {
+      from: cfg.from,
+      to,
+      replyTo: cfg.from,
+      subject,
+      text,
+      html,
+      headers,
+    }
+    await transporter.sendMail(mail)
+  } catch (err) {
+    throw formatSendError(cfg, err)
+  }
 }

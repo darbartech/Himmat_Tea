@@ -70,9 +70,9 @@ export default function Terms() {
               {/* Intro */}
               <div className="bg-white rounded-2xl border border-[rgba(28,25,23,0.06)] p-8 lg:p-10">
                 <p className="text-[#444] leading-relaxed">
-                  These Terms of Service ("Terms") govern your use of the Godgifted
+                  These Terms of Service (&quot;Terms&quot;) govern your use of the Godgifted
                   website located at godgifted.com and the purchase of
-                  products from Godgifted ("we", "us", or "our"). Please read
+                  products from Godgifted (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). Please read
                   these Terms carefully before placing an order. By using our
                   website or completing a purchase, you confirm that you have
                   read, understood, and agree to be bound by these Terms.
@@ -99,7 +99,7 @@ export default function Terms() {
                 <p className="text-[#78746e] leading-relaxed text-sm">
                   We reserve the right to update or modify these Terms at any
                   time without prior notice. The updated Terms will be posted on
-                  this page with a revised "Last updated" date. Your continued
+                  this page with a revised &quot;Last updated&quot; date. Your continued
                   use of our website after any changes constitutes acceptance of
                   the new Terms.
                 </p>

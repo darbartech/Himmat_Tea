@@ -136,6 +136,7 @@ function OrderConfirmedInner() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copiedOrderNum, setCopiedOrderNum] = useState(false);
+  const [qrFailed, setQrFailed] = useState(false);
 
   useEffect(() => {
     clearCart();
@@ -154,11 +155,12 @@ function OrderConfirmedInner() {
 
         const decoded = decodeURIComponent(orderRef);
         const isCuid = decoded.length > 10 && !decoded.startsWith('HT-');
-        let orderRes: any;
+        interface ApiEnvelope { success?: boolean; data?: unknown; message?: string }
+        let orderRes: ApiEnvelope | OrderT | null = null;
 
         try {
-          orderRes = await api.get(`/orders/${decoded}`);
-        } catch (err: any) {
+          orderRes = await api.get<ApiEnvelope | OrderT>(`/orders/${decoded}`);
+        } catch (err: unknown) {
           if (err instanceof ApiError && err.status === 404 && isCuid === false && decoded.startsWith('HT-') === false) {
             setError('We could not locate your order.');
             return;
@@ -167,10 +169,10 @@ function OrderConfirmedInner() {
         }
 
         if (!cancelled) {
-          if (orderRes?.success && orderRes.data) {
-            setOrder(orderRes.data);
-          } else if (orderRes && !orderRes.success) {
-            setError(orderRes.message || 'We could not locate your order.');
+          if ((orderRes as ApiEnvelope)?.success && (orderRes as ApiEnvelope).data) {
+            setOrder((orderRes as ApiEnvelope).data as OrderT);
+          } else if (orderRes && !(orderRes as ApiEnvelope).success && (orderRes as ApiEnvelope).message) {
+            setError((orderRes as ApiEnvelope).message || 'We could not locate your order.');
             return;
           } else if (orderRes) {
             setOrder(orderRes as OrderT);
@@ -178,14 +180,14 @@ function OrderConfirmedInner() {
         }
 
         try {
-          const sres: any = await api.get('/settings');
-          if (!cancelled && sres?.success && sres.data) {
-            setSettings(sres.data);
+          const sres = await api.get<ApiEnvelope | SettingsT>('/settings');
+          if (!cancelled && (sres as ApiEnvelope)?.success && (sres as ApiEnvelope).data) {
+            setSettings((sres as ApiEnvelope).data as SettingsT);
           } else if (!cancelled && sres) {
             setSettings(sres as SettingsT);
           }
         } catch (_) { /* noop - optional */ }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Order confirmed fetch error:', err);
         setError(
           err instanceof ApiError
@@ -340,13 +342,22 @@ function OrderConfirmedInner() {
 
                       <div className="grid md:grid-cols-[auto,1fr] gap-6 items-start">
                         <div className="mx-auto md:mx-0">
-                          {settings?.qrImageUrl ? (
+                          {!qrFailed ? (
                             <div className="bg-white border border-[#c8a96e]/30 rounded-2xl p-4 inline-block shadow-sm">
                               <img
-                                src={settings.qrImageUrl}
-                                alt={`${settings.storeName || 'Himmat Tea'} payment QR`}
+                                src={settings?.qrImageUrl || '/payment-qr.png'}
+                                alt={`${settings?.storeName || 'Himmat Tea'} payment QR`}
                                 className="w-56 h-56 object-contain rounded-xl bg-white"
-                                onError={(e) => { ((e.currentTarget as HTMLImageElement).style.visibility = 'hidden'); }}
+                                onError={(e) => {
+                                  const el = e.currentTarget as HTMLImageElement;
+                                  const fallback = '/payment-qr.png';
+                                  if (el.getAttribute('data-fallback-tried') === '1') {
+                                    setQrFailed(true);
+                                  } else {
+                                    el.setAttribute('data-fallback-tried', '1');
+                                    el.src = fallback;
+                                  }
+                                }}
                               />
                             </div>
                           ) : (

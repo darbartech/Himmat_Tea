@@ -275,7 +275,7 @@ export default function Checkout() {
       clearCart();
       idempotencyKeyRef.current = null;
 
-      const orderRef = encodeURIComponent(createdOrder?.id || createdOrder?.orderNumber || '');
+      const orderRef = encodeURIComponent(createdOrder?.orderNumber || createdOrder?.id || '');
       router.push(`/order-confirmed?ref=${orderRef}`);
     } catch (error: any) {
       console.error("Error placing order:", error);
@@ -696,7 +696,7 @@ export default function Checkout() {
                       <div className="flex justify-between text-sm text-[#78746e]">
                         <span>Shipping</span>
                         <span className={shippingFlatRate > 0 ? "text-[#1c1917] font-semibold" : "text-[#2d5a3d] font-semibold"}>
-                          {shippingFlatRate > 0 ? `{currency} ${shippingFlatRate.toLocaleString()}` : "Free"}
+                          {shippingFlatRate > 0 ? `${currency} ${shippingFlatRate.toLocaleString()}` : "Free"}
                         </span>
                       </div>
                     </div>

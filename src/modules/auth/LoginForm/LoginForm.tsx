@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { ArrowRight, Lock, Mail } from 'lucide-react';
@@ -38,6 +39,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   showForgotPassword = true,
   className = ''
 }) => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -91,7 +93,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       
       // Redirect if specified
       if (redirectTo && typeof window !== 'undefined') {
-        window.location.href = redirectTo;
+        router.replace(redirectTo);
       }
 
     } catch (error) {

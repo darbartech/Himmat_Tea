@@ -617,7 +617,7 @@ export default function Wholesale() {
 
                 {/* Quote */}
                 <p className="text-[#1c1917] leading-relaxed text-[0.9375rem] flex-1 mb-6">
-                  "{item.quote}"
+                  &quot;{item.quote}&quot;
                 </p>
 
                 {/* Attribution */}
@@ -687,7 +687,7 @@ export default function Wholesale() {
                     Start Your Wholesale Partnership
                   </h2>
                   <p className="text-white/55 leading-relaxed text-sm mb-10">
-                    Fill out the form and we'll get back to you within 48 hours
+                    Fill out the form and we&apos;ll get back to you within 48 hours
                     with pricing, samples, and next steps.
                   </p>
 
@@ -751,7 +751,7 @@ export default function Wholesale() {
                       hours.
                     </p>
                     <div className="mt-8 px-6 py-4 bg-[#f0f9f4] rounded-xl text-sm text-[#2d5a3d] font-medium">
-                      Check your inbox — we've sent a confirmation email.
+                      Check your inbox — we&apos;ve sent a confirmation email.
                     </div>
                   </div>
                 ) : (

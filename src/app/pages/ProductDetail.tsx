@@ -110,6 +110,23 @@ function StarRating({
 }
 
 // Define product type matching Prisma schema
+interface ProductVariant {
+  id: number;
+  [key: string]: unknown;
+}
+interface ProductBatch {
+  id: number;
+  [key: string]: unknown;
+}
+interface ProductReview {
+  id?: number;
+  rating: number;
+  name?: string;
+  initials?: string;
+  date?: string;
+  comment?: string;
+  [key: string]: unknown;
+}
 interface Product {
   id: number;
   name: string;
@@ -122,12 +139,12 @@ interface Product {
   sku?: string;
   reorderPoint?: number;
   hasVariants: boolean;
-  variantOptions?: any;
+  variantOptions?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
-  productVariants: any[];
-  batches: any[];
-  reviews: any[];
+  productVariants: ProductVariant[];
+  batches: ProductBatch[];
+  reviews: ProductReview[];
   isBestseller?: boolean;
 }
 
@@ -147,14 +164,15 @@ export default function ProductDetail() {
   const { data: allProducts = [], isLoading: loading } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const response = await api.get<any>('/products');
-      return response.data || response;
+      const response = await api.get<Product[] | { data?: Product[] }>('/products');
+      const arr = (response as { data?: Product[] }).data ?? (response as Product[]);
+      return arr;
     }
   });
 
   const productId = parseInt(id as string);
-  const product = allProducts.find((p: any) => p.id === productId) || null;
-  const relatedProducts = allProducts.filter((p: any) => p.id !== productId).slice(0, 3);
+  const product = allProducts.find((p: Product) => p.id === productId) || null;
+  const relatedProducts = allProducts.filter((p: Product) => p.id !== productId).slice(0, 3);
 
   // Track share clicks for analytics
   function trackShare(platform: string) {
@@ -305,7 +323,7 @@ export default function ProductDetail() {
               Product Not Found
             </h1>
             <p className="text-[#78746e] mb-8">
-              We couldn't find the product you're looking for.
+              We couldn&apos;t find the product you&apos;re looking for.
             </p>
             <Link
               href="/products"
@@ -326,7 +344,7 @@ export default function ProductDetail() {
   
   // Calculate average rating from reviews
   const averageRating = product.reviews.length > 0 
-    ? product.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / product.reviews.length 
+    ? product.reviews.reduce((sum: number, review: ProductReview) => sum + review.rating, 0) / product.reviews.length 
     : 4.8;
   
   const brewGuide = brewGuideByType[product.category] ?? brewGuideByType["green"];
@@ -724,7 +742,7 @@ export default function ProductDetail() {
 
                   {/* Individual reviews */}
                   {product.reviews.length > 0 ? (
-                    product.reviews.map((review: any, i: number) => (
+                    product.reviews.map((review: ProductReview, i: number) => (
                       <div
                         key={i}
                         className="bg-white rounded-2xl p-6 border border-[rgba(28,25,23,0.06)]"
@@ -768,7 +786,7 @@ export default function ProductDetail() {
                 You May Also Like
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {relatedProducts.map((relatedProduct: any) => (
+                {relatedProducts.map((relatedProduct: Product) => (
                   <Link
                     key={relatedProduct.id}
                     href={`/products/${relatedProduct.id}`}

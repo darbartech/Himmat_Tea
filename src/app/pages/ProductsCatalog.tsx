@@ -13,6 +13,26 @@ import { BRAND } from "@/config/brand";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 
+interface ProductLine {
+  id: number | string;
+  name: string;
+  slug: string;
+  isActive?: boolean;
+  color?: string;
+  [key: string]: unknown;
+}
+interface ProductVariant {
+  id: number;
+  [key: string]: unknown;
+}
+interface ProductBatch {
+  id: number;
+  [key: string]: unknown;
+}
+interface ProductReview {
+  rating: number;
+  [key: string]: unknown;
+}
 interface Product {
   id: number;
   name: string;
@@ -25,18 +45,18 @@ interface Product {
   sku?: string;
   reorderPoint?: number;
   hasVariants: boolean;
-  variantOptions?: any;
+  variantOptions?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
-  productVariants: any[];
-  batches: any[];
-  reviews: any[];
+  productVariants: ProductVariant[];
+  batches: ProductBatch[];
+  reviews: ProductReview[];
   productLine?: string;
-  productLineId?: string;
+  productLineId?: number | string;
   isBestseller?: boolean;
 }
 
-const filterTabs = (productLines: any[]) => [
+const filterTabs = (productLines: ProductLine[]) => [
   { key: "all", label: "All Products" },
   ...productLines.filter(pl => pl.isActive).map(pl => ({ key: pl.slug, label: pl.name })),
 ];
@@ -81,16 +101,18 @@ export default function ProductsCatalog() {
   const { data: allProducts = [], isLoading: productsLoading, error: productsError } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const response = await api.get<any>('/products');
-      return response.data || response;
+      const response = await api.get<Product[] | { data?: Product[] }>('/products');
+      const arr = (response as { data?: Product[] }).data ?? (response as Product[]);
+      return arr;
     }
   });
 
   const { data: productLines = [], isLoading: productLinesLoading } = useQuery({
     queryKey: ['product-lines'],
     queryFn: async () => {
-      const response = await api.get<any>('/product-lines');
-      return response.data || response;
+      const response = await api.get<ProductLine[] | { data?: ProductLine[] }>('/product-lines');
+      const arr = (response as { data?: ProductLine[] }).data ?? (response as ProductLine[]);
+      return arr;
     }
   });
 
@@ -114,11 +136,11 @@ export default function ProductsCatalog() {
   }
 
   const filtered = useMemo(() => {
-    let list = allProducts.filter((p: any) => {
-      const productLineForProduct = productLines.find((pl: any) => pl.id === p.productLineId);
+    let list = allProducts.filter((p: Product) => {
+      const productLineForProduct = productLines.find((pl: ProductLine) => pl.id === p.productLineId);
       const matchFilter = filter === "all" || 
         productLineForProduct?.slug === filter || 
-        p.productLine === productLines.find((pl: any) => pl.slug === filter)?.name;
+        p.productLine === productLines.find((pl: ProductLine) => pl.slug === filter)?.name;
       const matchSearch =
         search.trim() === "" ||
         p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -132,8 +154,8 @@ export default function ProductsCatalog() {
       list = [...list].sort((a, b) => b.price - a.price);
     else if (sort === "rating") {
       list = [...list].sort((a, b) => {
-        const aRating = a.reviews.length > 0 ? a.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / a.reviews.length : 0;
-        const bRating = b.reviews.length > 0 ? b.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / b.reviews.length : 0;
+        const aRating = a.reviews.length > 0 ? a.reviews.reduce((sum: number, r: ProductReview) => sum + r.rating, 0) / a.reviews.length : 0;
+        const bRating = b.reviews.length > 0 ? b.reviews.reduce((sum: number, r: ProductReview) => sum + r.rating, 0) / b.reviews.length : 0;
         return bRating - aRating;
       });
     }
@@ -202,7 +224,7 @@ export default function ProductsCatalog() {
             {/* Type filter tabs */}
             <div className="flex flex-wrap gap-2">
               {filterTabs(productLines).map((tab) => {
-                const pl = productLines.find((p: any) => p.slug === tab.key);
+                const pl = productLines.find((p: ProductLine) => p.slug === tab.key);
                 return (
                   <button
                     key={tab.key}
@@ -215,7 +237,7 @@ export default function ProductsCatalog() {
                         ? "text-white shadow-sm"
                         : "bg-white text-[#1c1917] border border-[rgba(28,25,23,0.08)] hover:bg-[#f0ede8]"
                     }`}
-                    style={filter === tab.key && pl ? { backgroundColor: (pl as any).color || "#2d5a3d" } : undefined}
+                    style={filter === tab.key && pl ? { backgroundColor: pl.color || "#2d5a3d" } : undefined}
                   >
                     {tab.label}
                   </button>
@@ -276,7 +298,7 @@ export default function ProductsCatalog() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {paginated.map((product: any) => {
+              {paginated.map((product: Product) => {
                 const rating = getAverageRating(product);
                 return (
                   <div

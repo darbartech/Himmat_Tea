@@ -1,6 +1,17 @@
+import type { NextRequest } from 'next/server'
+
 interface Bucket {
   tokens: number
   lastRefill: number
+}
+
+interface RequestLike {
+  headers?: {
+    get?: (name: string) => string | string[] | null | undefined
+  }
+  socket?: {
+    remoteAddress?: string
+  }
 }
 
 class InMemoryRateLimiter {
@@ -47,7 +58,7 @@ class InMemoryRateLimiter {
 const orderCreatLimiter = new InMemoryRateLimiter(10, 60_000)
 const authLimiter = new InMemoryRateLimiter(15, 60_000)
 
-function ipKeyFrom(request: any): string {
+function ipKeyFrom(request: RequestLike | NextRequest): string {
   try {
     const xff = request.headers?.get?.('x-forwarded-for')
     if (xff) {
@@ -56,7 +67,7 @@ function ipKeyFrom(request: any): string {
     }
     const realIp = request.headers?.get?.('x-real-ip')
     if (realIp) return `ip:${realIp}`
-    const socket = (request as any).socket
+    const socket = (request as RequestLike).socket
     if (socket?.remoteAddress) return `ip:${socket.remoteAddress}`
   } catch {
     // noop
@@ -64,7 +75,7 @@ function ipKeyFrom(request: any): string {
   return `ip:unknown-${Math.random().toString(36).slice(2, 10)}`
 }
 
-export function rateLimitOrderCreate(request: any): { allowed: boolean; retryAfterMs?: number; error?: string } {
+export function rateLimitOrderCreate(request: RequestLike | NextRequest): { allowed: boolean; retryAfterMs?: number; error?: string } {
   const key = `order-create:${ipKeyFrom(request)}`
   const res = orderCreatLimiter.check(key)
   if (!res.allowed) {
@@ -73,7 +84,7 @@ export function rateLimitOrderCreate(request: any): { allowed: boolean; retryAft
   return { allowed: true }
 }
 
-export function rateLimitAuth(request: any): { allowed: boolean; retryAfterMs?: number; error?: string } {
+export function rateLimitAuth(request: RequestLike | NextRequest): { allowed: boolean; retryAfterMs?: number; error?: string } {
   const key = `auth:${ipKeyFrom(request)}`
   const res = authLimiter.check(key)
   if (!res.allowed) {

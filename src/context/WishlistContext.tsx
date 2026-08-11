@@ -18,26 +18,30 @@ interface WishlistContextType {
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
-export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [wishlist, setWishlist] = useState<Product[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
+const WISHLIST_STORAGE_KEY = "himmat-wishlist";
 
-  // Initialize from localStorage on mount
+function readInitialWishlist(): Product[] {
+  if (typeof window === "undefined") return [];
+  const saved = localStorage.getItem(WISHLIST_STORAGE_KEY);
+  if (!saved) return [];
+  try {
+    return JSON.parse(saved) as Product[];
+  } catch {
+    return [];
+  }
+}
+
+export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [wishlist, setWishlist] = useState<Product[]>(() => readInitialWishlist());
+  const [isInitialized, setIsInitialized] = useState<boolean>(typeof window === "undefined");
+
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("himmat-wishlist");
-      if (saved) {
-        try {
-          setWishlist(JSON.parse(saved));
-        } catch (e) {}
-      }
-      setIsInitialized(true);
-    }
+    queueMicrotask(() => setIsInitialized(true));
   }, []);
 
   useEffect(() => {
     if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("himmat-wishlist", JSON.stringify(wishlist));
+      localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist));
     }
   }, [wishlist, isInitialized]);
 

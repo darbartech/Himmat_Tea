@@ -26,21 +26,23 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "himmat-tea-cart";
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
+function readInitialCart(): CartItem[] {
+  if (typeof window === "undefined") return [];
+  const saved = localStorage.getItem(CART_STORAGE_KEY);
+  if (!saved) return [];
+  try {
+    return JSON.parse(saved) as CartItem[];
+  } catch {
+    return [];
+  }
+}
 
-  // Initialize from localStorage on mount
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [cart, setCart] = useState<CartItem[]>(() => readInitialCart());
+  const [isInitialized, setIsInitialized] = useState<boolean>(typeof window === "undefined");
+
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem(CART_STORAGE_KEY);
-      if (saved) {
-        try {
-          setCart(JSON.parse(saved));
-        } catch (e) {}
-      }
-      setIsInitialized(true);
-    }
+    queueMicrotask(() => setIsInitialized(true));
   }, []);
 
   useEffect(() => {

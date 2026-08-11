@@ -2,9 +2,9 @@ const API_BASE = '/api'
 
 export class ApiError extends Error {
   status: number
-  body: any
+  body: unknown
 
-  constructor(message: string, status: number, body?: any) {
+  constructor(message: string, status: number, body?: unknown) {
     super(message)
     this.name = 'ApiError'
     this.status = status
@@ -27,7 +27,7 @@ class ApiClient {
       ...options
     })
 
-    let body: any = null
+    let body: unknown = null
     let bodyText: string | null = null
 
     try {
@@ -38,7 +38,8 @@ class ApiClient {
     }
 
     if (!response.ok) {
-      const msg = body?.error || (typeof body === 'string' ? body : `API Error: ${response.status}`)
+      const bodyObj = body as { error?: string } | null
+      const msg = bodyObj?.error || (typeof body === 'string' ? body : `API Error: ${response.status}`)
       throw new ApiError(msg, response.status, body)
     }
 
@@ -49,21 +50,21 @@ class ApiClient {
     return this.request<T>(endpoint, { method: 'GET' })
   }
 
-  async post<T>(endpoint: string, data: any): Promise<T> {
+  async post<T>(endpoint: string, data: unknown): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(data)
     })
   }
 
-  async put<T>(endpoint: string, data: any): Promise<T> {
+  async put<T>(endpoint: string, data: unknown): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data)
     })
   }
 
-  async patch<T>(endpoint: string, data: any): Promise<T> {
+  async patch<T>(endpoint: string, data: unknown): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PATCH',
       body: JSON.stringify(data)

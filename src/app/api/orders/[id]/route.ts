@@ -14,6 +14,18 @@ const customerOrderUpdateSchema = z.object({
   shippingAddress: z.string().min(1).optional(),
 }).strict()
 
+async function resolveOrderByIdentifier(idOrOrderNumber: string) {
+  let order = await prisma.order.findUnique({
+    where: { id: idOrOrderNumber },
+  })
+  if (!order) {
+    order = await prisma.order.findUnique({
+      where: { orderNumber: idOrOrderNumber },
+    })
+  }
+  return order
+}
+
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
@@ -25,8 +37,13 @@ export async function GET(request: NextRequest, { params }: Params) {
 
     const isAdmin = 'username' in currentUser
 
+    const resolved = await resolveOrderByIdentifier(id)
+    if (!resolved) {
+      return createErrorResponse('This order could not be found.', 404)
+    }
+
     const order = await prisma.order.findUnique({
-      where: { id },
+      where: { id: resolved.id },
       include: {
         customer: { select: SAFE_CUSTOMER_SELECT },
         items: true,
@@ -100,8 +117,14 @@ export async function PUT(request: NextRequest, { params }: Params) {
       return createErrorResponse('Forbidden', 403)
     }
 
+    const resolved = await resolveOrderByIdentifier(id)
+    if (!resolved) {
+      return createErrorResponse('Order not found', 404)
+    }
+    const orderId = resolved.id
+
     const order = await prisma.order.findUnique({
-      where: { id },
+      where: { id: orderId },
       include: { customer: { select: SAFE_CUSTOMER_SELECT } }
     })
 
@@ -120,7 +143,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     const updatedOrder = await prisma.order.update({
-      where: { id },
+      where: { id: orderId },
       data: validated.data,
       include: {
         customer: { select: SAFE_CUSTOMER_SELECT },
@@ -132,7 +155,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     await prisma.internalNote.create({
       data: {
-        orderId: id,
+        orderId,
         text: `Admin ${adminUser.username} updated contact/shipping details`,
         adminId: String(adminUser.id),
         adminName: adminUser.username,
@@ -164,8 +187,11 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
       return createErrorResponse('Forbidden', 403)
     }
 
+    const resolved = await resolveOrderByIdentifier(id)
+    const resolvedId = resolved?.id || id
+
     return createErrorResponse(
-      'Hard delete is disabled. Use PATCH /api/admin/orders/' + id + '/status with status "CANCELLED" to preserve audit history.',
+      'Hard delete is disabled. Use PATCH /api/admin/orders/' + resolvedId + '/status with status "CANCELLED" to preserve audit history.',
       405
     )
   } catch (error) {

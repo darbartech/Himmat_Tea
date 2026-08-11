@@ -175,7 +175,7 @@ export default function FAQ() {
             </h1>
             <p className="text-[#444] leading-relaxed text-lg">
               Everything you need to know about ordering, brewing,
-              subscriptions, and more. Can't find what you're looking for? We're
+              subscriptions, and more. Can&apos;t find what you&apos;re looking for? We&apos;re
               always happy to help.
             </p>
           </div>

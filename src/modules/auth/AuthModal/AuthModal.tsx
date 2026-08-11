@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Github, Chrome } from 'lucide-react';
 import { LoginForm } from '../LoginForm';
@@ -36,11 +36,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // Reset mode when modal opens
   useEffect(() => {
     if (isOpen) {
-      setMode(initialMode);
+      startTransition(() => setMode(initialMode));
       // Trigger fade in
       requestAnimationFrame(() => setIsVisible(true));
     } else {
-      setIsVisible(false);
+      startTransition(() => setIsVisible(false));
     }
   }, [isOpen, initialMode]);
 

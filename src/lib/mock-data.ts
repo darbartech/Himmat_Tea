@@ -1,3 +1,17 @@
+export interface ProductVariant {
+  id: number;
+  [key: string]: unknown;
+}
+export interface ProductBatch {
+  id: number;
+  [key: string]: unknown;
+}
+export interface ProductReview {
+  id: number;
+  rating: number;
+  comment?: string;
+  [key: string]: unknown;
+}
 export interface Product {
   id: number;
   name: string;
@@ -10,12 +24,12 @@ export interface Product {
   sku?: string;
   reorderPoint?: number;
   hasVariants: boolean;
-  variantOptions?: any;
+  variantOptions?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
-  productVariants: any[];
-  batches: any[];
-  reviews: any[];
+  productVariants: ProductVariant[];
+  batches: ProductBatch[];
+  reviews: ProductReview[];
 }
 
 export const initialMockProducts: Product[] = [

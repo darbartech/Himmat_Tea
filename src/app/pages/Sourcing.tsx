@@ -124,7 +124,7 @@ export default function Sourcing() {
               From Garden to Cup
             </h1>
             <p className="text-xl text-[#78746e] max-w-2xl mx-auto">
-              We believe transparency is the foundation of great tea. Here's
+              We believe transparency is the foundation of great tea. Here&apos;s
               exactly how your tea gets from a Himalayan hillside to your door.
             </p>
           </div>
@@ -199,7 +199,7 @@ export default function Sourcing() {
                 Our Farmer Partners
               </h2>
               <p className="text-[#78746e] mt-4 max-w-xl mx-auto">
-                These aren't just suppliers — they're the craftspeople whose
+                These aren&apos;t just suppliers — they&apos;re the craftspeople whose
                 hands and knowledge make every cup possible.
               </p>
             </div>

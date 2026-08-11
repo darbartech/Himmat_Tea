@@ -25,7 +25,7 @@ const createOrderSchema = z.object({
   items: z.array(orderItemSchema).min(1, 'At least one item is required'),
   shippingAddress: z.string().min(1, 'Shipping address is required'),
   idempotencyKey: z.string().min(1, 'Idempotency key is required'),
-}).strict()
+}).strip()
 
 function generateOrderNumber(date: Date): string {
   const y = date.getFullYear()
@@ -306,8 +306,11 @@ export async function POST(request: NextRequest) {
       orderUniqAttempts++
     }
 
+    let createdOrderId: string | undefined
+    let createdOrderItems: { productId: number; quantity: number; name: string }[] | undefined
+
     try {
-      const createdOrder = await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx) => {
         for (const item of lineItems) {
           const updated = await tx.product.updateMany({
             where: {
@@ -323,24 +326,6 @@ export async function POST(request: NextRequest) {
             throw new Error(
               `STOCK_RACE:Sorry, "${product.name}" is no longer available in the requested quantity. Please refresh and try again.`
             )
-          }
-
-          const freshProduct = await tx.product.findUnique({
-            where: { id: item.productId },
-            select: { stock: true, name: true }
-          })
-          if (freshProduct) {
-            await tx.inventoryTransaction.create({
-              data: {
-                productId: item.productId,
-                productName: freshProduct.name,
-                type: 'ORDER_RESERVED',
-                quantity: item.quantity,
-                previousStock: freshProduct.stock + item.quantity,
-                newStock: freshProduct.stock,
-                reason: `Order reserved at checkout`,
-              }
-            })
           }
         }
 
@@ -368,7 +353,7 @@ export async function POST(request: NextRequest) {
               }))
             }
           },
-          include: { items: true }
+          select: { id: true, items: { select: { productId: true, quantity: true, name: true } } }
         })
 
         await tx.payment.create({
@@ -380,39 +365,63 @@ export async function POST(request: NextRequest) {
           }
         })
 
-        await tx.customer.update({
+        createdOrderId = order.id
+        createdOrderItems = order.items
+      }, { timeout: 15_000, maxWait: 15_000 })
+
+      if (createdOrderId && createdOrderItems) {
+        const refreshed = await prisma.product.findMany({
+          where: { id: { in: createdOrderItems.map(i => i.productId) } },
+          select: { id: true, stock: true, name: true }
+        })
+        const refreshedMap = new Map(refreshed.map(p => [p.id, p]))
+        await prisma.inventoryTransaction.createMany({
+          data: createdOrderItems
+            .map(i => {
+              const p = refreshedMap.get(i.productId)
+              if (!p) return null
+              return {
+                productId: i.productId,
+                productName: p.name,
+                type: 'ORDER_RESERVED' as const,
+                quantity: i.quantity,
+                previousStock: p.stock + i.quantity,
+                newStock: p.stock,
+                reason: `Order reserved at checkout`,
+              }
+            })
+            .filter((x): x is NonNullable<typeof x> => x !== null)
+        }).catch(() => {})
+
+        prisma.customer.update({
           where: { id: customerId },
           data: {
             ordersCount: { increment: 1 },
             totalSpent: { increment: grandTotal },
           }
-        })
+        }).catch(() => {})
 
         if (isAdmin) {
-          const adminForNote = await getCurrentAdmin()
-          if (adminForNote) {
-            await tx.internalNote.create({
-              data: {
-                orderId: order.id,
-                text: `Order created manually by admin ${adminForNote.username}`,
-                adminId: String(adminForNote.id),
-                adminName: adminForNote.username,
-              }
-            })
-          }
+          const adminForNote = currentUser as { id: number; username: string; email: string; type: 'admin' }
+          prisma.internalNote.create({
+            data: {
+              orderId: createdOrderId,
+              text: `Order created manually by admin ${adminForNote.username}`,
+              adminId: String(adminForNote.id),
+              adminName: adminForNote.username,
+            }
+          }).catch(() => {})
         }
+      }
 
-        return order
-      })
-
-      const finalOrder = await prisma.order.findUnique({
-        where: { id: createdOrder.id },
+      const finalOrder = createdOrderId ? await prisma.order.findUnique({
+        where: { id: createdOrderId },
         include: {
           customer: { select: SAFE_CUSTOMER_SELECT },
           items: true,
           payment: true,
         }
-      })
+      }) : null
 
       return createResponse({ success: true, data: finalOrder }, 201)
     } catch (txErr: any) {

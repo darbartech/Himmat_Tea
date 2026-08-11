@@ -64,7 +64,9 @@ export default function Settings() {
   };
 
   useEffect(() => {
-    fetchSettings();
+    queueMicrotask(() => {
+      fetchSettings();
+    });
   }, []);
 
   const handleSave = async () => {

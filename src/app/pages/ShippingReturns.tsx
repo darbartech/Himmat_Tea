@@ -59,7 +59,7 @@ export default function ShippingReturns() {
             </h1>
             <p className="text-[#444] leading-relaxed text-lg">
               We want your tea to arrive quickly and in perfect condition. Below
-              you'll find full details on our delivery options and our returns
+              you&apos;ll find full details on our delivery options and our returns
               process.
             </p>
           </div>
@@ -188,7 +188,7 @@ export default function ShippingReturns() {
                       <p className="text-xs text-[#78746e] leading-relaxed">
                         International delivery times are estimates and may vary
                         due to local customs processing. Import duties or taxes,
-                        if applicable in your country, are the buyer's
+                        if applicable in your country, are the buyer&apos;s
                         responsibility. We ship with a declared customs value
                         matching the order total.
                       </p>
@@ -259,7 +259,7 @@ export default function ShippingReturns() {
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#c8593a] mt-2 shrink-0" />
-                          Items marked as "Final Sale"
+                          Items marked as &quot;Final Sale&quot;
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#c8593a] mt-2 shrink-0" />
