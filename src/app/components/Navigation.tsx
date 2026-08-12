@@ -33,6 +33,8 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useStore } from "@/context/StoreContext";
 import { BRAND } from '@/config/brand';
 import { AuthModal } from '@/modules/auth';
+import { Button } from "@/app/components/ui/button";
+import { Input } from "@/app/components/ui/input";
 
 /* ─────────────────────────────────────────────────────────
    Announcement messages  (auto-rotate every 4 s)
@@ -316,8 +318,10 @@ export default function Navigation() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? "bg-white shadow-md" : "bg-white/95 backdrop-blur-sm"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
+          scrolled
+            ? "bg-card shadow-[var(--shadow-md)] border-b border-border/60"
+            : "bg-card/80 backdrop-blur-[10px]"
         }`}
         style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
@@ -325,14 +329,15 @@ export default function Navigation() {
             ANNOUNCEMENT BAR  —  rotating carousel
         ══════════════════════════════════════════════════ */}
         {!dismissed && (
-          <div className="relative bg-[#2d5a3d] text-white select-none overflow-hidden">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8">
-              <div className="flex items-center h-10">
+          <div className="relative bg-primary text-primary-foreground select-none overflow-hidden">
+            <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:14px_14px]" aria-hidden />
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
+              <div className="flex items-center h-9">
                 {/* Prev arrow */}
                 <button
                   onClick={prev}
                   aria-label="Previous announcement"
-                  className="shrink-0 p-1.5 rounded-md hover:bg-white/15 transition-colors mr-3"
+                  className="shrink-0 p-1.5 rounded-[var(--radius-sm)] hover:bg-white/15 transition-colors duration-[var(--duration-fast)] mr-2.5"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
@@ -340,21 +345,21 @@ export default function Navigation() {
                 {/* Message — centered flex-1 */}
                 <div className="flex-1 flex items-center justify-center gap-2.5 min-w-0">
                   {/* Icon badge */}
-                  <span className="shrink-0 w-5 h-5 rounded-full bg-white/15 flex items-center justify-center">
-                    <current.icon className="h-3 w-3 text-white" />
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-white/12 flex items-center justify-center ring-1 ring-white/20">
+                    <current.icon className="h-3 w-3 text-primary-foreground" />
                   </span>
 
                   {/* Text */}
                   <Link
                     href={current.link}
-                    className="text-[13px] font-light tracking-wide truncate hover:text-white/80 transition-colors"
+                    className="text-[12.5px] font-light tracking-wide truncate hover:text-primary-foreground/80 transition-colors duration-[var(--duration-fast)]"
                   >
                     {current.text}
                   </Link>
 
                   {/* Code chip */}
                   {current.code && (
-                    <span className="shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-md bg-white/15 border border-white/30 text-[11px] font-bold tracking-[0.12em] text-[#c8a96e]">
+                    <span className="shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-[var(--radius-sm)] bg-accent/15 border border-accent/40 text-[10.5px] font-bold tracking-[0.12em] text-accent">
                       {current.code}
                     </span>
                   )}
@@ -364,7 +369,7 @@ export default function Navigation() {
                 <button
                   onClick={next}
                   aria-label="Next announcement"
-                  className="shrink-0 p-1.5 rounded-md hover:bg-white/15 transition-colors ml-3"
+                  className="shrink-0 p-1.5 rounded-[var(--radius-sm)] hover:bg-white/15 transition-colors duration-[var(--duration-fast)] ml-2.5"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
                 </button>
@@ -373,23 +378,23 @@ export default function Navigation() {
                 <button
                   onClick={() => setDismissed(true)}
                   aria-label="Dismiss"
-                  className="shrink-0 p-1.5 rounded-md hover:bg-white/15 transition-colors ml-1"
+                  className="shrink-0 p-1.5 rounded-[var(--radius-sm)] hover:bg-white/15 transition-colors duration-[var(--duration-fast)] ml-1"
                 >
                   <X className="h-3.5 w-3.5 opacity-70" />
                 </button>
               </div>
 
               {/* Dot indicators */}
-              <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
                 {ANNOUNCEMENTS.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setAnnouncementIdx(i)}
                     aria-label={`Go to announcement ${i + 1}`}
-                    className={`rounded-full transition-all duration-300 ${
+                    className={`rounded-full transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
                       i === announcementIdx
-                        ? "w-3.5 h-1.5 bg-[#c8a96e]"
-                        : "w-1.5 h-1.5 bg-white/30 hover:bg-white/50"
+                        ? "w-3.5 h-1.5 bg-accent"
+                        : "w-1.5 h-1.5 bg-white/25 hover:bg-white/45"
                     }`}
                   />
                 ))}
@@ -402,40 +407,43 @@ export default function Navigation() {
             MAIN NAV BAR
         ══════════════════════════════════════════════════ */}
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-[68px]">
+          <div className="flex items-center justify-between h-16">
             {/* ── Logo ── */}
             <Link
                 href="/"
-                className="flex items-center gap-2.5 shrink-0"
+                className="flex items-center gap-2.5 shrink-0 group"
                 onClick={() => setMobileOpen(false)}
               >
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 32 32"
-                fill="none"
-                aria-hidden="true"
-              >
-                <rect width="32" height="32" rx="8" fill="#0b7c33" />
-                <path
-                  d="M16 6C16 6 8 12 8 19a8 8 0 0016 0c0-7-8-13-8-13z"
-                  fill="#c8a96e"
-                  opacity="0.9"
-                />
-                <path
-                  d="M16 10C16 10 11 15 11 20a5 5 0 0010 0c0-5-5-10-5-10z"
-                  fill="white"
-                  opacity="0.25"
-                />
-              </svg>
+              <div className="relative transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] group-hover:scale-[1.03]">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 32 32"
+                  fill="none"
+                  aria-hidden="true"
+                  className="drop-shadow-[0_1px_2px_rgba(45,90,61,0.2)]"
+                >
+                  <rect width="32" height="32" rx="8" className="fill-primary" />
+                  <path
+                    d="M16 6C16 6 8 12 8 19a8 8 0 0016 0c0-7-8-13-8-13z"
+                    className="fill-accent"
+                    opacity="0.92"
+                  />
+                  <path
+                    d="M16 10C16 10 11 15 11 20a5 5 0 0010 0c0-5-5-10-5-10z"
+                    fill="white"
+                    opacity="0.28"
+                  />
+                </svg>
+              </div>
               <div className="flex flex-col">
                 <span
-                  className="text-[1.15rem] font-semibold tracking-tight text-[#1c1917]"
+                  className="text-[1.1rem] font-semibold tracking-[-0.01em] text-foreground leading-none"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
                   {BRAND.companyName}
                 </span>
-                <span className="text-[10px] text-[#78746e] -mt-1">
+                <span className="text-[10px] text-muted-foreground -mt-0.5 tracking-wide">
                   Home of Himmat Tea
                 </span>
               </div>
@@ -453,29 +461,30 @@ export default function Navigation() {
                   >
                     <Link
                       href={link.href}
-                      className="flex items-center gap-1 px-3.5 py-2 text-[14.5px] text-[#1c1917] hover:text-[#2d5a3d] transition-colors rounded-lg hover:bg-[#f0ede8]"
+                      className="flex items-center gap-1 px-3.5 py-2 text-[14.5px] text-foreground hover:text-primary transition-colors duration-[var(--duration-fast)] rounded-[var(--radius-md)] hover:bg-secondary relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:w-0 after:bg-accent after:transition-all after:duration-[var(--duration-base)] after:ease-[var(--ease-out-expo)] hover:after:w-5"
                     >
                       {link.label}
                       <ChevronDown
-                        className={`h-3 w-3 transition-transform duration-200 text-[#78746e] ${
+                        className={`h-3 w-3 transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] text-muted-foreground ${
                           activeDropdown === link.label ? "rotate-180" : ""
                         }`}
                       />
                     </Link>
 
                     {activeDropdown === link.label && (
-                      <div className="absolute top-full left-0 pt-1.5 z-50">
-                        <div className="bg-white rounded-xl shadow-2xl border border-[rgba(28,25,23,0.08)] p-1.5 min-w-[220px]">
+                      <div className="absolute top-full left-0 pt-1.5 z-50 animate-[scale-in_180ms_ease-out]">
+                        <div className="bg-card rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)] border border-border p-1.5 min-w-[240px]">
                           {link.children.map((child) => (
                             <Link
                               key={child.label}
                               href={child.href}
-                              className="flex flex-col px-3.5 py-2.5 rounded-lg hover:bg-[#f0ede8] transition-colors group"
+                              className="relative flex flex-col px-3.5 py-2.5 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] group pl-4"
                             >
-                              <span className="text-sm font-medium text-[#1c1917] group-hover:text-[#2d5a3d]">
+                              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-0 rounded-r-full bg-accent transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] group-hover:h-5" />
+                              <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors duration-[var(--duration-fast)]">
                                 {child.label}
                               </span>
-                              <span className="text-xs text-[#78746e] mt-0.5">
+                              <span className="text-xs text-muted-foreground mt-0.5">
                                 {child.sub}
                               </span>
                             </Link>
@@ -488,7 +497,7 @@ export default function Navigation() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="px-3.5 py-2 text-[14.5px] text-[#1c1917] hover:text-[#2d5a3d] transition-colors rounded-lg hover:bg-[#f0ede8]"
+                    className="px-3.5 py-2 text-[14.5px] text-foreground hover:text-primary transition-colors duration-[var(--duration-fast)] rounded-[var(--radius-md)] hover:bg-secondary relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:w-0 after:bg-accent after:transition-all after:duration-[var(--duration-base)] after:ease-[var(--ease-out-expo)] hover:after:w-5"
                   >
                     {link.label}
                   </Link>
@@ -505,35 +514,35 @@ export default function Navigation() {
               <div className="relative">
                 <button
                   onClick={() => setLangOpen(!langOpen)}
-                  className="flex cursor-pointer items-center gap-1.5 px-2.5 py-2 rounded-lg hover:bg-[#f0ede8] transition-colors text-[#1c1917]"
+                  className="flex cursor-pointer items-center gap-1.5 px-2.5 py-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
                 >
                   {/* Country badge */}
-                  <span className="inline-flex cursor-pointer items-center justify-center px-1.5 py-0.5 rounded-md bg-[#1c1917] text-white text-[9.5px] font-bold tracking-[0.08em] min-w-[22px]">
+                  <span className="inline-flex cursor-pointer items-center justify-center px-1.5 py-0.5 rounded-[var(--radius-xs)] bg-foreground text-background text-[9.5px] font-bold tracking-[0.08em] min-w-[22px]">
                     {langMeta[selectedLang].country}
                   </span>
                   {/* Language code */}
-                  <span className="text-[11px] font-semibold text-[#78746e] uppercase tracking-wide">
+                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
                     {langMeta[selectedLang].code}
                   </span>
                   <ChevronDown
-                    className={`h-3 w-3 text-[#78746e] transition-transform duration-200 ${
+                    className={`h-3 w-3 text-muted-foreground transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
                       langOpen ? "rotate-180" : ""
                     }`}
                   />
                 </button>
 
                 {langOpen && (
-                  <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl border border-[rgba(28,25,23,0.08)] py-1.5 px-1.5 min-w-[190px] z-50">
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-[#78746e] font-semibold px-3 pt-1 pb-2">
+                  <div className="absolute top-full right-0 mt-2 bg-card rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)] border border-border py-1.5 px-1.5 min-w-[190px] z-50 animate-[scale-in_160ms_ease-out]">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-semibold px-3 pt-1 pb-2">
                       Language
                     </p>
                     {Object.entries(langMeta).map(([code, meta]) => (
                       <button
                         key={code}
-                        className={`flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm transition-colors ${
+                        className={`flex items-center justify-between w-full px-3 py-2 rounded-[var(--radius-md)] text-sm transition-colors duration-[var(--duration-fast)] ${
                           selectedLang === code
-                            ? "bg-[#f0f9f4] text-[#2d5a3d] font-semibold"
-                            : "hover:bg-[#f0ede8] text-[#1c1917]"
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : "hover:bg-secondary text-foreground"
                         }`}
                         onClick={() => {
                           setLang(code);
@@ -543,14 +552,14 @@ export default function Navigation() {
                         <span className="flex items-center gap-2.5">
                           {/* Country + code badge */}
                           <span className="inline-flex items-center gap-1 shrink-0">
-                            <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded bg-[#1c1917] text-white text-[9px] font-bold tracking-[0.08em] min-w-[22px]">
+                            <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-[var(--radius-xs)] bg-foreground text-background text-[9px] font-bold tracking-[0.08em] min-w-[22px]">
                               {meta.country}
                             </span>
                             <span
                               className={`text-[10px] font-bold tracking-wider ${
                                 selectedLang === code
-                                  ? "text-[#2d5a3d]"
-                                  : "text-[#78746e]"
+                                  ? "text-primary"
+                                  : "text-muted-foreground"
                               }`}
                             >
                               {meta.code}
@@ -559,7 +568,7 @@ export default function Navigation() {
                           <span>{meta.name}</span>
                         </span>
                         {selectedLang === code && (
-                          <Check className="h-3.5 w-3.5 text-[#2d5a3d] shrink-0" />
+                          <Check className="h-3.5 w-3.5 text-primary shrink-0" />
                         )}
                       </button>
                     ))}
@@ -571,7 +580,7 @@ export default function Navigation() {
               <button
                 onClick={() => setSearchOpen(true)}
                 title="Search products  (Press /)"
-                className="p-2.5 cursor-pointer rounded-lg hover:bg-[#f0ede8] transition-colors text-[#78746e] hover:text-[#1c1917]"
+                className="p-2.5 cursor-pointer rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-muted-foreground hover:text-foreground"
               >
                 <Search className="h-[18px] w-[18px]" />
               </button>
@@ -579,12 +588,12 @@ export default function Navigation() {
               {/* Wishlist */}
               <Link
                 href="/wishlist"
-                className="group relative flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-[#f0ede8] transition-colors text-[#1c1917] cursor-pointer"
+                className="group relative flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground cursor-pointer"
               >
                 <div className="relative cursor-pointer">
                   <Heart className="h-[18px] w-[18px]" />
                   {wishlist.length > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-[#c8a96e] flex items-center justify-center text-[9px] font-bold text-[#1c1917] px-1 leading-none">
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-accent flex items-center justify-center text-[9px] font-bold text-accent-foreground px-1 leading-none shadow-[0_1px_2px_rgba(200,169,110,0.4)]">
                       {wishlist.length}
                     </span>
                   )}
@@ -596,17 +605,17 @@ export default function Navigation() {
               {/* ── Cart ── */}
               <Link
                 href="/cart"
-                className="group relative flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-[#f0ede8] transition-colors text-[#1c1917]"
+                className="group relative flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
               >
                 <div className="relative">
                   <ShoppingBag className="h-[18px] w-[18px]" />
                   {cartCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-[#c8a96e] flex items-center justify-center text-[9px] font-bold text-[#1c1917] px-1 leading-none">
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-accent flex items-center justify-center text-[9px] font-bold text-accent-foreground px-1 leading-none shadow-[0_1px_2px_rgba(200,169,110,0.4)]">
                       {cartCount}
                     </span>
                   )}
                 </div>
-                <span className="text-sm text-[#78746e] group-hover:text-[#1c1917] transition-colors font-medium">
+                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-[var(--duration-fast)] font-medium">
                   {cartCount > 0 ? `Cart (${cartCount})` : "Cart"}
                 </span>
               </Link>
@@ -614,20 +623,18 @@ export default function Navigation() {
               {isLoggedIn ? (
                 <>
                   {userType === 'admin' ? (
-                    <Link
-                      href="/himmat_admin_8526/dashboard"
-                      className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1c1917] text-white text-sm font-semibold rounded-lg hover:bg-[#2d5a3d] transition-all duration-200 group"
-                    >
-                      <LayoutDashboard className="h-3.5 w-3.5 opacity-80 group-hover:opacity-100 transition-opacity" />
-                      {t("nav.dashboard")}
+                    <Link href="/himmat_admin_8526/dashboard" asChild>
+                      <Button variant="secondary" size="sm" className="gap-1.5 ml-1">
+                        <LayoutDashboard className="h-3.5 w-3.5 opacity-80" />
+                        {t("nav.dashboard")}
+                      </Button>
                     </Link>
                   ) : (
-                    <Link
-                      href="/account"
-                      className="flex items-center gap-1.5 px-3.5 py-2 bg-[#2d5a3d] text-white text-sm font-semibold rounded-lg hover:bg-[#234832] transition-all duration-200 group"
-                    >
-                      <User className="h-3.5 w-3.5 opacity-80 group-hover:opacity-100 transition-opacity" />
-                      Account
+                    <Link href="/account" asChild>
+                      <Button variant="primary" size="sm" className="gap-1.5 ml-1">
+                        <User className="h-3.5 w-3.5 opacity-80" />
+                        Account
+                      </Button>
                     </Link>
                   )}
                   <button
@@ -635,20 +642,17 @@ export default function Navigation() {
                       logout();
                       router.push("/");
                     }}
-                    className="flex items-center gap-1.5 px-3.5 py-2 text-[#1c1917] text-sm font-semibold rounded-lg hover:bg-[#f0ede8] transition-all duration-200 group"
+                    className="flex items-center gap-1.5 px-3 py-2 text-foreground text-sm font-semibold rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] group ml-0.5"
                   >
                     <LogOut className="h-3.5 w-3.5 opacity-80 group-hover:opacity-100 transition-opacity" />
                     Logout
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={() => setAuthModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 bg-[#2d5a3d] text-white text-sm font-semibold rounded-lg hover:bg-[#234832] transition-all duration-200 group"
-                >
-                  <User className="h-3.5 w-3.5 opacity-80 group-hover:opacity-100 transition-opacity" />
+                <Button variant="elevated" size="sm" className="gap-1.5 ml-1" onClick={() => setAuthModalOpen(true)}>
+                  <User className="h-3.5 w-3.5 opacity-80" />
                   Sign In
-                </button>
+                </Button>
               )}
             </div>
 
@@ -657,11 +661,11 @@ export default function Navigation() {
               {/* Mobile cart */}
               <Link
                 href="/cart"
-                className="relative p-2 rounded-lg hover:bg-[#f0ede8] transition-colors text-[#1c1917]"
+                className="relative p-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
               >
                 <ShoppingBag className="h-5 w-5" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-[#c8a96e] flex items-center justify-center text-[9px] font-bold text-[#1c1917] px-1">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-accent flex items-center justify-center text-[9px] font-bold text-accent-foreground px-1 shadow-[0_1px_2px_rgba(200,169,110,0.4)]">
                     {cartCount}
                   </span>
                 )}
@@ -669,17 +673,17 @@ export default function Navigation() {
               {/* Mobile wishlist */}
               <Link
                 href="/wishlist"
-                className="relative p-2 rounded-lg hover:bg-[#f0ede8] transition-colors text-[#1c1917]"
+                className="relative p-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
               >
                 <Heart className="h-5 w-5" />
                 {wishlist.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-[#c8a96e] flex items-center justify-center text-[9px] font-bold text-[#1c1917] px-1">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-accent flex items-center justify-center text-[9px] font-bold text-accent-foreground px-1 shadow-[0_1px_2px_rgba(200,169,110,0.4)]">
                     {wishlist.length}
                   </span>
                 )}
               </Link>
               <button
-                className="p-2 rounded-lg hover:bg-[#f0ede8] transition-colors text-[#1c1917]"
+                className="p-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label="Toggle menu"
               >
@@ -700,9 +704,9 @@ export default function Navigation() {
 
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-[59] lg:hidden transition-all duration-300 ${
+        className={`fixed inset-0 z-[59] lg:hidden transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
           mobileOpen
-            ? "bg-[#1c1917]/50 backdrop-blur-sm pointer-events-auto"
+            ? "bg-foreground/45 backdrop-blur-[4px] pointer-events-auto"
             : "bg-transparent pointer-events-none"
         }`}
         onClick={() => setMobileOpen(false)}
@@ -710,17 +714,17 @@ export default function Navigation() {
 
       {/* Drawer panel — slides in from the right */}
       <div
-        className={`fixed top-0 right-0 h-full w-[300px] bg-white z-[60] lg:hidden flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-[310px] bg-card z-[60] lg:hidden flex flex-col shadow-[var(--shadow-2xl)] border-l border-border/50 transition-transform duration-[var(--duration-slow)] ease-[var(--ease-out-expo)] ${
           mobileOpen ? "translate-x-0" : "translate-x-full"
         }`}
         style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         {/* ── Drawer header — brand + close ── */}
-        <div className="flex items-center justify-between px-5 h-[68px] border-b border-[rgba(28,25,23,0.08)] shrink-0">
+        <div className="flex items-center justify-between px-5 h-16 border-b border-border shrink-0">
           <Link
             href="/"
             onClick={() => setMobileOpen(false)}
-            className="flex items-center gap-2.5"
+            className="flex items-center gap-2.5 group"
           >
             <svg
               width="28"
@@ -728,21 +732,22 @@ export default function Navigation() {
               viewBox="0 0 32 32"
               fill="none"
               aria-hidden
+              className="drop-shadow-[0_1px_2px_rgba(45,90,61,0.2)]"
             >
-              <rect width="32" height="32" rx="8" fill="#0b7c33" />
+              <rect width="32" height="32" rx="8" className="fill-primary" />
               <path
                 d="M16 6C16 6 8 12 8 19a8 8 0 0016 0c0-7-8-13-8-13z"
-                fill="#c8a96e"
-                opacity="0.9"
+                className="fill-accent"
+                opacity="0.92"
               />
               <path
                 d="M16 10C16 10 11 15 11 20a5 5 0 0010 0c0-5-5-10-5-10z"
                 fill="white"
-                opacity="0.25"
+                opacity="0.28"
               />
             </svg>
             <span
-              className="text-[1rem] font-semibold tracking-tight text-[#1c1917]"
+              className="text-[1rem] font-semibold tracking-[-0.01em] text-foreground"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
               {BRAND.companyName}
@@ -750,7 +755,7 @@ export default function Navigation() {
           </Link>
           <button
             onClick={() => setMobileOpen(false)}
-            className="p-2 rounded-lg hover:bg-[#f0ede8] transition-colors text-[#78746e]"
+            className="p-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-muted-foreground"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
@@ -768,28 +773,28 @@ export default function Navigation() {
                       mobileExpanded === link.label ? null : link.label,
                     )
                   }
-                  className="w-full flex items-center justify-between px-3 py-3 text-[15px] font-medium text-[#1c1917] rounded-xl hover:bg-[#f0ede8] transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-3 text-[15px] font-medium text-foreground rounded-[var(--radius-lg)] hover:bg-secondary transition-colors duration-[var(--duration-fast)]"
                 >
                   {link.label}
                   <ChevronDown
-                    className={`h-4 w-4 text-[#78746e] transition-transform duration-200 ${
+                    className={`h-4 w-4 text-muted-foreground transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
                       mobileExpanded === link.label ? "rotate-180" : ""
                     }`}
                   />
                 </button>
                 {mobileExpanded === link.label && (
-                  <div className="ml-3 mt-0.5 mb-1 space-y-0.5">
+                  <div className="ml-2 mt-0.5 mb-1 space-y-0.5 border-l border-border pl-2">
                     {link.children.map((child) => (
                       <Link
                         key={child.label}
                         href={child.href}
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center justify-between px-3 py-2.5 text-sm rounded-xl hover:bg-[#f0ede8] transition-colors group"
+                        className="flex items-center justify-between px-3 py-2.5 text-sm rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] group"
                       >
-                        <span className="font-medium text-[#1c1917] group-hover:text-[#2d5a3d] transition-colors">
+                        <span className="font-medium text-foreground group-hover:text-primary transition-colors duration-[var(--duration-fast)]">
                           {child.label}
                         </span>
-                        <span className="text-xs text-[#b0aba4]">
+                        <span className="text-xs text-muted-foreground/80">
                           {child.sub}
                         </span>
                       </Link>
@@ -802,7 +807,7 @@ export default function Navigation() {
                 key={link.label}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="block px-3 py-3 text-[15px] font-medium text-[#1c1917] rounded-xl hover:bg-[#f0ede8] transition-colors"
+                className="block px-3 py-3 text-[15px] font-medium text-foreground rounded-[var(--radius-lg)] hover:bg-secondary transition-colors duration-[var(--duration-fast)]"
               >
                 {link.label}
               </Link>
@@ -811,26 +816,26 @@ export default function Navigation() {
         </div>
 
         {/* ── Drawer footer — language + dashboard/login ── */}
-        <div className="shrink-0 px-4 pb-6 pt-3 border-t border-[rgba(28,25,23,0.08)] space-y-2">
+        <div className="shrink-0 px-4 pb-6 pt-3 border-t border-border space-y-2">
           {/* Language */}
           <div>
             <button
               onClick={() => setLangOpen(!langOpen)}
-              className="w-full flex items-center justify-between px-3 py-3 rounded-xl hover:bg-[#f0ede8] transition-colors"
+              className="w-full flex items-center justify-between px-3 py-3 rounded-[var(--radius-lg)] hover:bg-secondary transition-colors duration-[var(--duration-fast)]"
             >
-              <span className="flex items-center gap-2.5 text-sm font-medium text-[#1c1917]">
-                <Globe className="h-4 w-4 text-[#78746e]" />
+              <span className="flex items-center gap-2.5 text-sm font-medium text-foreground">
+                <Globe className="h-4 w-4 text-muted-foreground" />
                 Language
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded bg-[#1c1917] text-white text-[9px] font-bold tracking-[0.08em] min-w-[22px]">
+                <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-[var(--radius-xs)] bg-foreground text-background text-[9px] font-bold tracking-[0.08em] min-w-[22px]">
                   {langMeta[selectedLang].country}
                 </span>
-                <span className="font-bold uppercase text-[10px] tracking-wider text-[#78746e]">
+                <span className="font-bold uppercase text-[10px] tracking-wider text-muted-foreground">
                   {langMeta[selectedLang].code}
                 </span>
                 <ChevronDown
-                  className={`h-3.5 w-3.5 text-[#78746e] transition-transform duration-200 ${
+                  className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
                     langOpen ? "rotate-180" : ""
                   }`}
                 />
@@ -838,14 +843,14 @@ export default function Navigation() {
             </button>
 
             {langOpen && (
-              <div className="mt-1 mx-2 bg-[#f9f7f4] rounded-xl border border-[rgba(28,25,23,0.07)] p-1.5">
+              <div className="mt-1 mx-2 bg-secondary rounded-[var(--radius-xl)] border-border/60 border p-1.5">
                 {Object.entries(langMeta).map(([code, meta]) => (
                   <button
                     key={code}
-                    className={`flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm transition-colors ${
+                    className={`flex items-center justify-between w-full px-3 py-2 rounded-[var(--radius-md)] text-sm transition-colors duration-[var(--duration-fast)] ${
                       selectedLang === code
-                        ? "bg-white text-[#2d5a3d] font-semibold shadow-sm"
-                        : "hover:bg-white text-[#1c1917]"
+                        ? "bg-card text-primary font-semibold shadow-[var(--shadow-xs)]"
+                        : "hover:bg-card text-foreground"
                     }`}
                     onClick={() => {
                       setLang(code);
@@ -854,14 +859,14 @@ export default function Navigation() {
                   >
                     <span className="flex items-center gap-2.5">
                       <span className="inline-flex items-center gap-1 shrink-0">
-                        <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded bg-[#1c1917] text-white text-[9px] font-bold tracking-[0.08em] min-w-[22px]">
+                        <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-[var(--radius-xs)] bg-foreground text-background text-[9px] font-bold tracking-[0.08em] min-w-[22px]">
                           {meta.country}
                         </span>
                         <span
                           className={`text-[10px] font-bold tracking-wider ${
                             selectedLang === code
-                              ? "text-[#2d5a3d]"
-                              : "text-[#78746e]"
+                              ? "text-primary"
+                              : "text-muted-foreground"
                           }`}
                         >
                           {meta.code}
@@ -870,7 +875,7 @@ export default function Navigation() {
                       <span>{meta.name}</span>
                     </span>
                     {selectedLang === code && (
-                      <Check className="h-3.5 w-3.5 text-[#2d5a3d]" />
+                      <Check className="h-3.5 w-3.5 text-primary" />
                     )}
                   </button>
                 ))}
@@ -881,22 +886,18 @@ export default function Navigation() {
           {isLoggedIn ? (
             <>
               {userType === 'admin' ? (
-                <Link
-                  href="/himmat_admin_8526/dashboard"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#1c1917] text-white text-sm font-semibold rounded-xl hover:bg-[#2d5a3d] transition-colors"
-                >
-                  <LayoutDashboard className="h-4 w-4 opacity-80" />
-                  {t("nav.dashboard")}
+                <Link href="/himmat_admin_8526/dashboard" asChild onClick={() => setMobileOpen(false)}>
+                  <Button variant="secondary" size="sm" className="w-full gap-2 h-11">
+                    <LayoutDashboard className="h-4 w-4 opacity-80" />
+                    {t("nav.dashboard")}
+                  </Button>
                 </Link>
               ) : (
-                <Link
-                  href="/account"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#2d5a3d] text-white text-sm font-semibold rounded-xl hover:bg-[#234832] transition-colors"
-                >
-                  <User className="h-4 w-4 opacity-80" />
-                  Account
+                <Link href="/account" asChild onClick={() => setMobileOpen(false)}>
+                  <Button variant="primary" size="sm" className="w-full gap-2 h-11">
+                    <User className="h-4 w-4 opacity-80" />
+                    Account
+                  </Button>
                 </Link>
               )}
               <button
@@ -905,23 +906,22 @@ export default function Navigation() {
                   setMobileOpen(false);
                   router.push("/");
                 }}
-                className="flex items-center justify-center gap-2 w-full px-4 py-3 text-[#1c1917] text-sm font-semibold rounded-xl hover:bg-[#f0ede8] transition-colors"
+                className="flex items-center justify-center gap-2 w-full px-4 h-11 text-foreground text-sm font-semibold rounded-[var(--radius-lg)] hover:bg-secondary transition-colors duration-[var(--duration-fast)]"
               >
                 <LogOut className="h-4 w-4 opacity-80" />
                 Logout
               </button>
             </>
           ) : (
-            <button
+            <Button variant="primary" size="sm" className="w-full gap-2 h-11"
               onClick={() => {
                 setMobileOpen(false);
                 setAuthModalOpen(true);
               }}
-              className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#2d5a3d] text-white text-sm font-semibold rounded-xl hover:bg-[#234832] transition-colors"
             >
               <User className="h-4 w-4 opacity-80" />
               Sign In
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -933,48 +933,48 @@ export default function Navigation() {
         <>
           {/* Dark backdrop — click to close */}
           <div
-            className="fixed inset-0 z-[100] bg-[#1c1917]/55 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] bg-foreground/50 backdrop-blur-[4px] animate-[fade-in_150ms_ease-out]"
             onClick={() => setSearchOpen(false)}
           />
 
           {/* Modal panel */}
           <div className="fixed top-0 left-0 right-0 z-[101] flex justify-center px-4 pt-[88px] sm:pt-[110px]">
             <div
-              className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden"
+              className="w-full max-w-2xl bg-card rounded-[var(--radius-2xl)] shadow-[var(--shadow-2xl)] border border-border overflow-hidden animate-[slide-down_220ms_ease-[var(--ease-out-expo)]]"
               style={{ fontFamily: "'DM Sans', sans-serif" }}
             >
               {/* ── Search input row ── */}
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-[rgba(28,25,23,0.08)]">
-                <Search className="h-5 w-5 text-[#2d5a3d] shrink-0" />
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
+                <Search className="h-5 w-5 text-primary shrink-0" />
                 <input
                   ref={inputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search teas, origins, types…"
-                  className="flex-1 text-[1.0625rem] text-[#1c1917] placeholder:text-[#b0aba4] outline-none bg-transparent"
+                  className="flex-1 text-[1.0625rem] text-foreground placeholder:text-muted-foreground/70 outline-none bg-transparent"
                 />
                 {/* Clear query button — only when typing */}
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
                     title="Clear"
-                    className="shrink-0 p-1.5 rounded-full hover:bg-[#f0ede8] transition-colors"
+                    className="shrink-0 p-1.5 rounded-full hover:bg-secondary transition-colors duration-[var(--duration-fast)]"
                   >
-                    <X className="h-3.5 w-3.5 text-[#78746e]" />
+                    <X className="h-3.5 w-3.5 text-muted-foreground" />
                   </button>
                 )}
 
                 {/* Divider */}
-                <div className="w-px h-5 bg-[rgba(28,25,23,0.1)] shrink-0" />
+                <div className="w-px h-5 bg-border shrink-0" />
 
                 {/* Close modal button — always visible */}
                 <button
                   onClick={() => setSearchOpen(false)}
                   title="Close search  (Esc)"
-                  className="shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-[#f9f7f4] border border-[rgba(28,25,23,0.10)] hover:bg-[#f0ede8] hover:border-[rgba(28,25,23,0.18)] transition-all"
+                  className="shrink-0 flex items-center justify-center w-8 h-8 rounded-[var(--radius-md)] bg-secondary border border-border hover:bg-secondary/80 hover:border-border/80 transition-all duration-[var(--duration-fast)]"
                 >
-                  <X className="h-4 w-4 text-[#1c1917]" />
+                  <X className="h-4 w-4 text-foreground" />
                 </button>
               </div>
 
@@ -983,46 +983,46 @@ export default function Navigation() {
                 {/* ── Matching results ── */}
                 {searchResults.length > 0 && (
                   <div className="p-3">
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-[#78746e] font-semibold px-2 py-1.5 mb-1">
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold px-2 py-1.5 mb-1">
                       Products — {searchResults.length} found
                     </p>
                     {searchResults.map((product) => (
                       <button
                         key={product.id}
                         onClick={() => handleResultClick(product.id)}
-                        className="w-full flex items-center gap-4 px-3 py-3 rounded-xl hover:bg-[#f9f7f4] transition-colors group text-left"
+                        className="w-full flex items-center gap-4 px-3 py-3 rounded-[var(--radius-lg)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] group text-left"
                       >
                         <img
                           src={product.image}
                           alt={product.name}
-                          className="w-12 h-12 rounded-xl object-cover shrink-0 bg-[#f0ede8]"
+                          className="w-12 h-12 rounded-[var(--radius-lg)] object-cover shrink-0 bg-secondary"
                         />
                         <div className="flex-1 min-w-0">
                           <p
-                            className="font-semibold text-[#1c1917] text-[0.9375rem] group-hover:text-[#2d5a3d] transition-colors truncate leading-snug"
+                            className="font-semibold text-foreground text-[0.9375rem] group-hover:text-primary transition-colors duration-[var(--duration-fast)] truncate leading-snug"
                             style={{ fontFamily: "'Playfair Display', serif" }}
                           >
                             {product.name}
                           </p>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[10px] font-semibold text-[#2d5a3d] bg-[#f0f9f4] px-2 py-0.5 rounded-full">
+                            <span className="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                               {product.productLine}
                             </span>
-                            <span className="text-[#d0cbc4] text-xs">·</span>
-                            <span className="text-xs text-[#78746e]">
+                            <span className="text-border text-xs">·</span>
+                            <span className="text-xs text-muted-foreground">
                               {product.type}
                             </span>
-                            <span className="text-[#d0cbc4] text-xs">·</span>
-                            <span className="text-xs text-[#78746e]">
+                            <span className="text-border text-xs">·</span>
+                            <span className="text-xs text-muted-foreground">
                               {product.origin}
                             </span>
                           </div>
                         </div>
                         <div className="shrink-0 text-right">
-                          <p className="font-semibold text-[#2d5a3d] text-sm">
+                          <p className="font-semibold text-primary text-sm">
                             Rs.&nbsp;{product.price.toLocaleString()}
                           </p>
-                          <ArrowRight className="h-3.5 w-3.5 text-[#c8a96e] ml-auto mt-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                          <ArrowRight className="h-3.5 w-3.5 text-accent ml-auto mt-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)]" />
                         </div>
                       </button>
                     ))}
@@ -1031,7 +1031,7 @@ export default function Navigation() {
                     <Link
                       href="/products"
                       onClick={() => setSearchOpen(false)}
-                      className="flex items-center justify-center gap-2 mt-2 py-2.5 text-sm font-semibold text-[#2d5a3d] hover:bg-[#f0f9f4] rounded-xl transition-colors"
+                      className="flex items-center justify-center gap-2 mt-2 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5 rounded-[var(--radius-lg)] transition-colors duration-[var(--duration-fast)]"
                     >
                       Browse all teas
                       <ArrowRight className="h-3.5 w-3.5" />
@@ -1043,20 +1043,20 @@ export default function Navigation() {
                 {searchQuery.trim().length > 0 &&
                   searchResults.length === 0 && (
                     <div className="px-6 py-12 text-center">
-                      <p className="text-3xl mb-3">🍃</p>
-                      <p className="font-semibold text-[#1c1917] mb-1">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Leaf className="h-8 w-8 text-primary/60" />
+                      </div>
+                      <p className="font-semibold text-foreground mb-1 text-[1.0625rem]" style={{ fontFamily: "'Playfair Display', serif" }}>
                         No teas found for “{searchQuery}”
                       </p>
-                      <p className="text-sm text-[#78746e] mb-5">
+                      <p className="text-sm text-muted-foreground mb-5">
                         Try “green”, “Nepal”, or “herbal”
                       </p>
-                      <Link
-                        href="/products"
-                        onClick={() => setSearchOpen(false)}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2d5a3d] text-white text-sm font-semibold rounded-xl hover:bg-[#244a33] transition-colors"
-                      >
-                        View All Teas
-                        <ArrowRight className="h-4 w-4" />
+                      <Link href="/products" asChild onClick={() => setSearchOpen(false)}>
+                        <Button variant="elevated" size="sm" className="gap-2">
+                          View All Teas
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
                       </Link>
                     </div>
                   )}
@@ -1066,7 +1066,7 @@ export default function Navigation() {
                   <div className="p-4 space-y-5">
                     {/* Quick category links */}
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-[#78746e] font-semibold px-2 mb-3">
+                      <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold px-2 mb-3">
                         Browse by Category
                       </p>
                       <div className="grid grid-cols-2 gap-2">
@@ -1075,12 +1075,12 @@ export default function Navigation() {
                             key={label}
                             href={href}
                             onClick={() => setSearchOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#f9f7f4] hover:bg-[#f0f9f4] border border-[rgba(28,25,23,0.06)] hover:border-[#2d5a3d]/25 transition-all group"
+                            className="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] bg-secondary hover:bg-primary/5 border border-border/40 hover:border-primary/25 transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] group"
                           >
-                            <span className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm border border-[rgba(28,25,23,0.06)] group-hover:bg-[#2d5a3d] transition-colors shrink-0">
-                              <Icon className="h-4 w-4 text-[#2d5a3d] group-hover:text-white transition-colors" />
+                            <span className="w-9 h-9 rounded-[var(--radius-md)] bg-card flex items-center justify-center shadow-[var(--shadow-xs)] border border-border/60 group-hover:bg-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-out-expo)] shrink-0">
+                              <Icon className="h-4 w-4 text-primary group-hover:text-primary-foreground transition-colors duration-[var(--duration-base)] ease-[var(--ease-out-expo)]" />
                             </span>
-                            <span className="text-sm font-medium text-[#1c1917] group-hover:text-[#2d5a3d] transition-colors">
+                            <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors duration-[var(--duration-fast)]">
                               {label}
                             </span>
                           </Link>
@@ -1090,7 +1090,7 @@ export default function Navigation() {
 
                     {/* Trending search terms */}
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-[#78746e] font-semibold px-2 mb-2.5">
+                      <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold px-2 mb-2.5">
                         Trending Searches
                       </p>
                       <div className="flex flex-wrap gap-2 px-1">
@@ -1105,9 +1105,9 @@ export default function Navigation() {
                           <button
                             key={term}
                             onClick={() => setSearchQuery(term)}
-                            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#f9f7f4] border border-[rgba(28,25,23,0.1)] text-sm text-[#1c1917] hover:border-[#2d5a3d]/30 hover:bg-[#f0f9f4] hover:text-[#2d5a3d] transition-all"
+                            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-secondary border border-border/50 text-sm text-foreground hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all duration-[var(--duration-fast)]"
                           >
-                            <Search className="h-3 w-3 text-[#b0aba4]" />
+                            <Search className="h-3 w-3 text-muted-foreground/70" />
                             {term}
                           </button>
                         ))}
