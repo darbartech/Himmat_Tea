@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
 import { getCurrentAdmin } from '@/lib/auth'
+import { sendCustomerPaymentApprovedEmail, sendCustomerPaymentRejectedEmail } from '@/lib/email'
 import { z } from 'zod'
 
 interface Params {
@@ -11,6 +12,7 @@ interface Params {
 const paymentDecisionSchema = z.object({
   decision: z.enum(['PAID', 'FAILED']),
   transactionReference: z.string().optional(),
+  rejectReason: z.string().max(500).optional(),
 }).strict()
 
 const ALLOWED_PAYMENT_TRANSITIONS: Record<string, string[]> = {
@@ -53,7 +55,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       )
     }
 
-    const { decision, transactionReference } = parsed.data
+    const { decision, transactionReference, rejectReason } = parsed.data
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -137,28 +139,47 @@ export async function PATCH(request: NextRequest, { params }: Params) {
           },
         })
 
-        for (const item of order.items) {
-          const prev = await tx.product.findUnique({
-            where: { id: item.productId },
-            select: { stock: true, name: true },
-          })
-          if (prev) {
-            await tx.product.update({
-              where: { id: item.productId },
-              data: { stock: { increment: item.quantity } },
+        const productIds = order.items.map(i => i.productId)
+        const productsBefore = productIds.length > 0
+          ? await tx.product.findMany({
+              where: { id: { in: productIds } },
+              select: { id: true, stock: true, name: true },
             })
-            await tx.inventoryTransaction.create({
-              data: {
+          : []
+        const productMap = new Map(productsBefore.map(p => [p.id, p]))
+
+        if (productIds.length > 0) {
+          const qtyByProduct = new Map<number, number>()
+          for (const item of order.items) {
+            qtyByProduct.set(item.productId, (qtyByProduct.get(item.productId) || 0) + item.quantity)
+          }
+          const ids = Array.from(qtyByProduct.keys())
+          const qtys = ids.map(id => qtyByProduct.get(id) || 0)
+          // Atomic batched increment via CASE — avoids N round-trips
+          await tx.$executeRawUnsafe(
+            `UPDATE "Product" SET "stock" = "stock" + CASE "id" ${ids.map((_, i) => `WHEN ${ids[i]} THEN ${qtys[i]}`).join(' ')} END WHERE "id" IN (${ids.join(',')})`
+          ).catch(() => {})
+
+          // Restored stock (for the inventory-transaction records) = before + qty
+          const txnData = order.items
+            .map(item => {
+              const prev = productMap.get(item.productId)
+              if (!prev) return null
+              const qty = item.quantity
+              return {
                 productId: item.productId,
                 productName: prev.name,
-                type: 'ORDER_CANCELLED_RESTOCK',
-                quantity: item.quantity,
+                type: 'ORDER_CANCELLED_RESTOCK' as const,
+                quantity: qty,
                 previousStock: prev.stock,
-                newStock: prev.stock + item.quantity,
+                newStock: prev.stock + qty,
                 reason: `Payment rejected by admin ${adminUser.username} - stock restored`,
                 referenceId: orderId,
-              },
+              }
             })
+            .filter((x): x is NonNullable<typeof x> => x !== null)
+          if (txnData.length > 0) {
+            await tx.inventoryTransaction.createMany({ data: txnData }).catch(() => {})
           }
         }
 
@@ -183,7 +204,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         await tx.internalNote.create({
           data: {
             orderId,
-            text: `Admin ${adminUser.username} rejected payment (→ FAILED). Order status: ${order.status} → ${newOrderStatus}. Stock restored.${transactionReference ? ` Reference: ${transactionReference}` : ''}`,
+            text: `Admin ${adminUser.username} rejected payment (→ FAILED). Order status: ${order.status} → ${newOrderStatus}. Stock restored.${transactionReference ? ` Reference: ${transactionReference}` : ''}${rejectReason ? ` Reason: ${rejectReason}` : ''}`,
             adminId: String(adminUser.id),
             adminName: adminUser.username,
           },
@@ -193,7 +214,56 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       }
 
       throw new Error('Unhandled decision')
-    })
+    }, { timeout: 15_000, maxWait: 15_000 })
+
+    if (decision === 'PAID' && updated) {
+      const updAny = updated as any
+      const orderNum = updAny.orderNumber || ('orderNumber' in order ? (order as any).orderNumber : String(orderId))
+      const custName = (updAny.customerName as string) || order.customerName
+      const custEmail = (updAny.customerEmail as string) || order.customerEmail
+      const grandTot = Number((updAny.grandTotal as number) ?? order.grandTotal)
+
+      sendCustomerPaymentApprovedEmail({
+        to: custEmail,
+        customerName: custName,
+        orderNumber: orderNum,
+        grandTotal: grandTot,
+      }).catch(err => console.error('[payment] customer email failed', err))
+
+      prisma.notification.create({
+        data: {
+          title: 'Payment verified',
+          message: `Payment confirmed for order ${orderNum}.`,
+          orderId: orderId,
+        }
+      }).catch(() => {})
+    }
+
+    if (decision === 'FAILED' && updated) {
+      const updAny = updated as any
+      const orderNum = updAny.orderNumber || ('orderNumber' in order ? (order as any).orderNumber : String(orderId))
+      const custName = (updAny.customerName as string) || order.customerName
+      const custEmail = (updAny.customerEmail as string) || order.customerEmail
+      const grandTot = Number((updAny.grandTotal as number) ?? order.grandTotal)
+
+      sendCustomerPaymentRejectedEmail({
+        to: custEmail,
+        customerName: custName,
+        orderNumber: orderNum,
+        grandTotal: grandTot,
+        reason: rejectReason,
+      }).catch(err => console.error('[payment] customer reject email failed', err))
+
+      prisma.notification.create({
+        data: {
+          title: 'Payment not verified',
+          message: rejectReason
+            ? `Payment for order ${orderNum} was rejected. ${rejectReason}`
+            : `Payment for order ${orderNum} was rejected. The order has been cancelled.`,
+          orderId: orderId,
+        }
+      }).catch(() => {})
+    }
 
     return createResponse({ success: true, data: updated })
   } catch (error) {

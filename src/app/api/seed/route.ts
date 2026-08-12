@@ -21,7 +21,7 @@ export async function POST() {
       return createResponse({ message: 'Database already seeded' })
     }
 
-    const passwordHash = await bcrypt.hash('admin123', 10)
+    const passwordHash = await bcrypt.hash('admin123', 12)
 
     await prisma.adminUser.create({
       data: {

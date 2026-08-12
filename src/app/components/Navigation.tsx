@@ -623,24 +623,25 @@ export default function Navigation() {
               {isLoggedIn ? (
                 <>
                   {userType === 'admin' ? (
-                    <Link href="/himmat_admin_8526/dashboard" asChild>
-                      <Button variant="secondary" size="sm" className="gap-1.5 ml-1">
+                    <Button asChild variant="secondary" size="sm" className="gap-1.5 ml-1">
+                      <Link href="/himmat_admin_8526/dashboard">
                         <LayoutDashboard className="h-3.5 w-3.5 opacity-80" />
                         {t("nav.dashboard")}
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   ) : (
-                    <Link href="/account" asChild>
-                      <Button variant="primary" size="sm" className="gap-1.5 ml-1">
+                    <Button asChild variant="primary" size="sm" className="gap-1.5 ml-1">
+                      <Link href="/account">
                         <User className="h-3.5 w-3.5 opacity-80" />
                         Account
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   )}
                   <button
-                    onClick={() => {
-                      logout();
-                      router.push("/");
+                    onClick={async () => {
+                      await logout();
+                      router.replace("/");
+                      router.refresh();
                     }}
                     className="flex items-center gap-1.5 px-3 py-2 text-foreground text-sm font-semibold rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] group ml-0.5"
                   >
@@ -886,25 +887,26 @@ export default function Navigation() {
           {isLoggedIn ? (
             <>
               {userType === 'admin' ? (
-                <Link href="/himmat_admin_8526/dashboard" asChild onClick={() => setMobileOpen(false)}>
-                  <Button variant="secondary" size="sm" className="w-full gap-2 h-11">
+                <Button asChild variant="secondary" size="sm" className="w-full gap-2 h-11" onClick={() => setMobileOpen(false)}>
+                  <Link href="/himmat_admin_8526/dashboard">
                     <LayoutDashboard className="h-4 w-4 opacity-80" />
                     {t("nav.dashboard")}
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               ) : (
-                <Link href="/account" asChild onClick={() => setMobileOpen(false)}>
-                  <Button variant="primary" size="sm" className="w-full gap-2 h-11">
+                <Button asChild variant="primary" size="sm" className="w-full gap-2 h-11" onClick={() => setMobileOpen(false)}>
+                  <Link href="/account">
                     <User className="h-4 w-4 opacity-80" />
                     Account
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               )}
               <button
-                onClick={() => {
-                  logout();
+                onClick={async () => {
+                  await logout();
                   setMobileOpen(false);
-                  router.push("/");
+                  router.replace("/");
+                  router.refresh();
                 }}
                 className="flex items-center justify-center gap-2 w-full px-4 h-11 text-foreground text-sm font-semibold rounded-[var(--radius-lg)] hover:bg-secondary transition-colors duration-[var(--duration-fast)]"
               >
@@ -1052,12 +1054,12 @@ export default function Navigation() {
                       <p className="text-sm text-muted-foreground mb-5">
                         Try “green”, “Nepal”, or “herbal”
                       </p>
-                      <Link href="/products" asChild onClick={() => setSearchOpen(false)}>
-                        <Button variant="elevated" size="sm" className="gap-2">
+                      <Button asChild variant="elevated" size="sm" className="gap-2" onClick={() => setSearchOpen(false)}>
+                        <Link href="/products">
                           View All Teas
                           <ArrowRight className="h-4 w-4" />
-                        </Button>
-                      </Link>
+                        </Link>
+                      </Button>
                     </div>
                   )}
 

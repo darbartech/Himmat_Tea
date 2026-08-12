@@ -77,7 +77,7 @@ export default function Checkout() {
   const { t } = useTranslation();
   const router = useRouter();
   const { cart, cartTotal, clearCart } = useCart();
-  const { addOrder, settings: fallbackSettings } = useStore();
+  const { settings: fallbackSettings } = useStore();
   const { isLoggedIn, userType, currentUser } = useAuth();
   const [step, setStep] = useState(1);
   const [saveAddress, setSaveAddress] = useState(false);
@@ -269,9 +269,6 @@ export default function Checkout() {
 
       const response: any = await api.post('/orders', orderData);
       const createdOrder = response?.data || response;
-      if (addOrder && createdOrder) {
-        try { addOrder(createdOrder) } catch (_) { /* noop */ }
-      }
       clearCart();
       idempotencyKeyRef.current = null;
 

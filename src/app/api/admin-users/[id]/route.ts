@@ -57,7 +57,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       if (!pwResult.success) {
         return createErrorResponse(pwResult.error.issues[0].message, 400)
       }
-      data.passwordHash = await bcrypt.hash(password, 10)
+      data.passwordHash = await bcrypt.hash(password, 12)
     }
 
     const adminUser = await prisma.adminUser.update({

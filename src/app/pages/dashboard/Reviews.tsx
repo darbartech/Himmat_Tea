@@ -56,7 +56,7 @@ const Reviews = () => {
         {["All", "Pending", "Approved", "Rejected"].map((status) => (
           <Button
             key={status}
-            variant={filter === status ? "default" : "ghost"}
+            variant={filter === status ? "primary" : "ghost"}
             onClick={() => setFilter(status as any)}
             className={filter === status ? "bg-[#2d5a3d] hover:bg-[#0b7c33]" : "text-[#78746e]"}
           >

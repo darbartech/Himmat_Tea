@@ -1,14 +1,18 @@
-const API_BASE = '/api'
+const API_BASE = "/api";
 
 export class ApiError extends Error {
-  status: number
-  body: unknown
+  status: number;
+  body: unknown;
 
-  constructor(message: string, status: number, body?: unknown) {
-    super(message)
-    this.name = 'ApiError'
-    this.status = status
-    this.body = body
+  constructor(
+    message: string,
+    status: number,
+    body?: unknown
+  ) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.body = body;
   }
 }
 
@@ -17,63 +21,95 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${API_BASE}${endpoint}`
-    const response = await fetch(url, {
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-      },
-      ...options
-    })
+    const url = `${API_BASE}${endpoint}`;
 
-    let body: unknown = null
-    let bodyText: string | null = null
+    const response = await fetch(url, {
+      ...options,
+
+      credentials: "include",
+
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+    });
+
+    let body: unknown = null;
+    let bodyText: string | null = null;
 
     try {
-      bodyText = await response.text()
-      body = bodyText ? JSON.parse(bodyText) : null
+      bodyText = await response.text();
+      body = bodyText ? JSON.parse(bodyText) : null;
     } catch {
-      body = bodyText
+      body = bodyText;
     }
 
     if (!response.ok) {
-      const bodyObj = body as { error?: string } | null
-      const msg = bodyObj?.error || (typeof body === 'string' ? body : `API Error: ${response.status}`)
-      throw new ApiError(msg, response.status, body)
+      const bodyObj = body as {
+        error?: string;
+      } | null;
+
+      const message =
+        bodyObj?.error ||
+        (typeof body === "string"
+          ? body
+          : `API Error: ${response.status}`);
+
+      throw new ApiError(
+        message,
+        response.status,
+        body
+      );
     }
 
-    return body as T
+    return body as T;
   }
 
-  async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' })
-  }
-
-  async post<T>(endpoint: string, data: unknown): Promise<T> {
+  async get<T>(
+    endpoint: string
+  ): Promise<T> {
     return this.request<T>(endpoint, {
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
+      method: "GET",
+    });
   }
 
-  async put<T>(endpoint: string, data: unknown): Promise<T> {
+  async post<T>(
+    endpoint: string,
+    data: unknown
+  ): Promise<T> {
     return this.request<T>(endpoint, {
-      method: 'PUT',
-      body: JSON.stringify(data)
-    })
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   }
 
-  async patch<T>(endpoint: string, data: unknown): Promise<T> {
+  async put<T>(
+    endpoint: string,
+    data: unknown
+  ): Promise<T> {
     return this.request<T>(endpoint, {
-      method: 'PATCH',
-      body: JSON.stringify(data)
-    })
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
   }
 
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' })
+  async patch<T>(
+    endpoint: string,
+    data: unknown
+  ): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async delete<T>(
+    endpoint: string
+  ): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: "DELETE",
+    });
   }
 }
 
-export const api = new ApiClient()
+export const api = new ApiClient();

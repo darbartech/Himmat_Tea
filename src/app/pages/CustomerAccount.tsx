@@ -58,25 +58,26 @@ interface ApiResponse<T> {
 
 export default function CustomerAccount() {
   const [activeTab, setActiveTab] = useState<'orders' | 'profile'>('orders');
-  const { currentUser, userType, logout } = useAuth();
+  const { currentUser, userType, logout, isLoading: authLoading, isLoggedIn } = useAuth();
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 5;
 
   useEffect(() => {
-    if (!currentUser || userType !== 'customer') {
+    if (authLoading) return;
+    if (!isLoggedIn || !currentUser || userType !== 'customer') {
       router.replace('/customer-auth?redirect=/account');
     }
-  }, [currentUser, userType, router]);
+  }, [isLoggedIn, currentUser, userType, authLoading, router]);
 
   const fetchOrders = async () => {
     try {
-      setIsLoading(true);
+      setOrdersLoading(true);
       setError(null);
       const response = await api.get<ApiResponse<Order[]>>('/orders');
       if (response.success && response.data) {
@@ -86,17 +87,25 @@ export default function CustomerAccount() {
       console.error('Failed to fetch orders:', err);
       setError(err.message || 'Failed to load orders. Please try again.');
     } finally {
-      setIsLoading(false);
+      setOrdersLoading(false);
     }
   };
 
   useEffect(() => {
-    if (currentUser && userType === 'customer') {
+    if (!authLoading && currentUser && userType === 'customer') {
       fetchOrders();
     }
-  }, [currentUser, userType]);
+  }, [currentUser, userType, authLoading]);
 
-  if (!currentUser || userType !== 'customer') {
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#f9f7f4] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2d5a3d]"></div>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn || !currentUser || userType !== 'customer') {
     return null;
   }
 
@@ -195,9 +204,10 @@ export default function CustomerAccount() {
                   <div className="h-px bg-[rgba(28,25,23,0.06)] my-3" />
 
                   <button
-                    onClick={() => {
-                      logout();
-                      router.push('/');
+                    onClick={async () => {
+                      await logout();
+                      router.replace('/');
+                      router.refresh();
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all"
                   >
@@ -220,15 +230,15 @@ export default function CustomerAccount() {
                       </h2>
                       <button
                         onClick={fetchOrders}
-                        disabled={isLoading}
+                        disabled={ordersLoading}
                         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#2d5a3d] hover:bg-[#2d5a3d]/5 rounded-lg transition-colors disabled:opacity-50"
                       >
-                        <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`h-4 w-4 ${ordersLoading ? 'animate-spin' : ''}`} />
                         Refresh
                       </button>
                     </div>
 
-                    {isLoading ? (
+                    {ordersLoading ? (
                       <div className="text-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2d5a3d] mx-auto mb-4"></div>
                         <p className="text-lg font-medium text-[#1c1917]">Loading your orders...</p>

@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { ArrowRight, Lock, Mail } from 'lucide-react';
 import { loginFormSchema, LoginFormData } from './validation';
+import { useAuth } from '@/context/AuthContext';
 
 /**
  * Props for the LoginForm component
@@ -40,6 +41,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   className = ''
 }) => {
   const router = useRouter();
+  const { customerLogin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -66,34 +68,27 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setApiError(null);
 
     try {
-      const response = await fetch('/api/customer/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password
-        }),
-      });
+      const success = await customerLogin(data.email, data.password);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Invalid credentials');
+      if (!success) {
+        throw new Error('Invalid credentials');
       }
 
-      // Reset form on success
       reset();
-      
-      // Call success callback
+
       if (onSuccess) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(
+            `[AUTH] LoginForm success → delegating redirect to onSuccess callback, redirectTo=${redirectTo}`
+          );
+        }
         onSuccess();
-      }
-      
-      // Redirect if specified
-      if (redirectTo && typeof window !== 'undefined') {
+      } else if (redirectTo && typeof window !== 'undefined') {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[AUTH] LoginForm → self-redirecting to ${redirectTo}`);
+        }
         router.replace(redirectTo);
+        router.refresh();
       }
 
     } catch (error) {

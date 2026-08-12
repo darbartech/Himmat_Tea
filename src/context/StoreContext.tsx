@@ -758,280 +758,42 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [settings, setSettings] = useState<StoreContextType["settings"]>(defaultSettings);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(samplePurchaseOrders);
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>(sampleAdminUsers);
-  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize from localStorage on mount
+  // Purge any stale StoreContext content that older versions of the app may have
+  // left in localStorage. PII keys (orders, customers, admin_users, notifications,
+  // settings, purchase_orders, inventory_transactions) were never persisted by
+  // the current StoreContext, but we wipe them too for belt-and-suspenders safety.
   useEffect(() => {
     if (typeof window === "undefined") return;
     queueMicrotask(() => {
-      // Product Lines
-      const savedProductLines = localStorage.getItem("godgifted_product_lines");
-      if (savedProductLines) {
+      const keysToRemove = [
+        "godgifted_product_lines",
+        "godgifted_hero_visuals",
+        "godgifted_products",
+        "godgifted_blog_posts",
+        "godgifted_reviews",
+        "godgifted_coupons",
+        "godgifted_collections",
+        "godgifted_brewing_guides",
+        "godgifted_faqs",
+        "godgifted_about_page",
+        "godgifted_orders",
+        "godgifted_customers",
+        "godgifted_admin_users",
+        "godgifted_settings",
+        "godgifted_notifications",
+        "godgifted_purchase_orders",
+        "godgifted_inventory_transactions",
+      ];
+      for (const k of keysToRemove) {
         try {
-          setProductLines(JSON.parse(savedProductLines));
-        } catch {}
+          localStorage.removeItem(k);
+        } catch { /* noop — private mode etc. */ }
       }
-
-      // Hero Visuals
-      const savedHeroVisuals = localStorage.getItem("godgifted_hero_visuals");
-      if (savedHeroVisuals) {
-        try {
-          setHeroVisuals(JSON.parse(savedHeroVisuals));
-        } catch {}
-      }
-      
-      // Products
-      const savedProducts = localStorage.getItem("godgifted_products");
-      if (savedProducts) {
-        try {
-          const parsed = JSON.parse(savedProducts) as Product[];
-          setProducts(parsed.map((product: Product) => ({
-            ...product,
-            batches: product.batches || [],
-            productVariants: product.productVariants || [],
-            variantOptions: product.variantOptions || [],
-            reviews: product.reviews || [],
-          })));
-        } catch {}
-      }
-
-      // Inventory Transactions
-      const savedInventory = localStorage.getItem("godgifted_inventory_transactions");
-      if (savedInventory) {
-        try {
-          setInventoryTransactions(JSON.parse(savedInventory));
-        } catch {}
-      }
-
-      // Orders
-      const savedOrders = localStorage.getItem("godgifted_orders");
-      if (savedOrders) {
-        try {
-          const parsed = JSON.parse(savedOrders) as Order[];
-          setOrders(parsed.map((order: Order) => ({
-            ...order,
-            internalNotes: order.internalNotes || [],
-            trackingNumber: order.trackingNumber || undefined,
-            courierPartner: order.courierPartner || undefined,
-            refundReason: order.refundReason || undefined,
-            refundAmount: order.refundAmount || undefined,
-          })));
-        } catch {}
-      }
-
-      // Customers
-      const savedCustomers = localStorage.getItem("godgifted_customers");
-      if (savedCustomers) {
-        try {
-          const parsed = JSON.parse(savedCustomers) as Customer[];
-          setCustomers(parsed.map((customer: Customer) => ({
-            ...customer,
-            loyaltyPoints: customer.loyaltyPoints || 0,
-            tier: customer.tier || "Bronze",
-            createdAt: customer.createdAt || new Date().toISOString(),
-          })));
-        } catch {}
-      }
-
-      // Notifications
-      const savedNotifications = localStorage.getItem("godgifted_notifications");
-      if (savedNotifications) {
-        try {
-          setNotifications(JSON.parse(savedNotifications));
-        } catch {}
-      }
-
-      // Blog Posts
-      const savedBlogPosts = localStorage.getItem("godgifted_blog_posts");
-      if (savedBlogPosts) {
-        try {
-          setBlogPosts(JSON.parse(savedBlogPosts));
-        } catch {}
-      }
-
-      // Reviews
-      const savedReviews = localStorage.getItem("godgifted_reviews");
-      if (savedReviews) {
-        try {
-          setReviews(JSON.parse(savedReviews));
-        } catch {}
-      }
-
-      // Coupons
-      const savedCoupons = localStorage.getItem("godgifted_coupons");
-      if (savedCoupons) {
-        try {
-          setCoupons(JSON.parse(savedCoupons));
-        } catch {}
-      }
-
-      // Collections
-      const savedCollections = localStorage.getItem("godgifted_collections");
-      if (savedCollections) {
-        try {
-          setCollections(JSON.parse(savedCollections));
-        } catch {}
-      }
-
-      // Brewing Guides
-      const savedBrewingGuides = localStorage.getItem("godgifted_brewing_guides");
-      if (savedBrewingGuides) {
-        try {
-          setBrewingGuides(JSON.parse(savedBrewingGuides));
-        } catch {}
-      }
-
-      // FAQs
-      const savedFaqs = localStorage.getItem("godgifted_faqs");
-      if (savedFaqs) {
-        try {
-          setFaqs(JSON.parse(savedFaqs));
-        } catch {}
-      }
-
-      // About Page
-      const savedAboutPage = localStorage.getItem("godgifted_about_page");
-      if (savedAboutPage) {
-        try {
-          setAboutPage(JSON.parse(savedAboutPage));
-        } catch {}
-      }
-
-      // Settings
-      const savedSettings = localStorage.getItem("godgifted_settings");
-      if (savedSettings) {
-        try {
-          setSettings(JSON.parse(savedSettings));
-        } catch {}
-      }
-
-      // Purchase Orders
-      const savedPurchaseOrders = localStorage.getItem("godgifted_purchase_orders");
-      if (savedPurchaseOrders) {
-        try {
-          setPurchaseOrders(JSON.parse(savedPurchaseOrders));
-        } catch {}
-      }
-
-      // Admin Users
-      const savedAdminUsers = localStorage.getItem("godgifted_admin_users");
-      if (savedAdminUsers) {
-        try {
-          const parsed = JSON.parse(savedAdminUsers);
-          const defaultAdmin = parsed.find((u: AdminUser) => u.username === "admin");
-          if (defaultAdmin && defaultAdmin.passwordHash === ADMIN_PASSWORD_HASH) {
-            setAdminUsers(parsed);
-          }
-        } catch {}
-      }
-
-      setIsInitialized(true);
     });
   }, []);
 
   const loyaltyProgram = loyaltyProgramConfig;
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_product_lines", JSON.stringify(productLines));
-    }
-  }, [productLines, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_hero_visuals", JSON.stringify(heroVisuals));
-    }
-  }, [heroVisuals, isInitialized]);
-  
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_products", JSON.stringify(products));
-    }
-  }, [products, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_inventory_transactions", JSON.stringify(inventoryTransactions));
-    }
-  }, [inventoryTransactions, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_orders", JSON.stringify(orders));
-    }
-  }, [orders, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_customers", JSON.stringify(customers));
-    }
-  }, [customers, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_notifications", JSON.stringify(notifications));
-    }
-  }, [notifications, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_blog_posts", JSON.stringify(blogPosts));
-    }
-  }, [blogPosts, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_reviews", JSON.stringify(reviews));
-    }
-  }, [reviews, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_coupons", JSON.stringify(coupons));
-    }
-  }, [coupons, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_collections", JSON.stringify(collections));
-    }
-  }, [collections, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_brewing_guides", JSON.stringify(brewingGuides));
-    }
-  }, [brewingGuides, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_faqs", JSON.stringify(faqs));
-    }
-  }, [faqs, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_about_page", JSON.stringify(aboutPage));
-    }
-  }, [aboutPage, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_settings", JSON.stringify(settings));
-    }
-  }, [settings, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_purchase_orders", JSON.stringify(purchaseOrders));
-    }
-  }, [purchaseOrders, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && typeof window !== "undefined") {
-      localStorage.setItem("godgifted_admin_users", JSON.stringify(adminUsers));
-    }
-  }, [adminUsers, isInitialized]);
 
   // Helper function to hash passwords (simple SHA-256 for demo)
   const hashPassword = async (password: string): Promise<string> => {

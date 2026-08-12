@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       return createErrorResponse(pwResult.error.issues[0].message, 400)
     }
 
-    const passwordHash = await bcrypt.hash(password, 10)
+    const passwordHash = await bcrypt.hash(password, 12)
 
     const adminUser = await prisma.adminUser.create({
       data: {

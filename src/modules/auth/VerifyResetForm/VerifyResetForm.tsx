@@ -9,8 +9,6 @@ interface VerifyResetFormProps {
   className?: string;
 }
 
-export const RESET_TOKEN_STORAGE_KEY = 'himmat_reset_token';
-
 export const VerifyResetForm: React.FC<VerifyResetFormProps> = ({
   email,
   className = ''
@@ -45,12 +43,6 @@ export const VerifyResetForm: React.FC<VerifyResetFormProps> = ({
 
       if (!response.ok) {
         throw new Error(result.error || result.message || 'Invalid or expired code');
-      }
-
-      try {
-        sessionStorage.setItem(RESET_TOKEN_STORAGE_KEY, result.resetToken);
-      } catch {
-        // sessionStorage may be unavailable; rely on the server-issued code only.
       }
 
       router.push('/reset-password');
