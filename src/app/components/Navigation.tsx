@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Menu,
   X,
@@ -187,15 +187,26 @@ export default function Navigation() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   const { lang: selectedLang, setLang, t } = useTranslation();
   const { cartCount } = useCart();
-  const { isLoggedIn, logout, userType } = useAuth();
+  const { isLoggedIn, logout, userType, currentUser, isLoading } = useAuth();
   const { wishlist } = useWishlist();
   const { productLines, products } = useStore();
+
+  const authReady = !isLoading;
+  const showLoggedInState = authReady && isLoggedIn;
+
+  const loggedInUserName = currentUser
+    ? (userType === "admin" ? "username" in currentUser ? currentUser.username : "Admin" : "name" in currentUser ? currentUser.name : "User")
+    : "User";
+  const loggedInUserInitial = loggedInUserName.trim().charAt(0).toUpperCase() || "U";
 
   /* Auto-focus input when modal opens */
   useEffect(() => {
@@ -211,20 +222,36 @@ export default function Navigation() {
   /* Close on Escape */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSearchOpen(false);
+      if (e.key === "Escape") {
+        setSearchOpen(false);
+        setProfileMenuOpen(false);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  useEffect(() => {
+    if (!profileMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileMenuOpen]);
+
   const searchResults =
     searchQuery.trim().length > 0
       ? SEARCH_PRODUCTS.filter(
-          (p) =>
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.origin.toLowerCase().includes(searchQuery.toLowerCase()),
-        )
+        (p) =>
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.origin.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
       : [];
 
   const handleResultClick = (id: string) => {
@@ -315,14 +342,15 @@ export default function Navigation() {
 
   const current = ANNOUNCEMENTS[announcementIdx];
 
+  const isActivePath = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
-          scrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${scrolled
             ? "bg-card shadow-[var(--shadow-md)] border-b border-border/60"
             : "bg-card/80 backdrop-blur-[10px]"
-        }`}
+          }`}
         style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         {/* ══════════════════════════════════════════════════
@@ -391,11 +419,10 @@ export default function Navigation() {
                     key={i}
                     onClick={() => setAnnouncementIdx(i)}
                     aria-label={`Go to announcement ${i + 1}`}
-                    className={`rounded-full transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
-                      i === announcementIdx
+                    className={`rounded-full transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${i === announcementIdx
                         ? "w-3.5 h-1.5 bg-accent"
                         : "w-1.5 h-1.5 bg-white/25 hover:bg-white/45"
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -410,10 +437,10 @@ export default function Navigation() {
           <div className="flex items-center justify-between h-16">
             {/* ── Logo ── */}
             <Link
-                href="/"
-                className="flex items-center gap-2.5 shrink-0 group"
-                onClick={() => setMobileOpen(false)}
-              >
+              href="/"
+              className="flex items-center gap-2.5 shrink-0 group"
+              onClick={() => setMobileOpen(false)}
+            >
               <div className="relative transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] group-hover:scale-[1.03]">
                 <svg
                   width="32"
@@ -451,8 +478,10 @@ export default function Navigation() {
 
             {/* ── Desktop Nav links ── */}
             <nav className="hidden lg:flex items-center gap-0.5">
-              {navLinks.map((link) =>
-                link.children ? (
+              {navLinks.map((link) => {
+                const isActive = isActivePath(link.href);
+
+                return link.children ? (
                   <div
                     key={link.label}
                     className="relative"
@@ -461,13 +490,11 @@ export default function Navigation() {
                   >
                     <Link
                       href={link.href}
-                      className="flex items-center gap-1 px-3.5 py-2 text-[14.5px] text-foreground hover:text-primary transition-colors duration-[var(--duration-fast)] rounded-[var(--radius-md)] hover:bg-secondary relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:w-0 after:bg-accent after:transition-all after:duration-[var(--duration-base)] after:ease-[var(--ease-out-expo)] hover:after:w-5"
+                      className={`flex items-center gap-1 px-3.5 py-2 text-[14.5px] transition-colors duration-[var(--duration-fast)] rounded-[var(--radius-md)] relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:bg-accent after:transition-all after:duration-[var(--duration-base)] after:ease-[var(--ease-out-expo)] ${isActive ? "text-primary after:w-5" : "text-foreground hover:text-primary after:w-0 hover:after:w-5"}`}
                     >
                       {link.label}
                       <ChevronDown
-                        className={`h-3 w-3 transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] text-muted-foreground ${
-                          activeDropdown === link.label ? "rotate-180" : ""
-                        }`}
+                        className={`h-3 w-3 transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] text-muted-foreground ${activeDropdown === link.label ? "rotate-180" : ""}`}
                       />
                     </Link>
 
@@ -478,10 +505,10 @@ export default function Navigation() {
                             <Link
                               key={child.label}
                               href={child.href}
-                              className="relative flex flex-col px-3.5 py-2.5 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] group pl-4"
+                              className={`relative flex flex-col px-3.5 py-2.5 rounded-[var(--radius-md)] transition-colors duration-[var(--duration-fast)] group pl-4 ${isActivePath(child.href) ? "bg-secondary text-primary" : "hover:bg-secondary text-foreground"}`}
                             >
-                              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-0 rounded-r-full bg-accent transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] group-hover:h-5" />
-                              <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors duration-[var(--duration-fast)]">
+                              <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full bg-accent transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${isActivePath(child.href) ? "h-5" : "h-0 group-hover:h-5"}`} />
+                              <span className={`text-sm font-medium transition-colors duration-[var(--duration-fast)] ${isActivePath(child.href) ? "text-primary" : "text-foreground group-hover:text-primary"}`}>
                                 {child.label}
                               </span>
                               <span className="text-xs text-muted-foreground mt-0.5">
@@ -497,12 +524,12 @@ export default function Navigation() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="px-3.5 py-2 text-[14.5px] text-foreground hover:text-primary transition-colors duration-[var(--duration-fast)] rounded-[var(--radius-md)] hover:bg-secondary relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:w-0 after:bg-accent after:transition-all after:duration-[var(--duration-base)] after:ease-[var(--ease-out-expo)] hover:after:w-5"
+                    className={`cursor-pointer px-3.5 py-2 text-[14.5px] transition-colors duration-[var(--duration-fast)] rounded-[var(--radius-md)] relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:bg-accent after:transition-all after:duration-[var(--duration-base)] after:ease-[var(--ease-out-expo)] ${isActive ? "text-primary after:w-5" : "text-foreground hover:text-primary after:w-0 hover:after:w-5"}`}
                   >
                     {link.label}
                   </Link>
-                ),
-              )}
+                );
+              })}
             </nav>
 
             {/* ══════════════════════════════════════════════
@@ -510,25 +537,14 @@ export default function Navigation() {
             ══════════════════════════════════════════════ */}
             <div className="hidden lg:flex items-center gap-1">
 
-               {/* ── Language selector ── */}
+              {/* ── Language selector ── */}
               <div className="relative">
                 <button
                   onClick={() => setLangOpen(!langOpen)}
-                  className="flex cursor-pointer items-center gap-1.5 px-2.5 py-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
+                  className="flex cursor-pointer items-center justify-center w-9 h-9 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground cursor-pointer"
+                  aria-label="Select language"
                 >
-                  {/* Country badge */}
-                  <span className="inline-flex cursor-pointer items-center justify-center px-1.5 py-0.5 rounded-[var(--radius-xs)] bg-foreground text-background text-[9.5px] font-bold tracking-[0.08em] min-w-[22px]">
-                    {langMeta[selectedLang].country}
-                  </span>
-                  {/* Language code */}
-                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                    {langMeta[selectedLang].code}
-                  </span>
-                  <ChevronDown
-                    className={`h-3 w-3 text-muted-foreground transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
-                      langOpen ? "rotate-180" : ""
-                    }`}
-                  />
+                  <Globe className="h-[18px] w-[18px] text-muted-foreground" />
                 </button>
 
                 {langOpen && (
@@ -539,34 +555,16 @@ export default function Navigation() {
                     {Object.entries(langMeta).map(([code, meta]) => (
                       <button
                         key={code}
-                        className={`flex items-center justify-between w-full px-3 py-2 rounded-[var(--radius-md)] text-sm transition-colors duration-[var(--duration-fast)] ${
-                          selectedLang === code
+                        className={`flex items-center justify-between w-full px-3 py-2 rounded-[var(--radius-md)] text-sm transition-colors duration-[var(--duration-fast)] ${selectedLang === code
                             ? "bg-primary/10 text-primary font-semibold"
                             : "hover:bg-secondary text-foreground"
-                        }`}
+                          }`}
                         onClick={() => {
                           setLang(code);
                           setLangOpen(false);
                         }}
                       >
-                        <span className="flex items-center gap-2.5">
-                          {/* Country + code badge */}
-                          <span className="inline-flex items-center gap-1 shrink-0">
-                            <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-[var(--radius-xs)] bg-foreground text-background text-[9px] font-bold tracking-[0.08em] min-w-[22px]">
-                              {meta.country}
-                            </span>
-                            <span
-                              className={`text-[10px] font-bold tracking-wider ${
-                                selectedLang === code
-                                  ? "text-primary"
-                                  : "text-muted-foreground"
-                              }`}
-                            >
-                              {meta.code}
-                            </span>
-                          </span>
-                          <span>{meta.name}</span>
-                        </span>
+                        <span>{meta.name}</span>
                         {selectedLang === code && (
                           <Check className="h-3.5 w-3.5 text-primary shrink-0" />
                         )}
@@ -585,27 +583,11 @@ export default function Navigation() {
                 <Search className="h-[18px] w-[18px]" />
               </button>
 
-              {/* Wishlist */}
-              <Link
-                href="/wishlist"
-                className="group relative flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground cursor-pointer"
-              >
-                <div className="relative cursor-pointer">
-                  <Heart className="h-[18px] w-[18px]" />
-                  {wishlist.length > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-accent flex items-center justify-center text-[9px] font-bold text-accent-foreground px-1 leading-none shadow-[0_1px_2px_rgba(200,169,110,0.4)]">
-                      {wishlist.length}
-                    </span>
-                  )}
-                </div>
-              </Link>
-
-             
-
               {/* ── Cart ── */}
               <Link
                 href="/cart"
-                className="group relative flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
+                className="group relative flex items-center justify-center p-2.5 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground cursor-pointer"
+                aria-label="Cart"
               >
                 <div className="relative">
                   <ShoppingBag className="h-[18px] w-[18px]" />
@@ -615,76 +597,133 @@ export default function Navigation() {
                     </span>
                   )}
                 </div>
-                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-[var(--duration-fast)] font-medium">
-                  {cartCount > 0 ? `Cart (${cartCount})` : "Cart"}
-                </span>
               </Link>
 
-              {isLoggedIn ? (
-                <>
-                  {userType === 'admin' ? (
-                    <Button asChild variant="secondary" size="sm" className="gap-1.5 ml-1">
-                      <Link href="/himmat_admin_8526/dashboard">
-                        <LayoutDashboard className="h-3.5 w-3.5 opacity-80" />
-                        {t("nav.dashboard")}
-                      </Link>
-                    </Button>
+              <div className="h-6 w-px bg-border/80 mx-1" />
+
+              {/* ── Profile ── */}
+              <div ref={profileRef} className="relative ml-0.5">
+                <button
+                  type="button"
+                  onClick={() => setProfileMenuOpen((open) => !open)}
+                  aria-label={showLoggedInState ? "Open profile menu" : "Open account menu"}
+                  aria-expanded={profileMenuOpen}
+                  className="flex cursor-pointer items-center justify-center w-10 h-10 rounded-full border border-border/70 bg-card hover:bg-secondary hover:border-primary/30 text-foreground transition-all duration-[var(--duration-fast)]"
+                >
+                  {showLoggedInState ? (
+                    <span className="flex items-center justify-center w-full h-full text-sm font-semibold bg-primary text-primary-foreground rounded-full">
+                      {loggedInUserInitial}
+                    </span>
                   ) : (
-                    <Button asChild variant="primary" size="sm" className="gap-1.5 ml-1">
-                      <Link href="/account">
-                        <User className="h-3.5 w-3.5 opacity-80" />
-                        Account
-                      </Link>
-                    </Button>
+                    <User className="h-[18px] w-[18px]" />
                   )}
-                  <button
-                    onClick={async () => {
-                      await logout();
-                      router.replace("/");
-                      router.refresh();
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-2 text-foreground text-sm font-semibold rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] group ml-0.5"
-                  >
-                    <LogOut className="h-3.5 w-3.5 opacity-80 group-hover:opacity-100 transition-opacity" />
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <Button variant="elevated" size="sm" className="gap-1.5 ml-1" onClick={() => setAuthModalOpen(true)}>
-                  <User className="h-3.5 w-3.5 opacity-80" />
-                  Sign In
-                </Button>
-              )}
+                </button>
+
+                {profileMenuOpen && (
+                  <div className="absolute top-full right-0 mt-2 w-52 bg-card rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)] border border-border p-1.5 z-50 animate-[scale-in_160ms_ease-out]">
+                    {showLoggedInState ? (
+                      <>
+                        {userType === "admin" && (
+                          <Link
+                            href="/himmat_admin_8526/dashboard"
+                            onClick={() => setProfileMenuOpen(false)}
+                            className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+                          >
+                            <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
+                            {t("nav.dashboard")}
+                          </Link>
+                        )}
+
+                        <div className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-semibold text-foreground">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                            {loggedInUserInitial}
+                          </div>
+                          {loggedInUserName}
+                        </div>
+
+                        <Link
+                          href="/account"
+                          onClick={() => setProfileMenuOpen(false)}
+                          className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+                        >
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          Profile
+                        </Link>
+
+                        <div className="my-1 border-t border-border" />
+
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setProfileMenuOpen(false);
+                            await logout();
+                            router.replace("/");
+                            router.refresh();
+                          }}
+                          className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+                        >
+                          <LogOut className="h-4 w-4 text-muted-foreground" />
+                          Logout
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            setAuthModalOpen(true);
+                          }}
+                          className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+                        >
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          Log in
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            setAuthModalOpen(true);
+                          }}
+                          className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+                        >
+                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          Sign up
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {isLoggedIn ? null : null}
             </div>
 
             {/* Mobile hamburger */}
-            <div className="lg:hidden flex items-center gap-2">
+            <div className="lg:hidden flex items-center gap-1.5">
+              <button
+                className="p-2.5 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
+                onClick={() => setSearchOpen(true)}
+                aria-label="Search products"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+
               {/* Mobile cart */}
               <Link
                 href="/cart"
-                className="relative p-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
+                className="relative p-2.5 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
               >
-                <ShoppingBag className="h-5 w-5" />
+                <ShoppingBag className="h-4 w-4" />
                 {cartCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-accent flex items-center justify-center text-[9px] font-bold text-accent-foreground px-1 shadow-[0_1px_2px_rgba(200,169,110,0.4)]">
                     {cartCount}
                   </span>
                 )}
               </Link>
-              {/* Mobile wishlist */}
-              <Link
-                href="/wishlist"
-                className="relative p-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
-              >
-                <Heart className="h-5 w-5" />
-                {wishlist.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-accent flex items-center justify-center text-[9px] font-bold text-accent-foreground px-1 shadow-[0_1px_2px_rgba(200,169,110,0.4)]">
-                    {wishlist.length}
-                  </span>
-                )}
-              </Link>
               <button
-                className="p-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
+                className="p-2.5 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground"
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label="Toggle menu"
               >
@@ -705,19 +744,17 @@ export default function Navigation() {
 
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-[59] lg:hidden transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
-          mobileOpen
+        className={`fixed inset-0 z-[59] lg:hidden transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${mobileOpen
             ? "bg-foreground/45 backdrop-blur-[4px] pointer-events-auto"
             : "bg-transparent pointer-events-none"
-        }`}
+          }`}
         onClick={() => setMobileOpen(false)}
       />
 
       {/* Drawer panel — slides in from the right */}
       <div
-        className={`fixed top-0 right-0 h-full w-[310px] bg-card z-[60] lg:hidden flex flex-col shadow-[var(--shadow-2xl)] border-l border-border/50 transition-transform duration-[var(--duration-slow)] ease-[var(--ease-out-expo)] ${
-          mobileOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full w-[310px] bg-card z-[60] lg:hidden flex flex-col shadow-[var(--shadow-2xl)] border-l border-border/50 transition-transform duration-[var(--duration-slow)] ease-[var(--ease-out-expo)] ${mobileOpen ? "translate-x-0" : "translate-x-full"
+          }`}
         style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         {/* ── Drawer header — brand + close ── */}
@@ -765,8 +802,10 @@ export default function Navigation() {
 
         {/* ── Scrollable nav area ── */}
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-0.5">
-          {navLinks.map((link) =>
-            link.children ? (
+          {navLinks.map((link) => {
+            const isActive = isActivePath(link.href);
+
+            return link.children ? (
               <div key={link.label}>
                 <button
                   onClick={() =>
@@ -774,13 +813,11 @@ export default function Navigation() {
                       mobileExpanded === link.label ? null : link.label,
                     )
                   }
-                  className="w-full flex items-center justify-between px-3 py-3 text-[15px] font-medium text-foreground rounded-[var(--radius-lg)] hover:bg-secondary transition-colors duration-[var(--duration-fast)]"
+                  className={`w-full flex cursor-pointer items-center justify-between px-3 py-3 text-[15px] font-medium rounded-[var(--radius-lg)] transition-colors duration-[var(--duration-fast)] ${isActive ? "text-primary" : "text-foreground"}`}
                 >
                   {link.label}
                   <ChevronDown
-                    className={`h-4 w-4 text-muted-foreground transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
-                      mobileExpanded === link.label ? "rotate-180" : ""
-                    }`}
+                    className={`h-4 w-4 text-muted-foreground transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${mobileExpanded === link.label ? "rotate-180" : ""}`}
                   />
                 </button>
                 {mobileExpanded === link.label && (
@@ -790,9 +827,9 @@ export default function Navigation() {
                         key={child.label}
                         href={child.href}
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center justify-between px-3 py-2.5 text-sm rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] group"
+                        className={`flex cursor-pointer items-center justify-between px-3 py-2.5 text-sm rounded-[var(--radius-md)] transition-colors duration-[var(--duration-fast)] group ${isActivePath(child.href) ? "text-primary" : "text-foreground"}`}
                       >
-                        <span className="font-medium text-foreground group-hover:text-primary transition-colors duration-[var(--duration-fast)]">
+                        <span className={`font-medium transition-colors duration-[var(--duration-fast)] ${isActivePath(child.href) ? "text-primary" : "text-foreground group-hover:text-primary"}`}>
                           {child.label}
                         </span>
                         <span className="text-xs text-muted-foreground/80">
@@ -808,12 +845,12 @@ export default function Navigation() {
                 key={link.label}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="block px-3 py-3 text-[15px] font-medium text-foreground rounded-[var(--radius-lg)] hover:bg-secondary transition-colors duration-[var(--duration-fast)]"
+                className={`block cursor-pointer px-3 py-3 text-[15px] font-medium rounded-[var(--radius-lg)] transition-colors duration-[var(--duration-fast)] ${isActive ? "text-primary" : "text-foreground"}`}
               >
                 {link.label}
               </Link>
-            ),
-          )}
+            );
+          })}
         </div>
 
         {/* ── Drawer footer — language + dashboard/login ── */}
@@ -822,25 +859,10 @@ export default function Navigation() {
           <div>
             <button
               onClick={() => setLangOpen(!langOpen)}
-              className="w-full flex items-center justify-between px-3 py-3 rounded-[var(--radius-lg)] hover:bg-secondary transition-colors duration-[var(--duration-fast)]"
+              className="w-full flex cursor-pointer items-center justify-center px-3 py-3 rounded-[var(--radius-lg)] hover:bg-secondary transition-colors duration-[var(--duration-fast)]"
+              aria-label="Select language"
             >
-              <span className="flex items-center gap-2.5 text-sm font-medium text-foreground">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                Language
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-[var(--radius-xs)] bg-foreground text-background text-[9px] font-bold tracking-[0.08em] min-w-[22px]">
-                  {langMeta[selectedLang].country}
-                </span>
-                <span className="font-bold uppercase text-[10px] tracking-wider text-muted-foreground">
-                  {langMeta[selectedLang].code}
-                </span>
-                <ChevronDown
-                  className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${
-                    langOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </span>
+              <Globe className="h-4 w-4 text-muted-foreground" />
             </button>
 
             {langOpen && (
@@ -848,11 +870,10 @@ export default function Navigation() {
                 {Object.entries(langMeta).map(([code, meta]) => (
                   <button
                     key={code}
-                    className={`flex items-center justify-between w-full px-3 py-2 rounded-[var(--radius-md)] text-sm transition-colors duration-[var(--duration-fast)] ${
-                      selectedLang === code
+                    className={`flex cursor-pointer items-center justify-between w-full px-3 py-2 rounded-[var(--radius-md)] text-sm transition-colors duration-[var(--duration-fast)] ${selectedLang === code
                         ? "bg-card text-primary font-semibold shadow-[var(--shadow-xs)]"
                         : "hover:bg-card text-foreground"
-                    }`}
+                      }`}
                     onClick={() => {
                       setLang(code);
                       setLangOpen(false);
@@ -864,11 +885,10 @@ export default function Navigation() {
                           {meta.country}
                         </span>
                         <span
-                          className={`text-[10px] font-bold tracking-wider ${
-                            selectedLang === code
+                          className={`text-[10px] font-bold tracking-wider ${selectedLang === code
                               ? "text-primary"
                               : "text-muted-foreground"
-                          }`}
+                            }`}
                         >
                           {meta.code}
                         </span>
@@ -884,46 +904,17 @@ export default function Navigation() {
             )}
           </div>
 
-          {isLoggedIn ? (
-            <>
-              {userType === 'admin' ? (
-                <Button asChild variant="secondary" size="sm" className="w-full gap-2 h-11" onClick={() => setMobileOpen(false)}>
-                  <Link href="/himmat_admin_8526/dashboard">
-                    <LayoutDashboard className="h-4 w-4 opacity-80" />
-                    {t("nav.dashboard")}
-                  </Link>
-                </Button>
-              ) : (
-                <Button asChild variant="primary" size="sm" className="w-full gap-2 h-11" onClick={() => setMobileOpen(false)}>
-                  <Link href="/account">
-                    <User className="h-4 w-4 opacity-80" />
-                    Account
-                  </Link>
-                </Button>
-              )}
-              <button
-                onClick={async () => {
-                  await logout();
-                  setMobileOpen(false);
-                  router.replace("/");
-                  router.refresh();
-                }}
-                className="flex items-center justify-center gap-2 w-full px-4 h-11 text-foreground text-sm font-semibold rounded-[var(--radius-lg)] hover:bg-secondary transition-colors duration-[var(--duration-fast)]"
+          {isLoggedIn ? null : (
+            <div className="grid grid-cols-1 gap-2">
+              <Link
+                href="/customer-auth?mode=signup"
+                onClick={() => setMobileOpen(false)}
+                className="inline-flex items-center justify-center gap-2 w-full h-11 px-4 text-sm font-semibold rounded-[var(--radius-lg)] bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-[var(--duration-fast)]"
               >
-                <LogOut className="h-4 w-4 opacity-80" />
-                Logout
-              </button>
-            </>
-          ) : (
-            <Button variant="primary" size="sm" className="w-full gap-2 h-11"
-              onClick={() => {
-                setMobileOpen(false);
-                setAuthModalOpen(true);
-              }}
-            >
-              <User className="h-4 w-4 opacity-80" />
-              Sign In
-            </Button>
+                <User className="h-4 w-4 opacity-80" />
+                Sign up
+              </Link>
+            </div>
           )}
         </div>
       </div>

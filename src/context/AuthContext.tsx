@@ -157,25 +157,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
    * Therefore the UI knows the authentication state before
    * the /auth/me request completes.
    */
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
-    () => initialLoggedIn()
-  );
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-  const [currentUser, setCurrentUser] = useState<User | null>(
-    () => initialUser()
-  );
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const [userType, setUserType] = useState<
     "admin" | "customer" | null
-  >(() => initialUserType());
+  >(null);
 
   /*
-   * If we already have a persisted login state, don't block
-   * the UI waiting for /auth/me.
+   * Keep the initial server render stable, then hydrate the
+   * persisted auth state after mount.
    */
-  const [isLoading, setIsLoading] = useState<boolean>(
-    () => !initialLoggedIn()
-  );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   interface AuthEnvelope {
     success?: boolean;
@@ -266,6 +260,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   useEffect(() => {
+    const persistedLoggedIn = initialLoggedIn();
+    const persistedUserType = initialUserType();
+    const persistedUser = initialUser();
+
+    if (persistedLoggedIn && persistedUserType && persistedUser) {
+      setIsLoggedIn(true);
+      setUserType(persistedUserType);
+      setCurrentUser(persistedUser);
+    }
+
     hydrateFromServer();
   }, []);
 
@@ -355,7 +359,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     address: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-<<<<<<< HEAD
       const response = await api.post<{
         success: boolean;
         error?: string;
@@ -401,43 +404,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           otp,
         }
       );
-=======
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          `[AUTH] Customer signup started → email=${email}, name=${name}`
-        );
-      }
-      const response =
-        await api.post<AuthEnvelope>(
-          "/customer/signup",
-          {
-            name,
-            email,
-            phone,
-            password,
-            address,
-          }
-        );
->>>>>>> 677101886b9792c9960f382ed2fb2d4eedd60536
 
       if (response.success && response.user) {
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `[AUTH] Customer signup API success → id=${response.user.id}`
-          );
-        }
         persistUser(response.user, "customer");
         return { success: true };
       }
-<<<<<<< HEAD
-=======
-    } catch {
-      if (process.env.NODE_ENV === "development") {
-        console.log("[AUTH] Customer signup failed");
-      }
-      // Signup failed
-    }
->>>>>>> 677101886b9792c9960f382ed2fb2d4eedd60536
 
       return {
         success: false,

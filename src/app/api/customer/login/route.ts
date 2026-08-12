@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
 import { setAuthCookie } from '@/lib/auth'
 import { rateLimitAuth } from '@/lib/rate-limit'
+import { normalizeEmail } from '@/lib/email-validation'
 import bcrypt from 'bcryptjs'
 
 const CUSTOMER_USER_SELECT = {
@@ -28,9 +29,10 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const { email, password } = body
+    const normalizedEmail = normalizeEmail(typeof email === 'string' ? email : '')
 
     const customer = await prisma.customer.findUnique({
-      where: { email }
+      where: { email: normalizedEmail }
     })
 
     if (!customer) {

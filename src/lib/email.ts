@@ -131,19 +131,19 @@ function buildDeliverabilityHeaders(cfg: SmtpConfig, recipient: string, kind: 'r
 
   const headers: Record<string, string> = {
     'Message-ID': msgId,
-    'Auto-Submitted': 'auto-generated',
     'X-Auto-Response-Suppress': 'All',
-    'Precedence': 'bulk',
-    'List-Unsubscribe': `<mailto:${support}?subject=Unsubscribe>`,
-    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    // Keep X-Mailer and abuse reporting; avoid headers that mark message as "bulk"
     'X-Mailer': `${BRAND.companyName} OrderSystem`,
     'X-Report-Abuse': `Please report abuse to: ${support}`,
     'References': msgId,
     'In-Reply-To': msgId,
     'Reply-To': cfg.from,
-    'Return-Path': envelope,
   }
 
+  // Prefer a mailto unsubscribe link, and include an https unsubscribe endpoint if configured.
+  const mailto = `<mailto:${support}?subject=Unsubscribe>`
+  const httpsUnsub = process.env.LIST_UNSUBSCRIBE_URL ? `<${process.env.LIST_UNSUBSCRIBE_URL}>` : ''
+  headers['List-Unsubscribe'] = httpsUnsub ? `${mailto}, ${httpsUnsub}` : mailto
   if (recipient) {
     headers['To'] = recipient
   }
@@ -378,6 +378,82 @@ If you are having trouble entering the code, reply to this email or contact supp
       headers,
     }
     await transporter.sendMail(mail)
+  } catch (err) {
+    throw formatSendError(cfg, err)
+  }
+}
+
+export async function sendPartnershipEnquiryAlertEmail(form: {
+  business: string
+  contact: string
+  type: string
+  country: string
+  email: string
+  phone?: string
+  volume?: string
+  productLines: string[]
+  message?: string
+}): Promise<void> {
+  const cfg = getSmtpConfig()
+  const v = validateSmtpConfig(cfg)
+  if (!v.ok) {
+    console.log(
+      `[email:dev] Skipping partnership enquiry email — ${v.reason}${v.hint ? ` ${v.hint}` : ''}. ` +
+        `Partnership enquiry from ${form.contact} (${form.email}) for ${form.business}.`
+    )
+    return
+  }
+
+  const transporter = getOrCreateTransporter(cfg)
+  const to = process.env.ADMIN_ALERT_EMAIL || BRAND.supportEmail
+  const headers = buildDeliverabilityHeaders(cfg, to, 'order')
+  const productLines = form.productLines.length ? form.productLines.join(', ') : 'Not specified'
+  const contactLine = form.phone ? `Phone: ${form.phone}\n` : ''
+  const volumeLine = form.volume ? `Estimated monthly volume: ${form.volume}\n` : ''
+  const messageLine = form.message ? `\nBusiness notes:\n${form.message}` : ''
+
+  const subject = `New wholesale partnership enquiry — ${form.business}`
+  const text =
+    `A new wholesale partnership enquiry has been submitted.\n\n` +
+    `Business: ${form.business}\n` +
+    `Contact name: ${form.contact}\n` +
+    `Business type: ${form.type}\n` +
+    `Country: ${form.country}\n` +
+    `Email: ${form.email}\n` +
+    `${contactLine}` +
+    `${volumeLine}` +
+    `Interested product lines: ${productLines}\n` +
+    `${messageLine}\n\n` +
+    `Please review the enquiry in the admin dashboard and respond within the expected turnaround window.`
+
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#1c1917;line-height:1.55;font-size:15px;">
+      <div style="border-bottom:1px solid #e7e5e0;padding-bottom:16px;margin-bottom:20px;">
+        <span style="font-size:18px;font-weight:700;color:#2d5a3d;letter-spacing:0.02em;">${BRAND.companyName}</span>
+      </div>
+      <div style="margin:24px 0 28px 0;padding:22px;background:#f8f5ef;border-radius:12px;border:1px solid #e7e5e0;">
+        <div style="font-size:12px;color:#8a6a2d;text-transform:uppercase;letter-spacing:0.14em;">Wholesale enquiry</div>
+        <div style="font-size:28px;font-weight:700;color:#2d5a3d;margin-top:10px;">${form.business}</div>
+      </div>
+      <p style="margin:0 0 12px 0;">A new partnership enquiry has been submitted for review.</p>
+      <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;width:42%;">Contact</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${form.contact}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Business type</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${form.type}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Country</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${form.country}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Email</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${form.email}</td></tr>
+        ${form.phone ? `<tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Phone</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${form.phone}</td></tr>` : ''}
+        ${form.volume ? `<tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Monthly volume</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${form.volume}</td></tr>` : ''}
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Interested lines</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${productLines}</td></tr>
+      </table>
+      ${form.message ? `<p style="margin:0 0 8px 0;color:#57534e;font-weight:600;">Business notes</p><p style="margin:0 0 20px 0;color:#44403c;white-space:pre-wrap;">${form.message}</p>` : ''}
+      <p style="margin:0 0 22px 0;font-size:14px;color:#57534e;">Please review the enquiry in the admin dashboard and follow up with the business as needed.</p>
+      <div style="border-top:1px solid #e7e5e0;padding-top:16px;color:#78716c;font-size:12px;line-height:1.55;">
+        <p style="margin:0;">&copy; ${new Date().getFullYear()} ${BRAND.companyName}. All rights reserved.</p>
+      </div>
+    </div>`
+
+  try {
+    await transporter.sendMail({ from: cfg.from, to, replyTo: cfg.from, subject, text, html, headers })
   } catch (err) {
     throw formatSendError(cfg, err)
   }

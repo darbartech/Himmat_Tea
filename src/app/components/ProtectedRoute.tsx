@@ -12,6 +12,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isLoggedIn, userType, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [mounted, setMounted] = React.useState(false);
 
   useEffect(() => {
     if (!isLoading && (!isLoggedIn || userType !== 'admin')) {
@@ -20,6 +21,13 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       }
     }
   }, [isLoggedIn, userType, isLoading, router, pathname]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Avoid rendering the loading UI on the server to prevent hydration mismatches.
+  if (!mounted) return null;
 
   if (isLoading) {
     return (

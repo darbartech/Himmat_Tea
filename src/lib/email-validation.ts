@@ -199,12 +199,23 @@ export async function checkEmailDeliverability(email: string): Promise<EmailChec
 /** True if the email already exists in the customer or admin user tables. */
 export async function isEmailRegistered(
   email: string,
-  scope: 'customer' | 'admin' | 'any' = 'any'
+  scope: 'customer' | 'admin' | 'any' = 'any',
+  exclude?: { customerId?: number; adminId?: number }
 ): Promise<boolean> {
   const normalized = normalizeEmail(email)
   const [customer, admin] = await Promise.all([
-    scope === 'admin' ? null : prisma.customer.findUnique({ where: { email: normalized }, select: { id: true } }),
-    scope === 'customer' ? null : prisma.adminUser.findUnique({ where: { email: normalized }, select: { id: true } }),
+    scope === 'admin'
+      ? null
+      : prisma.customer.findFirst({
+          where: { email: normalized, NOT: exclude?.customerId ? { id: exclude.customerId } : undefined },
+          select: { id: true },
+        }),
+    scope === 'customer'
+      ? null
+      : prisma.adminUser.findFirst({
+          where: { email: normalized, NOT: exclude?.adminId ? { id: exclude.adminId } : undefined },
+          select: { id: true },
+        }),
   ])
   return Boolean(customer || admin)
 }
@@ -219,7 +230,8 @@ export interface SignupEmailCheckResult extends EmailCheckResult {
  */
 export async function validateSignupEmail(
   email: string,
-  scope: 'customer' | 'admin' = 'customer'
+  scope: 'customer' | 'admin' = 'customer',
+  exclude?: { customerId?: number; adminId?: number }
 ): Promise<SignupEmailCheckResult> {
   const normalized = normalizeEmail(email)
 
@@ -228,7 +240,7 @@ export async function validateSignupEmail(
     return { ok: false, error: deliverable.error }
   }
 
-  const registered = await isEmailRegistered(normalized, scope)
+  const registered = await isEmailRegistered(normalized, scope, exclude)
   if (registered) {
     return { ok: false, error: 'This email is already registered. Please sign in instead.' }
   }

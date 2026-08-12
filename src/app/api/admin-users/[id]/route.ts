@@ -72,12 +72,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
       return createErrorResponse('This email is already registered to another admin user.', 400)
     }
 
-    const emailCheck = await validateSignupEmail(email, 'admin')
+    const emailCheck = await validateSignupEmail(email, 'admin', { adminId: parseInt(id) })
     if (!emailCheck.ok) {
       return createErrorResponse(emailCheck.error || 'Invalid email address', 400)
     }
 
-    let data: Record<string, unknown> = { ...parsed.data, email }
+    const data: Record<string, unknown> = { ...parsed.data, email }
 
     if (password) {
       const pwResult = passwordSchema.safeParse(password)

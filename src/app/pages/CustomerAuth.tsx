@@ -16,14 +16,20 @@ function getSafeRedirect(value: string | null): string {
 }
 
 export default function CustomerAuth() {
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
-  const [socialLoading, setSocialLoading] = useState<'google' | 'github' | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get('redirect');
+  const rawMode = searchParams.get('mode');
   const safeRedirectTo = getSafeRedirect(rawRedirect);
+  const initialMode: 'login' | 'signup' = rawMode === 'signup' ? 'signup' : 'login';
+  const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
+  const [socialLoading, setSocialLoading] = useState<'google' | 'github' | null>(null);
   
   const { socialLogin, isLoggedIn, userType, isLoading } = useAuth();
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
   
   // Redirect if already logged in — only after loading finishes
   useEffect(() => {
@@ -167,7 +173,10 @@ export default function CustomerAuth() {
 
               <div className="flex rounded-3xl border border-[#e8e9e5] bg-[#f7f7f4] p-1 text-sm font-semibold text-[#5e5b53] mb-8">
                 <button
-                  onClick={() => setMode('login')}
+                  onClick={() => {
+                    setMode('login');
+                    router.replace(`/customer-auth?mode=login${safeRedirectTo ? `&redirect=${encodeURIComponent(safeRedirectTo)}` : ''}`);
+                  }}
                   className={`flex-1 rounded-3xl py-3 transition ${
                     mode === 'login'
                       ? 'bg-white text-[#2d5a3d] shadow-sm'
@@ -177,7 +186,10 @@ export default function CustomerAuth() {
                   Sign In
                 </button>
                 <button
-                  onClick={() => setMode('signup')}
+                  onClick={() => {
+                    setMode('signup');
+                    router.replace(`/customer-auth?mode=signup${safeRedirectTo ? `&redirect=${encodeURIComponent(safeRedirectTo)}` : ''}`);
+                  }}
                   className={`flex-1 rounded-3xl py-3 transition ${
                     mode === 'signup'
                       ? 'bg-white text-[#2d5a3d] shadow-sm'
