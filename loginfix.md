@@ -1199,4 +1199,3 @@ Refresh
 Fix the root authentication synchronization problem and preserve the existing UI/design/features.
 
 
-Read the "loginfix.md" file. many update and task are alread complete already. complete the remaining task as per this file.

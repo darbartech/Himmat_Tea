@@ -77,10 +77,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       reset();
 
       if (onSuccess) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(
+            `[AUTH] LoginForm success → delegating redirect to onSuccess callback, redirectTo=${redirectTo}`
+          );
+        }
         onSuccess();
-      }
-
-      if (redirectTo && typeof window !== 'undefined') {
+      } else if (redirectTo && typeof window !== 'undefined') {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[AUTH] LoginForm → self-redirecting to ${redirectTo}`);
+        }
         router.replace(redirectTo);
         router.refresh();
       }

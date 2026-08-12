@@ -194,6 +194,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     writeCookie("himmat_isLoggedIn", "true");
     writeCookie("himmat_userType", type);
     writeCookie("himmat_currentUser", JSON.stringify(userWithType));
+
+    if (process.env.NODE_ENV === "development") {
+      console.log(
+        `[AUTH] AuthContext persistUser → type=${type}, id=${user.id}`
+      );
+    }
   };
 
   const clearAuth = () => {
@@ -204,6 +210,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     deleteCookie("himmat_isLoggedIn");
     deleteCookie("himmat_userType");
     deleteCookie("himmat_currentUser");
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("[AUTH] AuthContext clearAuth → signed out");
+    }
   };
 
   /*
@@ -214,6 +224,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
    */
   const hydrateFromServer = async () => {
     try {
+      if (process.env.NODE_ENV === "development") {
+        console.log("[AUTH] Hydrating auth state from server /auth/me…");
+      }
       const response =
         await api.get<AuthEnvelope>("/auth/me");
 
@@ -226,8 +239,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
             : "customer";
 
         persistUser(user, type);
+        if (process.env.NODE_ENV === "development") {
+          console.log(`[AUTH] Hydrated → type=${type}, id=${user.id}`);
+        }
       } else {
         clearAuth();
+        if (process.env.NODE_ENV === "development") {
+          console.log("[AUTH] Hydrated → no active session, cleared");
+        }
       }
     } catch {
       /*
@@ -236,6 +255,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
        * Don't immediately log the customer out.
        * Keep the existing optimistic authentication state.
        */
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "[AUTH] Hydration network error — keeping optimistic state"
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -250,6 +274,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     password: string
   ): Promise<boolean> => {
     try {
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          `[AUTH] Admin login started → identifier=${username}`
+        );
+      }
       const response =
         await api.post<AuthEnvelope>(
           "/auth/login",
@@ -260,10 +289,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         );
 
       if (response.success && response.user) {
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            `[AUTH] Admin login API success → id=${response.user.id}`
+          );
+        }
         persistUser(response.user, "admin");
         return true;
       }
     } catch {
+      if (process.env.NODE_ENV === "development") {
+        console.log("[AUTH] Admin login failed — invalid credentials");
+      }
       // Login failed
     }
 
@@ -275,6 +312,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     password: string
   ): Promise<boolean> => {
     try {
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          `[AUTH] Customer login started → email=${email}`
+        );
+      }
       const response =
         await api.post<AuthEnvelope>(
           "/customer/login",
@@ -285,10 +327,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         );
 
       if (response.success && response.user) {
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            `[AUTH] Customer login API success → id=${response.user.id}`
+          );
+        }
         persistUser(response.user, "customer");
         return true;
       }
     } catch {
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "[AUTH] Customer login failed — invalid credentials or server error"
+        );
+      }
       // Customer login failed
     }
 
@@ -303,6 +355,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     address: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
+<<<<<<< HEAD
       const response = await api.post<{
         success: boolean;
         error?: string;
@@ -348,11 +401,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           otp,
         }
       );
+=======
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          `[AUTH] Customer signup started → email=${email}, name=${name}`
+        );
+      }
+      const response =
+        await api.post<AuthEnvelope>(
+          "/customer/signup",
+          {
+            name,
+            email,
+            phone,
+            password,
+            address,
+          }
+        );
+>>>>>>> 677101886b9792c9960f382ed2fb2d4eedd60536
 
       if (response.success && response.user) {
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            `[AUTH] Customer signup API success → id=${response.user.id}`
+          );
+        }
         persistUser(response.user, "customer");
         return { success: true };
       }
+<<<<<<< HEAD
+=======
+    } catch {
+      if (process.env.NODE_ENV === "development") {
+        console.log("[AUTH] Customer signup failed");
+      }
+      // Signup failed
+    }
+>>>>>>> 677101886b9792c9960f382ed2fb2d4eedd60536
 
       return {
         success: false,
@@ -408,11 +493,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const logout = async (): Promise<void> => {
     try {
       await api.post("/auth/logout", {});
+      if (process.env.NODE_ENV === "development") {
+        console.log("[AUTH] Logout API called — server cookies cleared");
+      }
     } catch {
       /*
        * Even if the server logout request fails,
        * clear the client authentication state.
        */
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "[AUTH] Logout API call failed — clearing client state anyway"
+        );
+      }
     }
 
     clearAuth();

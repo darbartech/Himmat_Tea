@@ -15,7 +15,7 @@ const noteCreateSchema = z.object({
 async function resolveOrderByIdentifier(idOrOrderNumber: string) {
   let order = await prisma.order.findUnique({ where: { id: idOrOrderNumber } })
   if (!order) {
-    order = await prisma.order.findUnique({ where: { orderNumber: idOrOrderNumber } })
+    order = await prisma.order.findFirst({ where: { orderNumber: idOrOrderNumber } })
   }
   return order
 }

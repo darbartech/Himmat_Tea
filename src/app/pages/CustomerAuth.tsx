@@ -62,6 +62,11 @@ export default function CustomerAuth() {
   };
 
   const handleAuthSuccess = () => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(
+        `[AUTH] CustomerAuth page handleAuthSuccess → redirecting to ${safeRedirectTo}`
+      );
+    }
     router.replace(safeRedirectTo);
     router.refresh();
   };

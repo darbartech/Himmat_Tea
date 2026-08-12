@@ -1,4 +1,5 @@
-import { cookies, redirect } from "next/headers";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 import CustomerAccount from "@/app/pages/CustomerAccount";
 import { Suspense } from "react";
