@@ -8,6 +8,7 @@ import { StoreProvider } from '@/context/StoreContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { BRAND } from '@/config/brand';
 import ReactQueryProvider from '@/providers/ReactQueryProvider';
+import NextAuthProvider from '@/providers/NextAuthProvider';
 
 export const metadata: Metadata = {
   title: BRAND.companyName,
@@ -36,18 +37,20 @@ export default function RootLayout({
     <html lang="en">
       <body suppressHydrationWarning={true}>
         <ReactQueryProvider>
-          <TranslationProvider>
-            <StoreProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  <AuthProvider>
-                    {children}
-                    <Toaster />
-                  </AuthProvider>
-                </WishlistProvider>
-              </CartProvider>
-            </StoreProvider>
-          </TranslationProvider>
+          <NextAuthProvider>
+            <TranslationProvider>
+              <StoreProvider>
+                <CartProvider>
+                  <WishlistProvider>
+                    <AuthProvider>
+                      {children}
+                      <Toaster />
+                    </AuthProvider>
+                  </WishlistProvider>
+                </CartProvider>
+              </StoreProvider>
+            </TranslationProvider>
+          </NextAuthProvider>
         </ReactQueryProvider>
       </body>
     </html>

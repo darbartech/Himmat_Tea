@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { ArrowRight, Lock, Mail, MapPin, Phone, User } from 'lucide-react';
+import { ArrowRight, Lock, Mail, MapPin, Phone, User, Eye, EyeOff } from 'lucide-react';
 import { signupFormSchema, SignupFormData } from './validation';
 import { useAuth } from '@/context/AuthContext';
 
@@ -41,6 +41,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   const { customerSignup } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -263,19 +265,31 @@ export const SignupForm: React.FC<SignupFormProps> = ({
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e] aria-hidden" />
             <input
               id="signup-password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               autoComplete="new-password"
               aria-describedby={errors.password ? 'signup-password-error signup-password-strength' : 'signup-password-strength'}
               aria-invalid={!!errors.password}
               {...register('password')}
               placeholder="Create a password"
-              className={`w-full pl-12 pr-4 py-3 rounded-xl border transition-colors text-sm focus:outline-none
+              className={`w-full pl-12 pr-12 py-3 rounded-xl border transition-colors text-sm focus:outline-none
                 ${errors.password 
                   ? 'border-red-300 bg-red-50 focus:border-red-500' 
                   : 'border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] focus:border-[#2d5a3d]'
                 }
               `}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#78746e] hover:text-[#2d5a3d] focus:outline-none"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" aria-hidden />
+              ) : (
+                <Eye className="h-4 w-4" aria-hidden />
+              )}
+            </button>
           </div>
           {/* Password Strength Indicator */}
           {password && (
@@ -309,19 +323,31 @@ export const SignupForm: React.FC<SignupFormProps> = ({
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e] aria-hidden" />
             <input
               id="signup-confirm-password"
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               autoComplete="new-password"
               aria-describedby={errors.confirmPassword ? 'signup-confirm-password-error' : undefined}
               aria-invalid={!!errors.confirmPassword}
               {...register('confirmPassword')}
               placeholder="Confirm your password"
-              className={`w-full pl-12 pr-4 py-3 rounded-xl border transition-colors text-sm focus:outline-none
+              className={`w-full pl-12 pr-12 py-3 rounded-xl border transition-colors text-sm focus:outline-none
                 ${errors.confirmPassword 
                   ? 'border-red-300 bg-red-50 focus:border-red-500' 
                   : 'border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] focus:border-[#2d5a3d]'
                 }
               `}
             />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#78746e] hover:text-[#2d5a3d] focus:outline-none"
+              aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="h-4 w-4" aria-hidden />
+              ) : (
+                <Eye className="h-4 w-4" aria-hidden />
+              )}
+            </button>
           </div>
           {errors.confirmPassword && (
             <p 

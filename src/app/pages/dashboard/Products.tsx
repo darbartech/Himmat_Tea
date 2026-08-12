@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from "react";
-import { Plus, Search, Edit, Trash2, MoreHorizontal, X, Save, Package } from "lucide-react";
+import { useState, useRef, useEffect, ChangeEvent } from "react";
+import { Plus, Search, Edit, Trash2, MoreHorizontal, X, Save, Package, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -34,6 +34,7 @@ import {
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog";
 import { Switch } from "../../components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { ExportButtons, exportToPDF, exportToCSV, printElement } from "../../components/ExportUtils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../../lib/api-client";
@@ -113,6 +114,9 @@ export default function Products() {
   const [isStockDialogOpen, setIsStockDialogOpen] = useState(false);
   const [selectedStockProduct, setSelectedStockProduct] = useState<Product | null>(null);
   const [stockSaving, setStockSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageUploadTab, setImageUploadTab] = useState<"upload" | "url">("upload");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const tableRef = useRef<HTMLDivElement>(null);
 
   const { data: products = [], isLoading: productsLoading } = useQuery({
@@ -374,6 +378,46 @@ export default function Products() {
     }
   };
 
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file");
+      return;
+    }
+
+    const uploadImage = async () => {
+      try {
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("folder", "products");
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || result.message || "Upload failed");
+        }
+
+        setNewProduct((prev) => ({ ...prev, imageUrl: result.data.url }));
+        toast.success("Image uploaded successfully!");
+      } catch (err: any) {
+        toast.error(err.message || "Failed to upload image. Please try again.");
+      } finally {
+        setUploadingImage(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }
+    };
+    uploadImage();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -494,13 +538,113 @@ export default function Products() {
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="image">Image URL</Label>
-                  <Input
-                    id="image"
-                    value={newProduct.imageUrl}
-                    onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
-                    placeholder="https://..."
-                  />
+                  <Label>Product Image</Label>
+                  <Tabs value={imageUploadTab} onValueChange={(v) => setImageUploadTab(v as "upload" | "url")}>
+                    <TabsList className="mb-2">
+                      <TabsTrigger value="upload" className="flex items-center gap-1">
+                        <Upload className="h-3 w-3 mr-1" />
+                        Upload
+                      </TabsTrigger>
+                      <TabsTrigger value="url" className="flex items-center gap-1">
+                        <ImageIcon className="h-3 w-3 mr-1" />
+                        URL
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="upload">
+                      <div className="space-y-3">
+                        <input
+                          ref={fileInputRef}
+                          id="imageFile"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                        <label
+                          htmlFor="imageFile"
+                          className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl cursor-pointer transition-colors
+                            ${uploadingImage 
+                              ? 'border-[#2d5a3d]/50 bg-[#2d5a3d]/5' 
+                              : 'border-[#2d5a3d]/20 bg-[#f9f7f4] hover:bg-[#2d5a3d]/5 hover:border-[#2d5a3d]/40'
+                            }
+                          `}
+                        >
+                          {uploadingImage ? (
+                            <div className="flex flex-col items-center gap-2 text-[#2d5a3d]">
+                              <Loader2 className="h-8 w-8 animate-spin" />
+                              <p className="text-sm font-medium">Uploading...</p>
+                            </div>
+                          ) : newProduct.imageUrl ? (
+                            <div className="relative w-full h-full rounded-xl overflow-hidden">
+                              <img
+                                src={newProduct.imageUrl}
+                                alt="Preview"
+                                className="w-full h-full object-contain p-2"
+                              />
+                              <div className="absolute top-2 right-2 flex gap-1">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    if (fileInputRef.current) fileInputRef.current.click();
+                                  }}
+                                  className="p-1.5 rounded-lg bg-white/90 text-[#1c1917] hover:bg-white shadow-sm"
+                                >
+                                  <Edit className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setNewProduct((prev) => ({ ...prev, imageUrl: "" }));
+                                  }}
+                                  className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 shadow-sm"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center gap-2 text-[#78746e]">
+                              <div className="w-10 h-10 rounded-full bg-[#2d5a3d]/10 flex items-center justify-center">
+                                <Upload className="h-5 w-5 text-[#2d5a3d]" />
+                              </div>
+                              <div className="text-center">
+                                <p className="text-sm font-medium text-[#1c1917]">
+                                  Click to upload image
+                                </p>
+                                <p className="text-xs text-[#78746e] mt-0.5">
+                                  PNG, JPG, WebP up to 10MB
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="url">
+                      <div className="space-y-3">
+                        <Input
+                          id="image"
+                          value={newProduct.imageUrl}
+                          onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
+                          placeholder="https://..."
+                        />
+                        {newProduct.imageUrl && (
+                          <div className="relative w-full h-36 rounded-xl overflow-hidden border border-[#2d5a3d]/10">
+                            <img
+                              src={newProduct.imageUrl}
+                              alt="Preview"
+                              className="w-full h-full object-contain p-2"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="description">Description</Label>

@@ -94,8 +94,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const clearNotifications = async () => {
     try {
-      await api.patch('/admin/notifications', { all: true });
-      setLiveNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      await api.delete('/admin/notifications');
+      setLiveNotifications([]);
+    } catch (_err) { /* noop */ }
+  };
+
+  const deleteNotification = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await api.delete('/admin/notifications', { data: { id } });
+      setLiveNotifications(prev => prev.filter(n => n.id !== id));
     } catch (_err) { /* noop */ }
   };
   const notifications = liveNotifications;
@@ -371,15 +379,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               : "bg-[#f0f9f4] hover:bg-[#e8f5ed]"
                           }`}
                         >
-                          <div className="flex items-start justify-between">
-                            <div>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
                               <p className="font-medium text-[#1c1917]">{notification.title}</p>
                               <p className="text-[#78746e] text-xs mt-0.5">{notification.message}</p>
                               <p className="text-[#c8a96e] font-bold mt-1">{notification.orderId}</p>
                             </div>
-                            {!notification.read && (
-                              <div className="h-2 w-2 rounded-full bg-[#2d5a3d]" />
-                            )}
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {!notification.read && (
+                                <div className="h-2 w-2 rounded-full bg-[#2d5a3d]" />
+                              )}
+                              <button
+                                type="button"
+                                onClick={(e) => deleteNotification(notification.id, e)}
+                                className="p-1.5 rounded-md text-[#78746e] hover:text-red-600 hover:bg-red-50 transition-colors"
+                                aria-label="Delete notification"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </div>
                           <p className="text-[#78746e] text-xs mt-1">
                             {new Date(notification.timestamp).toLocaleString()}

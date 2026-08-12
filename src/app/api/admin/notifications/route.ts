@@ -52,3 +52,31 @@ export async function PATCH(request: NextRequest) {
     return handleApiError(error)
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const admin = await getCurrentAdmin()
+    if (!admin) {
+      return createErrorResponse('Unauthorized - admin only', 401)
+    }
+
+    let body: { id?: number } = {}
+    try {
+      body = await request.json()
+    } catch (_e) {
+      body = {}
+    }
+
+    if (body?.id) {
+      await prisma.notification.delete({
+        where: { id: Number(body.id) },
+      })
+    } else {
+      await prisma.notification.deleteMany()
+    }
+
+    return createResponse({ success: true })
+  } catch (error) {
+    return handleApiError(error)
+  }
+}

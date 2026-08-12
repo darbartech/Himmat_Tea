@@ -17,7 +17,7 @@ export default function ResetPasswordPage() {
                 New password
               </span>
               <h1
-                className="mt-8 text-[clamp(2.5rem,4vw,4rem)] font-semibold leading-[0.95] max-w-3xl"
+                className="mt-8 text-[clamp(2.5rem,4vw,4rem)] font-semibold leading-[0.95] max-w-3xl text-white"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
                 Almost there. Set a new password.

@@ -389,12 +389,54 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const socialLogin = async (
     provider: "google" | "github"
   ): Promise<boolean> => {
-    return false;
+    try {
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[AUTH] Social login starting → provider=${provider}`);
+      }
+
+      const { signIn } = await import("next-auth/react");
+
+      const result = await signIn(provider, { redirect: false });
+
+      if (result?.error) {
+        if (process.env.NODE_ENV === "development") {
+          console.log(`[AUTH] Social login failed: ${result.error}`);
+        }
+        return false;
+      }
+
+      if (result?.ok && result?.url) {
+        if (process.env.NODE_ENV === "development") {
+          console.log(`[AUTH] Social login redirecting to: ${result.url}`);
+        }
+        if (typeof window !== "undefined") {
+          window.location.href = result.url;
+        }
+        return true;
+      }
+
+      if (result?.ok) {
+        if (process.env.NODE_ENV === "development") {
+          console.log(`[AUTH] Social login in-page succeeded, hydrating session`);
+        }
+        await hydrateFromServer();
+        return true;
+      }
+
+      return false;
+    } catch (err) {
+      console.error("[AUTH] Social login error:", err);
+      return false;
+    }
   };
 
   const logout = async (): Promise<void> => {
     try {
       await api.post("/auth/logout", {});
+      try {
+        const { signOut } = await import("next-auth/react");
+        await signOut({ redirect: false });
+      } catch {}
       if (process.env.NODE_ENV === "development") {
         console.log("[AUTH] Logout API called — server cookies cleared");
       }

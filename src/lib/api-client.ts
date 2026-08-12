@@ -104,10 +104,12 @@ class ApiClient {
   }
 
   async delete<T>(
-    endpoint: string
+    endpoint: string,
+    data?: unknown
   ): Promise<T> {
     return this.request<T>(endpoint, {
       method: "DELETE",
+      ...(data !== undefined ? { body: JSON.stringify(data) } : {}),
     });
   }
 }
