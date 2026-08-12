@@ -276,8 +276,8 @@ export default function PurchaseOrders() {
                 </div>
 
                 {newPO.items.length > 0 && (
-                  <div className="bg-[#f9f7f4] rounded-lg p-4">
-                    <table className="w-full">
+                  <div className="bg-[#f9f7f4] rounded-lg p-4 overflow-x-auto">
+                    <table className="w-full min-w-[520px]">
                       <thead>
                         <tr className="text-left text-sm text-[#78746e] border-b">
                           <th className="py-2">Product</th>

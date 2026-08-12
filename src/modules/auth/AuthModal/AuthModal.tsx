@@ -14,6 +14,14 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'login' | 'signup';
+  redirectTo?: string;
+}
+
+function getSafeRedirect(value: string | null | undefined): string {
+  if (!value) return '/account';
+  if (!value.startsWith('/')) return '/account';
+  if (value.startsWith('//')) return '/account';
+  return value;
 }
 
 /**
@@ -23,15 +31,18 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({ 
   isOpen, 
   onClose, 
-  initialMode = 'login' 
+  initialMode = 'login',
+  redirectTo = '/account'
 }) => {
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [isVisible, setIsVisible] = useState(false);
   const [socialLoading, setSocialLoading] = useState<'google' | 'github' | null>(null);
-  const { socialLogin, isLoggedIn } = useAuth();
+  const { socialLogin, isLoggedIn, isLoading, userType } = useAuth();
   const router = useRouter();
   const modalRef = useRef<HTMLDivElement>(null);
   const firstFocusableRef = useRef<HTMLButtonElement>(null);
+
+  const safeRedirectTo = getSafeRedirect(redirectTo);
 
   // Reset mode when modal opens
   useEffect(() => {
@@ -44,13 +55,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   }, [isOpen, initialMode]);
 
-  // Redirect if logged in
+  // Redirect if logged in — only after loading finishes
   useEffect(() => {
+    if (isLoading) return;
     if (isLoggedIn && isOpen) {
+      const dest = userType === 'admin' ? '/himmat_admin_8526/dashboard' : safeRedirectTo;
       onClose();
-      router.push('/account');
+      router.replace(dest);
+      router.refresh();
     }
-  }, [isLoggedIn, isOpen, onClose, router]);
+  }, [isLoggedIn, isLoading, isOpen, onClose, router, safeRedirectTo, userType]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -97,7 +111,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const success = await socialLogin(provider);
       if (success) {
         onClose();
-        router.push('/account');
+        router.replace(safeRedirectTo);
+        router.refresh();
       }
     } finally {
       setSocialLoading(null);
@@ -106,7 +121,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleAuthSuccess = () => {
     onClose();
-    router.push('/account');
   };
 
   if (!isOpen && !isVisible) return null;
@@ -230,11 +244,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {mode === 'login' ? (
               <LoginForm 
                 onSuccess={handleAuthSuccess} 
+                redirectTo={safeRedirectTo}
                 showForgotPassword={true}
               />
             ) : (
               <SignupForm 
                 onSuccess={handleAuthSuccess} 
+                redirectTo={safeRedirectTo}
               />
             )}
           </div>

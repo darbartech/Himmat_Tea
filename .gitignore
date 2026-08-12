@@ -9,3 +9,8 @@ dist/
 .coverage
 .vscode
 .next/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+.DS_Store

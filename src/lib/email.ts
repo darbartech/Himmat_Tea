@@ -300,3 +300,244 @@ Reply to: ${fromAddr}`
     throw formatSendError(cfg, err)
   }
 }
+
+export async function sendAdminOrderAlertEmail(order: {
+  orderNumber: string
+  customerName: string
+  customerEmail: string
+  grandTotal: number
+  currency?: string
+}): Promise<void> {
+  const cfg = getSmtpConfig()
+  const v = validateSmtpConfig(cfg)
+  if (!v.ok) {
+    console.log(
+      `[email:dev] Skipping admin alert email — ${v.reason}${v.hint ? ` ${v.hint}` : ''}. ` +
+        `Order ${order.orderNumber} from ${order.customerName} for ${order.currency || '₹'}${order.grandTotal} awaiting payment.`
+    )
+    return
+  }
+  const transporter = getOrCreateTransporter(cfg)
+  const to = process.env.ADMIN_ALERT_EMAIL || BRAND.supportEmail
+  const headers = buildDeliverabilityHeaders(cfg, to, 'order')
+  const currency = order.currency || '₹'
+  const subject = `New order ${order.orderNumber} — awaiting payment verification`
+  const text =
+    `Order ${order.orderNumber} from ${order.customerName} (${order.customerEmail}) ` +
+    `for ${currency}${order.grandTotal} is awaiting QR payment verification. ` +
+    `Review it in the admin dashboard.`
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1c1917;line-height:1.55;font-size:15px;">
+      <div style="border-bottom:1px solid #e7e5e0;padding-bottom:16px;margin-bottom:20px;">
+        <span style="font-size:18px;font-weight:700;color:#2d5a3d;letter-spacing:0.02em;">${BRAND.companyName}</span>
+      </div>
+      <div style="margin:24px 0 28px 0;padding:22px;background:#fffbeb;border-radius:12px;border:1px solid #fde68a;">
+        <div style="font-size:12px;color:#92400e;text-transform:uppercase;letter-spacing:0.14em;">New order awaiting payment</div>
+        <div style="font-size:28px;font-weight:700;color:#92400e;margin-top:10px;">${order.orderNumber}</div>
+      </div>
+      <p style="margin:0 0 12px 0;">A customer has placed a new order and is waiting for QR payment verification.</p>
+      <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;width:40%;">Customer</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${order.customerName}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Email</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${order.customerEmail}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Order total</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:700;font-size:18px;color:#2d5a3d;">${currency}${order.grandTotal.toFixed(2)}</td></tr>
+      </table>
+      <p style="margin:0 0 22px 0;font-size:14px;color:#57534e;">Please log in to the admin dashboard to verify the payment and confirm the order.</p>
+      <div style="border-top:1px solid #e7e5e0;padding-top:16px;color:#78716c;font-size:12px;line-height:1.55;">
+        <p style="margin:0;">&copy; ${new Date().getFullYear()} ${BRAND.companyName}. All rights reserved.</p>
+      </div>
+    </div>`
+  try {
+    await transporter.sendMail({ from: cfg.from, to, replyTo: cfg.from, subject, text, html, headers })
+  } catch (err) {
+    throw formatSendError(cfg, err)
+  }
+}
+
+export async function sendCustomerPaymentApprovedEmail(params: {
+  to: string
+  customerName: string
+  orderNumber: string
+  grandTotal: number
+  currency?: string
+}): Promise<void> {
+  const cfg = getSmtpConfig()
+  const v = validateSmtpConfig(cfg)
+  if (!v.ok) {
+    console.log(
+      `[email:dev] Skipping payment-approved email to ${params.to} — ${v.reason}${v.hint ? ` ${v.hint}` : ''}. ` +
+        `Order ${params.orderNumber} payment confirmed for ${params.customerName}.`
+    )
+    return
+  }
+  const transporter = getOrCreateTransporter(cfg)
+  const headers = buildDeliverabilityHeaders(cfg, params.to, 'order')
+  const currency = params.currency || '₹'
+  const subject = `Payment confirmed — order ${params.orderNumber}`
+  const text =
+    `Hi ${params.customerName},\n\n` +
+    `We've confirmed your payment of ${currency}${params.grandTotal.toFixed(2)} for order ${params.orderNumber}. ` +
+    `Your order is now being processed.\n\n` +
+    `— The ${BRAND.companyName} Team`
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1c1917;line-height:1.55;font-size:15px;">
+      <div style="border-bottom:1px solid #e7e5e0;padding-bottom:16px;margin-bottom:20px;">
+        <span style="font-size:18px;font-weight:700;color:#2d5a3d;letter-spacing:0.02em;">${BRAND.companyName}</span>
+      </div>
+      <p style="margin:0 0 12px 0;">Hi ${params.customerName},</p>
+      <div style="margin:24px 0 28px 0;padding:22px;background:#f0fdf4;border-radius:12px;border:1px solid #bbf7d0;text-align:center;">
+        <div style="font-size:12px;color:#166534;text-transform:uppercase;letter-spacing:0.14em;">Payment confirmed</div>
+        <div style="font-size:28px;font-weight:700;color:#166534;margin-top:10px;">${params.orderNumber}</div>
+        <div style="font-size:18px;font-weight:700;color:#2d5a3d;margin-top:8px;">${currency}${params.grandTotal.toFixed(2)}</div>
+      </div>
+      <p style="margin:0 0 20px 0;">Thank you for your purchase! Your payment has been verified and your order is now being processed for shipping.</p>
+      <p style="margin:0 0 22px 0;font-size:14px;color:#57534e;">You can track your order status any time from your account page. We'll send another update when your order ships.</p>
+      <div style="border-top:1px solid #e7e5e0;padding-top:16px;color:#78716c;font-size:12px;line-height:1.55;">
+        <p style="margin:0 0 6px 0;">Thank you for shopping with ${BRAND.companyName}.</p>
+        <p style="margin:0;">&copy; ${new Date().getFullYear()} ${BRAND.companyName}. All rights reserved.</p>
+      </div>
+    </div>`
+  try {
+    await transporter.sendMail({ from: cfg.from, to: params.to, replyTo: cfg.from, subject, text, html, headers })
+  } catch (err) {
+    throw formatSendError(cfg, err)
+  }
+}
+
+export async function sendCustomerPaymentRejectedEmail(params: {
+  to: string
+  customerName: string
+  orderNumber: string
+  grandTotal: number
+  currency?: string
+  reason?: string
+}): Promise<void> {
+  const cfg = getSmtpConfig()
+  const v = validateSmtpConfig(cfg)
+  if (!v.ok) {
+    console.log(
+      `[email:dev] Skipping payment-rejected email to ${params.to} — ${v.reason}${v.hint ? ` ${v.hint}` : ''}. ` +
+        `Order ${params.orderNumber} payment rejected for ${params.customerName}.`
+    )
+    return
+  }
+  const transporter = getOrCreateTransporter(cfg)
+  const headers = buildDeliverabilityHeaders(cfg, params.to, 'order')
+  const currency = params.currency || '₹'
+  const reasonLine = params.reason ? ` Reason: ${params.reason}.` : ''
+  const subject = `Payment not verified — order ${params.orderNumber}`
+  const text =
+    `Hi ${params.customerName},\n\n` +
+    `We were unable to verify your payment of ${currency}${params.grandTotal.toFixed(2)} for order ${params.orderNumber}. ` +
+    `The order has been cancelled and any reserved stock has been released.${reasonLine}\n\n` +
+    `If you believe this is a mistake or still want to complete your purchase, please reply to this email or place a new order.\n\n` +
+    `— The ${BRAND.companyName} Team`
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1c1917;line-height:1.55;font-size:15px;">
+      <div style="border-bottom:1px solid #e7e5e0;padding-bottom:16px;margin-bottom:20px;">
+        <span style="font-size:18px;font-weight:700;color:#2d5a3d;letter-spacing:0.02em;">${BRAND.companyName}</span>
+      </div>
+      <p style="margin:0 0 12px 0;">Hi ${params.customerName},</p>
+      <div style="margin:24px 0 28px 0;padding:22px;background:#fef2f2;border-radius:12px;border:1px solid #fecaca;text-align:center;">
+        <div style="font-size:12px;color:#991b1b;text-transform:uppercase;letter-spacing:0.14em;">Payment not verified</div>
+        <div style="font-size:28px;font-weight:700;color:#991b1b;margin-top:10px;">${params.orderNumber}</div>
+        <div style="font-size:18px;font-weight:700;color:#7f1d1d;margin-top:8px;">${currency}${params.grandTotal.toFixed(2)}</div>
+      </div>
+      <p style="margin:0 0 16px 0;">We reviewed the payment proof for this order and were unable to verify your payment of ${currency}${params.grandTotal.toFixed(2)}. The order has been cancelled and any reserved stock has been released.</p>
+      ${params.reason ? `<p style="margin:0 0 16px 0;padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;color:#9a3412;"><strong style="color:#7c2d12;">Reason:</strong> ${params.reason}</p>` : ''}
+      <p style="margin:0 0 22px 0;font-size:14px;color:#57534e;">If you believe this is a mistake or still want to complete your purchase, please reply to this email or place a new order. We're happy to help.</p>
+      <div style="border-top:1px solid #e7e5e0;padding-top:16px;color:#78716c;font-size:12px;line-height:1.55;">
+        <p style="margin:0 0 6px 0;">Thank you for your understanding.</p>
+        <p style="margin:0;">&copy; ${new Date().getFullYear()} ${BRAND.companyName}. All rights reserved.</p>
+      </div>
+    </div>`
+  try {
+    await transporter.sendMail({ from: cfg.from, to: params.to, replyTo: cfg.from, subject, text, html, headers })
+  } catch (err) {
+    throw formatSendError(cfg, err)
+  }
+}
+
+export async function sendCustomerOrderStatusEmail(params: {
+  to: string
+  customerName: string
+  orderNumber: string
+  status: string
+  grandTotal: number
+  currency?: string
+  trackingNumber?: string
+  courierPartner?: string
+}): Promise<void> {
+  const cfg = getSmtpConfig()
+  const v = validateSmtpConfig(cfg)
+  if (!v.ok) {
+    console.log(
+      `[email:dev] Skipping order-status email to ${params.to} — ${v.reason}${v.hint ? ` ${v.hint}` : ''}. ` +
+        `Order ${params.orderNumber} → ${params.status}.`
+    )
+    return
+  }
+  const transporter = getOrCreateTransporter(cfg)
+  const headers = buildDeliverabilityHeaders(cfg, params.to, 'order')
+  const currency = params.currency || '₹'
+
+  const statusLabels: Record<string, string> = {
+    CONFIRMED: 'Order confirmed',
+    PROCESSING: 'Your order is being processed',
+    SHIPPED: 'Your order has shipped',
+    DELIVERED: 'Your order has been delivered',
+    CANCELLED: 'Your order has been cancelled',
+    REFUNDED: 'Your order refund has been processed',
+  }
+  const statusColors: Record<string, { bg: string; border: string; text: string }> = {
+    CONFIRMED: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534' },
+    PROCESSING: { bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af' },
+    SHIPPED: { bg: '#faf5ff', border: '#e9d5ff', text: '#6b21a8' },
+    DELIVERED: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534' },
+    CANCELLED: { bg: '#fef2f2', border: '#fecaca', text: '#991b1b' },
+    REFUNDED: { bg: '#fff7ed', border: '#fed7aa', text: '#9a3412' },
+  }
+  const label = statusLabels[params.status] || 'Order update'
+  const color = statusColors[params.status] || { bg: '#f6f7f3', border: '#e7e5e0', text: '#2d5a3d' }
+
+  let extraBlock = ''
+  if (params.status === 'SHIPPED' && params.trackingNumber) {
+    extraBlock = `
+      <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;width:40%;">Tracking number</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;font-family:Courier,'Courier New',monospace;">${params.trackingNumber}</td></tr>
+        ${params.courierPartner ? `<tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Courier</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${params.courierPartner}</td></tr>` : ''}
+      </table>`
+  }
+
+  const subject = `${label} — order ${params.orderNumber}`
+  const text =
+    `Hi ${params.customerName},\n\n` +
+    `Order ${params.orderNumber} (${currency}${params.grandTotal.toFixed(2)}) status: ${label.toLowerCase()}.\n` +
+    (params.status === 'SHIPPED' && params.trackingNumber ? `Tracking: ${params.trackingNumber}${params.courierPartner ? ` via ${params.courierPartner}` : ''}\n` : '') +
+    `\n— The ${BRAND.companyName} Team`
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1c1917;line-height:1.55;font-size:15px;">
+      <div style="border-bottom:1px solid #e7e5e0;padding-bottom:16px;margin-bottom:20px;">
+        <span style="font-size:18px;font-weight:700;color:#2d5a3d;letter-spacing:0.02em;">${BRAND.companyName}</span>
+      </div>
+      <p style="margin:0 0 12px 0;">Hi ${params.customerName},</p>
+      <div style="margin:24px 0 28px 0;padding:22px;background:${color.bg};border-radius:12px;border:1px solid ${color.border};text-align:center;">
+        <div style="font-size:12px;color:${color.text};text-transform:uppercase;letter-spacing:0.14em;">${label}</div>
+        <div style="font-size:28px;font-weight:700;color:${color.text};margin-top:10px;">${params.orderNumber}</div>
+      </div>
+      <p style="margin:0 0 20px 0;color:#44403c;">Your order status has been updated.</p>
+      <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;width:40%;">Status</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${label}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Order total</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:700;color:#2d5a3d;">${currency}${params.grandTotal.toFixed(2)}</td></tr>
+      </table>
+      ${extraBlock}
+      <p style="margin:0 0 22px 0;font-size:14px;color:#57534e;">You can view the full details of your order from your account page.</p>
+      <div style="border-top:1px solid #e7e5e0;padding-top:16px;color:#78716c;font-size:12px;line-height:1.55;">
+        <p style="margin:0;">&copy; ${new Date().getFullYear()} ${BRAND.companyName}. All rights reserved.</p>
+      </div>
+    </div>`
+  try {
+    await transporter.sendMail({ from: cfg.from, to: params.to, replyTo: cfg.from, subject, text, html, headers })
+  } catch (err) {
+    throw formatSendError(cfg, err)
+  }
+}

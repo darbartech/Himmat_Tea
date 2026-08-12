@@ -8,28 +8,43 @@ import { useAuth } from '@/context/AuthContext';
 import { Github, Chrome } from 'lucide-react';
 import { LoginForm, SignupForm } from '@/modules/auth';
 
+function getSafeRedirect(value: string | null): string {
+  if (!value) return '/account';
+  if (!value.startsWith('/')) return '/account';
+  if (value.startsWith('//')) return '/account';
+  return value;
+}
+
 export default function CustomerAuth() {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [socialLoading, setSocialLoading] = useState<'google' | 'github' | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/';
+  const rawRedirect = searchParams.get('redirect');
+  const safeRedirectTo = getSafeRedirect(rawRedirect);
   
-  const { socialLogin, isLoggedIn, userType } = useAuth();
+  const { socialLogin, isLoggedIn, userType, isLoading } = useAuth();
   
-  // Redirect if already logged in
+  // Redirect if already logged in — only after loading finishes
   useEffect(() => {
+    if (isLoading) return;
     if (isLoggedIn) {
       if (userType === 'customer') {
-        router.replace('/account');
-      } else {
-        router.replace('/');
+        router.replace(safeRedirectTo);
+        router.refresh();
+      } else if (userType === 'admin') {
+        router.replace('/himmat_admin_8526/dashboard');
+        router.refresh();
       }
     }
-  }, [isLoggedIn, userType, router]);
+  }, [isLoggedIn, userType, isLoading, router, safeRedirectTo]);
   
-  if (isLoggedIn) {
-    return null;
+  if (isLoading || isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-[#eef4ea] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2d5a3d]"></div>
+      </div>
+    );
   }
 
   const handleSocialLogin = async (provider: 'google' | 'github') => {
@@ -38,7 +53,8 @@ export default function CustomerAuth() {
     try {
       const success = await socialLogin(provider);
       if (success) {
-        router.push(redirectTo);
+        router.replace(safeRedirectTo);
+        router.refresh();
       }
     } finally {
       setSocialLoading(null);
@@ -46,7 +62,8 @@ export default function CustomerAuth() {
   };
 
   const handleAuthSuccess = () => {
-    router.push(redirectTo);
+    router.replace(safeRedirectTo);
+    router.refresh();
   };
 
   return (
@@ -169,7 +186,7 @@ export default function CustomerAuth() {
               {mode === 'login' && (
                 <LoginForm 
                   onSuccess={handleAuthSuccess}
-                  redirectTo={redirectTo}
+                  redirectTo={safeRedirectTo}
                   showForgotPassword={true}
                   className="space-y-6"
                 />
@@ -178,7 +195,7 @@ export default function CustomerAuth() {
               {mode === 'signup' && (
                 <SignupForm 
                   onSuccess={handleAuthSuccess}
-                  redirectTo={redirectTo}
+                  redirectTo={safeRedirectTo}
                   className="space-y-6"
                 />
               )}

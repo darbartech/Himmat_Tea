@@ -32,6 +32,5 @@ export function eraseCookie(name: string): void {
 
 export const COOKIE_NAMES = {
   IS_LOGGED_IN: 'himmat_isLoggedIn',
-  SESSION_TOKEN: 'himmat_sessionToken',
   CURRENT_USER: 'himmat_currentUser'
 } as const;

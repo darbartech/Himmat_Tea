@@ -749,8 +749,32 @@ export default function Orders() {
   const [courierPartner, setCourierPartner] = useState("");
   const [bulkStatus, setBulkStatus] = useState<OrderStatus>("CONFIRMED");
   const [paymentReference, setPaymentReference] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
+  const [invoiceScale, setInvoiceScale] = useState<number>(1);
+  const invoiceWrapRef = useRef<HTMLDivElement | null>(null);
   
   const invoiceRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const compute = () => {
+      const el = invoiceWrapRef.current;
+      const availWidth = el ? el.clientWidth - 24 : (window.innerWidth - 48);
+      const A4_WIDTH = 794;
+      if (availWidth <= 0) return;
+      setInvoiceScale(Math.min(1, availWidth / A4_WIDTH));
+    };
+    queueMicrotask(compute);
+    window.addEventListener('resize', compute);
+    const ro = typeof ResizeObserver !== 'undefined' && invoiceWrapRef.current
+      ? new ResizeObserver(compute)
+      : null;
+    if (ro && invoiceWrapRef.current) ro.observe(invoiceWrapRef.current);
+    return () => {
+      window.removeEventListener('resize', compute);
+      if (ro) ro.disconnect();
+    };
+  }, [isDetailModalOpen]);
 
   const filteredOrders = orders.filter((o) =>
     (o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -874,11 +898,13 @@ export default function Orders() {
     try {
       const payload: any = { decision };
       if (paymentReference.trim()) payload.transactionReference = paymentReference.trim();
+      if (decision === 'FAILED' && rejectReason.trim()) payload.rejectReason = rejectReason.trim();
       const res: any = await api.patch(`/admin/orders/${order.id}/payment`, payload);
       const refreshed = res?.success ? adaptOrder(res.data) : await refreshOne(order.id) || order;
       setOrders((prev) => prev.map((o) => (o.id === order.id ? refreshed : o)));
       if (selectedOrder?.id === order.id) setSelectedOrder(refreshed);
       setPaymentReference("");
+      setRejectReason("");
       await refreshOrders();
     } catch (e: any) {
       console.error('Failed to update payment:', e);
@@ -1351,6 +1377,14 @@ export default function Orders() {
                           onChange={(e) => setPaymentReference(e.target.value)}
                           className="mt-2 text-sm"
                         />
+                        <textarea
+                          placeholder="Reject reason (sent to customer, optional)"
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                          rows={2}
+                          maxLength={500}
+                          className="mt-2 w-full rounded-md border border-[#e7e4df] bg-white px-3 py-2 text-sm text-[#1c1917] placeholder:text-[#a8a29e] focus:outline-none focus:ring-2 focus:ring-[#2d5a3d]/40 focus:border-[#2d5a3d]"
+                        />
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
@@ -1455,8 +1489,18 @@ export default function Orders() {
               </div>
 
               {/* Invoice preview */}
-              <div className="p-6 bg-[#f0f0f0]">
-                <div className="shadow-xl rounded overflow-hidden">
+              <div
+                ref={invoiceWrapRef}
+                className="p-3 sm:p-6 bg-[#f0f0f0] overflow-x-auto"
+              >
+                <div
+                  className="shadow-xl rounded mx-auto origin-top"
+                  style={{
+                    width: 794,
+                    transform: `scale(${invoiceScale})`,
+                    transformOrigin: 'top center',
+                  }}
+                >
                   <OrderInvoice
                     order={selectedOrder}
                     invoiceRef={invoiceRef}

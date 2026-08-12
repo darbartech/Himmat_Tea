@@ -1,5 +1,12 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect, startTransition, ReactNode } from "react";
+
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { api } from "@/lib/api-client";
 
 interface AdminUser {
@@ -26,121 +33,327 @@ interface CustomerUser {
   type?: "customer";
 }
 
+type User = AdminUser | CustomerUser;
+
 interface AuthContextType {
   isLoggedIn: boolean;
-  currentUser: AdminUser | CustomerUser | null;
+  currentUser: User | null;
   userType: "admin" | "customer" | null;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   customerLogin: (email: string, password: string) => Promise<boolean>;
-  customerSignup: (name: string, email: string, phone: string, password: string, address: string) => Promise<boolean>;
-  socialLogin: (provider: 'google' | 'github') => Promise<boolean>;
+  customerSignup: (
+    name: string,
+    email: string,
+    phone: string,
+    password: string,
+    address: string
+  ) => Promise<boolean>;
+  socialLogin: (provider: "google" | "github") => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<AdminUser | CustomerUser | null>(null);
-  const [userType, setUserType] = useState<"admin" | "customer" | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+function readCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
 
-  interface AuthEnvelope { success?: boolean; user?: AdminUser | CustomerUser }
+  const prefix = `${encodeURIComponent(name)}=`;
 
-  const checkSession = async () => {
+  const parts = document.cookie.split(";");
+
+  for (const part of parts) {
+    const trimmed = part.trim();
+
+    if (trimmed.startsWith(prefix)) {
+      return decodeURIComponent(trimmed.substring(prefix.length));
+    }
+  }
+
+  return null;
+}
+
+function initialLoggedIn(): boolean {
+  return readCookie("himmat_isLoggedIn") === "true";
+}
+
+function initialUserType(): "admin" | "customer" | null {
+  const value = readCookie("himmat_userType");
+
+  if (value === "admin" || value === "customer") {
+    return value;
+  }
+
+  return null;
+}
+
+function initialUser(): User | null {
+  const raw = readCookie("himmat_currentUser");
+
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      (parsed.type === "admin" || parsed.type === "customer")
+    ) {
+      return parsed as User;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCookie(
+  name: string,
+  value: string,
+  days = 4
+): void {
+  if (typeof document === "undefined") return;
+
+  const maxAge = days * 24 * 60 * 60;
+
+  const secure =
+    typeof window !== "undefined" &&
+    window.location.protocol === "https:"
+      ? "; Secure"
+      : "";
+
+  document.cookie =
+    `${encodeURIComponent(name)}=${encodeURIComponent(value)}` +
+    `; Path=/` +
+    `; Max-Age=${maxAge}` +
+    `; SameSite=Lax` +
+    secure;
+}
+
+function deleteCookie(name: string): void {
+  if (typeof document === "undefined") return;
+
+  document.cookie =
+    `${encodeURIComponent(name)}=` +
+    `; Path=/` +
+    `; Expires=Thu, 01 Jan 1970 00:00:00 GMT` +
+    `; Max-Age=0` +
+    `; SameSite=Lax`;
+}
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  /*
+   * IMPORTANT:
+   * These lazy initializers execute immediately in the browser.
+   * Therefore the UI knows the authentication state before
+   * the /auth/me request completes.
+   */
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
+    () => initialLoggedIn()
+  );
+
+  const [currentUser, setCurrentUser] = useState<User | null>(
+    () => initialUser()
+  );
+
+  const [userType, setUserType] = useState<
+    "admin" | "customer" | null
+  >(() => initialUserType());
+
+  /*
+   * If we already have a persisted login state, don't block
+   * the UI waiting for /auth/me.
+   */
+  const [isLoading, setIsLoading] = useState<boolean>(
+    () => !initialLoggedIn()
+  );
+
+  interface AuthEnvelope {
+    success?: boolean;
+    user?: User;
+  }
+
+  const persistUser = (
+    user: User,
+    type: "admin" | "customer"
+  ) => {
+    const userWithType = { ...user, type };
+    setCurrentUser(userWithType);
+    setIsLoggedIn(true);
+    setUserType(type);
+
+    writeCookie("himmat_isLoggedIn", "true");
+    writeCookie("himmat_userType", type);
+    writeCookie("himmat_currentUser", JSON.stringify(userWithType));
+  };
+
+  const clearAuth = () => {
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+    setUserType(null);
+
+    deleteCookie("himmat_isLoggedIn");
+    deleteCookie("himmat_userType");
+    deleteCookie("himmat_currentUser");
+  };
+
+  /*
+   * Validate the real HTTP-only session cookie.
+   *
+   * The browser UI already has optimistic auth state, so this
+   * request does not block the first render.
+   */
+  const hydrateFromServer = async () => {
     try {
-      const response = await api.get<AuthEnvelope>('/auth/me');
+      const response =
+        await api.get<AuthEnvelope>("/auth/me");
+
       if (response.success && response.user) {
         const user = response.user;
-        setCurrentUser(user);
-        setIsLoggedIn(true);
-        if ('username' in user) {
-          setUserType('admin');
-        } else {
-          setUserType('customer');
-        }
+
+        const type =
+          "username" in user
+            ? "admin"
+            : "customer";
+
+        persistUser(user, type);
+      } else {
+        clearAuth();
       }
     } catch {
+      /*
+       * Network/server error:
+       *
+       * Don't immediately log the customer out.
+       * Keep the existing optimistic authentication state.
+       */
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    startTransition(() => {
-      checkSession();
-    });
+    hydrateFromServer();
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (
+    username: string,
+    password: string
+  ): Promise<boolean> => {
     try {
-      const response = await api.post<AuthEnvelope>('/auth/login', { username, password });
+      const response =
+        await api.post<AuthEnvelope>(
+          "/auth/login",
+          {
+            username,
+            password,
+          }
+        );
+
       if (response.success && response.user) {
-        setCurrentUser(response.user);
-        setIsLoggedIn(true);
-        setUserType("admin");
+        persistUser(response.user, "admin");
         return true;
       }
     } catch {
+      // Login failed
     }
+
     return false;
   };
 
-  const customerLogin = async (email: string, password: string): Promise<boolean> => {
+  const customerLogin = async (
+    email: string,
+    password: string
+  ): Promise<boolean> => {
     try {
-      const response = await api.post<AuthEnvelope>('/customer/login', { email, password });
+      const response =
+        await api.post<AuthEnvelope>(
+          "/customer/login",
+          {
+            email,
+            password,
+          }
+        );
+
       if (response.success && response.user) {
-        setCurrentUser(response.user);
-        setIsLoggedIn(true);
-        setUserType("customer");
+        persistUser(response.user, "customer");
         return true;
       }
     } catch {
+      // Customer login failed
     }
+
     return false;
   };
 
-  const customerSignup = async (name: string, email: string, phone: string, password: string, address: string): Promise<boolean> => {
+  const customerSignup = async (
+    name: string,
+    email: string,
+    phone: string,
+    password: string,
+    address: string
+  ): Promise<boolean> => {
     try {
-      const response = await api.post<AuthEnvelope>('/customer/signup', { name, email, phone, password, address });
+      const response =
+        await api.post<AuthEnvelope>(
+          "/customer/signup",
+          {
+            name,
+            email,
+            phone,
+            password,
+            address,
+          }
+        );
+
       if (response.success && response.user) {
-        setCurrentUser(response.user);
-        setIsLoggedIn(true);
-        setUserType("customer");
+        persistUser(response.user, "customer");
         return true;
       }
     } catch {
+      // Signup failed
     }
+
     return false;
   };
 
-  const socialLogin = async (provider: 'google' | 'github'): Promise<boolean> => {
+  const socialLogin = async (
+    provider: "google" | "github"
+  ): Promise<boolean> => {
     return false;
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     try {
-      await api.post('/auth/logout', {});
-    } catch (e) {
+      await api.post("/auth/logout", {});
+    } catch {
+      /*
+       * Even if the server logout request fails,
+       * clear the client authentication state.
+       */
     }
-    setIsLoggedIn(false);
-    setCurrentUser(null);
-    setUserType(null);
+
+    clearAuth();
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      isLoggedIn, 
-      currentUser, 
-      userType,
-      isLoading, 
-      login, 
-      customerLogin, 
-      customerSignup, 
-      socialLogin, 
-      logout 
-    }}>
+    <AuthContext.Provider
+      value={{
+        isLoggedIn,
+        currentUser,
+        userType,
+        isLoading,
+        login,
+        customerLogin,
+        customerSignup,
+        socialLogin,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -148,8 +361,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error(
+      "useAuth must be used within an AuthProvider"
+    );
   }
+
   return context;
 };

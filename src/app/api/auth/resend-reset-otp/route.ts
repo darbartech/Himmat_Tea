@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     if (customer) {
       const otp = generateOtp()
-      const otpHash = await bcrypt.hash(otp, 10)
+      const otpHash = await bcrypt.hash(otp, 12)
       const expiresAt = new Date(Date.now() + RESET_TTL_MINUTES * 60_000)
 
       const token = await prisma.passwordResetToken.findFirst({

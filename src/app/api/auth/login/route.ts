@@ -39,13 +39,24 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('Invalid credentials', 401)
     }
 
+    const { passwordHash, ...userWithoutPassword } = adminUser
+
     await setAuthCookie({
       id: adminUser.id,
       email: adminUser.email,
       type: 'admin'
+    }, {
+      currentUserCookieValue: JSON.stringify({
+        id: adminUser.id,
+        username: adminUser.username,
+        email: adminUser.email,
+        role: adminUser.role,
+        isActive: adminUser.isActive,
+        createdAt: adminUser.createdAt,
+        type: 'admin'
+      }),
+      userTypeCookieValue: 'admin'
     })
-
-    const { passwordHash, ...userWithoutPassword } = adminUser
 
     return createResponse({
       user: userWithoutPassword,

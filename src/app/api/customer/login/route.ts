@@ -52,6 +52,21 @@ export async function POST(request: NextRequest) {
       id: customer.id,
       email: customer.email,
       type: 'customer'
+    }, {
+      currentUserCookieValue: JSON.stringify({
+        id: customer.id,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        address: customer.address,
+        loyaltyPoints: customer.loyaltyPoints,
+        tier: customer.tier,
+        ordersCount: customer.ordersCount,
+        totalSpent: customer.totalSpent,
+        createdAt: customer.createdAt,
+        type: 'customer'
+      }),
+      userTypeCookieValue: 'customer'
     })
 
     const user = await prisma.customer.findUnique({

@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { ArrowRight, Lock, Mail, MapPin, Phone, User } from 'lucide-react';
 import { signupFormSchema, SignupFormData } from './validation';
+import { useAuth } from '@/context/AuthContext';
 
 /**
  * Props for the SignupForm component
@@ -35,6 +37,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   redirectTo,
   className = ''
 }) => {
+  const router = useRouter();
+  const { customerSignup } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -90,37 +94,27 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     setApiError(null);
 
     try {
-      const response = await fetch('/api/customer/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          password: data.password,
-          address: data.address
-        }),
-      });
+      const success = await customerSignup(
+        data.name,
+        data.email,
+        data.phone,
+        data.password,
+        data.address
+      );
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Signup failed');
+      if (!success) {
+        throw new Error('Signup failed');
       }
 
-      // Reset form on success
       reset();
-      
-      // Call success callback
+
       if (onSuccess) {
         onSuccess();
       }
-      
-      // Redirect if specified
+
       if (redirectTo && typeof window !== 'undefined') {
-        window.location.href = redirectTo;
+        router.replace(redirectTo);
+        router.refresh();
       }
 
     } catch (error) {

@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('Email already exists', 400)
     }
 
-    const passwordHash = await bcrypt.hash(password, 10)
+    const passwordHash = await bcrypt.hash(password, 12)
 
     const customer = await prisma.customer.create({
       data: {
@@ -72,6 +72,9 @@ export async function POST(request: NextRequest) {
       id: customer.id,
       email: customer.email,
       type: 'customer'
+    }, {
+      currentUserCookieValue: JSON.stringify(customer),
+      userTypeCookieValue: 'customer'
     })
 
     return createResponse({

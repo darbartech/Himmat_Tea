@@ -31,7 +31,10 @@ export const passwordSchema = z.string()
   .refine(pw => /\d/.test(pw), 'Must include a number')
   .refine(pw => /[^A-Za-z0-9]/.test(pw), 'Must include a special character')
 
-export async function setAuthCookie(payload: AuthPayload): Promise<string> {
+export async function setAuthCookie(payload: AuthPayload, extras?: {
+  currentUserCookieValue?: string
+  userTypeCookieValue?: 'customer' | 'admin'
+}): Promise<string> {
   const cookieStore = await cookies()
   const secret = getJwtSecret()
   const maxAgeSec = 60 * 60 * 24 * 4
@@ -51,6 +54,24 @@ export async function setAuthCookie(payload: AuthPayload): Promise<string> {
     path: '/',
     maxAge: maxAgeSec
   })
+  if (extras?.currentUserCookieValue) {
+    cookieStore.set('himmat_currentUser', extras.currentUserCookieValue, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: maxAgeSec
+    })
+  }
+  if (extras?.userTypeCookieValue) {
+    cookieStore.set('himmat_userType', extras.userTypeCookieValue, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: maxAgeSec
+    })
+  }
 
   return token
 }
@@ -59,6 +80,32 @@ export async function clearAuthCookies() {
   const cookieStore = await cookies()
   cookieStore.delete('himmat_sessionToken')
   cookieStore.delete('himmat_isLoggedIn')
+  cookieStore.delete('himmat_currentUser')
+  cookieStore.delete('himmat_userType')
+}
+
+const RESET_TOKEN_COOKIE = 'himmat_resetToken'
+const RESET_COOKIE_MAX_AGE_SEC = 15 * 60
+
+export async function setResetTokenCookie(resetToken: string) {
+  const cookieStore = await cookies()
+  cookieStore.set(RESET_TOKEN_COOKIE, resetToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: RESET_COOKIE_MAX_AGE_SEC,
+  })
+}
+
+export async function getResetTokenFromCookie(): Promise<string | null> {
+  const cookieStore = await cookies()
+  return cookieStore.get(RESET_TOKEN_COOKIE)?.value ?? null
+}
+
+export async function clearResetTokenCookie() {
+  const cookieStore = await cookies()
+  cookieStore.delete(RESET_TOKEN_COOKIE)
 }
 
 export function decodeToken(token: string): AuthPayload | null {

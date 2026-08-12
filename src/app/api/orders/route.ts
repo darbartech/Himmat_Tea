@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
 import { getCurrentUser, getCurrentAdmin } from '@/lib/auth'
 import { rateLimitOrderCreate } from '@/lib/rate-limit'
+import { sendAdminOrderAlertEmail } from '@/lib/email'
 import { z } from 'zod'
 
 const ORDER_STATUSES = ['AWAITING_PAYMENT', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'] as const
@@ -411,6 +412,23 @@ export async function POST(request: NextRequest) {
               adminName: adminForNote.username,
             }
           }).catch(() => {})
+        }
+
+        if (!isAdmin) {
+          prisma.notification.create({
+            data: {
+              title: 'New order awaiting payment',
+              message: `${data.customerName} placed order ${orderNumber} — ₹${grandTotal} — awaiting QR payment verification.`,
+              orderId: createdOrderId,
+            }
+          }).catch(() => {})
+
+          sendAdminOrderAlertEmail({
+            orderNumber,
+            customerName: data.customerName,
+            customerEmail: data.customerEmail,
+            grandTotal,
+          }).catch(err => console.error('[order] admin alert email failed', err))
         }
       }
 

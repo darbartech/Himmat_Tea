@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
 import { getCurrentAdmin } from '@/lib/auth'
+import { sendCustomerOrderStatusEmail } from '@/lib/email'
 import { z } from 'zod'
 
 interface Params {
@@ -96,28 +97,46 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         (currentStatus === 'AWAITING_PAYMENT' || currentStatus === 'CONFIRMED' || currentStatus === 'PROCESSING')
 
       if (cancelledNeedsRestock) {
-        for (const item of order.items) {
-          const prev = await tx.product.findUnique({
-            where: { id: item.productId },
-            select: { stock: true, name: true },
-          })
-          if (prev) {
-            await tx.product.update({
-              where: { id: item.productId },
-              data: { stock: { increment: item.quantity } },
+        const productIds = order.items.map(i => i.productId)
+        const productsBefore = productIds.length > 0
+          ? await tx.product.findMany({
+              where: { id: { in: productIds } },
+              select: { id: true, stock: true, name: true },
             })
-            await tx.inventoryTransaction.create({
-              data: {
+          : []
+        const productMap = new Map(productsBefore.map(p => [p.id, p]))
+
+        if (productIds.length > 0) {
+          const qtyByProduct = new Map<number, number>()
+          for (const item of order.items) {
+            qtyByProduct.set(item.productId, (qtyByProduct.get(item.productId) || 0) + item.quantity)
+          }
+          const ids = Array.from(qtyByProduct.keys())
+          const qtys = ids.map(id => qtyByProduct.get(id) || 0)
+          // Atomic batched increment via CASE — avoids N round-trips
+          await tx.$executeRawUnsafe(
+            `UPDATE "Product" SET "stock" = "stock" + CASE "id" ${ids.map((_, i) => `WHEN ${ids[i]} THEN ${qtys[i]}`).join(' ')} END WHERE "id" IN (${ids.join(',')})`
+          ).catch(() => {})
+
+          const txnData = order.items
+            .map(item => {
+              const prev = productMap.get(item.productId)
+              if (!prev) return null
+              const qty = item.quantity
+              return {
                 productId: item.productId,
                 productName: prev.name,
-                type: 'ORDER_CANCELLED_RESTOCK',
-                quantity: item.quantity,
+                type: 'ORDER_CANCELLED_RESTOCK' as const,
+                quantity: qty,
                 previousStock: prev.stock,
-                newStock: prev.stock + item.quantity,
+                newStock: prev.stock + qty,
                 reason: cancelReason || `Order cancelled by admin ${adminUser.username}`,
                 referenceId: orderId,
-              },
+              }
             })
+            .filter((x): x is NonNullable<typeof x> => x !== null)
+          if (txnData.length > 0) {
+            await tx.inventoryTransaction.createMany({ data: txnData }).catch(() => {})
           }
         }
 
@@ -183,7 +202,52 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       })
 
       return orderUpd
-    })
+    }, { timeout: 15_000, maxWait: 15_000 })
+
+    if (updated) {
+      const updAny = updated as any
+      const orderNum = updAny.orderNumber || ('orderNumber' in order ? (order as any).orderNumber : String(orderId))
+      const custName = (updAny.customerName as string) || order.customerName
+      const custEmail = (updAny.customerEmail as string) || order.customerEmail
+      const grandTot = Number((updAny.grandTotal as number) ?? order.grandTotal)
+      const trackNum = (status === 'SHIPPED' && trackingNumber) ? (trackingNumber === null ? undefined : trackingNumber) : undefined
+      const courier = (status === 'SHIPPED' && courierPartner) ? (courierPartner === null ? undefined : courierPartner) : undefined
+
+      const titleMap: Record<string, string> = {
+        CONFIRMED: 'Order confirmed',
+        PROCESSING: 'Order processing',
+        SHIPPED: 'Order shipped',
+        DELIVERED: 'Order delivered',
+        CANCELLED: 'Order cancelled',
+        REFUNDED: 'Order refunded',
+      }
+      const msgMap: Record<string, string> = {
+        CONFIRMED: `Order ${orderNum} has been confirmed and is being prepared.`,
+        PROCESSING: `Order ${orderNum} is now being processed.`,
+        SHIPPED: `Order ${orderNum} has been shipped${trackNum ? ` — tracking: ${trackNum}` : ''}.`,
+        DELIVERED: `Order ${orderNum} has been delivered successfully.`,
+        CANCELLED: `Order ${orderNum} has been cancelled${cancelReason ? `: ${cancelReason}` : ''}.`,
+        REFUNDED: `Order ${orderNum} refund has been processed${refundReason ? `: ${refundReason}` : ''}.`,
+      }
+
+      prisma.notification.create({
+        data: {
+          title: titleMap[status] || 'Order update',
+          message: msgMap[status] || `Order ${orderNum} status updated to ${status}.`,
+          orderId: orderId,
+        }
+      }).catch(() => {})
+
+      sendCustomerOrderStatusEmail({
+        to: custEmail,
+        customerName: custName,
+        orderNumber: orderNum,
+        status,
+        grandTotal: grandTot,
+        trackingNumber: trackNum,
+        courierPartner: courier,
+      }).catch(err => console.error('[status] customer email failed', err))
+    }
 
     return createResponse({ success: true, data: updated })
   } catch (error) {

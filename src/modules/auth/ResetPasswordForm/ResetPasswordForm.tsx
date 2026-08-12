@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Lock } from 'lucide-react';
 import { resetPasswordSchema, ResetPasswordData } from './validation';
-import { RESET_TOKEN_STORAGE_KEY } from '../VerifyResetForm/VerifyResetForm';
 
 interface ResetPasswordFormProps {
   className?: string;
@@ -54,36 +53,17 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
     setIsLoading(true);
     setApiError(null);
 
-    let resetToken = '';
-    try {
-      resetToken = sessionStorage.getItem(RESET_TOKEN_STORAGE_KEY) || '';
-    } catch {
-      resetToken = '';
-    }
-
-    if (!resetToken) {
-      setApiError('Your reset session has expired. Please start over.');
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resetToken, newPassword: data.newPassword })
+        body: JSON.stringify({ newPassword: data.newPassword })
       });
 
       const result = await response.json();
 
       if (!response.ok) {
         throw new Error(result.error || result.message || 'Could not reset your password. Please try again.');
-      }
-
-      try {
-        sessionStorage.removeItem(RESET_TOKEN_STORAGE_KEY);
-      } catch {
-        // noop
       }
 
       setSuccess(true);
@@ -100,19 +80,6 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    let hasToken = false;
-    try {
-      hasToken = Boolean(sessionStorage.getItem(RESET_TOKEN_STORAGE_KEY));
-    } catch {
-      hasToken = false;
-    }
-    if (!hasToken) {
-      router.replace('/forgot-password');
-    }
-  }, [router]);
 
   if (success) {
     return (

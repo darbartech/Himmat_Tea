@@ -631,9 +631,10 @@ export default function Navigation() {
                     </Link>
                   )}
                   <button
-                    onClick={() => {
-                      logout();
-                      router.push("/");
+                    onClick={async () => {
+                      await logout();
+                      router.replace("/");
+                      router.refresh();
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 text-[#1c1917] text-sm font-semibold rounded-lg hover:bg-[#f0ede8] transition-all duration-200 group"
                   >
@@ -900,10 +901,11 @@ export default function Navigation() {
                 </Link>
               )}
               <button
-                onClick={() => {
-                  logout();
+                onClick={async () => {
+                  await logout();
                   setMobileOpen(false);
-                  router.push("/");
+                  router.replace("/");
+                  router.refresh();
                 }}
                 className="flex items-center justify-center gap-2 w-full px-4 py-3 text-[#1c1917] text-sm font-semibold rounded-xl hover:bg-[#f0ede8] transition-colors"
               >

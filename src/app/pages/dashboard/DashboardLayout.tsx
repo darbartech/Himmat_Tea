@@ -43,6 +43,16 @@ import { Button } from "@/app/components/ui/button";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useAuth } from "@/context/AuthContext";
 import { useStore } from "@/context/StoreContext";
+import { api } from "@/lib/api-client";
+
+interface LiveNotification {
+  id: number;
+  title: string;
+  message: string;
+  orderId: string;
+  timestamp: string;
+  read: boolean;
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -51,8 +61,44 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const { t, lang: selectedLang, setLang } = useTranslation();
   const { logout, currentUser, userType } = useAuth();
-  const { notifications, markNotificationRead, clearNotifications, orders, addOrder, products } = useStore();
+  const { orders, addOrder, products } = useStore();
+  const [liveNotifications, setLiveNotifications] = useState<LiveNotification[]>([]);
   const router = useRouter();
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchNotifications = async () => {
+      try {
+        const result = await api.get<{ success: boolean; data: LiveNotification[] }>('/admin/notifications');
+        if (!cancelled && result?.success && Array.isArray(result.data)) {
+          setLiveNotifications(result.data);
+        }
+      } catch (_err) {
+        // silent — transient errors, will retry on next interval
+      }
+    };
+    fetchNotifications();
+    const id = setInterval(fetchNotifications, 25_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
+
+  const markNotificationRead = async (id: number) => {
+    try {
+      await api.patch('/admin/notifications', { id });
+      setLiveNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    } catch (_err) { /* noop */ }
+  };
+
+  const clearNotifications = async () => {
+    try {
+      await api.patch('/admin/notifications', { all: true });
+      setLiveNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (_err) { /* noop */ }
+  };
+  const notifications = liveNotifications;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

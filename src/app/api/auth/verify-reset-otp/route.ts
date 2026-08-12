@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
 import { rateLimitAuth } from '@/lib/rate-limit'
 import { signResetToken, MAX_OTP_ATTEMPTS, OTP_LENGTH } from '@/lib/password-reset'
+import { setResetTokenCookie } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
@@ -73,8 +74,9 @@ export async function POST(request: NextRequest) {
     }
 
     const resetToken = signResetToken({ customerId: customer.id, tokenId: token.id })
+    await setResetTokenCookie(resetToken)
 
-    return createResponse({ success: true, resetToken })
+    return createResponse({ success: true })
   } catch (error) {
     return handleApiError(error)
   }

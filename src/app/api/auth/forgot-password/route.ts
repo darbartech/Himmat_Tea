@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       })
 
       const otp = generateOtp()
-      const otpHash = await bcrypt.hash(otp, 10)
+      const otpHash = await bcrypt.hash(otp, 12)
 
       await prisma.passwordResetToken.create({
         data: {

@@ -45,6 +45,13 @@ function verifyAdminToken(req: NextRequest): boolean {
   return decoded?.type === 'admin' && typeof decoded.id === 'number'
 }
 
+function verifyCustomerToken(req: NextRequest): boolean {
+  const token = req.cookies.get('himmat_sessionToken')?.value
+  if (!token) return false
+  const decoded = verifyTokenWithSecret(token)
+  return decoded?.type === 'customer' && typeof decoded.id === 'number'
+}
+
 function verifyAnyAuthenticated(req: NextRequest): boolean {
   const token = req.cookies.get('himmat_sessionToken')?.value
   if (!token) return false
@@ -60,6 +67,16 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith(ADMIN_DASHBOARD_PREFIX)) {
     if (!verifyAdminToken(req)) {
       const loginUrl = new URL(ADMIN_LOGIN_PATH, req.url)
+      return NextResponse.redirect(loginUrl)
+    }
+  }
+
+  const ACCOUNT_PATH = '/account'
+  const CUSTOMER_AUTH_PATH = '/customer-auth'
+  if (pathname === ACCOUNT_PATH || pathname.startsWith(ACCOUNT_PATH + '/')) {
+    if (!verifyCustomerToken(req)) {
+      const loginUrl = new URL(CUSTOMER_AUTH_PATH, req.url)
+      loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
   }
@@ -94,6 +111,8 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/himmat_admin_8526/dashboard/:path*',
+    '/account/:path*',
+    '/account',
     '/api/admin-users/:path*',
     '/api/customers/:path*',
     '/api/orders/:path*',
