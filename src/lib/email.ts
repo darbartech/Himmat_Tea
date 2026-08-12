@@ -301,6 +301,88 @@ Reply to: ${fromAddr}`
   }
 }
 
+export async function sendSignupVerificationEmail(
+  to: string,
+  otp: string,
+  expiresInMinutes: number,
+  customerName?: string
+): Promise<void> {
+  const cfg = getSmtpConfig()
+
+  const v = validateSmtpConfig(cfg)
+  if (!v.ok) {
+    console.log(
+      `[email:dev] Skipping real email to ${to} because SMTP is misconfigured. ${v.reason}${v.hint ? ` ${v.hint}` : ''} ` +
+        `Signup verification code for ${to}: ${otp} (expires in ${expiresInMinutes} minutes).`
+    )
+    return
+  }
+
+  const transporter = getOrCreateTransporter(cfg)
+  const headers = buildDeliverabilityHeaders(cfg, to, 'generic')
+
+  const name = customerName ? ` ${customerName}` : ''
+  const subject = `Verify your email — ${BRAND.companyName}`
+
+  const fromAddr = extractFromAddress(cfg.from)
+  const support = fromAddr
+
+  const text = `Hi${name},
+
+Welcome to ${BRAND.companyName}. Please confirm your email address (${to}) to complete your account registration.
+
+Your verification code is: ${otp}
+
+This code expires in ${expiresInMinutes} minutes. If you did not try to create an account, you can safely ignore this email.
+
+If you are having trouble entering the code, reply to this email or contact support at ${support}.
+
+— The ${BRAND.companyName} Team`
+
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1c1917;line-height:1.55;font-size:15px;">
+      <div style="border-bottom:1px solid #e7e5e0;padding-bottom:16px;margin-bottom:20px;">
+        <span style="font-size:18px;font-weight:700;color:#2d5a3d;letter-spacing:0.02em;">${BRAND.companyName}</span>
+      </div>
+
+      <p style="margin:0 0 12px 0;">Hi${name},</p>
+      <p style="margin:0 0 20px 0;">
+        Welcome to ${BRAND.companyName}. Please confirm your email address
+        (<span style="color:#57534e;">${to}</span>) to complete your registration.
+      </p>
+
+      <div style="margin:24px 0 28px 0;padding:22px;background:#f6f7f3;border-radius:12px;text-align:center;border:1px solid #e7e5e0;">
+        <div style="font-size:12px;color:#6d6a63;text-transform:uppercase;letter-spacing:0.14em;">Your verification code</div>
+        <div style="font-size:34px;font-weight:700;letter-spacing:0.3em;color:#2d5a3d;margin-top:10px;font-family:Courier,'Courier New',monospace;">${otp}</div>
+        <div style="font-size:12px;color:#78716c;margin-top:10px;">Valid for ${expiresInMinutes} minutes</div>
+      </div>
+
+      <p style="margin:0 0 22px 0;font-size:14px;color:#57534e;">
+        If you did not try to create an account, you can safely ignore this email — no account will be created.
+        Need help? Contact us at <a href="mailto:${support}" style="color:#2d5a3d;text-decoration:underline;">${support}</a>.
+      </p>
+
+      <div style="border-top:1px solid #e7e5e0;padding-top:16px;color:#78716c;font-size:12px;line-height:1.55;">
+        <p style="margin:0;">&copy; ${new Date().getFullYear()} ${BRAND.companyName}. All rights reserved.</p>
+      </div>
+    </div>`
+
+  try {
+    const mail: SendMailOptions = {
+      from: cfg.from,
+      to,
+      replyTo: cfg.from,
+      subject,
+      text,
+      html,
+      headers,
+    }
+    await transporter.sendMail(mail)
+  } catch (err) {
+    throw formatSendError(cfg, err)
+  }
+}
+
 export async function sendAdminOrderAlertEmail(order: {
   orderNumber: string
   customerName: string
