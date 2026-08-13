@@ -407,7 +407,15 @@ export default function Products() {
         setNewProduct((prev) => ({ ...prev, imageUrl: result.data.url }));
         toast.success("Image uploaded successfully!");
       } catch (err: any) {
-        toast.error(err.message || "Failed to upload image. Please try again.");
+        const rawMsg: string = (err?.message || "Failed to upload image. Please try again.").toString();
+        let displayMsg = rawMsg;
+        if (rawMsg.toLowerCase().includes("timeout")) {
+          displayMsg =
+            "Upload timed out. For best results, compress the image (save as WebP, reduce resolution to ~2000px wide, or lower JPEG quality to 75-80%) then try again.";
+        } else if (rawMsg.toLowerCase().includes("exceeds") || rawMsg.toLowerCase().includes("size limit")) {
+          displayMsg = rawMsg;
+        }
+        toast.error(displayMsg);
       } finally {
         setUploadingImage(false);
         if (fileInputRef.current) {

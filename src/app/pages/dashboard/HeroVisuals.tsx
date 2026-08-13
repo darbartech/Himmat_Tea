@@ -26,6 +26,7 @@ import {
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog";
 import { Switch } from "../../components/ui/switch";
+import { ImageUploadField } from "../../components/ui/image-upload-field";
 import { useStore } from "../../../context/StoreContext";
 import { HeroVisual } from "../../../context/StoreContext";
 
@@ -43,7 +44,7 @@ export default function HeroVisuals() {
 
   const handleSaveHeroVisual = () => {
     if (!newHeroVisual.imageUrl) {
-      toast.error("Please provide an image URL");
+      toast.error("Please provide an image");
       return;
     }
     if (editingHeroVisual) {
@@ -75,7 +76,6 @@ export default function HeroVisuals() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -99,15 +99,15 @@ export default function HeroVisuals() {
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="imageUrl">Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    value={newHeroVisual.imageUrl}
-                    onChange={(e) => setNewHeroVisual({ ...newHeroVisual, imageUrl: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
+                <ImageUploadField
+                  label="Hero Image"
+                  value={newHeroVisual.imageUrl || ""}
+                  onChange={(v) => setNewHeroVisual({ ...newHeroVisual, imageUrl: v })}
+                  folder="hero-visuals"
+                  placeholder="https://example.com/image.jpg"
+                  id="hero-image"
+                  required
+                />
                 <div className="grid gap-2">
                   <Label htmlFor="title">Title (Optional)</Label>
                   <Input
@@ -168,7 +168,6 @@ export default function HeroVisuals() {
         </div>
       </div>
 
-      {/* Hero Visuals List */}
       <div className="bg-white rounded-2xl shadow-sm border border-[#2d5a3d]/5 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">

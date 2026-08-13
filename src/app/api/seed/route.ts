@@ -32,7 +32,7 @@ export async function POST() {
     }
 
     const { password, generated } = resolveSeedAdminPassword()
-    const passwordHash = await bcrypt.hash(password, 12)
+    const passwordHash = await bcrypt.hash(password, 8)
 
     await prisma.adminUser.create({
       data: {

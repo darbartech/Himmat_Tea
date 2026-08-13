@@ -33,6 +33,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog";
+import { ImageUploadField } from "../../components/ui/image-upload-field";
 import Link from "next/link";
 
 const categories = ["All", "Brewing", "Origins", "Wellness", "Culture"];
@@ -286,15 +287,14 @@ export default function Blog() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image">Image URL</Label>
-                <Input
-                  id="image"
-                  value={newPost.image}
-                  onChange={(e) => setNewPost({ ...newPost, image: e.target.value })}
-                  placeholder="https://..."
-                />
-              </div>
+              <ImageUploadField
+                label="Post Image"
+                value={newPost.image}
+                onChange={(v) => setNewPost({ ...newPost, image: v })}
+                folder="blog"
+                placeholder="https://..."
+                id="blog-image"
+              />
 
               <div className="space-y-2">
                 <Label htmlFor="excerpt">Excerpt *</Label>

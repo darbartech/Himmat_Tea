@@ -5,18 +5,12 @@ import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-<<<<<<< HEAD
-import { ArrowRight, Lock, Mail, MapPin, Phone, User, Eye, EyeOff } from 'lucide-react';
-=======
-import { ArrowLeft, ArrowRight, Lock, Mail, MailCheck, MapPin, Phone, User } from 'lucide-react';
->>>>>>> 03b1196f218eefeffeda13705ea8c64ab894d39e
+import { ArrowLeft, ArrowRight, Lock, Mail, MailCheck, MapPin, Phone, User, Eye, EyeOff } from 'lucide-react';
 import { signupFormSchema, SignupFormData } from './validation';
 import { useAuth } from '@/context/AuthContext';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/app/components/ui/input-otp';
 
-/**
- * Props for the SignupForm component
- */
+
 interface SignupFormProps {
   /** Callback function called when signup is successful */
   onSuccess?: () => void;
@@ -41,14 +35,11 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   const [pendingEmail, setPendingEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-<<<<<<< HEAD
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-=======
   const [otp, setOtp] = useState('');
   const [resendIn, setResendIn] = useState(0);
   const [resending, setResending] = useState(false);
->>>>>>> 03b1196f218eefeffeda13705ea8c64ab894d39e
 
   const {
     register,
@@ -450,15 +441,9 @@ export const SignupForm: React.FC<SignupFormProps> = ({
               aria-invalid={!!errors.password}
               {...register('password')}
               placeholder="Create a password"
-<<<<<<< HEAD
               className={`w-full pl-12 pr-12 py-3 rounded-xl border transition-colors text-sm focus:outline-none
-                ${errors.password 
-                  ? 'border-red-300 bg-red-50 focus:border-red-500' 
-=======
-              className={`w-full pl-12 pr-4 py-3 rounded-xl border transition-colors text-sm focus:outline-none
                 ${errors.password
                   ? 'border-red-300 bg-red-50 focus:border-red-500'
->>>>>>> 03b1196f218eefeffeda13705ea8c64ab894d39e
                   : 'border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] focus:border-[#2d5a3d]'
                 }
               `}
@@ -514,15 +499,9 @@ export const SignupForm: React.FC<SignupFormProps> = ({
               aria-invalid={!!errors.confirmPassword}
               {...register('confirmPassword')}
               placeholder="Confirm your password"
-<<<<<<< HEAD
               className={`w-full pl-12 pr-12 py-3 rounded-xl border transition-colors text-sm focus:outline-none
-                ${errors.confirmPassword 
-                  ? 'border-red-300 bg-red-50 focus:border-red-500' 
-=======
-              className={`w-full pl-12 pr-4 py-3 rounded-xl border transition-colors text-sm focus:outline-none
                 ${errors.confirmPassword
                   ? 'border-red-300 bg-red-50 focus:border-red-500'
->>>>>>> 03b1196f218eefeffeda13705ea8c64ab894d39e
                   : 'border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] focus:border-[#2d5a3d]'
                 }
               `}

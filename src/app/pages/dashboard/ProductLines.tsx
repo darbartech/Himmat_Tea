@@ -34,6 +34,7 @@ import {
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog";
 import { Switch } from "../../components/ui/switch";
+import { ImageUploadField } from "../../components/ui/image-upload-field";
 import { useStore } from "../../../context/StoreContext";
 import { BRAND } from "../../../config/brand";
 
@@ -177,15 +178,14 @@ export default function ProductLines() {
                     placeholder="Brief description of this product line"
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="heroImage">Hero Image URL</Label>
-                  <Input
-                    id="heroImage"
-                    value={newProductLine.heroImage}
-                    onChange={(e) => setNewProductLine({ ...newProductLine, heroImage: e.target.value })}
-                    placeholder="https://..."
-                  />
-                </div>
+                <ImageUploadField
+                  label="Hero Image"
+                  value={newProductLine.heroImage || ""}
+                  onChange={(v) => setNewProductLine({ ...newProductLine, heroImage: v })}
+                  folder="product-lines"
+                  placeholder="https://..."
+                  id="hero-image"
+                />
                 <div className="grid gap-2">
                   <Label htmlFor="color">Brand Color</Label>
                   <div className="flex gap-3 items-center">
