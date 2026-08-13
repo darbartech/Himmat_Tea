@@ -44,6 +44,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useAuth } from "@/context/AuthContext";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
+import Images from "next/image";
 
 interface LiveNotification {
   id: number;
@@ -247,15 +248,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               href="/himmat_admin_8526/dashboard" 
               className="flex items-center gap-3"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-[#2d5a3d] to-[#0b7c33] rounded-xl flex items-center justify-center shadow-md">
-                <span className="text-2xl">🍃</span>
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  Godgifted
-                </h1>
-                <p className="text-xs text-[#78746e]">{t("dashboard.adminTitle")}</p>
-              </div>
+                  <Images
+              src="/logo.svg"
+              alt={"GodGifted"}
+              width={100}
+              height={100}
+              className="w-[150px] h-[100%]"
+             
+            />
             </Link>
           </div>
 

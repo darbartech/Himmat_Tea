@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ArrowRight, Instagram, Facebook, Youtube } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { BRAND } from "@/config/brand";
+import Image from "next/image";
 
 export default function Footer() {
   const { t } = useTranslation();
@@ -98,31 +99,15 @@ export default function Footer() {
           {/* Brand column */}
           <div>
             <Link href="/" className="flex items-center gap-3 mb-6">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 32 32"
-                fill="none"
-                aria-hidden="true"
-              >
-                <rect width="32" height="32" rx="8" fill="#2d5a3d" />
-                <path
-                  d="M16 6C16 6 8 12 8 19a8 8 0 0016 0c0-6-8-13-8-13z"
-                  fill="#c8a96e"
-                  opacity="0.9"
-                />
-                <path
-                  d="M16 10C16 10 11 15 11 20a5 5 0 0010 0c0-5-5-10-5-10z"
-                  fill="white"
-                  opacity="0.25"
-                />
-              </svg>
-              <span
-                className="text-xl font-semibold"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                {BRAND.companyName}
-              </span>
+             
+                  <Image
+                           src="/logo.svg"
+                           alt={BRAND.companyName}
+                           width={100}
+                           height={100}
+                           className="w-[150px] h-[100%]"
+                          
+                         />
             </Link>
             <p className="text-white/60 text-[15px] leading-relaxed mb-6 max-w-[260px]">
               {BRAND.tagline}

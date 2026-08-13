@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { api } from "../../../lib/api-client";
+import { api, ApiError } from "../../../lib/api-client";
+import { toast } from "sonner";
 import {
   Plus,
   Search,
@@ -19,6 +20,7 @@ import {
   ArrowDown,
   RefreshCw,
   Info,
+  Loader2,
 } from "lucide-react";
 import {
   Dialog,
@@ -79,6 +81,9 @@ export default function Inventory() {
   });
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedTransactionProduct, setSelectedTransactionProduct] = useState<number | null>(null);
+  const [isAdjusting, setIsAdjusting] = useState(false);
+  const [isBatchSaving, setIsBatchSaving] = useState(false);
+  const [batchDeletingId, setBatchDeletingId] = useState<number | null>(null);
 
   const loadAll = async () => {
     setLoading(true);
@@ -223,11 +228,84 @@ export default function Inventory() {
     return p?.name ?? "Unknown Product";
   };
 
-  const handleAdjustStock = () => {
-    if (!selectedProduct || stockAdjustment.quantity === 0 || !stockAdjustment.reason) return;
-    showBackendAlert("Adjust Stock");
-    setSelectedProduct(null);
-    setStockAdjustment({ quantity: 0, reason: "" });
+  const handleAdjustStock = async () => {
+    if (!selectedProduct || stockAdjustment.quantity === 0 || !stockAdjustment.reason) {
+      if (stockAdjustment.quantity === 0) toast.error("Quantity cannot be zero");
+      if (!stockAdjustment.reason) toast.error("Please enter a reason");
+      return;
+    }
+    try {
+      setIsAdjusting(true);
+      const qty = Number(stockAdjustment.quantity);
+      const type = qty > 0 ? "in" : "out";
+      await api.post("/inventory/transactions", {
+        productId: Number(selectedProduct.id),
+        type,
+        quantity: Math.abs(qty),
+        reason: stockAdjustment.reason,
+      });
+      toast.success(
+        `Stock adjusted for ${selectedProduct.name}: ${qty > 0 ? "+" : ""}${qty} units`
+      );
+      setSelectedProduct(null);
+      setStockAdjustment({ quantity: 0, reason: "" });
+      await loadAll();
+    } catch (err: any) {
+      const msg = err instanceof ApiError ? err.message : err?.message || "Failed to adjust stock";
+      toast.error(msg);
+    } finally {
+      setIsAdjusting(false);
+    }
+  };
+
+  const handleSaveBatch = async () => {
+    if (!selectedProductForBatch) return;
+    if (!batchForm.batchNumber || !batchForm.quantity || !batchForm.receivedDate) {
+      toast.error("Batch Number, Quantity, and Received Date are required");
+      return;
+    }
+    try {
+      setIsBatchSaving(true);
+      const payload = {
+        productId: Number(selectedProductForBatch.id),
+        batchNumber: batchForm.batchNumber,
+        quantity: Number(batchForm.quantity),
+        receivedDate: batchForm.receivedDate,
+        expiryDate: batchForm.expiryDate || null,
+        supplier: batchForm.supplier || null,
+        costPrice: Number(batchForm.costPrice) || 0,
+      };
+      if (editBatchId) {
+        await api.put(`/batches/${editBatchId}`, payload);
+        toast.success("Batch updated successfully!");
+      } else {
+        await api.post("/batches", payload);
+        toast.success("Batch added successfully! Stock updated.");
+      }
+      setBatchModalOpen(false);
+      setSelectedProductForBatch(null);
+      setEditBatchId(null);
+      await loadAll();
+    } catch (err: any) {
+      const msg = err instanceof ApiError ? err.message : err?.message || "Failed to save batch";
+      toast.error(msg);
+    } finally {
+      setIsBatchSaving(false);
+    }
+  };
+
+  const handleDeleteBatch = async (product: any, batch: any) => {
+    try {
+      setBatchDeletingId(batch.id);
+      await api.delete(`/batches/${batch.id}`);
+      toast.success(`Batch ${batch.batchNumber} deleted`);
+      await loadAll();
+    } catch (err: any) {
+      const msg = err instanceof ApiError ? err.message : err?.message || "Failed to delete batch";
+      toast.error(msg);
+    } finally {
+      setBatchDeletingId(null);
+    }
   };
 
   const filteredTransactions = selectedTransactionProduct
@@ -580,9 +658,19 @@ export default function Inventory() {
                                     <Button
                                       className="bg-[#2d5a3d] hover:bg-[#234832]"
                                       onClick={handleAdjustStock}
+                                      disabled={isAdjusting}
                                     >
-                                      <Save className="h-4 w-4 mr-2" />
-                                      Save
+                                      {isAdjusting ? (
+                                        <>
+                                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                          Saving...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Save className="h-4 w-4 mr-2" />
+                                          Save
+                                        </>
+                                      )}
                                     </Button>
                                   </div>
                                 </DialogContent>
@@ -908,11 +996,14 @@ export default function Inventory() {
                                 <Button
                                   variant="destructive"
                                   size="sm"
-                                  onClick={() => {
-                                    showBackendAlert("Delete Batch");
-                                  }}
+                                  onClick={() => handleDeleteBatch(product, batch)}
+                                  disabled={batchDeletingId === batch.id}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  {batchDeletingId === batch.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
                                 </Button>
                               </div>
                             </td>
@@ -1009,20 +1100,23 @@ export default function Inventory() {
                     setSelectedProductForBatch(null);
                     setEditBatchId(null);
                   }}
+                  disabled={isBatchSaving}
                 >
                   Cancel
                 </Button>
                 <Button
                   className="bg-[#2d5a3d] hover:bg-[#234832]"
-                  onClick={() => {
-                    if (!selectedProductForBatch) return;
-                    showBackendAlert(editBatchId ? "Update Batch" : "Add Batch");
-                    setBatchModalOpen(false);
-                    setSelectedProductForBatch(null);
-                    setEditBatchId(null);
-                  }}
+                  onClick={handleSaveBatch}
+                  disabled={isBatchSaving}
                 >
-                  {editBatchId ? "Update" : "Add"}
+                  {isBatchSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {editBatchId ? "Saving..." : "Adding..."}
+                    </>
+                  ) : (
+                    editBatchId ? "Update" : "Add"
+                  )}
                 </Button>
               </div>
             </DialogContent>

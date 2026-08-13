@@ -1,7 +1,7 @@
-
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createResponse, handleApiError } from '@/lib/api-utils'
+import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
+import { getCurrentAdmin } from '@/lib/auth'
 
 interface Params {
   params: Promise<{ id: string }>
@@ -9,6 +9,10 @@ interface Params {
 
 export async function GET(request: NextRequest, { params }: Params) {
   try {
+    const adminUser = await getCurrentAdmin();
+    if (!adminUser) {
+      return createErrorResponse('Unauthorized - admin only', 401);
+    }
     const { id } = await params
     const productLine = await prisma.productLine.findUnique({
       where: { id: parseInt(id) },
@@ -25,6 +29,10 @@ export async function GET(request: NextRequest, { params }: Params) {
 
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
+    const adminUser = await getCurrentAdmin();
+    if (!adminUser) {
+      return createErrorResponse('Unauthorized - admin only', 401);
+    }
     const { id } = await params
     const body = await request.json()
     const productLine = await prisma.productLine.update({
@@ -40,6 +48,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
+    const adminUser = await getCurrentAdmin();
+    if (!adminUser) {
+      return createErrorResponse('Unauthorized - admin only', 401);
+    }
     const { id } = await params
     await prisma.productLine.delete({
       where: { id: parseInt(id) },

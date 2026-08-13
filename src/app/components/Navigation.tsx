@@ -35,6 +35,9 @@ import { BRAND } from '@/config/brand';
 import { AuthModal } from '@/modules/auth';
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
+import Image from "next/image";
+
+
 
 /* ─────────────────────────────────────────────────────────
    Announcement messages  (auto-rotate every 4 s)
@@ -441,39 +444,17 @@ export default function Navigation() {
               className="flex items-center gap-2.5 shrink-0 group"
               onClick={() => setMobileOpen(false)}
             >
-              <div className="relative transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-expo)] group-hover:scale-[1.03]">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                  aria-hidden="true"
-                  className="drop-shadow-[0_1px_2px_rgba(45,90,61,0.2)]"
-                >
-                  <rect width="32" height="32" rx="8" className="fill-primary" />
-                  <path
-                    d="M16 6C16 6 8 12 8 19a8 8 0 0016 0c0-7-8-13-8-13z"
-                    className="fill-accent"
-                    opacity="0.92"
-                  />
-                  <path
-                    d="M16 10C16 10 11 15 11 20a5 5 0 0010 0c0-5-5-10-5-10z"
-                    fill="white"
-                    opacity="0.28"
-                  />
-                </svg>
-              </div>
-              <div className="flex flex-col">
-                <span
-                  className="text-[1.1rem] font-semibold tracking-[-0.01em] text-foreground leading-none"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
-                >
-                  {BRAND.companyName}
-                </span>
-                <span className="text-[10px] text-muted-foreground -mt-0.5 tracking-wide">
-                  Home of Himmat Tea
-                </span>
-              </div>
+              
+            <Image
+              src="/logo.svg"
+              alt={BRAND.companyName}
+              width={100}
+              height={100}
+              className="w-[150px] h-[100%]"
+             
+            />
+
+
             </Link>
 
             {/* ── Desktop Nav links ── */}
