@@ -37,35 +37,7 @@ export default function Features() {
       title: t("features.f3.title"),
       description: t("features.f3.description"),
     },
-    {
-      icon: (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
-        </svg>
-      ),
-      title: t("features.f4.title"),
-      description: t("features.f4.description"),
-    },
-    {
-      icon: (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 12h14M12 5l7 7-7 7" />
-        </svg>
-      ),
-      title: t("features.f5.title"),
-      description: t("features.f5.description"),
-    },
-    {
-      icon: (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-        </svg>
-      ),
-      title: t("features.f6.title"),
-      description: t("features.f6.description"),
-    },
-  ];
+  ].filter(f => f.title);
    
   return (
     <section
@@ -74,24 +46,18 @@ export default function Features() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-        {/* Header — asymmetric */}
-        <div className="grid lg:grid-cols-[1fr_2fr] gap-16 items-end mb-20">
-          <div>
-            <p className="text-xs uppercase tracking-widest text-[#c8a96e] font-medium mb-4">
-              {t("features.eyebrow")}
-            </p>
-            <h2
-              className="text-[clamp(2rem,3.5vw,2.75rem)] font-semibold leading-[1.15] text-[#1c1917]"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              {t("features.headline")}
-              <br />
-              <em className="not-italic text-[#2d5a3d]">{t("features.headlineAccent")}</em>
-            </h2>
-          </div>
-          <p className="text-[17px] text-[#78746e] leading-relaxed max-w-[560px] lg:mb-1.5">
-            {t("features.subheadline")}
+        {/* Header */}
+        <div className="text-center mb-16">
+          <p className="text-xs uppercase tracking-widest text-[#c8a96e] font-medium mb-4">
+            {t("features.eyebrow")}
           </p>
+          <h2
+            className="text-[clamp(2rem,3.5vw,2.75rem)] font-semibold leading-[1.15] text-[#1c1917] max-w-2xl mx-auto"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            {t("features.headline")}{" "}
+            <em className="not-italic text-[#2d5a3d]">{t("features.headlineAccent")}</em>
+          </h2>
         </div>
 
         {/* Features grid */}

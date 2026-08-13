@@ -6,10 +6,12 @@ import { Star, ShoppingBag, ArrowRight } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useCart } from "@/context/CartContext";
 import { useStore } from "@/context/StoreContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function ProductsSection() {
   const { t } = useTranslation();
   const { addToCart } = useCart();
+  const { formatPrice } = useCurrency();
   const { products } = useStore();
   const [activeFilter, setActiveFilter] = useState(t("products.filter.all"));
   const [hoveredId, setHoveredId] = useState<number | null>(null);
@@ -138,7 +140,7 @@ export default function ProductsSection() {
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <span className="text-xl font-bold text-[#1c1917]">
-                          ₹{product.price.toFixed(0)}
+                          {formatPrice(product.price)}
                         </span>
                         <span className="text-xs text-[#78746e] ml-1">
                           / 50g

@@ -7,10 +7,12 @@ import { useWishlist } from "@/context/WishlistContext";
 import { Heart, ShoppingBag, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function Wishlist() {
   const { wishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const { formatPrice } = useCurrency();
 
   function handleAddToCart(product: typeof wishlist[0]) {
     addToCart({
@@ -107,7 +109,7 @@ export default function Wishlist() {
                       </h3>
                     </Link>
                     <p className="text-xl font-bold text-[#2d5a3d] mb-4">
-                      Rs.&nbsp;{product.price.toLocaleString()}
+                      {formatPrice(product.price)}
                     </p>
                     <div className="flex gap-3">
                       <button

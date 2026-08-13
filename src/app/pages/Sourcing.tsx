@@ -19,28 +19,28 @@ const steps = [
     icon: <Sprout className="h-6 w-6" />,
     title: "Garden Selection",
     subtitle: "How we pick partner farms",
-    desc: "Every partnership begins with a visit. We walk the fields, taste the soil's story, and verify that every farm aligns with our standards for altitude, cultivation methods, and fair labour practices. We only work with gardens we'd invite you to visit yourself.",
+    desc: "On-site visits verify altitude, cultivation methods, and labour standards before any partnership begins.",
   },
   {
     number: "02",
     icon: <Leaf className="h-6 w-6" />,
     title: "Harvest & Processing",
     subtitle: "Timing and methods",
-    desc: "We harvest at peak flush — when leaves carry the highest concentration of flavour compounds. Our partners use traditional hand-plucking methods for the finest grades, and time their harvests to the exact moment of optimal development, whether that's spring's first flush or autumn's bold second.",
+    desc: "Hand-plucked at peak flush by experienced farmers to capture the season's brightest flavours.",
   },
   {
     number: "03",
     icon: <FlaskConical className="h-6 w-6" />,
     title: "Quality Testing",
     subtitle: "Cupping and lab tests",
-    desc: "Every lot passes a rigorous two-stage quality process: a sensory cupping session led by our head of sourcing, followed by third-party laboratory testing for pesticide residues, heavy metals, and microbial safety. If it doesn't pass both stages, it doesn't reach you.",
+    desc: "Sensory cupping plus third-party lab tests for residues; rejected lots never ship.",
   },
   {
     number: "04",
     icon: <Package className="h-6 w-6" />,
     title: "Packaging & Shipping",
     subtitle: "Eco-friendly, nitrogen-flushed",
-    desc: "Approved teas are nitrogen-flushed into resealable, food-safe pouches that lock out oxygen and moisture. Our outer packaging uses FSC-certified card and vegetable inks. We ship via consolidated freight to minimise our carbon footprint, and offer carbon-offset delivery.",
+    desc: "Nitrogen-flushed pouches, FSC-certified cartons, carbon-offset consolidated freight.",
   },
 ];
 
@@ -124,8 +124,10 @@ export default function Sourcing() {
               From Garden to Cup
             </h1>
             <p className="text-xl text-[#78746e] max-w-2xl mx-auto">
-              We believe transparency is the foundation of great tea. Here&apos;s
-              exactly how your tea gets from a Himalayan hillside to your door.
+              Four checkpoints stand between a Himalayan farm and your cup. Here&apos;s what each one does.
+            </p>
+            <p className="text-sm text-[#78746e] mt-4">
+              <Link href="/about" className="underline hover:text-[#2d5a3d]">About our team →</Link>
             </p>
           </div>
 

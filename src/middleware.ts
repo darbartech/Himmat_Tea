@@ -62,6 +62,20 @@ function verifyAnyAuthenticated(req: NextRequest): boolean {
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
+  const res = NextResponse.next()
+
+  const existing = req.cookies.get('himmat_country')?.value
+  if (!existing) {
+    const country =
+      (req as any).geo?.country ||
+      req.headers.get('x-vercel-ip-country') ||
+      'NP'
+    res.cookies.set('himmat_country', country, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+    })
+  }
+
   const ADMIN_DASHBOARD_PREFIX = '/himmat_admin_8526/dashboard'
   const ADMIN_LOGIN_PATH = '/himmat_admin_8526'
   if (pathname.startsWith(ADMIN_DASHBOARD_PREFIX)) {
@@ -105,11 +119,13 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  return NextResponse.next()
+  return res
 }
 
 export const config = {
   matcher: [
+    '/',
+    '/:path*',
     '/himmat_admin_8526/dashboard/:path*',
     '/account/:path*',
     '/account',
@@ -119,6 +135,7 @@ export const config = {
     '/api/coupons/:path*',
     '/api/seed/:path*',
     '/api/admin/:path*',
-    '/api/settings/:path*'
+    '/api/settings/:path*',
+    '/api/exchange-rates/:path*'
   ]
 }

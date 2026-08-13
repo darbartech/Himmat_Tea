@@ -7,6 +7,7 @@ import Footer from "@/app/components/Footer";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { Search, ShoppingBag, Star, ArrowRight, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { BRAND } from "@/config/brand";
@@ -93,6 +94,7 @@ export default function ProductsCatalog() {
   const { t } = useTranslation();
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { formatPrice } = useCurrency();
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState("featured");
   const [search, setSearch] = useState("");
@@ -361,7 +363,7 @@ export default function ProductsCatalog() {
 
                       <div className="flex items-center justify-between mb-4">
                         <p className="text-xl font-bold text-[#2d5a3d]">
-                          Rs.&nbsp;{product.price.toLocaleString()}
+                          {formatPrice(product.price)}
                         </p>
                         <p className="text-xs text-[#78746e] bg-[#f0ede8] px-2.5 py-0.5 rounded-full">
                           50g

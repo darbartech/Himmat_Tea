@@ -15,6 +15,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { toast } from "sonner";
 
 export default function Cart() {
@@ -22,6 +23,7 @@ export default function Cart() {
   const { cart, updateQuantity, removeFromCart, cartTotal } = useCart();
   const [promo, setPromo] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
+  const { formatPrice } = useCurrency();
 
   const shippingFree = cartTotal >= 3000;
 
@@ -127,11 +129,11 @@ export default function Cart() {
                           {item.weight}
                         </span>
                         <span className="text-xs text-[#78746e]">
-                          Rs.&nbsp;{item.price.toLocaleString()} each
+                          {formatPrice(item.price)} each
                         </span>
                       </div>
                       <p className="text-lg font-bold text-[#2d5a3d]">
-                        Rs.&nbsp;{(item.price * item.quantity).toLocaleString()}
+                        {formatPrice(item.price * item.quantity)}
                       </p>
                     </div>
 
@@ -190,8 +192,7 @@ export default function Cart() {
                           {item.name} × {item.quantity}
                         </span>
                         <span className="text-[#1c1917] font-medium shrink-0">
-                          Rs.&nbsp;
-                          {(item.price * item.quantity).toLocaleString()}
+                          {formatPrice(item.price * item.quantity)}
                         </span>
                       </div>
                     ))}
@@ -236,7 +237,7 @@ export default function Cart() {
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm text-[#78746e]">
                       <span>Subtotal</span>
-                      <span>Rs.&nbsp;{cartTotal.toLocaleString()}</span>
+                      <span>{formatPrice(cartTotal)}</span>
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <div className="flex justify-between text-sm text-[#78746e]">
@@ -254,7 +255,7 @@ export default function Cart() {
                     <div className="h-px bg-[rgba(28,25,23,0.08)]" />
                     <div className="flex justify-between text-lg font-bold text-[#1c1917]">
                       <span>Total</span>
-                      <span>Rs.&nbsp;{cartTotal.toLocaleString()}</span>
+                      <span>{formatPrice(cartTotal)}</span>
                     </div>
                   </div>
 

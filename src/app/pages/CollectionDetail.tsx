@@ -6,6 +6,7 @@ import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useCart } from "@/context/CartContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { ArrowLeft, ArrowRight, ShoppingBag } from "lucide-react";
 
 const collections: Record<
@@ -109,6 +110,7 @@ export default function CollectionDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { t } = useTranslation();
   const { addToCart } = useCart();
+  const { formatPrice } = useCurrency();
 
   const collection = slug ? collections[slug] : null;
 
@@ -225,7 +227,7 @@ export default function CollectionDetail() {
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-xl font-semibold text-[#1c1917]">
-                          ₹{product.price.toLocaleString()}
+                          {formatPrice(product.price)}
                         </span>
                         <span className="text-sm text-[#78746e] ml-2">
                           / {product.weight}

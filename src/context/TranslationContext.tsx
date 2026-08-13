@@ -1,6 +1,7 @@
 "use client";
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import en from '../locales/en.json';
+import { languageForCountry } from '../lib/locale';
 
 type Translations = Record<string, string>;
 
@@ -11,7 +12,7 @@ interface TranslationCtx {
   isLoading: boolean;
 }
 
-const TRANSLATION_VERSION = 'v3'; // Increment this when translation files change
+const TRANSLATION_VERSION = 'v4';
 
 const TranslationContext = createContext<TranslationCtx>({
   t: (k) => k,
@@ -20,16 +21,26 @@ const TranslationContext = createContext<TranslationCtx>({
   isLoading: false,
 });
 
+function readCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const prefix = `${encodeURIComponent(name)}=`;
+  const parts = document.cookie.split(";");
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (trimmed.startsWith(prefix)) {
+      return decodeURIComponent(trimmed.substring(prefix.length));
+    }
+  }
+  return null;
+}
+
 export const TranslationProvider = ({ children }: { children: ReactNode }) => {
   const [lang, setLangState] = useState('en');
   const [translations, setTranslations] = useState<Translations>(en);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Validate if cached data has all keys
   const isValidCache = (data: Translations): boolean => {
     const allEnglishKeys = Object.keys(en);
-    const cachedKeys = Object.keys(data);
-    // Check if all English keys are present in cached data
     return allEnglishKeys.every(key => data[key] !== undefined);
   };
 
@@ -41,49 +52,56 @@ export const TranslationProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    // Check sessionStorage first
-    let cachedVersion: string | null = null;
-    let cachedData: string | null = null;
-    if (typeof window !== 'undefined') {
-      cachedVersion = sessionStorage.getItem(`tr_${newLang}_version`);
-      cachedData = sessionStorage.getItem(`tr_${newLang}`);
-    }
-    if (cachedVersion === TRANSLATION_VERSION && cachedData) {
-      const parsedData = JSON.parse(cachedData);
-      if (isValidCache(parsedData)) {
-        setTranslations(parsedData);
-        return;
-      }
-    }
-
-    // Try to load from locale file (since we have them pre-generated!)
+    setIsLoading(true);
     try {
+      let cachedVersion: string | null = null;
+      let cachedData: string | null = null;
+      if (typeof window !== 'undefined') {
+        cachedVersion = localStorage.getItem(`tr_${newLang}_version`);
+        cachedData = localStorage.getItem(`tr_${newLang}`);
+      }
+      if (cachedVersion === TRANSLATION_VERSION && cachedData) {
+        const parsedData = JSON.parse(cachedData);
+        if (isValidCache(parsedData)) {
+          setTranslations(parsedData);
+          return;
+        }
+      }
+
       const localeModule = await import(`../locales/${newLang}.json`);
       const localeData = localeModule.default;
       if (typeof window !== 'undefined') {
-        sessionStorage.setItem(`tr_${newLang}`, JSON.stringify(localeData));
-        sessionStorage.setItem(`tr_${newLang}_version`, TRANSLATION_VERSION);
+        localStorage.setItem(`tr_${newLang}`, JSON.stringify(localeData));
+        localStorage.setItem(`tr_${newLang}_version`, TRANSLATION_VERSION);
       }
       setTranslations(localeData);
     } catch (err) {
       console.error('Failed to load translations, falling back to English', err);
       setTranslations(en);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  // Fallback to key, then English - with interpolation support
+  useEffect(() => {
+    const manualChoice = localStorage.getItem("himmat_lang");
+    if (manualChoice) {
+      setLang(manualChoice);
+      return;
+    }
+    const country = readCookie("himmat_country");
+    setLang(languageForCountry(country));
+  }, [setLang]);
+
   const t = useCallback(
     (key: string, params?: Record<string, string | number>) => {
       let text = translations[key] ?? en[key as keyof typeof en] ?? key;
-      
-      // Handle interpolation if params are provided
       if (params) {
         Object.entries(params).forEach(([paramKey, paramValue]) => {
           const regex = new RegExp(`{${paramKey}}`, 'g');
           text = text.replace(regex, String(paramValue));
         });
       }
-      
       return text;
     },
     [translations]
@@ -91,7 +109,6 @@ export const TranslationProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <TranslationContext.Provider value={{ t, lang, setLang, isLoading }}>
-      {/* Thin progress bar during language fetch */}
       {isLoading && (
         <div
           style={{

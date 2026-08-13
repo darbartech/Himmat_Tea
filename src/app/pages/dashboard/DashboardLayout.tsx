@@ -304,6 +304,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       }`}
                       onClick={() => {
                         setLang(code);
+                        localStorage.setItem("himmat_lang", code);
                         setLangOpen(false);
                       }}
                     >
