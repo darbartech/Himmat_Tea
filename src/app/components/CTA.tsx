@@ -15,7 +15,6 @@ export default function CTA() {
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, #c8a96e 0%, transparent 50%), radial-gradient(circle at 80% 50%, #f9f7f4 0%, transparent 50%)" }} />
           <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8 p-10 lg:p-14">
             <div className="text-center lg:text-left">
-              <p className="text-xs uppercase tracking-widest text-[#c8a96e] font-medium mb-3">Personalised Service</p>
               <h3
                 className="text-[clamp(1.6rem,2.5vw,2rem)] font-semibold text-white leading-snug mb-2"
                 style={{ fontFamily: "'Playfair Display', serif" }}
@@ -26,16 +25,24 @@ export default function CTA() {
                 {t("features.cta.sub")}
               </p>
             </div>
-            <Link
-              href="/products"
-              className="shrink-0 inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-[#c8a96e] via-[#d4b76a] to-[#c8a96e] text-[#1c1917] font-bold rounded-full hover:from-[#d4b76a] hover:to-[#c8a96e] transition-all duration-300 hover:scale-105 shadow-2xl hover:shadow-[#c8a96e]/50 border-2 border-transparent hover:border-white/50 relative overflow-hidden group"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                {t("features.cta.button")}
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-800 ease-out" />
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/products"
+                className="shrink-0 inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-[#c8a96e] via-[#d4b76a] to-[#c8a96e] text-[#1c1917] font-bold rounded-full hover:from-[#d4b76a] hover:to-[#c8a96e] transition-all duration-300 hover:scale-[1.02] shadow-xl hover:shadow-[#c8a96e]/40 border-2 border-transparent hover:border-white/50 relative overflow-hidden group"
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5" />
+                  {t("features.cta.button")}
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-800 ease-out" />
+              </Link>
+              <Link
+                href="/collections/godgifted-dal"
+                className="shrink-0 inline-flex items-center justify-center px-8 py-4 border-2 border-white/40 text-white font-bold rounded-full hover:bg-white/10 transition-all duration-300 hover:scale-[1.02]"
+              >
+                Explore Godgifted Dal
+              </Link>
+            </div>
           </div>
           <div className="absolute -bottom-6 -right-6 w-40 h-40 opacity-[0.07] pointer-events-none">
             <svg viewBox="0 0 100 100" className="w-full h-full">

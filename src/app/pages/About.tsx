@@ -11,22 +11,22 @@ const milestones = [
   {
     year: "2018",
     title: "Founded in Kathmandu",
-    desc: `${BRAND.companyName} was born with a mission to connect Himalayan farmers directly with global consumers.`,
+    desc: "Started with a mission to connect Himalayan farmers directly with global buyers.",
   },
   {
     year: "2020",
     title: "First Export to Japan",
-    desc: "Our first-flush Ilam green teas reached Tokyo, earning rave reviews from discerning Japanese customers.",
+    desc: "First-flush Ilam green teas arrived in Tokyo; well-received by specialty buyers.",
   },
   {
     year: "2022",
     title: "Certified Organic",
-    desc: "All partner farms received full organic certification, reaffirming our commitment to chemical-free cultivation.",
+    desc: "All partner farms earned full organic certification.",
   },
   {
     year: "2024",
     title: "Expanded Product Lines",
-    desc: "Launched Godgifted Dal, extending our commitment to quality and direct trade to pulses and grains.",
+    desc: "Launched Godgifted Dal — direct-trade pulses and grains.",
   },
 ];
 
@@ -36,21 +36,21 @@ const team = [
     role: "Founder & CEO",
     initials: "RS",
     color: "#2d5a3d",
-    bio: "Raj grew up in the tea gardens of Ilam and has spent 15 years building direct relationships with Nepal's finest farmers.",
+    bio: "Grew up in the tea gardens of Ilam; 15 years building direct farmer relationships.",
   },
   {
     name: "Priya Gurung",
     role: "Head of Sourcing",
     initials: "PG",
     color: "#c8a96e",
-    bio: "Priya travels across Nepal each season, selecting only the finest teas, dals, and grains from trusted partners.",
+    bio: "Travels Nepal year-round sourcing teas, dals, and grains from partner farms.",
   },
   {
     name: "Aarav Pradhan",
     role: "Head of Operations",
     initials: "AP",
     color: "#78746e",
-    bio: "Aarav ensures every order leaves our warehouse with the speed and care our customers expect.",
+    bio: "Oversees warehousing, QC, and fulfillment from our Kathmandu facility.",
   },
 ];
 
@@ -93,14 +93,15 @@ export default function About() {
             </div>
             <div>
               <p className="text-lg text-[#444] leading-relaxed mb-6">
-                {BRAND.companyName} was born from a simple mission: to bring exceptional products from Nepal directly to consumers worldwide, while honoring the farmers who grow them.
+                {BRAND.companyName} started in Kathmandu in 2018 with one goal: connect Himalayan farmers directly with the world, without a middleman in between.
               </p>
-              <p className="text-lg text-[#444] leading-relaxed mb-6">
-                Our journey began in the foothills of the Himalayas, where we met smallholder farmers practicing traditional, organic cultivation passed down through generations. We saw an opportunity — not just a business one, but a human one.
-              </p>
-              <p className="text-lg text-[#444] leading-relaxed">
-                Every product we offer is carefully selected, ethically sourced, and packaged with care to preserve its unique character and freshness.
-              </p>
+              <Link
+                href="/sourcing"
+                className="inline-flex items-center gap-2 text-[#2d5a3d] font-medium hover:underline"
+              >
+                See how we vet every farm
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
 
@@ -110,17 +111,17 @@ export default function About() {
               {
                 icon: <Handshake className="h-6 w-6" />,
                 title: "Direct Trade",
-                desc: "We work directly with farmers, ensuring fair compensation and transparent partnerships that benefit entire communities.",
+                desc: "Fair compensation and transparent partnerships with every farm.",
               },
               {
                 icon: <Leaf className="h-6 w-6" />,
                 title: "Organic & Sustainable",
-                desc: "All our products are grown without synthetic pesticides or fertilizers — good for the earth, better for your family.",
+                desc: "Chemical-free cultivation — for the earth and your family.",
               },
               {
                 icon: <Sparkles className="h-6 w-6" />,
                 title: "Freshness First",
-                desc: "We pack our products within days of harvest to lock in flavor, aroma, and the vibrant character of the season.",
+                desc: "Packed within days of harvest to lock in flavor.",
               },
             ].map((item, i) => (
               <div
@@ -249,7 +250,7 @@ export default function About() {
               Discover Our Product Lines
             </h2>
             <p className="text-white/70 text-lg mb-10 max-w-xl mx-auto">
-              Explore Himmat Tea and Godgifted Dal — two lines, one commitment to quality and sustainability.
+              Two lines, one commitment: quality from farm to cup.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

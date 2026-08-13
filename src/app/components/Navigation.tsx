@@ -31,6 +31,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useStore } from "@/context/StoreContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { BRAND } from '@/config/brand';
 import { AuthModal } from '@/modules/auth';
 import { Button } from "@/app/components/ui/button";
@@ -194,6 +195,7 @@ export default function Navigation() {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -202,6 +204,7 @@ export default function Navigation() {
   const { isLoggedIn, logout, userType, currentUser, isLoading } = useAuth();
   const { wishlist } = useWishlist();
   const { productLines, products } = useStore();
+  const { formatPrice } = useCurrency();
 
   const authReady = !isLoading;
   const showLoggedInState = authReady && isLoggedIn;
@@ -228,6 +231,7 @@ export default function Navigation() {
       if (e.key === "Escape") {
         setSearchOpen(false);
         setProfileMenuOpen(false);
+        setLangOpen(false);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -246,6 +250,17 @@ export default function Navigation() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [profileMenuOpen]);
+
+  useEffect(() => {
+    if (!langOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(event.target as Node)) {
+        setLangOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [langOpen]);
 
   const searchResults =
     searchQuery.trim().length > 0
@@ -285,17 +300,12 @@ export default function Navigation() {
       label: "Products",
       href: "/products",
       children: [
-        // Product lines
         ...productLines.filter(pl => pl.isActive).map(pl => ({
           label: pl.name,
-          sub: pl.description.slice(0, 50) + (pl.description.length > 50 ? "..." : ""),
           href: `/${pl.slug}`,
         })),
-        // Divider (represented by null for now, but we'll handle it in rendering)
-        // All products
         {
           label: "All Products",
-          sub: "Browse our complete product catalog",
           href: "/products",
         },
       ],
@@ -306,17 +316,14 @@ export default function Navigation() {
       children: [
         {
           label: t("nav.seasonalPicks"),
-          sub: t("nav.seasonalPicksSub"),
           href: "/collections/seasonal",
         },
         {
           label: t("nav.wellnessRange"),
-          sub: t("nav.wellnessRangeSub"),
           href: "/collections/wellness",
         },
         {
           label: t("nav.giftSets"),
-          sub: t("nav.giftSetsSub"),
           href: "/collections/gift-sets",
         },
       ],
@@ -486,14 +493,11 @@ export default function Navigation() {
                             <Link
                               key={child.label}
                               href={child.href}
-                              className={`relative flex flex-col px-3.5 py-2.5 rounded-[var(--radius-md)] transition-colors duration-[var(--duration-fast)] group pl-4 ${isActivePath(child.href) ? "bg-secondary text-primary" : "hover:bg-secondary text-foreground"}`}
+                              className={`relative flex items-center px-3.5 py-2.5 rounded-[var(--radius-md)] transition-colors duration-[var(--duration-fast)] group pl-4 ${isActivePath(child.href) ? "bg-secondary text-primary" : "hover:bg-secondary text-foreground"}`}
                             >
                               <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full bg-accent transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)] ${isActivePath(child.href) ? "h-5" : "h-0 group-hover:h-5"}`} />
                               <span className={`text-sm font-medium transition-colors duration-[var(--duration-fast)] ${isActivePath(child.href) ? "text-primary" : "text-foreground group-hover:text-primary"}`}>
                                 {child.label}
-                              </span>
-                              <span className="text-xs text-muted-foreground mt-0.5">
-                                {child.sub}
                               </span>
                             </Link>
                           ))}
@@ -519,7 +523,7 @@ export default function Navigation() {
             <div className="hidden lg:flex items-center gap-1">
 
               {/* ── Language selector ── */}
-              <div className="relative">
+              <div ref={langRef} className="relative">
                 <button
                   onClick={() => setLangOpen(!langOpen)}
                   className="flex cursor-pointer items-center justify-center w-9 h-9 rounded-[var(--radius-md)] hover:bg-secondary transition-colors duration-[var(--duration-fast)] text-foreground cursor-pointer"
@@ -542,6 +546,7 @@ export default function Navigation() {
                           }`}
                         onClick={() => {
                           setLang(code);
+                          localStorage.setItem("himmat_lang", code);
                           setLangOpen(false);
                         }}
                       >
@@ -808,13 +813,10 @@ export default function Navigation() {
                         key={child.label}
                         href={child.href}
                         onClick={() => setMobileOpen(false)}
-                        className={`flex cursor-pointer items-center justify-between px-3 py-2.5 text-sm rounded-[var(--radius-md)] transition-colors duration-[var(--duration-fast)] group ${isActivePath(child.href) ? "text-primary" : "text-foreground"}`}
+                        className={`block cursor-pointer px-3 py-2.5 text-sm rounded-[var(--radius-md)] transition-colors duration-[var(--duration-fast)] group ${isActivePath(child.href) ? "text-primary" : "text-foreground"}`}
                       >
                         <span className={`font-medium transition-colors duration-[var(--duration-fast)] ${isActivePath(child.href) ? "text-primary" : "text-foreground group-hover:text-primary"}`}>
                           {child.label}
-                        </span>
-                        <span className="text-xs text-muted-foreground/80">
-                          {child.sub}
                         </span>
                       </Link>
                     ))}
@@ -857,6 +859,7 @@ export default function Navigation() {
                       }`}
                     onClick={() => {
                       setLang(code);
+                      localStorage.setItem("himmat_lang", code);
                       setLangOpen(false);
                     }}
                   >
@@ -994,7 +997,7 @@ export default function Navigation() {
                         </div>
                         <div className="shrink-0 text-right">
                           <p className="font-semibold text-primary text-sm">
-                            Rs.&nbsp;{product.price.toLocaleString()}
+                            {formatPrice(product.price)}
                           </p>
                           <ArrowRight className="h-3.5 w-3.5 text-accent ml-auto mt-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)]" />
                         </div>

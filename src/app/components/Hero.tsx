@@ -33,25 +33,19 @@ function useInView<T extends HTMLElement>() {
 
 const FEATURES = [
   {
-    label: "Hand-Picked\nLeaves",
+    label: "Direct from\nFarms",
     icon: (
       <path d="M4 14c0-6 4-10 10-10 5 0 6 5 4 8-3 4-9 5-14 2z M4 14c4-1 8-3 10-6" />
     ),
   },
   {
-    label: "Small-Batch\nBlended",
-    icon: (
-      <path d="M9 3h6 M10 3v6l-5.5 9.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.5L14 9V3 M8 15h8" />
-    ),
-  },
-  {
-    label: "Certified\nOrganic",
+    label: "Lab-Tested\nQuality",
     icon: <path d="M12 7.5v9M8 12h8 M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17" />,
   },
   {
-    label: "Ethically\nSourced",
+    label: "Ships\nWorldwide",
     icon: (
-      <path d="M5 4v9a7 7 0 0 0 14 0V4 M5 8H3.5A1.5 1.5 0 0 1 2 6.5 1.5 1.5 0 0 1 3.5 5H5 M19 8h1.5A1.5 1.5 0 0 0 22 6.5 1.5 1.5 0 0 0 20.5 5H19 M8 21h8" />
+      <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
     ),
   },
 ];

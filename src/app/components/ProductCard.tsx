@@ -3,6 +3,7 @@
 import { ShoppingBag, Star } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import type { Product } from "@/context/StoreContext";
 
 interface ProductCardProps {
@@ -11,6 +12,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
+  const { formatPrice } = useCurrency();
 
   // Calculate average rating from reviews
   const averageRating = product.reviews && product.reviews.length > 0
@@ -64,7 +66,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </p>
         <div className="flex items-center justify-between mt-2">
           <span className="text-sm font-bold text-[#2d5a3d]">
-            Rs.{product.price.toLocaleString()}
+            {formatPrice(product.price)}
           </span>
           <button
             onClick={(e) => {

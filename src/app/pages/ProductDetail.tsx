@@ -8,6 +8,7 @@ import Footer from "@/app/components/Footer";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import {
@@ -154,6 +155,7 @@ export default function ProductDetail() {
   const { t } = useTranslation();
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { formatPrice } = useCurrency();
 
   const [activeImage, setActiveImage] = useState(0);
   const [selectedWeight, setSelectedWeight] = useState("50g");
@@ -445,7 +447,7 @@ export default function ProductDetail() {
 
               {/* Price */}
               <p className="text-4xl font-bold text-[#2d5a3d] mb-5">
-                Rs. {adjustedPrice.toLocaleString()}
+                {formatPrice(adjustedPrice)}
               </p>
 
               {/* Weight selector */}
@@ -467,7 +469,7 @@ export default function ProductDetail() {
                       {w}
                       {w !== "50g" && (
                         <span className="ml-1.5 text-xs opacity-70">
-                          Rs. {Math.round(product.price * mult).toLocaleString()}
+                          {formatPrice(Math.round(product.price * mult))}
                         </span>
                       )}
                     </button>
@@ -810,7 +812,7 @@ export default function ProductDetail() {
                         {relatedProduct.name}
                       </h3>
                       <p className="text-[#2d5a3d] font-bold">
-                        Rs. {relatedProduct.price.toLocaleString()}
+                        {formatPrice(relatedProduct.price)}
                       </p>
                     </div>
                   </Link>

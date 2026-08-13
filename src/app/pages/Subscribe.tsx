@@ -5,6 +5,7 @@ import Link from "next/link";
 import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
 import { toast } from "sonner";
+import { useCurrency } from "@/context/CurrencyContext";
 import { Check, Package, Sparkles, Star } from "lucide-react";
 
 interface Plan {
@@ -114,6 +115,7 @@ const subFaqs = [
 
 export default function Subscribe() {
   const [billing, setBilling] = useState<"monthly" | "quarterly">("monthly");
+  const { formatPrice } = useCurrency();
 
   const handleSubscribe = (planName: string) => {
     toast.success("Subscription started! Check your email.");
@@ -233,13 +235,13 @@ export default function Subscribe() {
                   <div className="mb-6">
                     <div className="flex items-end gap-1 mb-1">
                       <span className="text-4xl font-bold text-[#1c1917]">
-                        Rs. {price.toLocaleString()}
+                        {formatPrice(price)}
                       </span>
                       <span className="text-[#78746e] mb-1.5">/mo</span>
                     </div>
                     <p className="text-xs text-[#78746e]">
                       {billing === "quarterly"
-                        ? `Billed quarterly (Rs. ${(price * 3).toLocaleString()} every 3 months)`
+                        ? `Billed quarterly (${formatPrice(price * 3)} every 3 months)`
                         : "Billed monthly"}
                     </p>
                   </div>
