@@ -3,6 +3,16 @@ import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
 import bcrypt from 'bcryptjs'
 import { getCurrentAdmin, passwordSchema } from '@/lib/auth'
+import { validateSignupEmail, normalizeEmail } from '@/lib/email-validation'
+import { z } from 'zod'
+
+const adminUserUpdateSchema = z.object({
+  username: z.string().min(3, 'Username must be at least 3 characters').max(50)
+    .regex(/^[a-zA-Z0-9_.-]+$/, 'Username can only contain letters, numbers, dots, dashes and underscores'),
+  email: z.string().email('Please enter a valid email address'),
+  role: z.enum(['admin', 'superadmin']),
+  isActive: z.boolean()
+})
 
 interface Params {
   params: Promise<{ id: string }>
@@ -50,7 +60,24 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const body = await request.json()
     const { password, ...rest } = body
 
-    let data: any = { ...rest }
+    const parsed = adminUserUpdateSchema.safeParse(rest)
+    if (!parsed.success) {
+      return createErrorResponse(parsed.error.issues[0].message, 400)
+    }
+
+    const email = normalizeEmail(parsed.data.email)
+
+    const existing = await prisma.adminUser.findUnique({ where: { email }, select: { id: true } })
+    if (existing && existing.id !== parseInt(id)) {
+      return createErrorResponse('This email is already registered to another admin user.', 400)
+    }
+
+    const emailCheck = await validateSignupEmail(email, 'admin', { adminId: parseInt(id) })
+    if (!emailCheck.ok) {
+      return createErrorResponse(emailCheck.error || 'Invalid email address', 400)
+    }
+
+    const data: Record<string, unknown> = { ...parsed.data, email }
 
     if (password) {
       const pwResult = passwordSchema.safeParse(password)

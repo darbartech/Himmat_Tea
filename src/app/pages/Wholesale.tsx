@@ -161,6 +161,8 @@ const inputClass =
 
 export default function Wholesale() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [form, setForm] = useState({
     business: "",
     contact: "",
@@ -756,9 +758,32 @@ export default function Wholesale() {
                   </div>
                 ) : (
                   <form
-                    onSubmit={(e) => {
+                    onSubmit={async (e) => {
                       e.preventDefault();
-                      setSubmitted(true);
+                      setSubmitting(true);
+                      setSubmitError("");
+
+                      try {
+                        const response = await fetch('/api/partnership', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify(form),
+                        });
+
+                        const data = await response.json().catch(() => ({}));
+
+                        if (!response.ok) {
+                          throw new Error(data?.error || 'Unable to submit your partnership enquiry. Please try again.');
+                        }
+
+                        setSubmitted(true);
+                      } catch (error) {
+                        setSubmitError(error instanceof Error ? error.message : 'Unable to submit your partnership enquiry. Please try again.');
+                      } finally {
+                        setSubmitting(false);
+                      }
                     }}
                     className="space-y-5"
                   >
@@ -934,17 +959,24 @@ export default function Wholesale() {
                       />
                     </div>
 
+                    {submitError && (
+                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {submitError}
+                      </div>
+                    )}
+
                     <button
                       type="submit"
-                      className="w-full flex items-center justify-center gap-2.5 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#244a33] transition-all duration-200"
+                      disabled={submitting}
+                      className="w-full flex items-center justify-center gap-2.5 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#244a33] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70"
                       style={{
                         padding: "15px 28px",
                         fontSize: "0.9rem",
                         boxShadow: "0 4px 16px rgba(45,90,61,0.22)",
                       }}
                     >
-                      Send Wholesale Enquiry
-                      <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                      {submitting ? 'Sending enquiry...' : 'Send Wholesale Enquiry'}
+                      {!submitting && <ArrowRight className="h-4 w-4" strokeWidth={2.5} />}
                     </button>
 
                     <p className="text-center text-xs text-[#78746e] mt-2">

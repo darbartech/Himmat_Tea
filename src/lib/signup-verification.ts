@@ -1,0 +1,3 @@
+export const SIGNUP_OTP_TTL_MINUTES = 15
+export const MAX_SIGNUP_OTP_ATTEMPTS = 5
+export const SIGNUP_OTP_RESEND_COOLDOWN_SEC = 60

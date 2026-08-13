@@ -2,6 +2,16 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
+
+function resolveSeedAdminPassword(): { password: string; generated: boolean } {
+  const fromEnv = process.env.SEED_ADMIN_PASSWORD
+  if (fromEnv && fromEnv.length >= 8) {
+    return { password: fromEnv, generated: false }
+  }
+  const generated = crypto.randomBytes(18).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 20) + 'Aa1!'
+  return { password: generated, generated: true }
+}
 
 export async function GET() {
   if (process.env.NODE_ENV === 'production') {
@@ -21,7 +31,8 @@ export async function POST() {
       return createResponse({ message: 'Database already seeded' })
     }
 
-    const passwordHash = await bcrypt.hash('admin123', 12)
+    const { password, generated } = resolveSeedAdminPassword()
+    const passwordHash = await bcrypt.hash(password, 12)
 
     await prisma.adminUser.create({
       data: {
@@ -32,6 +43,16 @@ export async function POST() {
         isActive: true
       }
     })
+
+    if (generated) {
+      console.log('')
+      console.log('==========================================================')
+      console.log('  SEED SUPERADMIN PASSWORD (generated, change on first login):')
+      console.log(`  ${password}`)
+      console.log('  Or set SEED_ADMIN_PASSWORD in your .env to control it.')
+      console.log('==========================================================')
+      console.log('')
+    }
 
     const himmatTea = await prisma.productLine.create({
       data: {

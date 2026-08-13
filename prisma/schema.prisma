@@ -168,6 +168,22 @@ model PasswordResetToken {
   @@index([customerId])
 }
 
+model SignupVerification {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  name         String
+  phone        String
+  address      String
+  passwordHash String
+  otpHash      String
+  expiresAt    DateTime
+  attempts     Int       @default(0)
+  usedAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([email])
+}
+
 model Order {
   id              String         @id @default(cuid())
   orderNumber     String         @unique
