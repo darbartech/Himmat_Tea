@@ -10,6 +10,7 @@ import { Label } from "@/app/components/ui/label";
 import { Alert, AlertDescription } from "@/app/components/ui/alert";
 import { Eye, EyeOff, AlertCircle, ArrowLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -74,36 +75,14 @@ export default function Login() {
           </Link>
 
           {/* Logo */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3">
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 32 32"
-                fill="none"
-                aria-hidden="true"
-                className="shrink-0"
-              >
-                <rect width="32" height="32" rx="8" fill="#0b7c33" />
-                <path
-                  d="M16 6C16 6 8 12 8 19a8 8 0 0016 0c0-7-8-13-8-13z"
-                  fill="#c8a96e"
-                  opacity="0.9"
-                />
-                <path
-                  d="M16 10C16 10 11 15 11 20a5 5 0 0010 0c0-5-5-10-5-10z"
-                  fill="white"
-                  opacity="0.25"
-                />
-              </svg>
-              <span
-                className="text-2xl font-bold text-[#1c1917] tracking-tight"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                Himmat Tea
-              </span>
-            </div>
-          </div>
+              <Image
+              src="/logo.svg"
+              alt="GodGifted Logo"
+              width={100}
+              height={100}
+              className="w-[150px] h-[100%]"
+             
+            />
 
           {/* Header */}
           <div className="mb-10">
