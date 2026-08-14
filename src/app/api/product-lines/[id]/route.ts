@@ -10,15 +10,16 @@ interface Params {
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const adminUser = await getCurrentAdmin();
-    if (!adminUser) {
-      return createErrorResponse('Unauthorized - admin only', 401);
-    }
+    const isAdmin = !!adminUser;
     const { id } = await params
     const productLine = await prisma.productLine.findUnique({
       where: { id: parseInt(id) },
       include: { products: true },
     })
     if (!productLine) {
+      return NextResponse.json({ error: 'Product line not found' }, { status: 404 })
+    }
+    if (!isAdmin && !productLine.isActive) {
       return NextResponse.json({ error: 'Product line not found' }, { status: 404 })
     }
     return createResponse(productLine)
@@ -32,6 +33,9 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const adminUser = await getCurrentAdmin();
     if (!adminUser) {
       return createErrorResponse('Unauthorized - admin only', 401);
+    }
+    if (adminUser.role !== 'superadmin') {
+      return createErrorResponse('Only SuperAdmin can update product lines', 403);
     }
     const { id } = await params
     const body = await request.json()
@@ -51,6 +55,9 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     const adminUser = await getCurrentAdmin();
     if (!adminUser) {
       return createErrorResponse('Unauthorized - admin only', 401);
+    }
+    if (adminUser.role !== 'superadmin') {
+      return createErrorResponse('Only SuperAdmin can delete product lines', 403);
     }
     const { id } = await params
     await prisma.productLine.delete({

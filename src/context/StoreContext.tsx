@@ -29,7 +29,7 @@ export interface Batch {
 }
 
 export interface ProductLine {
-  id: string;
+  id: number;
   slug: string;
   name: string;
   description: string;
@@ -41,15 +41,16 @@ export interface ProductLine {
     name: string;
     description: string;
     image: string;
-  }>;
+  }> | any;
   ctaTitle?: string;
   ctaDescription?: string;
   ctaLinkText?: string;
   ctaLink?: string;
   isActive: boolean;
   sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
+  products?: Product[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface HeroVisual {
@@ -76,7 +77,7 @@ export interface Review {
 
 export interface Product {
   id: number;
-  productLineId: string;
+  productLineId?: number | null;
   productLine?: ProductLine;
   name: string;
   category: string;
@@ -93,9 +94,11 @@ export interface Product {
   productVariants: ProductVariant[];
   variantOptions: string[];
   isBestseller: boolean;
+  isActive?: boolean;
   reviews: Review[];
   createdAt?: string;
   updatedAt?: string;
+  sortOrder?: number;
 }
 
 export interface Customer {
@@ -292,9 +295,10 @@ interface StoreContextType {
   deleteAdminUser: (id: number) => void;
   verifyAdminCredentials: (username: string, password: string) => Promise<AdminUser | null>;
   productLines: ProductLine[];
+  isCatalogLoading: boolean;
   addProductLine: (productLine: Omit<ProductLine, "id" | "createdAt" | "updatedAt">) => void;
-  updateProductLine: (id: string, productLine: Partial<ProductLine>) => void;
-  deleteProductLine: (id: string) => void;
+  updateProductLine: (id: number | string, productLine: Partial<ProductLine>) => void;
+  deleteProductLine: (id: number | string) => void;
   heroVisuals: HeroVisual[];
   addHeroVisual: (heroVisual: Omit<HeroVisual, "id" | "createdAt" | "updatedAt">) => void;
   updateHeroVisual: (id: string, heroVisual: Partial<HeroVisual>) => void;
@@ -741,9 +745,10 @@ const sampleAdminUsers: AdminUser[] = [
 ];
 
 export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [productLines, setProductLines] = useState<ProductLine[]>(sampleProductLines);
+  const [productLines, setProductLines] = useState<ProductLine[]>([]);
   const [heroVisuals, setHeroVisuals] = useState<HeroVisual[]>(sampleHeroVisuals);
-  const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isCatalogLoading, setIsCatalogLoading] = useState(true);
   const [inventoryTransactions, setInventoryTransactions] = useState<InventoryTransaction[]>([]);
   const [orders, setOrders] = useState<Order[]>(sampleOrders);
   const [customers, setCustomers] = useState<Customer[]>(sampleCustomers);
@@ -791,6 +796,50 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         } catch { /* noop — private mode etc. */ }
       }
     });
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [linesRes, productsRes] = await Promise.all([
+          fetch('/api/product-lines').then(r => r.json()).catch(() => []),
+          fetch('/api/products').then(r => r.json()).catch(() => []),
+        ]);
+        if (!cancelled) {
+          const rawLines = Array.isArray(linesRes) ? linesRes : Array.isArray((linesRes as any)?.data) ? (linesRes as any).data : [];
+          const rawProducts = Array.isArray(productsRes) ? productsRes : Array.isArray((productsRes as any)?.data) ? (productsRes as any).data : [];
+          setProductLines(rawLines.map((pl: any) => {
+            let cats: any = pl.categories;
+            if (typeof cats === 'string') {
+              try { cats = JSON.parse(cats); } catch { cats = []; }
+            }
+            if (!Array.isArray(cats)) cats = [];
+            const nestedProducts: Product[] = Array.isArray(pl.products) ? pl.products : [];
+            return {
+              ...pl,
+              color: pl.color || '#2d5a3d',
+              categories: cats,
+              products: nestedProducts,
+            };
+          }));
+          setProducts(rawProducts.map((p: any) => ({
+            reviewsEnabled: (p as Partial<Product>).reviewsEnabled !== false,
+            batches: p.batches || [],
+            productVariants: p.productVariants || [],
+            variantOptions: Array.isArray(p.variantOptions) ? p.variantOptions : (p.variantOptions ? p.variantOptions.split(',').filter(Boolean) : []),
+            reviews: p.reviews || [],
+            isActive: p.isActive !== false,
+            ...p,
+          })));
+        }
+      } catch (e) {
+        console.error('Failed to load storefront catalog', e);
+      } finally {
+        if (!cancelled) setIsCatalogLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   const loyaltyProgram = loyaltyProgramConfig;
@@ -1000,6 +1049,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       reviews: product.reviews || [],
       reviewsEnabled: (product as Partial<Product>).reviewsEnabled !== false,
       isBestseller: (product as Partial<Product>).isBestseller || false,
+      isActive: (product as Partial<Product>).isActive !== false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -1400,7 +1450,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const addProductLine = (productLine: Omit<ProductLine, "id" | "createdAt" | "updatedAt">) => {
     const newProductLine: ProductLine = {
       ...productLine,
-      id: Date.now().toString(),
+      id: Date.now(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -1408,17 +1458,19 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     toast.success("Product line added successfully!");
   };
 
-  const updateProductLine = (id: string, updates: Partial<ProductLine>) => {
+  const updateProductLine = (id: number | string, updates: Partial<ProductLine>) => {
+    const numericId = typeof id === 'string' ? parseInt(id) : id;
     setProductLines((prev) =>
       prev.map((line) =>
-        line.id === id ? { ...line, ...updates, updatedAt: new Date().toISOString() } : line
+        line.id === numericId ? { ...line, ...updates, updatedAt: new Date().toISOString() } : line
       )
     );
     toast.success("Product line updated!");
   };
 
-  const deleteProductLine = (id: string) => {
-    setProductLines((prev) => prev.filter((line) => line.id !== id));
+  const deleteProductLine = (id: number | string) => {
+    const numericId = typeof id === 'string' ? parseInt(id) : id;
+    setProductLines((prev) => prev.filter((line) => line.id !== numericId));
     toast.error("Product line deleted!");
   };
 
@@ -1576,6 +1628,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         deleteAdminUser,
         verifyAdminCredentials,
         productLines,
+        isCatalogLoading,
         addProductLine,
         updateProductLine,
         deleteProductLine,

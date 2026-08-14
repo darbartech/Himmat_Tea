@@ -264,12 +264,24 @@ export default function Navigation() {
 
   const searchResults =
     searchQuery.trim().length > 0
-      ? SEARCH_PRODUCTS.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.origin.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
+      ? products
+          .filter(
+            (p) =>
+              p.isActive !== false &&
+              (p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                p.description.toLowerCase().includes(searchQuery.toLowerCase())),
+          )
+          .slice(0, 20)
+          .map((p) => ({
+            id: String(p.id),
+            name: p.name,
+            type: p.category,
+            origin: p.sku || "",
+            price: p.price,
+            image: p.imageUrl,
+            productLine: p.productLine?.name || "",
+          }))
       : [];
 
   const handleResultClick = (id: string) => {

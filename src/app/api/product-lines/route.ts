@@ -6,12 +6,13 @@ import { getCurrentAdmin } from '@/lib/auth'
 export async function GET() {
   try {
     const adminUser = await getCurrentAdmin();
-    if (!adminUser) {
-      return createErrorResponse('Unauthorized - admin only', 401);
-    }
+    const isAdmin = !!adminUser;
+    const where = isAdmin ? {} : { isActive: true };
+    const productWhere = isAdmin ? {} : { isActive: true };
     const productLines = await prisma.productLine.findMany({
+      where,
       include: {
-        products: true,
+        products: { where: productWhere },
       },
       orderBy: { sortOrder: 'asc' },
     })
@@ -26,6 +27,9 @@ export async function POST(request: NextRequest) {
     const adminUser = await getCurrentAdmin();
     if (!adminUser) {
       return createErrorResponse('Unauthorized - admin only', 401);
+    }
+    if (adminUser.role !== 'superadmin') {
+      return createErrorResponse('Only SuperAdmin can create product lines', 403);
     }
     const body = await request.json()
     const productLine = await prisma.productLine.create({

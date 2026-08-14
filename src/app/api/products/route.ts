@@ -35,13 +35,25 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
-    // Stringify JSON fields before saving
-    const data = {
-      ...body,
-      variantOptions: body.variantOptions ? JSON.stringify(body.variantOptions) : null
-    }
-    
+
+    const data: any = {}
+    if (body.productLineId != null) data.productLineId = Number(body.productLineId)
+    if (body.name != null) data.name = String(body.name)
+    if (body.category != null) data.category = String(body.category)
+    if (body.price != null) data.price = Number(body.price)
+    if (body.stock != null) data.stock = Number(body.stock)
+    if (body.status != null) data.status = String(body.status)
+    if (body.description != null) data.description = String(body.description)
+    if (body.imageUrl != null) data.imageUrl = String(body.imageUrl)
+    if (body.sku != null && body.sku !== "") data.sku = String(body.sku)
+    else if (body.sku === "") data.sku = null
+    if (body.reorderPoint != null && body.reorderPoint !== "") data.reorderPoint = Number(body.reorderPoint)
+    if (body.hasVariants != null) data.hasVariants = Boolean(body.hasVariants)
+    if (body.variantOptions != null) data.variantOptions = JSON.stringify(body.variantOptions)
+    if (body.isBestseller != null) data.isBestseller = Boolean(body.isBestseller)
+    if (body.isActive != null) data.isActive = Boolean(body.isActive)
+    if (body.sortOrder != null) data.sortOrder = Number(body.sortOrder)
+
     const product = await prisma.product.create({
       data,
       include: {
