@@ -636,8 +636,8 @@ const FILTER_STATUSES = ["All", "AWAITING_PAYMENT", "CONFIRMED", "PROCESSING", "
 const CHANGEABLE_STATUSES = ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"];
 const ORDER_TRANSITIONS: Record<string, string[]> = {
   AWAITING_PAYMENT: ['CONFIRMED', 'CANCELLED'],
-  CONFIRMED: ['PROCESSING', 'CANCELLED'],
-  PROCESSING: ['SHIPPED', 'CANCELLED'],
+  CONFIRMED: ['PROCESSING', 'DELIVERED', 'CANCELLED'],
+  PROCESSING: ['SHIPPED', 'DELIVERED', 'CANCELLED'],
   SHIPPED: ['DELIVERED', 'CANCELLED'],
   DELIVERED: ['REFUNDED'],
   CANCELLED: [],
@@ -1051,7 +1051,7 @@ export default function Orders() {
           />
         </div>
         <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder={t("dashboard.orders.allStatuses")} />
           </SelectTrigger>
           <SelectContent>
@@ -1064,13 +1064,13 @@ export default function Orders() {
 
       {/* Bulk actions */}
       {selectedOrderIds.length > 0 && (
-        <div className="bg-[#2d5a3d]/10 border border-[#2d5a3d]/20 rounded-2xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="bg-[#2d5a3d]/10 border border-[#2d5a3d]/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span className="font-medium text-[#2d5a3d]">
               {selectedOrderIds.length} {selectedOrderIds.length === 1 ? "order" : "orders"} selected
             </span>
             <Select value={bulkStatus} onValueChange={(val) => setBulkStatus(val as OrderStatus)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
@@ -1080,7 +1080,7 @@ export default function Orders() {
               </SelectContent>
             </Select>
             <Button
-              className="bg-[#2d5a3d] hover:bg-[#234832] text-white"
+              className="bg-[#2d5a3d] hover:bg-[#234832] text-white w-full sm:w-auto"
               onClick={handleBulkUpdate}
             >
               Update Status
@@ -1089,6 +1089,7 @@ export default function Orders() {
           <Button
             variant="secondary"
             onClick={() => setSelectedOrderIds([])}
+            className="w-full sm:w-auto"
           >
             Clear Selection
           </Button>

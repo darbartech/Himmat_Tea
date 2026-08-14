@@ -28,6 +28,9 @@ import {
   Shield,
   Check,
   Image,
+  HelpCircle,
+  ChefHat,
+  Layers,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar";
 import {
@@ -162,6 +165,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       icon: Image 
     },
     { 
+      name: "FAQs", 
+      href: "/himmat_admin_8526/dashboard/faqs", 
+      icon: HelpCircle 
+    },
+    { 
+      name: "Brewing Guides", 
+      href: "/himmat_admin_8526/dashboard/brewing-guides", 
+      icon: ChefHat 
+    },
+    { 
+      name: "Collections", 
+      href: "/himmat_admin_8526/dashboard/collections", 
+      icon: Layers 
+    },
+    { 
       name: t("dashboard.nav.orders"), 
       href: "/himmat_admin_8526/dashboard/orders", 
       icon: ShoppingBag,
@@ -233,9 +251,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </style>
       {/* Top Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-[#2d5a3d]/10 shadow-sm">
-        <div className="h-20 px-6 flex items-center justify-between">
+        <div className="h-16 px-4 sm:h-20 sm:px-6 flex items-center justify-between">
           {/* Left Section - Logo & Menu Toggle */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Button
               variant="ghost"
               size="icon"
@@ -253,14 +271,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               alt={"GodGifted"}
               width={100}
               height={100}
-              className="w-[150px] h-[100%]"
+              className="w-[100px] sm:w-[150px] h-[100%]"
              
             />
             </Link>
           </div>
 
           {/* Right Section - Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Back to Website */}
             <Link 
               href="/" 
@@ -346,7 +364,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   )}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-96">
+              <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-96">
                 <div className="flex items-center justify-between p-4">
                   <DropdownMenuLabel className="font-semibold text-[#1c1917] p-0 m-0">{t("dashboard.notifications")}</DropdownMenuLabel>
                   {notifications.length > 0 && (
@@ -462,7 +480,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-20 left-0 bottom-0 w-72 bg-white border-r border-[#2d5a3d]/10 z-40 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-16 sm:top-20 left-0 bottom-0 w-72 bg-white border-r border-[#2d5a3d]/10 z-40 transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -514,8 +532,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main Content */}
-      <main className="lg:pl-72 pt-20">
-        <div className="p-6 md:p-8">
+      <main className="lg:pl-72 pt-16 sm:pt-20">
+        <div className="p-4 sm:p-6 md:p-8">
           {children}
         </div>
       </main>

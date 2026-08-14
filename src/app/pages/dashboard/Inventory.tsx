@@ -719,7 +719,7 @@ export default function Inventory() {
               />
             </div>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full md:w-[180px]">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
@@ -879,7 +879,7 @@ export default function Inventory() {
         </TabsContent>
 
         <TabsContent value="batches" className="space-y-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
               <h2 className="text-lg font-semibold text-[#1c1917]">Batch Management</h2>
               <p className="text-sm text-[#78746e]">Track inventory batches with expiry dates</p>
@@ -900,7 +900,7 @@ export default function Inventory() {
                 setBatchModalOpen(true);
               }
             }}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Add Batch..." />
               </SelectTrigger>
               <SelectContent>

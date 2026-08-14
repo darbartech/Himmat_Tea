@@ -30,9 +30,18 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     setCurrencyState(detected);
 
     fetch("/api/exchange-rates")
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.success) setRates(json.rates);
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Exchange rate request failed with status ${response.status}`);
+        }
+
+        const json = await response.json();
+        if (json.success && json.rates) {
+          setRates(json.rates);
+        }
+      })
+      .catch((error) => {
+        console.warn("Exchange rate fetch failed, using default rates.", error);
       })
       .finally(() => setIsLoading(false));
   }, []);

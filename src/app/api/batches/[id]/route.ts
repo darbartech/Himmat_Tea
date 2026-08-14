@@ -67,7 +67,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
         const productCurrent = await tx.product.findUnique({
           where: { id: existing.productId },
-          select: { stock: true },
+          select: { stock: true, name: true },
         });
         const previousStock = Number(productCurrent?.stock) || 0;
         const newStock = previousStock + delta;
@@ -90,6 +90,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         await tx.inventoryTransaction.create({
           data: {
             productId: existing.productId,
+            productName: productCurrent?.name || `Product ${existing.productId}`,
             type: 'adjustment',
             quantity: Math.abs(delta),
             previousStock,
@@ -133,7 +134,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       if (qty > 0) {
         const productCurrent = await tx.product.findUnique({
           where: { id: existing.productId },
-          select: { stock: true },
+          select: { stock: true, name: true },
         });
         const previousStock = Number(productCurrent?.stock) || 0;
         const newStock = Math.max(0, previousStock - qty);
@@ -144,6 +145,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
         await tx.inventoryTransaction.create({
           data: {
             productId: existing.productId,
+            productName: productCurrent?.name || `Product ${existing.productId}`,
             type: 'out',
             quantity: qty,
             previousStock,

@@ -104,7 +104,7 @@ export function ImageUploadField({
           'Upload timed out. For best results, compress the image (save as WebP, reduce resolution to ~2000px wide, or lower JPEG quality to 75-80%) then try again.';
       } else if (rawMsg.toLowerCase().includes('preset')) {
         displayMsg =
-          'Upload preset is not configured. Signed upload (API key + secret) will be used instead — the image should still upload. If this fails, check Cloudinary credentials.';
+          'Cloudinary upload preset is missing or invalid. The app retried with signed upload, but if this still fails, check your Cloudinary API key and secret.';
       } else if (rawMsg.toLowerCase().includes('size') || rawMsg.toLowerCase().includes('exceeds')) {
         displayMsg = rawMsg;
       }

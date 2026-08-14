@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       if (qty > 0) {
         const current = await tx.product.findUnique({
           where: { id: Number(productId) },
-          select: { stock: true },
+          select: { stock: true, name: true },
         });
         const previousStock = Number(current?.stock) || 0;
         const newStock = previousStock + qty;
@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
         await tx.inventoryTransaction.create({
           data: {
             productId: Number(productId),
+            productName: current?.name || `Product ${productId}`,
             type: 'in',
             quantity: qty,
             previousStock,

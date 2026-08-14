@@ -1,6 +1,3 @@
-
-  # Untitled
-
   This is a code bundle for Himmat Tea.
   ## Running the code
 

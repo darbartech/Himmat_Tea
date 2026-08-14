@@ -55,36 +55,15 @@ function humanFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-}
+} 
 
-async function uploadSingleFile(
+async function uploadWithOptions(
   file: File,
-  folder: string
+  folder: string,
+  options: Record<string, any>
 ): Promise<UploadedFileData> {
-  if (file.size > MAX_FILE_SIZE) {
-    throw new Error(
-      `File "${file.name}" (${humanFileSize(file.size)}) exceeds the ${humanFileSize(
-        MAX_FILE_SIZE
-      )} size limit. Resize or compress it before uploading.`
-    );
-  }
-  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-    throw new Error(
-      `Unsupported file type: ${file.type}. Allowed: JPG, PNG, WebP, GIF, AVIF, SVG.`
-    );
-  }
-
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-
-  const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET?.trim();
-  const uploadOptions: Record<string, any> = {
-    folder,
-    resource_type: 'auto',
-  };
-  if (uploadPreset) {
-    uploadOptions.upload_preset = uploadPreset;
-  }
 
   const fileSizeKB = file.size / 1024;
   const timeoutMs =
@@ -97,7 +76,7 @@ async function uploadSingleFile(
   const uploadPromise = new Promise<UploadedFileData>((resolve, reject) => {
     try {
       const uploadStream = cloudinary.uploader.upload_stream(
-        uploadOptions,
+        options,
         (error, result) => {
           if (error) {
             reject(error);
@@ -138,6 +117,57 @@ async function uploadSingleFile(
       file.size
     )}). Try compressing the image (reduce resolution/quality, or convert to WebP) and try again. If the issue persists, check your network connection or increase the upload timeout.`
   );
+}
+
+async function uploadSingleFile(
+  file: File,
+  folder: string
+): Promise<UploadedFileData> {
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(
+      `File "${file.name}" (${humanFileSize(file.size)}) exceeds the ${humanFileSize(
+        MAX_FILE_SIZE
+      )} size limit. Resize or compress it before uploading.`
+    );
+  }
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    throw new Error(
+      `Unsupported file type: ${file.type}. Allowed: JPG, PNG, WebP, GIF, AVIF, SVG.`
+    );
+  }
+
+  const normalizedFolder = folder?.trim() || 'himmat-tea';
+  const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET?.trim();
+  const baseOptions: Record<string, any> = {
+    folder: normalizedFolder,
+    resource_type: 'auto',
+  };
+
+  const primaryOptions = uploadPreset
+    ? { ...baseOptions, upload_preset: uploadPreset }
+    : { ...baseOptions };
+
+  try {
+    return await uploadWithOptions(file, normalizedFolder, primaryOptions);
+  } catch (error: any) {
+    const message = String(error?.message || error || '');
+    const presetProblem = /upload preset|preset.*not configured|preset.*invalid|preset.*missing|invalid.*preset/i.test(message);
+    const hasSignedCredentials = !!(
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET &&
+      process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+    );
+
+    if (presetProblem && hasSignedCredentials) {
+      const signedOptions = {
+        ...baseOptions,
+        timestamp: Math.round(Date.now() / 1000),
+      };
+      return await uploadWithOptions(file, normalizedFolder, signedOptions);
+    }
+
+    throw error;
+  }
 }
 
 export async function POST(request: NextRequest) {
