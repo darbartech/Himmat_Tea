@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
 import { getCurrentAdmin } from '@/lib/auth'
+import { ensureUniqueSlug } from '@/lib/slug'
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,11 +32,26 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('Unauthorized - admin only', 401)
     }
     const body = await request.json()
+    if (typeof body.title !== 'string' || !body.title.trim()) {
+      return createErrorResponse('Title is required', 400)
+    }
     const { items, ...restBody } = body
+
+    const safeData: Record<string, any> = { title: body.title.trim() }
+    if (typeof restBody.description === 'string') safeData.description = restBody.description
+    if (typeof restBody.image === 'string') safeData.image = restBody.image
+    if (typeof restBody.isActive === 'boolean') safeData.isActive = restBody.isActive
+
+    const slugInput =
+      typeof restBody.slug === 'string' && restBody.slug.trim() ? restBody.slug.trim() : body.title
+    safeData.slug = await ensureUniqueSlug(slugInput, async (c) => {
+      const exists = await prisma.collection.findUnique({ where: { slug: c }, select: { id: true } })
+      return !!exists
+    })
 
     const result = await prisma.$transaction(async (tx) => {
       const collection = await tx.collection.create({
-        data: restBody,
+        data: safeData as any,
       })
 
       if (Array.isArray(items) && items.length > 0) {
