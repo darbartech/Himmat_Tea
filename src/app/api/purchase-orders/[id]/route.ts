@@ -83,7 +83,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
           const unitPrice = Number(line.unitPrice) || 0
           const currentProduct = await tx.product.findUnique({
             where: { id: productId },
-            select: { id: true, stock: true },
+            select: { id: true, stock: true, name: true },
           })
           if (currentProduct) {
             const currentStock = Number(currentProduct.stock) || 0
@@ -96,6 +96,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
             await tx.inventoryTransaction.create({
               data: {
                 productId,
+                productName: currentProduct.name,
                 type: 'in',
                 quantity: qty,
                 previousStock,

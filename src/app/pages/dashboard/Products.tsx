@@ -448,7 +448,7 @@ export default function Products() {
                 Add Product
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg max-h-[92vh] overflow-y-auto p-4 sm:p-6">
               <DialogHeader>
                 <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
                 <DialogDescription>
@@ -672,15 +672,15 @@ export default function Products() {
                   />
                 </div>
               </div>
-              <div className="flex justify-end gap-3">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
                 <Button variant="secondary" onClick={() => {
                   setIsAddDialogOpen(false);
                   setEditingProduct(null);
                   resetForm();
-                }} disabled={saving}>
+                }} disabled={saving} className="w-full sm:w-auto">
                   Cancel
                 </Button>
-                <Button className="bg-[#2d5a3d] hover:bg-[#234832]" onClick={handleSaveProduct} disabled={saving}>
+                <Button className="bg-[#2d5a3d] hover:bg-[#234832] w-full sm:w-auto" onClick={handleSaveProduct} disabled={saving}>
                   {saving ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   ) : (
@@ -709,7 +709,7 @@ export default function Products() {
           value={selectedProductLine}
           onValueChange={setSelectedProductLine}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="All Product Lines" />
           </SelectTrigger>
           <SelectContent>
@@ -723,7 +723,7 @@ export default function Products() {
 
       <div className="bg-white rounded-2xl shadow-sm border border-[#2d5a3d]/5 overflow-hidden">
         <div className="overflow-x-auto" ref={tableRef}>
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead>
               <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
                 <th className="px-6 py-4 font-medium">Product</th>
@@ -799,7 +799,7 @@ export default function Products() {
                             <Package className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-md">
+                        <DialogContent className="max-w-md max-h-[92vh] overflow-y-auto p-4 sm:p-6">
                           <DialogHeader>
                             <DialogTitle>Adjust Stock for {selectedStockProduct?.name}</DialogTitle>
                             <DialogDescription>
@@ -831,7 +831,7 @@ export default function Products() {
                               />
                             </div>
                           </div>
-                          <div className="flex justify-end gap-3">
+                          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
                             <Button
                               variant="secondary"
                               onClick={() => {
@@ -840,11 +840,12 @@ export default function Products() {
                                 setStockAdjustment({ quantity: 0, reason: "" });
                               }}
                               disabled={stockSaving}
+                              className="w-full sm:w-auto"
                             >
                               Cancel
                             </Button>
                             <Button
-                              className="bg-[#2d5a3d] hover:bg-[#234832]"
+                              className="bg-[#2d5a3d] hover:bg-[#234832] w-full sm:w-auto"
                               onClick={handleAdjustStock}
                               disabled={stockSaving}
                             >

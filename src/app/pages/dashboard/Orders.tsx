@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import {
   Plus, Search, Eye, CheckCircle, Truck, Clock,
   Package, XCircle, RefreshCw, Download, Printer, Undo2,
-  CheckSquare, Square, ChevronLeft, ChevronRight, AlertTriangle
+  CheckSquare, Square, ChevronLeft, ChevronRight, AlertTriangle,
+  Trash2, MinusCircle
 } from "lucide-react";
 import { useStore } from "../../../context/StoreContext";
 import { useTranslation } from "../../../hooks/useTranslation";
@@ -88,6 +89,23 @@ interface Order {
   refundAmount?: number;
   createdAt?: string;
   updatedAt?: string;
+}
+
+interface CreateOrderItem {
+  productId: number;
+  productName?: string;
+  name?: string;
+  quantity: number;
+  price?: number;
+  weight?: string;
+}
+
+function generateDefaultOrderNumber(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `HT-${y}${m}${day}-0001`;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -633,11 +651,12 @@ const buildPrintStyles = () => `
 // ─── Main Orders page ─────────────────────────────────────────────────────────
 
 const FILTER_STATUSES = ["All", "AWAITING_PAYMENT", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"];
+const ORDER_STATUSES = ["AWAITING_PAYMENT", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"] as const;
 const CHANGEABLE_STATUSES = ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"];
 const ORDER_TRANSITIONS: Record<string, string[]> = {
   AWAITING_PAYMENT: ['CONFIRMED', 'CANCELLED'],
-  CONFIRMED: ['PROCESSING', 'CANCELLED'],
-  PROCESSING: ['SHIPPED', 'CANCELLED'],
+  CONFIRMED: ['PROCESSING', 'DELIVERED', 'CANCELLED'],
+  PROCESSING: ['SHIPPED', 'DELIVERED', 'CANCELLED'],
   SHIPPED: ['DELIVERED', 'CANCELLED'],
   DELIVERED: ['REFUNDED'],
   CANCELLED: [],
@@ -714,7 +733,7 @@ export default function Orders() {
       setLoading(true);
       setLoadError(null);
       try {
-        const [settRes] = await Promise.all([
+        const [settRes, custRes, prodRes] = await Promise.all([
           (async () => {
             try {
               const r: any = await api.get('/settings');
@@ -723,9 +742,27 @@ export default function Orders() {
               return storeSettings;
             }
           })(),
+          (async () => {
+            try {
+              const r: any = await api.get('/customers');
+              return r?.success ? (r.data || []) : (Array.isArray(r) ? r : []);
+            } catch {
+              return [];
+            }
+          })(),
+          (async () => {
+            try {
+              const r: any = await api.get('/products');
+              return r?.success ? (r.data || []) : (Array.isArray(r) ? r : []);
+            } catch {
+              return [];
+            }
+          })(),
         ]);
         if (!cancelled) {
           if (settRes) setSettings(settRes);
+          if (Array.isArray(custRes)) setAllCustomers(custRes);
+          if (Array.isArray(prodRes)) setAllProducts(prodRes);
           await refreshOrders(true);
         }
       } finally {
@@ -754,6 +791,21 @@ export default function Orders() {
   const invoiceWrapRef = useRef<HTMLDivElement | null>(null);
   
   const invoiceRef = useRef<HTMLDivElement>(null);
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createCustomerId, setCreateCustomerId] = useState<string>("");
+  const [createCustomerName, setCreateCustomerName] = useState("");
+  const [createCustomerEmail, setCreateCustomerEmail] = useState("");
+  const [createCustomerPhone, setCreateCustomerPhone] = useState("");
+  const [createShippingAddress, setCreateShippingAddress] = useState("");
+  const [createOrderNumber, setCreateOrderNumber] = useState(generateDefaultOrderNumber());
+  const [createStatus, setCreateStatus] = useState<string>("AWAITING_PAYMENT");
+  const [createItems, setCreateItems] = useState<CreateOrderItem[]>([
+    { productId: 0, productName: "", quantity: 1, price: 0, weight: "" }
+  ]);
+  const [createSubmitting, setCreateSubmitting] = useState(false);
+  const [allCustomers, setAllCustomers] = useState<any[]>([]);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -912,6 +964,140 @@ export default function Orders() {
     }
   };
 
+  // ── Create Order helpers ────────────────────────────────────────────────────
+
+  const openCreateModal = useCallback(async () => {
+    setCreateOrderNumber(generateDefaultOrderNumber());
+    setCreateCustomerId("");
+    setCreateCustomerName("");
+    setCreateCustomerEmail("");
+    setCreateCustomerPhone("");
+    setCreateShippingAddress("");
+    setCreateStatus("AWAITING_PAYMENT");
+    setCreateItems([{ productId: 0, productName: "", quantity: 1, price: 0, weight: "" }]);
+    setCreateSubmitting(false);
+    setIsCreateModalOpen(true);
+  }, []);
+
+  const handleCustomerSelect = (val: string) => {
+    setCreateCustomerId(val);
+    const id = parseInt(val);
+    if (!isNaN(id)) {
+      const c = allCustomers.find((cc) => cc.id === id);
+      if (c) {
+        setCreateCustomerName(c.name || "");
+        setCreateCustomerEmail(c.email || "");
+        setCreateCustomerPhone(c.phone || "");
+        setCreateShippingAddress(c.address || "");
+      }
+    }
+  };
+
+  const addCreateItem = () => {
+    setCreateItems((prev) => [
+      ...prev,
+      { productId: 0, productName: "", quantity: 1, price: 0, weight: "" },
+    ]);
+  };
+
+  const removeCreateItem = (idx: number) => {
+    setCreateItems((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateCreateItem = (idx: number, patch: Partial<CreateOrderItem>) => {
+    setCreateItems((prev) => prev.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
+  };
+
+  const handleItemProductSelect = (idx: number, productIdStr: string) => {
+    const productId = parseInt(productIdStr);
+    if (isNaN(productId)) {
+      updateCreateItem(idx, { productId: 0, productName: "", price: 0 });
+      return;
+    }
+    const p = allProducts.find((pp) => pp.id === productId);
+    if (p) {
+      updateCreateItem(idx, {
+        productId,
+        productName: p.name,
+        name: p.name,
+        price: typeof p.price === "number" ? p.price : 0,
+      });
+    } else {
+      updateCreateItem(idx, { productId });
+    }
+  };
+
+  const createSubtotal = useMemo(
+    () => createItems.reduce((s, it) => s + ((it.price ?? 0) * it.quantity), 0),
+    [createItems]
+  );
+  const createTax = useMemo(
+    () => Number(((createSubtotal * ((settings.taxRate ?? 0) / 100))).toFixed(2)),
+    [createSubtotal, settings.taxRate]
+  );
+  const createShipping = useMemo(() => Number((settings.shippingFlatRate ?? 0).toFixed(2)), [settings.shippingFlatRate]);
+  const createGrandTotal = useMemo(
+    () => Number((createSubtotal + createTax + createShipping).toFixed(2)),
+    [createSubtotal, createTax, createShipping]
+  );
+
+  const handleCreateOrder = async () => {
+    try {
+      const customerId = parseInt(createCustomerId);
+      if (isNaN(customerId) || customerId <= 0) {
+        alert("Please select a customer.");
+        return;
+      }
+      if (!createCustomerName.trim()) { alert("Customer name is required."); return; }
+      if (!createCustomerEmail.trim()) { alert("Customer email is required."); return; }
+      if (!createCustomerPhone.trim()) { alert("Customer phone is required."); return; }
+      if (!createShippingAddress.trim()) { alert("Shipping address is required."); return; }
+      if (createItems.length === 0) { alert("Add at least one item."); return; }
+      for (const it of createItems) {
+        if (!it.productId || it.productId <= 0) { alert("Each item must have a product selected."); return; }
+        if (!it.quantity || it.quantity < 1) { alert("Item quantity must be at least 1."); return; }
+      }
+
+      setCreateSubmitting(true);
+      const idempotencyKey = `admin-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      const payload: any = {
+        customerId,
+        customerName: createCustomerName.trim(),
+        customerEmail: createCustomerEmail.trim(),
+        customerPhone: createCustomerPhone.trim(),
+        shippingAddress: createShippingAddress.trim(),
+        idempotencyKey,
+        orderNumber: createOrderNumber.trim() || undefined,
+        status: createStatus as any,
+        items: createItems.map((it) => ({
+          productId: it.productId,
+          productName: it.productName || undefined,
+          quantity: it.quantity,
+          weight: it.weight || undefined,
+        })),
+      };
+      const res: any = await api.post("/orders", payload);
+      const createdOrder = res?.success ? res.data : res;
+      setIsCreateModalOpen(false);
+      await refreshOrders();
+      if (createdOrder?.id) {
+        const raw: any = await api.get(`/orders/${createdOrder.id}`);
+        const ord = raw?.success ? raw.data : raw;
+        if (ord) {
+          setSelectedOrder(adaptOrder(ord));
+          setIsDetailModalOpen(true);
+          setTrackingNumber(ord.trackingNumber || "");
+          setCourierPartner(ord.courierPartner || "");
+        }
+      }
+    } catch (e: any) {
+      console.error("Create order failed:", e);
+      alert(e instanceof ApiError ? e.message : "Could not create order.");
+    } finally {
+      setCreateSubmitting(false);
+    }
+  };
+
   // ── Print ──────────────────────────────────────────────────────────────────
 
   const handlePrintInvoice = () => {
@@ -1001,7 +1187,7 @@ export default function Orders() {
           </h1>
           <p className="text-[#78746e] mt-1">{t("dashboard.orders.subtitle")}</p>
         </div>
-        <Button className="bg-[#2d5a3d] hover:bg-[#234832] text-white">
+        <Button className="bg-[#2d5a3d] hover:bg-[#234832] text-white" onClick={openCreateModal}>
           <Plus className="h-4 w-4 mr-2" />
           {t("dashboard.home.newOrder")}
         </Button>
@@ -1051,7 +1237,7 @@ export default function Orders() {
           />
         </div>
         <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder={t("dashboard.orders.allStatuses")} />
           </SelectTrigger>
           <SelectContent>
@@ -1064,13 +1250,13 @@ export default function Orders() {
 
       {/* Bulk actions */}
       {selectedOrderIds.length > 0 && (
-        <div className="bg-[#2d5a3d]/10 border border-[#2d5a3d]/20 rounded-2xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="bg-[#2d5a3d]/10 border border-[#2d5a3d]/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span className="font-medium text-[#2d5a3d]">
               {selectedOrderIds.length} {selectedOrderIds.length === 1 ? "order" : "orders"} selected
             </span>
             <Select value={bulkStatus} onValueChange={(val) => setBulkStatus(val as OrderStatus)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
@@ -1080,7 +1266,7 @@ export default function Orders() {
               </SelectContent>
             </Select>
             <Button
-              className="bg-[#2d5a3d] hover:bg-[#234832] text-white"
+              className="bg-[#2d5a3d] hover:bg-[#234832] text-white w-full sm:w-auto"
               onClick={handleBulkUpdate}
             >
               Update Status
@@ -1089,6 +1275,7 @@ export default function Orders() {
           <Button
             variant="secondary"
             onClick={() => setSelectedOrderIds([])}
+            className="w-full sm:w-auto"
           >
             Clear Selection
           </Button>
@@ -1510,6 +1697,255 @@ export default function Orders() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Create Order modal ── */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="max-w-[960px] w-full max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-[#1c1917]">Create New Order</DialogTitle>
+            <DialogDescription className="text-sm text-[#78746e]">
+              Enter the order details below. The order number is auto-generated but can be edited.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <Label htmlFor="create-order-number">Order Number</Label>
+                <Input
+                  id="create-order-number"
+                  value={createOrderNumber}
+                  onChange={(e) => setCreateOrderNumber(e.target.value)}
+                  className="mt-2 font-mono tracking-wide"
+                />
+                <p className="text-xs text-[#78746e] mt-1.5">
+                  Format: <span className="font-mono">HT-YYYYMMDD-####</span>. Leave the server-assigned format for sequential numbering.
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="create-order-status">Initial Status</Label>
+                <Select value={createStatus} onValueChange={setCreateStatus}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ORDER_STATUSES.map((s) => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="create-customer">Customer</Label>
+                <Select value={createCustomerId} onValueChange={handleCustomerSelect}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Select a customer…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allCustomers.map((c) => (
+                      <SelectItem key={c.id} value={String(c.id)}>
+                        #{c.id} · {c.name} {c.email ? `(${c.email})` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="create-customer-name">Customer Name</Label>
+                <Input
+                  id="create-customer-name"
+                  value={createCustomerName}
+                  onChange={(e) => setCreateCustomerName(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="create-customer-email">Email</Label>
+                <Input
+                  id="create-customer-email"
+                  type="email"
+                  value={createCustomerEmail}
+                  onChange={(e) => setCreateCustomerEmail(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="create-customer-phone">Phone</Label>
+                <Input
+                  id="create-customer-phone"
+                  value={createCustomerPhone}
+                  onChange={(e) => setCreateCustomerPhone(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <Label htmlFor="create-shipping">Shipping Address</Label>
+                <Textarea
+                  id="create-shipping"
+                  rows={2}
+                  value={createShippingAddress}
+                  onChange={(e) => setCreateShippingAddress(e.target.value)}
+                  className="mt-2"
+                  placeholder="Street, City, State, PIN"
+                />
+              </div>
+            </div>
+
+            {/* ── Items table ── */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label className="text-sm font-semibold text-[#1c1917]">Order Items</Label>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={addCreateItem}
+                >
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  Add Item
+                </Button>
+              </div>
+              <div className="rounded-xl border border-[#e7e4df] overflow-x-auto">
+                <table className="w-full min-w-[640px]">
+                  <thead className="bg-[#f9f7f4] text-[#78746e] text-xs uppercase tracking-wide">
+                    <tr>
+                      <th className="px-3 py-3 text-left font-semibold w-[38%]">Product</th>
+                      <th className="px-3 py-3 text-left font-semibold w-[10%]">Qty</th>
+                      <th className="px-3 py-3 text-left font-semibold w-[14%]">Unit Price</th>
+                      <th className="px-3 py-3 text-left font-semibold w-[14%]">Weight</th>
+                      <th className="px-3 py-3 text-right font-semibold w-[14%]">Amount</th>
+                      <th className="px-3 py-3 w-[10%]"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#e7e4df]">
+                    {createItems.map((it, idx) => (
+                      <tr key={idx}>
+                        <td className="px-3 py-3 align-top">
+                          <Select
+                            value={it.productId ? String(it.productId) : ""}
+                            onValueChange={(v) => handleItemProductSelect(idx, v)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select product…" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {allProducts.filter((p: any) => p.isActive !== false).map((p: any) => (
+                                <SelectItem key={p.id} value={String(p.id)}>
+                                  #{p.id} · {p.name} {typeof p.price === "number" ? ` (₹${p.price.toFixed(2)})` : ""}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="px-3 py-3 align-top">
+                          <Input
+                            type="number"
+                            min={1}
+                            value={it.quantity}
+                            onChange={(e) => updateCreateItem(idx, { quantity: Math.max(1, parseInt(e.target.value) || 1) })}
+                          />
+                        </td>
+                        <td className="px-3 py-3 align-top">
+                          <Input
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            value={it.price ?? 0}
+                            onChange={(e) => updateCreateItem(idx, { price: parseFloat(e.target.value) || 0 })}
+                          />
+                        </td>
+                        <td className="px-3 py-3 align-top">
+                          <Input
+                            type="text"
+                            placeholder="250g"
+                            value={it.weight || ""}
+                            onChange={(e) => updateCreateItem(idx, { weight: e.target.value })}
+                          />
+                        </td>
+                        <td className="px-3 py-3 align-top text-right font-medium text-[#1c1917] tabular-nums">
+                          ₹{fmt(((it.price ?? 0) * it.quantity))}
+                        </td>
+                        <td className="px-3 py-3 align-top text-right">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeCreateItem(idx)}
+                            disabled={createItems.length <= 1}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 disabled:text-gray-400"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* ── Totals summary ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2 flex justify-end">
+                <div className="w-full sm:w-[300px] bg-[#f9f7f4] rounded-xl p-4 border border-[#2d5a3d]/10 space-y-2 text-sm">
+                  <div className="flex justify-between text-[#78746e]">
+                    <span>Subtotal</span>
+                    <span className="tabular-nums">₹{fmt(createSubtotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-[#78746e]">
+                    <span>Shipping (flat rate)</span>
+                    <span className="tabular-nums">₹{fmt(createShipping)}</span>
+                  </div>
+                  <div className="flex justify-between text-[#78746e]">
+                    <span>Tax ({settings.taxRate ?? 0}%)</span>
+                    <span className="tabular-nums">₹{fmt(createTax)}</span>
+                  </div>
+                  <div className="pt-2 border-t border-[#2d5a3d]/15 flex justify-between font-bold text-[#1c1917] text-base">
+                    <span>Grand Total</span>
+                    <span className="tabular-nums">₹{fmt(createGrandTotal)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Actions ── */}
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-[#e7e4df]">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setIsCreateModalOpen(false)}
+                disabled={createSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="bg-[#2d5a3d] hover:bg-[#234832] text-white"
+                onClick={handleCreateOrder}
+                disabled={createSubmitting}
+              >
+                {createSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin mr-2" />
+                    Creating…
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-1.5" />
+                    Create Order
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

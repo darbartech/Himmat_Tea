@@ -10,14 +10,13 @@ interface Params {
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
-    const review = await prisma.review.findUnique({
-      where: { id: parseInt(id) },
-      include: { product: true },
+    const faq = await prisma.fAQ.findUnique({
+      where: { id },
     })
-    if (!review) {
-      return createErrorResponse('Review not found', 404)
+    if (!faq) {
+      return createErrorResponse('FAQ not found', 404)
     }
-    return createResponse(review)
+    return createResponse(faq)
   } catch (error) {
     return handleApiError(error)
   }
@@ -32,19 +31,23 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const { id } = await params
     const body = await request.json()
 
-    const safeData: Record<string, any> = {}
-    if (typeof body.rating === 'number') safeData.rating = body.rating
-    if (typeof body.title === 'string') safeData.title = body.title
-    if (typeof body.comment === 'string') safeData.comment = body.comment
-    if (typeof body.approved === 'boolean') safeData.approved = body.approved
-    if (typeof body.status === 'string') safeData.status = body.status
+    const existing = await prisma.fAQ.findUnique({ where: { id } })
+    if (!existing) {
+      return createErrorResponse('FAQ not found', 404)
+    }
 
-    const review = await prisma.review.update({
-      where: { id: parseInt(id) },
+    const safeData: Record<string, any> = {}
+    if (typeof body.question === 'string') safeData.question = body.question
+    if (typeof body.answer === 'string') safeData.answer = body.answer
+    if (typeof body.category === 'string') safeData.category = body.category
+    if (typeof body.isActive === 'boolean') safeData.isActive = body.isActive
+    if (typeof body.order === 'number') safeData.order = body.order
+
+    const faq = await prisma.fAQ.update({
+      where: { id },
       data: safeData,
-      include: { product: true },
     })
-    return createResponse(review)
+    return createResponse(faq)
   } catch (error) {
     return handleApiError(error)
   }
@@ -57,10 +60,14 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       return createErrorResponse('Unauthorized - admin only', 401)
     }
     const { id } = await params
-    await prisma.review.delete({
-      where: { id: parseInt(id) },
-    })
-    return createResponse({ message: 'Review deleted successfully' })
+
+    const existing = await prisma.fAQ.findUnique({ where: { id } })
+    if (!existing) {
+      return createErrorResponse('FAQ not found', 404)
+    }
+
+    await prisma.fAQ.delete({ where: { id } })
+    return createResponse({ message: 'FAQ deleted successfully' })
   } catch (error) {
     return handleApiError(error)
   }

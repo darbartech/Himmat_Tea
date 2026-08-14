@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return createErrorResponse('Unauthorized - admin only', 401);
     }
     const reviews = await prisma.review.findMany({
-      include: { product: true, customer: true },
+      include: { product: true },
       orderBy: { id: 'desc' }
     })
     return createResponse(reviews)
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const review = await prisma.review.create({
       data: body,
-      include: { product: true, customer: true }
+      include: { product: true }
     })
     return createResponse(review, 201)
   } catch (error) {

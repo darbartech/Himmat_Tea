@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
       const transaction = await tx.inventoryTransaction.create({
         data: {
           productId: Number(productId),
+          productName: product.name,
           type,
           quantity: Math.abs(quantity),
           previousStock,

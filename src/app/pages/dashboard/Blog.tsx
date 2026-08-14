@@ -230,7 +230,7 @@ export default function Blog() {
               Add Post
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto p-4 sm:p-6">
             <DialogHeader>
               <DialogTitle>{editingPost ? "Edit Blog Post" : "Add New Blog Post"}</DialogTitle>
               <DialogDescription>
@@ -238,7 +238,7 @@ export default function Blog() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Title *</Label>
                   <Input
@@ -259,7 +259,7 @@ export default function Blog() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
                   <Select
@@ -318,15 +318,15 @@ export default function Blog() {
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
               <Button variant="secondary" onClick={() => {
                 setIsAddDialogOpen(false);
                 setEditingPost(null);
                 resetForm();
-              }}>
+              }} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button className="bg-[#2d5a3d] hover:bg-[#234832]" onClick={handleSavePost}>
+              <Button className="bg-[#2d5a3d] hover:bg-[#234832] w-full sm:w-auto" onClick={handleSavePost}>
                 <Save className="h-4 w-4 mr-2" />
                 Save Post
               </Button>
@@ -351,7 +351,7 @@ export default function Blog() {
           value={selectedCategory}
           onValueChange={setSelectedCategory}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>

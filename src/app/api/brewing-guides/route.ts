@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createResponse, handleApiError } from '@/lib/api-utils'
+import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
+import { getCurrentAdmin } from '@/lib/auth'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const isAdminView = searchParams.get('admin') === 'true'
+
+    const where: any = {}
+    if (!isAdminView) {
+      where.isActive = true
+    }
+
     const guides = await prisma.brewingGuide.findMany({
+      where,
       orderBy: { createdAt: 'desc' }
     })
     return createResponse(guides)
@@ -15,6 +25,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const adminUser = await getCurrentAdmin()
+    if (!adminUser) {
+      return createErrorResponse('Unauthorized - admin only', 401)
+    }
     const body = await request.json()
     const guide = await prisma.brewingGuide.create({
       data: body

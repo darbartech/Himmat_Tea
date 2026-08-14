@@ -18,12 +18,22 @@ model ProductLine {
   categories     Json?
   ctaTitle       String?
   ctaDescription String?
+<<<<<<< HEAD
   ctaLinkText    String?
   ctaLink        String?
   isActive       Boolean   @default(true)
   sortOrder      Int       @default(0)
 
   products       Product[]
+=======
+  ctaLinkText  String?
+  ctaLink      String?
+  isActive     Boolean   @default(true)
+  sortOrder    Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  products     Product[]
+>>>>>>> 06da89314e26d17ea9aedc8f181672a739f869db
 }
 
 model Product {
