@@ -4,23 +4,30 @@ import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-u
 import { rateLimitAuth } from '@/lib/rate-limit'
 import { passwordSchema, clearAuthCookies, getResetTokenFromCookie, clearResetTokenCookie } from '@/lib/auth'
 import { verifyResetToken } from '@/lib/password-reset'
+import { USER_ERRORS } from '@/lib/error-messages'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
+const RESET_EXPIRED_MSG = "Your reset session has expired. Please start over by requesting a new password reset link."
+
 const resetPasswordSchema = z.object({
-  newPassword: passwordSchema
+  newPassword: passwordSchema,
+  confirmPassword: z.string().min(1, USER_ERRORS.VALIDATION.REQUIRED_FIELD)
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: USER_ERRORS.VALIDATION.PASSWORDS_DO_NOT_MATCH,
+  path: ["confirmPassword"]
 })
 
 export async function POST(request: NextRequest) {
   try {
     const rl = rateLimitAuth(request)
     if (!rl.allowed) {
-      return createErrorResponse(rl.error || 'Too many requests. Please try again later.', 429)
+      return createErrorResponse(USER_ERRORS.AUTH.TOO_MANY_ATTEMPTS, 429)
     }
 
     const resetToken = await getResetTokenFromCookie()
     if (!resetToken) {
-      return createErrorResponse('Your reset session has expired. Please start over.', 400)
+      return createErrorResponse(RESET_EXPIRED_MSG, 400)
     }
 
     const body = await request.json()
@@ -34,7 +41,7 @@ export async function POST(request: NextRequest) {
     const payload = verifyResetToken(resetToken)
     if (!payload) {
       await clearResetTokenCookie()
-      return createErrorResponse('Your reset session has expired. Please start over.', 400)
+      return createErrorResponse(RESET_EXPIRED_MSG, 400)
     }
 
     const token = await prisma.passwordResetToken.findUnique({
@@ -48,7 +55,7 @@ export async function POST(request: NextRequest) {
       token.expiresAt.getTime() < Date.now()
     ) {
       await clearResetTokenCookie()
-      return createErrorResponse('Your reset session has expired. Please start over.', 400)
+      return createErrorResponse(RESET_EXPIRED_MSG, 400)
     }
 
     const customer = await prisma.customer.findUnique({
@@ -58,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     if (!customer) {
       await clearResetTokenCookie()
-      return createErrorResponse('Your reset session has expired. Please start over.', 400)
+      return createErrorResponse(RESET_EXPIRED_MSG, 400)
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 12)

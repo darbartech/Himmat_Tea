@@ -24,8 +24,8 @@ interface AuthPayload {
 }
 
 export const passwordSchema = z.string()
-  .min(12, 'Password must be at least 12 characters')
-  .max(128, 'Password must be less than 128 characters')
+  .min(8, 'Password must be at least 8 characters')
+  .max(50, 'Password must be less than 50 characters')
   .refine(pw => /[a-z]/.test(pw), 'Must include a lowercase letter')
   .refine(pw => /[A-Z]/.test(pw), 'Must include an uppercase letter')
   .refine(pw => /\d/.test(pw), 'Must include a number')

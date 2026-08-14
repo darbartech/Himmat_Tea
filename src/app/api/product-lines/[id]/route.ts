@@ -7,6 +7,19 @@ interface Params {
   params: Promise<{ id: string }>
 }
 
+function parseCategories(raw: string | null | undefined): any[] | null {
+  if (!raw) return null
+  if (raw === '{}') return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed
+    if (parsed && typeof parsed === 'object') return []
+    return []
+  } catch {
+    return []
+  }
+}
+
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const adminUser = await getCurrentAdmin();
@@ -22,7 +35,17 @@ export async function GET(request: NextRequest, { params }: Params) {
     if (!isAdmin && !productLine.isActive) {
       return NextResponse.json({ error: 'Product line not found' }, { status: 404 })
     }
-    return createResponse(productLine)
+
+    const parsed = {
+      ...productLine,
+      categories: parseCategories(productLine.categories),
+      products: productLine.products.map(p => ({
+        ...p,
+        variantOptions: p.variantOptions ? JSON.parse(p.variantOptions) : null,
+      })),
+    }
+
+    return createResponse(parsed)
   } catch (error) {
     return handleApiError(error)
   }
@@ -39,12 +62,42 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
     const { id } = await params
     const body = await request.json()
+
+    const data: any = {}
+    if (body.slug != null) data.slug = String(body.slug)
+    if (body.name != null) data.name = String(body.name)
+    if (body.description != null) data.description = String(body.description)
+    if (body.heroHeadline !== undefined) data.heroHeadline = body.heroHeadline ? String(body.heroHeadline) : null
+    if (body.heroImage !== undefined) data.heroImage = body.heroImage ? String(body.heroImage) : null
+    if (body.color !== undefined) data.color = body.color ? String(body.color) : null
+    if (body.categories !== undefined) {
+      data.categories = Array.isArray(body.categories)
+        ? JSON.stringify(body.categories)
+        : JSON.stringify([])
+    }
+    if (body.ctaTitle !== undefined) data.ctaTitle = body.ctaTitle ? String(body.ctaTitle) : null
+    if (body.ctaDescription !== undefined) data.ctaDescription = body.ctaDescription ? String(body.ctaDescription) : null
+    if (body.ctaLinkText !== undefined) data.ctaLinkText = body.ctaLinkText ? String(body.ctaLinkText) : null
+    if (body.ctaLink !== undefined) data.ctaLink = body.ctaLink ? String(body.ctaLink) : null
+    if (body.isActive != null) data.isActive = Boolean(body.isActive)
+    if (body.sortOrder != null) data.sortOrder = Number(body.sortOrder)
+
     const productLine = await prisma.productLine.update({
       where: { id: parseInt(id) },
-      data: body,
+      data,
       include: { products: true },
     })
-    return createResponse(productLine)
+
+    const parsed = {
+      ...productLine,
+      categories: parseCategories(productLine.categories),
+      products: productLine.products.map(p => ({
+        ...p,
+        variantOptions: p.variantOptions ? JSON.parse(p.variantOptions) : null,
+      })),
+    }
+
+    return createResponse(parsed)
   } catch (error) {
     return handleApiError(error)
   }

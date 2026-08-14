@@ -4,18 +4,19 @@ import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-u
 import { rateLimitAuth } from '@/lib/rate-limit'
 import { sendPasswordResetEmail } from '@/lib/email'
 import { generateOtp, RESET_TTL_MINUTES } from '@/lib/password-reset'
+import { USER_ERRORS } from '@/lib/error-messages'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email('Please enter a valid email address')
+  email: z.string().email(USER_ERRORS.VALIDATION.INVALID_EMAIL)
 })
 
 export async function POST(request: NextRequest) {
   try {
     const rl = rateLimitAuth(request)
     if (!rl.allowed) {
-      return createErrorResponse(rl.error || 'Too many requests. Please try again later.', 429)
+      return createErrorResponse(USER_ERRORS.AUTH.TOO_MANY_ATTEMPTS, 429)
     }
 
     const body = await request.json()
@@ -31,7 +32,6 @@ export async function POST(request: NextRequest) {
       select: { id: true, name: true, email: true }
     })
 
-    // Respond identically whether or not the email exists to avoid account enumeration.
     if (customer) {
       await prisma.passwordResetToken.deleteMany({
         where: { customerId: customer.id, usedAt: null }

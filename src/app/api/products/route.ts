@@ -2,6 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createResponse, handleApiError } from '@/lib/api-utils'
 
+function parseCategories(raw: string | null | undefined): any[] | null {
+  if (!raw) return null
+  if (raw === '{}') return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed
+    if (parsed && typeof parsed === 'object') return []
+    return []
+  } catch {
+    return []
+  }
+}
+
+function parseProductLine(pl: any) {
+  if (!pl) return pl
+  return {
+    ...pl,
+    categories: parseCategories(pl.categories),
+  }
+}
+
 export async function GET() {
   try {
     const products = await prisma.product.findMany({
@@ -20,6 +41,7 @@ export async function GET() {
     const parsedProducts = products.map(product => ({
       ...product,
       variantOptions: product.variantOptions ? JSON.parse(product.variantOptions) : null,
+      productLine: parseProductLine(product.productLine),
       productVariants: product.productVariants.map(variant => ({
         ...variant,
         variants: JSON.parse(variant.variants)
@@ -57,6 +79,7 @@ export async function POST(request: NextRequest) {
     const product = await prisma.product.create({
       data,
       include: {
+        productLine: true,
         productVariants: true,
         batches: true,
         reviews: true,
@@ -69,6 +92,7 @@ export async function POST(request: NextRequest) {
     const parsedProduct = {
       ...product,
       variantOptions: product.variantOptions ? JSON.parse(product.variantOptions) : null,
+      productLine: parseProductLine(product.productLine),
       productVariants: product.productVariants.map(variant => ({
         ...variant,
         variants: JSON.parse(variant.variants)

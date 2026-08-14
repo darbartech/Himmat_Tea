@@ -3,6 +3,19 @@ import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
 import { getCurrentAdmin } from '@/lib/auth'
 
+function parseCategories(raw: string | null | undefined): any[] | null {
+  if (!raw) return null
+  if (raw === '{}') return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed
+    if (parsed && typeof parsed === 'object') return []
+    return []
+  } catch {
+    return []
+  }
+}
+
 export async function GET() {
   try {
     const adminUser = await getCurrentAdmin();
@@ -16,7 +29,17 @@ export async function GET() {
       },
       orderBy: { sortOrder: 'asc' },
     })
-    return createResponse(productLines)
+
+    const parsedLines = productLines.map(pl => ({
+      ...pl,
+      categories: parseCategories(pl.categories),
+      products: pl.products.map(p => ({
+        ...p,
+        variantOptions: p.variantOptions ? JSON.parse(p.variantOptions) : null,
+      })),
+    }))
+
+    return createResponse(parsedLines)
   } catch (error) {
     return handleApiError(error)
   }
@@ -32,13 +55,43 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('Only SuperAdmin can create product lines', 403);
     }
     const body = await request.json()
+
+    const data: any = {}
+    if (body.slug != null) data.slug = String(body.slug)
+    if (body.name != null) data.name = String(body.name)
+    if (body.description != null) data.description = String(body.description)
+    if (body.heroHeadline != null) data.heroHeadline = body.heroHeadline ? String(body.heroHeadline) : null
+    if (body.heroImage != null) data.heroImage = body.heroImage ? String(body.heroImage) : null
+    if (body.color != null) data.color = body.color ? String(body.color) : null
+    if (body.categories != null) {
+      data.categories = Array.isArray(body.categories)
+        ? JSON.stringify(body.categories)
+        : JSON.stringify([])
+    }
+    if (body.ctaTitle != null) data.ctaTitle = body.ctaTitle ? String(body.ctaTitle) : null
+    if (body.ctaDescription != null) data.ctaDescription = body.ctaDescription ? String(body.ctaDescription) : null
+    if (body.ctaLinkText != null) data.ctaLinkText = body.ctaLinkText ? String(body.ctaLinkText) : null
+    if (body.ctaLink != null) data.ctaLink = body.ctaLink ? String(body.ctaLink) : null
+    if (body.isActive != null) data.isActive = Boolean(body.isActive)
+    if (body.sortOrder != null) data.sortOrder = Number(body.sortOrder)
+
     const productLine = await prisma.productLine.create({
-      data: body,
+      data,
       include: {
         products: true,
       },
     })
-    return createResponse(productLine, 201)
+
+    const parsed = {
+      ...productLine,
+      categories: parseCategories(productLine.categories),
+      products: productLine.products.map(p => ({
+        ...p,
+        variantOptions: p.variantOptions ? JSON.parse(p.variantOptions) : null,
+      })),
+    }
+
+    return createResponse(parsed, 201)
   } catch (error) {
     return handleApiError(error)
   }
