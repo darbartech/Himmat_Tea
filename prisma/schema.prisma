@@ -23,7 +23,7 @@ model ProductLine {
   isActive     Boolean   @default(true)
   sortOrder    Int       @default(0)
   createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  updatedAt    DateTime  @default(now()) @updatedAt
   products     Product[]
 }
 

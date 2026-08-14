@@ -12,7 +12,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     const { id } = await params
     const review = await prisma.review.findUnique({
       where: { id: parseInt(id) },
-      include: { product: true, customer: true },
+      include: { product: true },
     })
     if (!review) {
       return createErrorResponse('Review not found', 404)
@@ -42,7 +42,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const review = await prisma.review.update({
       where: { id: parseInt(id) },
       data: safeData,
-      include: { product: true, customer: true },
+      include: { product: true },
     })
     return createResponse(review)
   } catch (error) {

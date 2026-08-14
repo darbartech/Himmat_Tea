@@ -26,14 +26,30 @@ const createOrderSchema = z.object({
   items: z.array(orderItemSchema).min(1, 'At least one item is required'),
   shippingAddress: z.string().min(1, 'Shipping address is required'),
   idempotencyKey: z.string().min(1, 'Idempotency key is required'),
+  orderNumber: z.string().min(1).optional(),
+  status: z.enum(ORDER_STATUSES).optional(),
 }).strip()
 
-function generateOrderNumber(date: Date): string {
+async function generateOrderNumber(date: Date): Promise<string> {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
   const d = String(date.getDate()).padStart(2, '0')
-  const rand = String(Math.floor(Math.random() * 900000) + 100000)
-  return `HT-${y}${m}${d}-${rand}`
+  const prefix = `HT-${y}${m}${d}-`
+
+  const latest = await prisma.order.findFirst({
+    where: { orderNumber: { startsWith: prefix } },
+    orderBy: { orderNumber: 'desc' },
+    select: { orderNumber: true }
+  })
+
+  let seq = 1
+  if (latest?.orderNumber) {
+    const match = latest.orderNumber.match(/-(\d{4,})$/)
+    if (match) {
+      seq = parseInt(match[1], 10) + 1
+    }
+  }
+  return `${prefix}${String(seq).padStart(4, '0')}`
 }
 
 function isMissingColumnError(error: any, column: string) {
@@ -298,14 +314,16 @@ export async function POST(request: NextRequest) {
     const grandTotal = Number((total + shippingCost + tax).toFixed(2))
 
     const now = new Date()
-    let orderNumber = generateOrderNumber(now)
+    let orderNumber = data.orderNumber || await generateOrderNumber(now)
     let orderUniqAttempts = 0
     while (orderUniqAttempts < 5) {
       const taken = await prisma.order.findUnique({ where: { orderNumber }, select: { id: true } })
       if (!taken) break
-      orderNumber = generateOrderNumber(now)
+      orderNumber = await generateOrderNumber(now)
       orderUniqAttempts++
     }
+
+    const initialStatus = isAdmin && data.status ? data.status : 'AWAITING_PAYMENT'
 
     let createdOrderId: string | undefined
     let createdOrderItems: { productId: number; quantity: number; name: string }[] | undefined
@@ -342,7 +360,7 @@ export async function POST(request: NextRequest) {
             shippingCost,
             tax,
             grandTotal,
-            status: 'AWAITING_PAYMENT',
+            status: initialStatus,
             idempotencyKey: data.idempotencyKey,
             items: {
               create: lineItems.map(li => ({
