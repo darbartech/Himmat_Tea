@@ -1,34 +1,36 @@
 import { z } from 'zod';
 
-export const signupFormSchema = z.object({
+export type TFunc = (key: string, params?: Record<string, string | number>) => string;
+
+export const createSignupFormSchema = (t: TFunc) => z.object({
   name: z.string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(100, 'Name must be less than 100 characters')
-    .regex(/^[a-zA-Z\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes')
-    .min(1, 'Full name is required'),
+    .min(2, t('validation.name.minLength'))
+    .max(100, t('validation.name.maxLength'))
+    .regex(/^[a-zA-Z\s'-]+$/, t('validation.name.pattern'))
+    .min(1, t('validation.name.required')),
   email: z.string()
-    .email('Please enter a valid email address')
-    .min(1, 'Email is required'),
+    .email(t('validation.email.invalid'))
+    .min(1, t('validation.email.required')),
   password: z.string()
-    .min(12, 'Password must be at least 12 characters')
-    .max(128, 'Password must be less than 128 characters')
-    .refine(pw => /[a-z]/.test(pw), 'Must include a lowercase letter')
-    .refine(pw => /[A-Z]/.test(pw), 'Must include an uppercase letter')
-    .refine(pw => /\d/.test(pw), 'Must include a number')
-    .refine(pw => /[^A-Za-z0-9]/.test(pw), 'Must include a special character'),
+    .min(8, t('validation.password.minLength'))
+    .max(50, t('validation.password.maxLength'))
+    .refine(pw => /[a-z]/.test(pw), t('validation.password.lowercase'))
+    .refine(pw => /[A-Z]/.test(pw), t('validation.password.uppercase'))
+    .refine(pw => /\d/.test(pw), t('validation.password.number'))
+    .refine(pw => /[^A-Za-z0-9]/.test(pw), t('validation.password.specialChar')),
   confirmPassword: z.string()
-    .min(1, 'Please confirm your password'),
+    .min(1, t('validation.password.confirmRequired')),
   phone: z.string()
-    .min(1, 'Phone number is required'),
+    .min(1, t('validation.phone.required')),
   address: z.string()
-    .min(5, 'Address must be at least 5 characters')
-    .max(500, 'Address must be less than 500 characters')
-    .min(1, 'Address is required'),
+    .min(5, t('validation.address.minLength'))
+    .max(500, t('validation.address.maxLength'))
+    .min(1, t('validation.address.required')),
   agreeToTerms: z.boolean()
-    .refine((val) => val === true, 'You must agree to the Terms of Service and Privacy Policy')
+    .refine((val) => val === true, t('validation.terms.required'))
 }).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
+  message: t('validation.password.mismatch'),
   path: ['confirmPassword']
 });
 
-export type SignupFormData = z.infer<typeof signupFormSchema>;
+export type SignupFormData = z.infer<ReturnType<typeof createSignupFormSchema>>;

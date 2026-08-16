@@ -1,0 +1,423 @@
+New Translation Key,English Source Text,Files To Update (replace hardcoded text with t(key))
+a11y.addItem,Add item,src/app/pages/dashboard/PurchaseOrders.tsx
+a11y.cart,Cart,src/app/components/Navigation.tsx
+a11y.clearSearch,Clear search,src/app/components/Navigation.tsx
+a11y.close,Close,src/modules/auth/AuthModal/AuthModal.tsx
+a11y.closeMenu,Close menu,src/app/components/Navigation.tsx
+a11y.closeSearch,Close search,src/app/components/Navigation.tsx
+a11y.colorPicker,Color picker,src/app/pages/dashboard/ProductLines.tsx
+a11y.deleteNotification,Delete notification,src/app/pages/dashboard/DashboardLayout.tsx
+a11y.dismiss,Dismiss,src/app/components/Navigation.tsx
+a11y.errorLoadingImage,Error loading image,src/app/components/image-utils/ImageWithFallback.tsx
+a11y.nextAnnouncement,Next announcement,src/app/components/Navigation.tsx
+a11y.nextSlide,Next slide,src/app/components/ProductSlider.tsx
+a11y.previousAnnouncement,Previous announcement,src/app/components/Navigation.tsx
+a11y.previousSlide,Previous slide,src/app/components/ProductSlider.tsx
+a11y.searchProducts,Search products,src/app/components/Navigation.tsx
+a11y.selectLanguage,Select language,src/app/components/Navigation.tsx
+a11y.toggleMenu,Toggle menu,src/app/components/Navigation.tsx
+about.farmImageAlt,Farm in Nepal,src/app/pages/About.tsx
+account.fullName,Full Name,src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/Customers.tsx
+account.loading,Loading account...,src/app/account/page.tsx
+account.loadingOrders,Loading your orders...,src/app/pages/CustomerAccount.tsx
+account.loyaltyPoints,Loyalty Points,src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/Customers.tsx
+account.memberTier,Member Tier,src/app/pages/CustomerAccount.tsx
+account.noOrdersDesc,"Once you place an order, it will show up here.",src/app/pages/CustomerAccount.tsx
+account.noOrdersYet,No orders yet,src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/Customers.tsx
+account.orderItems,Order Items,src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/Orders.tsx
+account.orderTracking,Order Tracking,src/app/pages/CustomerAccount.tsx
+auth.backToHome,Back to Home,src/app/pages/Login.tsx
+auth.checkingAuthentication,Checking Authentication...,src/app/components/ProtectedRoute.tsx
+auth.enterUsernameOrEmail,Enter your username or email,src/app/pages/Login.tsx
+auth.enterYourPassword,Enter your password,src/app/pages/Login.tsx
+auth.heroImageAlt,Tea leaves being harvested in a lush plantation,src/app/pages/Login.tsx
+auth.logoAlt,GodGifted Logo,src/app/pages/Login.tsx
+auth.stats.happyCustomers,Happy Customers,src/app/pages/Login.tsx
+auth.stats.teaVarieties,Tea Varieties,src/app/pages/Login.tsx
+auth.stats.yearsOfExcellence,Years of Excellence,src/app/pages/Login.tsx
+blog.editorialLabel,Editorial,src/app/pages/BlogPost.tsx
+blog.emailPlaceholder,Your email address,src/app/pages/Blog.tsx; src/app/pages/BlogPost.tsx
+careers.emailPlaceholder,you@email.com,src/app/pages/Careers.tsx
+careers.fullNamePlaceholder,Your full name,src/app/pages/Careers.tsx; src/app/pages/Wholesale.tsx
+careers.linkedinPlaceholder,https://linkedin.com/in/yourname,src/app/pages/Careers.tsx
+careers.teamImageAlt,Godgifted team at work,src/app/pages/Careers.tsx
+cart.enterCode,Enter code,src/app/pages/Cart.tsx
+cart.promoApplied,Promo code applied!,src/app/pages/Cart.tsx
+cart.shipping,Shipping,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/OrderConfirmed.tsx
+cart.subtotal,Subtotal,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/OrderConfirmed.tsx; src/app/pages/dashboard/Orders.tsx
+cart.total,Total,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/CustomerAccount.tsx; src/app/pages/OrderConfirmed.tsx; src/app/pages/dashboard/Analytics.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+checkout.countries.australia,Australia,src/app/pages/Checkout.tsx
+checkout.countries.india,India,src/app/pages/Checkout.tsx
+checkout.countries.nepal,Nepal,src/app/pages/Checkout.tsx
+checkout.countries.other,Other,src/app/pages/Checkout.tsx; src/app/pages/Wholesale.tsx
+checkout.countries.usa,USA,src/app/pages/Checkout.tsx
+checkout.emptyCart,Your cart is empty.,src/app/pages/Checkout.tsx
+checkout.fields.addressPlaceholder,"House No., Street Name, Area",src/app/pages/Checkout.tsx
+checkout.summary.addressLabel,Address:,src/app/pages/Checkout.tsx; src/app/pages/PrivacyPolicy.tsx; src/app/pages/Terms.tsx
+checkout.summary.emailLabel,Email:,src/app/pages/Checkout.tsx; src/app/pages/PrivacyPolicy.tsx; src/app/pages/Terms.tsx
+checkout.summary.nameLabel,Name:,src/app/pages/Checkout.tsx
+checkout.summary.phoneLabel,Phone:,src/app/pages/Checkout.tsx
+checkout.summary.shipping,Shipping,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/OrderConfirmed.tsx
+checkout.summary.subtotal,Subtotal,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/OrderConfirmed.tsx; src/app/pages/dashboard/Orders.tsx
+checkout.summary.total,Total,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/CustomerAccount.tsx; src/app/pages/OrderConfirmed.tsx; src/app/pages/dashboard/Analytics.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+common.active,Active,src/app/pages/dashboard/Coupons.tsx; src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/ProductLines.tsx
+common.activeVisible,Active (Visible),src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+common.activeVisibleOnSite,Active (Visible on site),src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/FAQs.tsx
+common.allCategories,All Categories,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/Inventory.tsx
+common.cancel,Cancel,src/app/pages/dashboard/AdminUsers.tsx; src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/BrewingGuidesAdmin.tsx; src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/Coupons.tsx; src/app/pages/dashboard/Customers.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/Products.tsx; src/app/pages/dashboard/PurchaseOrders.tsx; src/app/pages/dashboard/Reviews.tsx
+common.delete,Delete,src/app/pages/dashboard/Coupons.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+common.description,Description,src/app/pages/dashboard/Products.tsx
+common.discount,Discount,src/app/pages/dashboard/Orders.tsx
+common.dismissAction,Dismiss,src/app/components/Navigation.tsx
+common.edit,Edit,src/app/pages/dashboard/Coupons.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+common.enterReason,Enter reason,src/app/pages/dashboard/Customers.tsx
+common.failedToLoadData,Failed to load data,src/app/pages/dashboard/Inventory.tsx
+common.loading,Loading...,src/app/customer-auth/page.tsx; src/app/forgot-password/page.tsx; src/app/reset-password/page.tsx; src/app/verify-reset/page.tsx
+common.name,Name,src/app/pages/Contact.tsx
+common.notesOptional,Notes (Optional),src/app/pages/dashboard/PurchaseOrders.tsx
+common.notice,Notice,src/app/pages/dashboard/Inventory.tsx
+common.order,Order,src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/ProductLines.tsx
+common.preview,Preview,src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/Products.tsx
+common.previewAlt,Preview,src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/Products.tsx
+common.reference,Reference,src/app/pages/dashboard/Inventory.tsx
+common.searchProductsPlaceholder,Search products...,src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+common.selectCategory,Select category,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/Products.tsx
+common.selectRole,Select role,src/app/pages/dashboard/AdminUsers.tsx
+common.selectStatus,Select status,src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+common.shipping,Shipping,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/OrderConfirmed.tsx
+common.slug,Slug,src/app/pages/dashboard/ProductLines.tsx
+common.sortOrder,Sort Order,src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/ProductLines.tsx
+common.subtitleOptional,Subtitle (Optional),src/app/pages/dashboard/HeroVisuals.tsx
+common.title,Title,src/app/pages/dashboard/HeroVisuals.tsx
+common.titleOptional,Title (Optional),src/app/pages/dashboard/HeroVisuals.tsx
+common.type,Type,src/app/pages/dashboard/Inventory.tsx
+common.unit,Unit,src/app/pages/dashboard/PurchaseOrders.tsx
+common.uploading,Uploading...,src/app/pages/dashboard/Products.tsx; src/app/pages/dashboard/Settings.tsx
+contact.faq,FAQ,src/app/pages/Contact.tsx
+contact.fields.email,Email,src/app/pages/Contact.tsx; src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/AdminUsers.tsx; src/app/pages/dashboard/Customers.tsx; src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/Settings.tsx
+contact.fields.message,Message,src/app/pages/Contact.tsx
+contact.fields.name,Name,src/app/pages/Contact.tsx
+contact.fields.selectTopic,Select a topic,src/app/pages/Contact.tsx
+contact.fields.subject,Subject,src/app/pages/Contact.tsx
+contact.responseNote,We'll get back to you as soon as possible.,src/app/pages/Contact.tsx
+contact.topics.generalInquiry,General Inquiry,src/app/pages/Contact.tsx
+contact.topics.godgiftedDalInquiry,Godgifted Dal Inquiry,src/app/pages/Contact.tsx
+contact.topics.himmatTeaInquiry,Himmat Tea Inquiry,src/app/pages/Contact.tsx
+contact.topics.orderSupport,Order Support,src/app/pages/Contact.tsx
+contact.topics.wholesale,Wholesale,src/app/pages/Contact.tsx
+dashboard.adminUsers.accountActive,Account Active,src/app/pages/dashboard/AdminUsers.tsx
+dashboard.adminUsers.admin,Admin,src/app/pages/dashboard/AdminUsers.tsx; src/app/pages/dashboard/DashboardLayout.tsx
+dashboard.adminUsers.deleteConfirmTitle,Delete Admin User?,src/app/pages/dashboard/AdminUsers.tsx
+dashboard.adminUsers.emailPlaceholder,admin@example.com,src/app/pages/dashboard/AdminUsers.tsx
+dashboard.adminUsers.manageDesc,Manage admin accounts and permissions,src/app/pages/dashboard/AdminUsers.tsx
+dashboard.adminUsers.passwordPlaceholder,Enter password,src/app/pages/dashboard/AdminUsers.tsx
+dashboard.adminUsers.role,Role,src/app/pages/dashboard/AdminUsers.tsx
+dashboard.adminUsers.searchPlaceholder,Search admin users...,src/app/pages/dashboard/AdminUsers.tsx
+dashboard.adminUsers.selectRole,Select role,src/app/pages/dashboard/AdminUsers.tsx
+dashboard.adminUsers.superAdmin,Super Admin,src/app/pages/dashboard/AdminUsers.tsx
+dashboard.adminUsers.username,Username,src/app/pages/dashboard/AdminUsers.tsx
+dashboard.adminUsers.usernamePlaceholder,Enter username,src/app/pages/dashboard/AdminUsers.tsx
+dashboard.analytics.date,Date,src/app/pages/dashboard/Analytics.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.analytics.distributionByStatus,Distribution by status,src/app/pages/dashboard/Analytics.tsx
+dashboard.analytics.latest5Orders,Latest 5 orders,src/app/pages/dashboard/Analytics.tsx
+dashboard.analytics.orderId,Order ID,src/app/pages/dashboard/Analytics.tsx
+dashboard.analytics.orderStatus,Order Status,src/app/pages/dashboard/Analytics.tsx
+dashboard.analytics.productPerformance,Product Performance,src/app/pages/dashboard/Analytics.tsx
+dashboard.analytics.recentOrders,Recent Orders,src/app/pages/dashboard/Analytics.tsx
+dashboard.analytics.revenueTrend,Revenue Trend,src/app/pages/dashboard/Analytics.tsx
+dashboard.analytics.revenueTrendDesc,Monthly revenue for the last 6 months,src/app/pages/dashboard/Analytics.tsx
+dashboard.analytics.topSellingProducts,Top selling products,src/app/pages/dashboard/Analytics.tsx
+dashboard.analytics.trackPerformance,Track your tea business performance,src/app/pages/dashboard/Analytics.tsx
+dashboard.blogAdmin.allCategoriesPlaceholder,All Categories,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/Inventory.tsx
+dashboard.blogAdmin.contentJson,Content (JSON),src/app/pages/dashboard/Blog.tsx
+dashboard.blogAdmin.deleteConfirm,Delete Post?,src/app/pages/dashboard/Blog.tsx
+dashboard.blogAdmin.excerptPlaceholder,Brief description of the post,src/app/pages/dashboard/Blog.tsx
+dashboard.blogAdmin.imageUrlPlaceholder,https://...,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/BrewingGuidesAdmin.tsx; src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.blogAdmin.loading,Loading blog posts...,src/app/pages/dashboard/Blog.tsx
+dashboard.blogAdmin.manageDesc,Manage your tea blog content,src/app/pages/dashboard/Blog.tsx
+dashboard.blogAdmin.noneFound,No blog posts found,src/app/pages/dashboard/Blog.tsx
+dashboard.blogAdmin.readTime,Read Time,src/app/pages/dashboard/Blog.tsx
+dashboard.blogAdmin.searchPostsPlaceholder,Search posts...,src/app/pages/dashboard/Blog.tsx
+dashboard.blogAdmin.slugAutoGenerated,Slug (auto-generated),src/app/pages/dashboard/Blog.tsx
+dashboard.blogAdmin.slugPlaceholder,post-slug,src/app/pages/dashboard/Blog.tsx
+dashboard.blogAdmin.titlePlaceholder,Blog post title,src/app/pages/dashboard/Blog.tsx
+dashboard.brewingGuides.activeVisible,Active (Visible),src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.allTeaTypes,All Tea Types,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.deleteConfirm,Delete Brewing Guide?,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.excerptPlaceholder,A short summary of this brewing guide...,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.imageUrlPlaceholder,https://...,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/BrewingGuidesAdmin.tsx; src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.brewingGuides.leafQuantity,Leaf Quantity,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.leaves,Leaves,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.manageDesc,Manage tea brewing instructions and guides,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.noneFound,No brewing guides found,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.noneFoundDesc,Create your first guide to help customers brew the perfect cup,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.selectTeaType,Select tea type,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.slugPlaceholder,brew-darjeeling,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.steepingTime,Steeping Time,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.teaType,Tea Type,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.temp,Temp,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.time,Time,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.titlePlaceholder,How to Brew Perfect Darjeeling,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.brewingGuides.waterTemperature,Water Temperature,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+dashboard.collections.deleteConfirm,Delete Collection?,src/app/pages/dashboard/CollectionsAdmin.tsx
+dashboard.collections.descPlaceholder,Describe this collection...,src/app/pages/dashboard/CollectionsAdmin.tsx
+dashboard.collections.groupDesc,Group products into curated collections,src/app/pages/dashboard/CollectionsAdmin.tsx
+dashboard.collections.imageUrlPlaceholder,https://...,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/BrewingGuidesAdmin.tsx; src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.collections.namePlaceholder,Summer Favorites,src/app/pages/dashboard/CollectionsAdmin.tsx
+dashboard.collections.noneFound,No collections found,src/app/pages/dashboard/CollectionsAdmin.tsx
+dashboard.collections.noneFoundDesc,Create your first collection to group related products together,src/app/pages/dashboard/CollectionsAdmin.tsx
+dashboard.collections.searchProductsPlaceholder,Search products...,src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.collections.slugPlaceholder,summer-favorites,src/app/pages/dashboard/CollectionsAdmin.tsx
+dashboard.coupons.active,Active,src/app/pages/dashboard/Coupons.tsx; src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/ProductLines.tsx
+dashboard.coupons.code,Coupon Code,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.codePlaceholder,"e.g., WELCOME10",src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.copyCode,Copy code,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.deleteConfirm,Delete Coupon?,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.discountType,Discount Type,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.expired,Expired,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.fixedAmount,Fixed Amount,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.inactive,Inactive,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.limitReached,Limit Reached,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.manageDesc,Create and manage discount coupons,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.maxDiscountColumn,Max Discount,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.noneYet,No coupons yet. Create your first one!,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.percentage,Percentage,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.usage,Usage,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.usageLimit,Usage Limit,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.validFrom,Valid From,src/app/pages/dashboard/Coupons.tsx
+dashboard.coupons.validTo,Valid To,src/app/pages/dashboard/Coupons.tsx
+dashboard.customers.address,Address,src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/Customers.tsx
+dashboard.customers.deleteConfirm,Delete Customer?,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.detailHistoryDesc,Customer details and order history,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.emailPlaceholder,john@example.com,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.enterPoints,Enter points,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.enterReason,Enter reason,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.fullName,Full Name,src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/Customers.tsx
+dashboard.customers.information,Information,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.loading,Loading customers...,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.loyaltyPoints,Loyalty Points,src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/Customers.tsx
+dashboard.customers.manageDesc,Manage your customer relationships,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.namePlaceholder,John Doe,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.noOrdersYet,No orders yet,src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/Customers.tsx
+dashboard.customers.orderHistory,Order History,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.orders,Orders,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.points,Points,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.searchPlaceholder,Search customers by name or email...,src/app/pages/dashboard/Customers.tsx
+dashboard.customers.totalSpent,Total Spent,src/app/pages/dashboard/Customers.tsx
+dashboard.faqs.activeVisibleOnSite,Active (Visible on site),src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/FAQs.tsx
+dashboard.faqs.allCategories,All Categories,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/Inventory.tsx
+dashboard.faqs.answerPlaceholder,Write a detailed answer...,src/app/pages/dashboard/FAQs.tsx
+dashboard.faqs.category,Category,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.faqs.deleteConfirm,Delete FAQ?,src/app/pages/dashboard/FAQs.tsx
+dashboard.faqs.displayOrder,Display Order,src/app/pages/dashboard/FAQs.tsx
+dashboard.faqs.manageDesc,Manage frequently asked questions and answers,src/app/pages/dashboard/FAQs.tsx
+dashboard.faqs.order,Order,src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/ProductLines.tsx
+dashboard.faqs.question,Question,src/app/pages/dashboard/FAQs.tsx
+dashboard.faqs.questionPlaceholder,What is your return policy?,src/app/pages/dashboard/FAQs.tsx
+dashboard.faqs.selectCategory,Select category,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.heroVisuals.deleteConfirm,Delete Hero Visual?,src/app/pages/dashboard/HeroVisuals.tsx
+dashboard.heroVisuals.imageUrlPlaceholder,https://example.com/image.jpg,src/app/pages/dashboard/HeroVisuals.tsx
+dashboard.heroVisuals.manageDesc,Manage the visuals for the hero section of your homepage,src/app/pages/dashboard/HeroVisuals.tsx
+dashboard.heroVisuals.preview,Preview,src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.heroVisuals.subtitlePlaceholder,Hand-picked from the Himalayas,src/app/pages/dashboard/HeroVisuals.tsx
+dashboard.heroVisuals.titleOptional,Title (Optional),src/app/pages/dashboard/HeroVisuals.tsx
+dashboard.heroVisuals.titlePlaceholder,Premium Green Tea,src/app/pages/dashboard/HeroVisuals.tsx
+dashboard.inventory.action,Action,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.addBatch,Add Batch...,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.allCategories,All Categories,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.allProducts,All products,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.batchManagement,Batch Management,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.batchNumber,Batch Number,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.batchNumberPlaceholder,BATCH-001,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.costPrice,Cost Price,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.currentStockLevels,Current stock levels for all products,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.expiry,Expiry,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.expiryDateOptional,Expiry Date (Optional),src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.quantityHelp,"Quantity (positive to add, negative to remove)",src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.inventory.quantityHelpPlaceholder,"e.g., 50 or -10",src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.inventory.reason,Reason,src/app/pages/dashboard/Customers.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.inventory.reasonPlaceholder,"e.g., Restock from supplier, Return, etc.",src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.inventory.received,Received,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.receivedDate,Received Date,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.reference,Reference,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.stockChange,Stock Change,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.stockStatusOverview,Stock Status Overview,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.supplier,Supplier,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.inventory.supplierOptional,Supplier (Optional),src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.supplierPlaceholder,Supplier name,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.inventory.trackBatchesDesc,Track inventory batches with expiry dates,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.trackDesc,Track and manage your tea inventory,src/app/pages/dashboard/Inventory.tsx
+dashboard.inventory.value,Value,src/app/pages/dashboard/Inventory.tsx
+dashboard.layout.admin,Admin,src/app/pages/dashboard/AdminUsers.tsx; src/app/pages/dashboard/DashboardLayout.tsx
+dashboard.layout.adminAlt,Admin,src/app/pages/dashboard/AdminUsers.tsx; src/app/pages/dashboard/DashboardLayout.tsx
+dashboard.layout.deleteNotification,Delete notification,src/app/pages/dashboard/DashboardLayout.tsx
+dashboard.orders.addNotePlaceholder,Add a note...,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.amountColumn,Amount,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.courierPartner,Courier Partner,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.courierPartnerPlaceholder,Enter courier partner,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.createNewOrder,Create New Order,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.customerLabel,Customer,src/app/pages/dashboard/Analytics.tsx; src/app/pages/dashboard/Orders.tsx
+dashboard.orders.customerName,Customer Name,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.discount,Discount,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.email,Email,src/app/pages/Contact.tsx; src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/AdminUsers.tsx; src/app/pages/dashboard/Customers.tsx; src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/Settings.tsx
+dashboard.orders.fullAmountIfEmpty,Full amount if left empty,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.grandTotal,Grand Total,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.initialStatus,Initial Status,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.internalNotes,Internal Notes,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.orderItems,Order Items,src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/Orders.tsx
+dashboard.orders.orderNumber,Order Number,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.phone,Phone,src/app/pages/dashboard/Customers.tsx; src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/Settings.tsx
+dashboard.orders.productColumn,Product,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/Products.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.orders.qty,Qty,src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.orders.refundAmountOptional,Refund Amount (optional),src/app/pages/dashboard/Orders.tsx
+dashboard.orders.rejectReasonOptional,"Reject reason (sent to customer, optional)",src/app/pages/dashboard/Orders.tsx
+dashboard.orders.selectCustomerPlaceholder,Select a customer…,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.selectProductPlaceholder,Select product…,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.selectStatus,Select status,src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.orders.shippingAddress,Shipping Address,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.shippingAddressPlaceholder,"Street, City, State, PIN",src/app/pages/dashboard/Orders.tsx
+dashboard.orders.shippingFlatRate,Shipping (flat rate),src/app/pages/dashboard/Orders.tsx
+dashboard.orders.subtotal,Subtotal,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/OrderConfirmed.tsx; src/app/pages/dashboard/Orders.tsx
+dashboard.orders.trackingInformation,Tracking Information,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.trackingNumber,Tracking Number,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.trackingNumberPlaceholder,Enter tracking number,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.transactionRefOptional,Transaction reference (optional),src/app/pages/dashboard/Orders.tsx
+dashboard.orders.unitPrice,Unit Price,src/app/pages/dashboard/Orders.tsx
+dashboard.orders.weight,Weight,src/app/pages/Subscribe.tsx; src/app/pages/dashboard/Orders.tsx
+dashboard.productLines.ctaButtonPlaceholder,Browse Collection,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.ctaButtonText,CTA Button Text,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.ctaDescPlaceholder,A short blurb for the CTA section...,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.ctaDescription,CTA Description,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.ctaLink,CTA Link,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.ctaOptional,Call to Action (Optional),src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.ctaTitle,CTA Title,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.ctaTitlePlaceholder,Ready to explore?,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.deleteConfirm,Delete Product Line?,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.descPlaceholder,Briefly describe this product line...,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.heroHeadline,Hero Headline,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.heroHeadlinePlaceholder,The finest green teas from Himalayan gardens,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.imageUrlPlaceholder,https://...,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/BrewingGuidesAdmin.tsx; src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.productLines.line,Line,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.manageDesc,Manage your tea product lines and their sections,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.namePlaceholder,Green Tea Collection,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.slug,Slug,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.slugPlaceholder,green-tea,src/app/pages/dashboard/ProductLines.tsx
+dashboard.productLines.themeColor,Theme Color,src/app/pages/dashboard/ProductLines.tsx
+dashboard.products.allProductLines,All Product Lines,src/app/pages/dashboard/Products.tsx
+dashboard.products.deleteConfirmTitle,Delete Product?,src/app/pages/dashboard/Products.tsx
+dashboard.products.descriptionLabel,Description,src/app/pages/dashboard/Products.tsx
+dashboard.products.descriptionPlaceholder,Product description,src/app/pages/dashboard/Products.tsx
+dashboard.products.imageUrlPlaceholder,https://...,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/BrewingGuidesAdmin.tsx; src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.products.markBestseller,Mark as Bestseller,src/app/pages/dashboard/Products.tsx
+dashboard.products.namePlaceholder,"e.g., Premium Green Tea",src/app/pages/dashboard/Products.tsx
+dashboard.products.priceRs,Price (Rs.),src/app/pages/dashboard/Products.tsx
+dashboard.products.productImage,Product Image,src/app/pages/dashboard/Products.tsx
+dashboard.products.productLine,Product Line,src/app/pages/dashboard/Products.tsx
+dashboard.products.reorderPoint,Reorder Point,src/app/pages/dashboard/Products.tsx
+dashboard.products.searchPlaceholder,Search products...,src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+dashboard.products.selectProductLine,Select product line,src/app/pages/dashboard/Products.tsx
+dashboard.products.sku,SKU,src/app/pages/dashboard/Products.tsx
+dashboard.products.skuPlaceholderAlt,TEA-001,src/app/pages/dashboard/Products.tsx
+dashboard.products.stockQuantity,Stock Quantity,src/app/pages/dashboard/Products.tsx
+dashboard.purchaseOrders.add,Add,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.addItem,Add item,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.deleteConfirm,Delete Purchase Order?,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.expectedDelivery,Expected Delivery,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.items,Items,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.manageDesc,Manage your supplier purchase orders,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.markReceived,Mark as Received,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.notesOptional,Notes (Optional),src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.notesPlaceholder,Additional notes...,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.orderDate,Order Date,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.poNumber,PO Number,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.poNumberPlaceholder,PO-2024-001,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.pricePlaceholder,Price,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.qty,Qty,src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.qtyPlaceholder,Qty,src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.searchPlaceholder,Search by PO number or supplier...,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.selectProduct,Select product,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.supplier,Supplier,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.supplierNamePlaceholder,Supplier name,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.purchaseOrders.unit,Unit,src/app/pages/dashboard/PurchaseOrders.tsx
+dashboard.reviews.approved,Approved,src/app/pages/dashboard/Reviews.tsx
+dashboard.reviews.deleteConfirm,Delete Review?,src/app/pages/dashboard/Reviews.tsx
+dashboard.reviews.manageDesc,Manage customer reviews and feedback,src/app/pages/dashboard/Reviews.tsx
+dashboard.reviews.noneFound,No reviews found,src/app/pages/dashboard/Reviews.tsx
+dashboard.reviews.pending,Pending,src/app/pages/dashboard/Reviews.tsx
+dashboard.reviews.rejected,Rejected,src/app/pages/dashboard/Reviews.tsx
+dashboard.settings.currency,Currency,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.defaultReorderPoint,Default Reorder Point,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.defaultReorderPointPlaceholder,Default reorder point for new products,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.emailNotifications,Email Notifications,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.emailNotificationsDesc,Receive email updates for new orders to store email,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.flatShippingRatePlaceholder,Flat rate for shipping (0 for free),src/app/pages/dashboard/Settings.tsx
+dashboard.settings.gstNumber,GST Number,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.gstNumberPlaceholder,"e.g., 27AABCU9603R1ZX",src/app/pages/dashboard/Settings.tsx
+dashboard.settings.inventorySettings,Inventory Settings,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.language,Language,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.languages.english,English,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.languages.gujarati,Gujarati,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.languages.hindi,Hindi,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.languages.nepali,Nepali,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.lowStockAlerts,Low Stock Alerts,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.lowStockAlertsDesc,Alert when product stock falls below threshold,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.lowStockThreshold,Low Stock Threshold,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.lowStockThresholdPlaceholder,Alert when stock is below this number,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.manageDesc,Manage your store settings,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.nepaleseRupee,Nepalese Rupee (Rs.),src/app/pages/dashboard/Settings.tsx
+dashboard.settings.notifications,Notifications,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.orderNotifications,Order Notifications,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.orderNotificationsDesc,Get notified when new orders are placed,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.paymentQrCode,Payment QR Code,src/app/pages/OrderConfirmed.tsx; src/app/pages/dashboard/Settings.tsx
+dashboard.settings.paymentTaxSettings,Payment & Tax Settings,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.storeInformation,Store Information,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.storeName,Store Name,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.taxRate,Tax Rate (%),src/app/pages/dashboard/Settings.tsx
+dashboard.settings.timeZone,Time Zone,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.units.grams,Grams (g),src/app/pages/dashboard/Settings.tsx
+dashboard.settings.units.kilograms,Kilograms (kg),src/app/pages/dashboard/Settings.tsx
+dashboard.settings.units.ounces,Ounces (oz),src/app/pages/dashboard/Settings.tsx
+dashboard.settings.units.pounds,Pounds (lb),src/app/pages/dashboard/Settings.tsx
+dashboard.settings.utc,UTC,src/app/pages/dashboard/Settings.tsx
+dashboard.settings.weightUnit,Weight Unit,src/app/pages/dashboard/Settings.tsx
+hero.imageAlt,Hero section,src/app/components/Hero.tsx
+hero.tagline,Steeped in Grace,src/app/components/Hero.tsx
+nav.searchPlaceholder,"Search teas, origins, types…",src/app/components/Navigation.tsx
+order.paymentQrAlt,Payment QR Code,src/app/pages/OrderConfirmed.tsx; src/app/pages/dashboard/Settings.tsx
+order.summary.shipping,Shipping,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/OrderConfirmed.tsx
+order.summary.subtotal,Subtotal,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/OrderConfirmed.tsx; src/app/pages/dashboard/Orders.tsx
+order.summary.tax,Tax,src/app/pages/OrderConfirmed.tsx
+order.summary.total,Total,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/CustomerAccount.tsx; src/app/pages/OrderConfirmed.tsx; src/app/pages/dashboard/Analytics.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+password.startOver,Please start the password reset process again.,src/app/pages/VerifyReset.tsx
+productDetail.loading,Loading product...,src/app/products/[id]/page.tsx
+productDetail.noReviewsYet,No reviews yet. Be the first to review this product!,src/app/pages/ProductDetail.tsx
+productDetail.share.button,Share,src/app/pages/ProductDetail.tsx
+productDetail.share.copyLink,Copy product link,src/app/pages/ProductDetail.tsx
+productDetail.share.facebook,Share on Facebook,src/app/pages/ProductDetail.tsx
+productDetail.share.linkedin,Share on LinkedIn,src/app/pages/ProductDetail.tsx
+productDetail.share.native,Share via native share dialog,src/app/pages/ProductDetail.tsx
+productDetail.share.title,Share this product,src/app/pages/ProductDetail.tsx
+productDetail.share.twitter,Share on X (Twitter),src/app/pages/ProductDetail.tsx
+productDetail.share.whatsapp,Share on WhatsApp,src/app/pages/ProductDetail.tsx
+products.searchPlaceholder,Search products or origin…,src/app/pages/ProductsCatalog.tsx
+products.sort.featured,Featured,src/app/pages/ProductsCatalog.tsx
+products.sort.topRated,Top Rated,src/app/pages/ProductsCatalog.tsx
+sourcing.imageAlt,Tea plantation in Nepal,src/app/pages/Sourcing.tsx
+subscribe.teasLabel,Teas,src/app/pages/Subscribe.tsx
+subscribe.weightLabel,Weight,src/app/pages/Subscribe.tsx; src/app/pages/dashboard/Orders.tsx
+wholesale.acrossTheWorld,Across the World,src/app/pages/Wholesale.tsx
+wholesale.brand.godgiftedDal,Godgifted Dal,src/app/pages/Wholesale.tsx
+wholesale.brand.himmatTea,Himmat Tea,src/app/pages/Wholesale.tsx
+wholesale.businessEmailPlaceholder,you@business.com,src/app/pages/Wholesale.tsx
+wholesale.businessNamePlaceholder,Your business name,src/app/pages/Wholesale.tsx
+wholesale.businessType.distributor,Distributor,src/app/pages/Wholesale.tsx
+wholesale.businessType.hotel,Hotel / Resort,src/app/pages/Wholesale.tsx
+wholesale.businessType.onlineStore,Online Store,src/app/pages/Wholesale.tsx
+wholesale.businessType.other,Other,src/app/pages/Checkout.tsx; src/app/pages/Wholesale.tsx
+wholesale.businessType.restaurant,Restaurant,src/app/pages/Wholesale.tsx
+wholesale.businessType.retailer,Retailer,src/app/pages/Wholesale.tsx
+wholesale.cafeImageAlt,Café wholesale partner,src/app/pages/Wholesale.tsx
+wholesale.countryPlaceholder,e.g. United Kingdom,src/app/pages/Wholesale.tsx
+wholesale.fullNamePlaceholder,Your full name,src/app/pages/Careers.tsx; src/app/pages/Wholesale.tsx
+wholesale.under1kg,Under 1 kg,src/app/pages/Wholesale.tsx
+wishlist.removeItem,Remove from Wishlist,src/app/pages/Wishlist.tsx

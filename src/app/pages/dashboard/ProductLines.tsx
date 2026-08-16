@@ -29,6 +29,8 @@ import {
 import { Switch } from "../../components/ui/switch";
 import { ImageUploadField } from "../../components/ui/image-upload-field";
 import { api, ApiError } from "../../../lib/api-client";
+import { useAuth } from "../../../context/AuthContext";
+import { Badge } from "../../components/ui/badge";
 
 type ProductLineCategory = {
   id: string;
@@ -91,6 +93,8 @@ function toCreatePayload(pl: Partial<ProductLine>) {
 }
 
 export default function ProductLines() {
+  const { currentUser, userType } = useAuth();
+  const isSuperAdmin = userType === "admin" && "role" in (currentUser || {}) && (currentUser as any)?.role === "superadmin";
   const [productLines, setProductLines] = useState<ProductLine[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -207,7 +211,14 @@ export default function ProductLines() {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             Product Lines
           </h1>
-          <p className="text-[#78746e] mt-1">Manage your tea product lines and their sections</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-[#78746e]">Manage your tea product lines and their sections</p>
+            {!isSuperAdmin && (
+              <Badge variant="secondary" className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200">
+                View only — Super Admin required to edit
+              </Badge>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <Dialog
@@ -218,7 +229,11 @@ export default function ProductLines() {
             }}
           >
             <DialogTrigger asChild>
-              <Button className="bg-[#2d5a3d] hover:bg-[#234832] text-white">
+              <Button
+                className="bg-[#2d5a3d] hover:bg-[#234832] text-white"
+                disabled={!isSuperAdmin}
+                title={isSuperAdmin ? "Add new product line" : "Only Super Admin can create product lines"}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Product Line
               </Button>
@@ -487,29 +502,37 @@ export default function ProductLines() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2 whitespace-nowrap">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleEditProductLine(pl)}
-                          disabled={isSaving || deletingId !== null}
-                          title="Edit"
-                          className="hover:bg-[#f0ede8]"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => requestDelete(pl)}
-                          disabled={deletingId === pl.id}
-                          title="Delete"
-                        >
-                          {deletingId === pl.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                        </Button>
+                        {isSuperAdmin ? (
+                          <>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleEditProductLine(pl)}
+                              disabled={isSaving || deletingId !== null}
+                              title="Edit"
+                              className="hover:bg-[#f0ede8]"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => requestDelete(pl)}
+                              disabled={deletingId === pl.id}
+                              title="Delete"
+                            >
+                              {deletingId === pl.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] text-[#78746e] border-[#e7e4df]">
+                            Read-only
+                          </Badge>
+                        )}
                       </div>
                     </td>
                   </tr>

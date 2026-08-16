@@ -7,6 +7,7 @@ interface Params {
   params: Promise<{ id: string }>
 }
 
+<<<<<<< HEAD
 type BaseProduct = Awaited<ReturnType<typeof prisma.product.findUnique>> & NonNullable<any>
 
 function parseProduct(p: any) {
@@ -22,6 +23,27 @@ function parseProduct(p: any) {
       })
     : []
   return { ...p, variantOptions, productVariants }
+=======
+function parseCategories(raw: string | null | undefined): any[] | null {
+  if (!raw) return null
+  if (raw === '{}') return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed
+    if (parsed && typeof parsed === 'object') return []
+    return []
+  } catch {
+    return []
+  }
+}
+
+function parseProductLine(pl: any) {
+  if (!pl) return pl
+  return {
+    ...pl,
+    categories: parseCategories(pl.categories),
+  }
+>>>>>>> 82a9e5e369f08e2d34aad73619dcf89a4e6b59a4
 }
 
 export async function GET(request: NextRequest, { params }: Params) {
@@ -54,8 +76,21 @@ export async function GET(request: NextRequest, { params }: Params) {
     if (!product) {
       return createErrorResponse('Product not found', 404)
     }
+<<<<<<< HEAD
     if (!adminUser && !(product as any).isActive === false) {
       return createErrorResponse('Product not found', 404)
+=======
+    
+    // Parse JSON strings back to objects
+    const parsedProduct = {
+      ...product,
+      variantOptions: product.variantOptions ? JSON.parse(product.variantOptions) : null,
+      productLine: parseProductLine(product.productLine),
+      productVariants: product.productVariants.map(variant => ({
+        ...variant,
+        variants: JSON.parse(variant.variants)
+      }))
+>>>>>>> 82a9e5e369f08e2d34aad73619dcf89a4e6b59a4
     }
 
     return createResponse(parseProduct(product))
@@ -76,6 +111,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       return createErrorResponse('Invalid product id', 400)
     }
     const body = await request.json()
+<<<<<<< HEAD
 
     const existing = await prisma.product.findUnique({ where: { id: parsed } })
     if (!existing) {
@@ -126,6 +162,36 @@ export async function PUT(request: NextRequest, { params }: Params) {
             })),
           })
         }
+=======
+    
+    const data: any = {}
+    if (body.productLineId !== undefined) data.productLineId = body.productLineId != null ? Number(body.productLineId) : null
+    if (body.name != null) data.name = String(body.name)
+    if (body.category != null) data.category = String(body.category)
+    if (body.price != null) data.price = Number(body.price)
+    if (body.stock != null) data.stock = Number(body.stock)
+    if (body.status != null) data.status = String(body.status)
+    if (body.description != null) data.description = String(body.description)
+    if (body.imageUrl != null) data.imageUrl = String(body.imageUrl)
+    if (body.sku !== undefined) data.sku = body.sku && body.sku !== "" ? String(body.sku) : null
+    if (body.reorderPoint !== undefined) data.reorderPoint = body.reorderPoint && body.reorderPoint !== "" ? Number(body.reorderPoint) : null
+    if (body.hasVariants != null) data.hasVariants = Boolean(body.hasVariants)
+    if (body.variantOptions !== undefined) data.variantOptions = body.variantOptions ? JSON.stringify(body.variantOptions) : null
+    if (body.isBestseller != null) data.isBestseller = Boolean(body.isBestseller)
+    if (body.isActive != null) data.isActive = Boolean(body.isActive)
+    if (body.sortOrder != null) data.sortOrder = Number(body.sortOrder)
+    
+    const product = await prisma.product.update({
+      where: { id: parseInt(id) },
+      data,
+      include: {
+        productLine: true,
+        productVariants: true,
+        batches: true,
+        reviews: true,
+        collectionItems: { include: { collection: true } },
+        inventoryTransactions: true
+>>>>>>> 82a9e5e369f08e2d34aad73619dcf89a4e6b59a4
       }
 
       if (Array.isArray(body.batches)) {
@@ -159,8 +225,24 @@ export async function PUT(request: NextRequest, { params }: Params) {
         },
       })
     })
+<<<<<<< HEAD
 
     return createResponse(parseProduct(result))
+=======
+    
+    // Parse JSON strings back to objects
+    const parsedProduct = {
+      ...product,
+      variantOptions: product.variantOptions ? JSON.parse(product.variantOptions) : null,
+      productLine: parseProductLine(product.productLine),
+      productVariants: product.productVariants.map(variant => ({
+        ...variant,
+        variants: JSON.parse(variant.variants)
+      }))
+    }
+    
+    return createResponse(parsedProduct)
+>>>>>>> 82a9e5e369f08e2d34aad73619dcf89a4e6b59a4
   } catch (error) {
     return handleApiError(error)
   }

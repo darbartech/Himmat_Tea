@@ -8,23 +8,23 @@ datasource db {
 }
 
 model ProductLine {
-  id           Int       @id @default(autoincrement())
-  slug         String    @unique
-  name         String
-  description  String
-  heroHeadline String?
-  heroImage    String?
-  color        String?
-  categories   String?
-  ctaTitle     String?
+  id             Int       @id @default(autoincrement())
+  slug           String    @unique
+  name           String
+  description    String
+  heroHeadline   String?
+  heroImage      String?
+  color          String?
+  categories     String?
+  ctaTitle       String?
   ctaDescription String?
-  ctaLinkText  String?
-  ctaLink      String?
-  isActive     Boolean   @default(true)
-  sortOrder    Int       @default(0)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @default(now()) @updatedAt
-  products     Product[]
+  ctaLinkText    String?
+  ctaLink        String?
+  isActive       Boolean   @default(true)
+  sortOrder      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
+  products       Product[]
 }
 
 model Product {

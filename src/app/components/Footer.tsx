@@ -6,15 +6,17 @@ import { ArrowRight, Instagram, Facebook, Youtube } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { BRAND } from "@/config/brand";
 import Image from "next/image";
+import { useStore } from "@/context/StoreContext";
 
 export default function Footer() {
   const { t } = useTranslation();
+  const { productLines } = useStore();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
   const links = {
     [t("footer.shop")]: [
-      ...BRAND.productLines.map(pl => ({ label: pl.name, href: `/${pl.slug}` })),
+      ...productLines.filter(pl => pl.isActive).map(pl => ({ label: pl.name, href: `/${pl.slug}` })),
       { label: t("footer.subscriptions"), href: "/subscribe" },
     ],
     [t("footer.company")]: [

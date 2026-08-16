@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import OrderConfirmed from '@/app/pages/OrderConfirmed';
+import OrderConfirmed from "@/app/pages/OrderConfirmed";
 
 export default function OrderConfirmedPage() {
   return <OrderConfirmed />;

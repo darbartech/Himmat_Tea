@@ -1,9 +1,11 @@
 import { z } from 'zod';
 
-export const forgotPasswordSchema = z.object({
+export type TFunc = (key: string, params?: Record<string, string | number>) => string;
+
+export const createForgotPasswordSchema = (t: TFunc) => z.object({
   email: z.string()
-    .email('Please enter a valid email address')
-    .min(1, 'Email is required')
+    .email(t('validation.email.invalid'))
+    .min(1, t('validation.email.required'))
 });
 
-export type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
+export type ForgotPasswordData = z.infer<ReturnType<typeof createForgotPasswordSchema>>;

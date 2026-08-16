@@ -163,6 +163,22 @@ function noteTs(note: InternalNote): string {
 const fmt = (n: number) =>
   n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+function isNewOrder(order: Order): boolean {
+  const processedStatuses = new Set(["DELIVERED", "CANCELLED", "REFUNDED", "SHIPPED", "Delivered", "Cancelled", "Refunded", "Shipped"]);
+  if (processedStatuses.has(order.status)) return false;
+  const created = new Date(order.orderDate || order.createdAt || Date.now());
+  const ageHours = (Date.now() - created.getTime()) / (1000 * 60 * 60);
+  return ageHours < 48;
+}
+
+function isNewCustomerOrder(order: Order): boolean {
+  const customerId = Number(order.customerId);
+  if (!customerId || isNaN(customerId)) return false;
+  const created = new Date(order.orderDate || order.createdAt || Date.now());
+  const ageHours = (Date.now() - created.getTime()) / (1000 * 60 * 60);
+  return ageHours < 168;
+}
+
 function numberToWords(num: number): string {
   const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
   const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
@@ -1297,13 +1313,13 @@ export default function Orders() {
                     )}
                   </button>
                 </th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">{t("dashboard.orders.orderId")}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t("dashboard.orders.orderNumber")}</th>
                 <th className="px-6 py-4 font-medium whitespace-nowrap">{t("dashboard.orders.customer")}</th>
                 <th className="px-6 py-4 font-medium whitespace-nowrap">{t("dashboard.orders.date")}</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">{t("dashboard.products.products")}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t("dashboard.orders.product")}</th>
                 <th className="px-6 py-4 font-medium whitespace-nowrap">{t("dashboard.orders.totalAmount")}</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">{t("dashboard.products.status")}</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">{t("dashboard.settings.billing")}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t("dashboard.orders.orderStatus")}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t("dashboard.orders.paymentStatus")}</th>
                 <th className="px-6 py-4 font-medium text-right whitespace-nowrap">{t("dashboard.orders.action")}</th>
               </tr>
             </thead>
@@ -1329,10 +1345,28 @@ export default function Orders() {
                         )}
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-[#1c1917] font-mono tracking-wide">{order.orderNumber || order.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-[#1c1917]">{order.customerName}</p>
-                      <p className="text-xs text-[#78746e]">{order.customerEmail}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-[#1c1917] font-mono tracking-wide">{order.orderNumber || order.id}</span>
+                        {isNewOrder(order) && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 animate-pulse">
+                            New Order
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-[#1c1917]">{order.customerName}</p>
+                          {isNewCustomerOrder(order) && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide uppercase bg-sky-100 text-sky-800 border border-sky-200">
+                              New Customer
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-[#78746e]">{order.customerEmail}</p>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-[#78746e]">
                       {new Date(order.orderDate).toLocaleDateString()}

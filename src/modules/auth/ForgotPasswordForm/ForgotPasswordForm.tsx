@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Mail } from 'lucide-react';
-import { forgotPasswordSchema, ForgotPasswordData } from './validation';
+import { createForgotPasswordSchema, ForgotPasswordData } from './validation';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ForgotPasswordFormProps {
   className?: string;
@@ -17,6 +18,9 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const forgotPasswordSchema = useMemo(() => createForgotPasswordSchema(t), [t]);
 
   const {
     register,
@@ -41,7 +45,15 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || result.message || 'Something went wrong. Please try again.');
+        const errorCode = result.rawError || result.error || result.message;
+        const isAccountNotFound =
+          response.status === 404 ||
+          errorCode === 'AUTH_EMAIL_NOT_FOUND' ||
+          (typeof errorCode === 'string' && errorCode.includes('No account found'));
+        if (isAccountNotFound) {
+          throw new Error(t('auth.forgotPassword.accountNotFound'));
+        }
+        throw new Error(t('auth.forgotPassword.genericError'));
       }
 
       router.push(`/verify-reset?email=${encodeURIComponent(data.email.trim())}`);
@@ -49,7 +61,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
       setApiError(
         error instanceof Error
           ? error.message
-          : 'Something went wrong. Please try again.'
+          : t('auth.forgotPassword.genericError')
       );
     } finally {
       setIsLoading(false);
@@ -64,7 +76,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
             htmlFor="forgot-email"
             className="block text-sm font-medium text-[#1c1917] mb-1.5"
           >
-            Email Address
+            {t('auth.forgotPassword.emailLabel')}
           </label>
           <div className="relative">
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e] aria-hidden" />
@@ -75,7 +87,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
               aria-describedby={errors.email ? 'forgot-email-error' : undefined}
               aria-invalid={!!errors.email}
               {...register('email')}
-              placeholder="your@email.com"
+              placeholder={t('auth.forgotPassword.emailPlaceholder')}
               className={`w-full pl-12 pr-4 py-3 rounded-xl border transition-colors text-sm focus:outline-none
                 ${errors.email
                   ? 'border-red-300 bg-red-50 focus:border-red-500'
@@ -114,11 +126,11 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
           {isLoading ? (
             <>
               <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
-              Sending Code...
+              {t('auth.forgotPassword.submitting')}
             </>
           ) : (
             <>
-              Send Reset Code
+              {t('auth.forgotPassword.submit')}
               <ArrowRight className="h-5 w-5" />
             </>
           )}

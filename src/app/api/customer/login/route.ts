@@ -4,6 +4,7 @@ import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-u
 import { setAuthCookie } from '@/lib/auth'
 import { rateLimitAuth } from '@/lib/rate-limit'
 import { normalizeEmail } from '@/lib/email-validation'
+import { USER_ERRORS } from '@/lib/error-messages'
 import bcrypt from 'bcryptjs'
 
 const CUSTOMER_USER_SELECT = {
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
   try {
     const rl = rateLimitAuth(request)
     if (!rl.allowed) {
-      return createErrorResponse(rl.error || 'Too many requests. Please try again later.', 429)
+      return createErrorResponse(USER_ERRORS.AUTH.TOO_MANY_ATTEMPTS, 429)
     }
 
     const body = await request.json()
@@ -36,18 +37,22 @@ export async function POST(request: NextRequest) {
     })
 
     if (!customer) {
-      return createErrorResponse('Invalid credentials', 401)
+      return createErrorResponse(USER_ERRORS.AUTH.EMAIL_NOT_FOUND, 401)
+    }
+
+    if (!customer.emailVerified) {
+      return createErrorResponse('Please verify your email address before logging in.', 403)
     }
 
     let passwordMatch = false
     try {
       passwordMatch = await bcrypt.compare(password, customer.passwordHash ?? '')
     } catch {
-      return createErrorResponse('Invalid credentials', 401)
+      return createErrorResponse(USER_ERRORS.AUTH.INVALID_CREDENTIALS, 401)
     }
 
     if (!passwordMatch) {
-      return createErrorResponse('Invalid credentials', 401)
+      return createErrorResponse(USER_ERRORS.AUTH.PASSWORD_MISMATCH, 401)
     }
 
     await setAuthCookie({

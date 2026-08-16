@@ -107,7 +107,7 @@ const downloadReport = (orders: any[]) => {
     return order.paymentStatus || 'Unpaid';
   };
 
-  const headers = ["Order ID", "Customer Name", "Email", "Phone", "Date", "Total (₹)", "Status", "Payment Status"];
+  const headers = ["Order Number", "Customer Name", "Email", "Phone", "Order Date", "Total (₹)", "Order Status", "Payment Status"];
   const rows = orders.map(order => [
     order.id,
     order.customerName,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -68,6 +68,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { orders, addOrder, products } = useStore();
   const [liveNotifications, setLiveNotifications] = useState<LiveNotification[]>([]);
   const router = useRouter();
+
+  const newOrdersCount = useMemo(() => {
+    if (!Array.isArray(orders)) return 0;
+    const newStatuses = new Set(["AWAITING_PAYMENT", "CONFIRMED", "Pending", "Processing", "PROCESSING"]);
+    return orders.filter((o: any) => {
+      const created = new Date(o.createdAt || o.orderDate || Date.now());
+      const ageHours = (Date.now() - created.getTime()) / (1000 * 60 * 60);
+      return newStatuses.has(o.status) && ageHours < 48;
+    }).length;
+  }, [orders]);
 
   useEffect(() => {
     let cancelled = false;
@@ -183,7 +193,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       name: t("dashboard.nav.orders"), 
       href: "/himmat_admin_8526/dashboard/orders", 
       icon: ShoppingBag,
-      badge: 5
+      badge: newOrdersCount > 0 ? newOrdersCount : undefined
     },
     { 
       name: t("dashboard.nav.purchaseOrders"), 
