@@ -32,24 +32,26 @@ export async function POST(request: NextRequest) {
       select: { id: true, name: true, email: true }
     })
 
-    if (customer) {
-      await prisma.passwordResetToken.deleteMany({
-        where: { customerId: customer.id, usedAt: null }
-      })
-
-      const otp = generateOtp()
-      const otpHash = await bcrypt.hash(otp, 12)
-
-      await prisma.passwordResetToken.create({
-        data: {
-          customerId: customer.id,
-          otpHash,
-          expiresAt: new Date(Date.now() + RESET_TTL_MINUTES * 60_000)
-        }
-      })
-
-      await sendPasswordResetEmail(customer.email, otp, RESET_TTL_MINUTES, customer.name)
+    if (!customer) {
+      return createErrorResponse('AUTH_EMAIL_NOT_FOUND', 404)
     }
+
+    await prisma.passwordResetToken.deleteMany({
+      where: { customerId: customer.id, usedAt: null }
+    })
+
+    const otp = generateOtp()
+    const otpHash = await bcrypt.hash(otp, 12)
+
+    await prisma.passwordResetToken.create({
+      data: {
+        customerId: customer.id,
+        otpHash,
+        expiresAt: new Date(Date.now() + RESET_TTL_MINUTES * 60_000)
+      }
+    })
+
+    await sendPasswordResetEmail(customer.email, otp, RESET_TTL_MINUTES, customer.name)
 
     return createResponse({ success: true })
   } catch (error) {

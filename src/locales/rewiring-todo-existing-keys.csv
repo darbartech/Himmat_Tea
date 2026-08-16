@@ -1,0 +1,122 @@
+Hardcoded Text Found In Code,Existing Translation Key(s) To Use Instead,Files Containing This Hardcoded Text
+Account Active,dashboard.adminUsers.accountActive,src/app/pages/dashboard/AdminUsers.tsx
+Action,dashboard.inventory.action,src/app/pages/dashboard/Inventory.tsx
+Actions,dashboard.orders.action; dashboard.home.action,src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/Products.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+Active,dashboard.customers.active; dashboard.home.active; dashboard.inventory.active; dashboard.coupons.active,src/app/pages/dashboard/Coupons.tsx; src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/ProductLines.tsx
+Add,dashboard.inventory.add,src/app/pages/dashboard/PurchaseOrders.tsx
+Add Batch...,dashboard.inventory.addBatch,src/app/pages/dashboard/Inventory.tsx
+Address,dashboard.settings.address; checkout.fields.address; auth.signup.addressLabel,src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/Customers.tsx
+Admin,dashboard.adminUsers.admin,src/app/pages/dashboard/AdminUsers.tsx; src/app/pages/dashboard/DashboardLayout.tsx
+All Categories,dashboard.products.allCategories; dashboard.inventory.allCategories; dashboard.blog.allCategories,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/Inventory.tsx
+All products,dashboard.inventory.allProducts,src/app/pages/dashboard/Inventory.tsx
+Amount,dashboard.invoice.amount,src/app/pages/dashboard/Orders.tsx
+Approved,dashboard.reviews.approved,src/app/pages/dashboard/Reviews.tsx
+Batch Management,dashboard.inventory.batchManagement,src/app/pages/dashboard/Inventory.tsx
+Batch Number,dashboard.inventory.batchNumber,src/app/pages/dashboard/Inventory.tsx
+Blog post title,dashboard.blog.enterTitle,src/app/pages/dashboard/Blog.tsx
+Brief description of the post,dashboard.blog.enterExcerpt,src/app/pages/dashboard/Blog.tsx
+Cancel,dashboard.products.cancel; dashboard.adminUsers.cancel; dashboard.inventory.cancel; dashboard.purchaseOrders.cancel; dashboard.coupons.cancel; dashboard.blog.cancel,src/app/pages/dashboard/AdminUsers.tsx; src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/BrewingGuidesAdmin.tsx; src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/Coupons.tsx; src/app/pages/dashboard/Customers.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/Products.tsx; src/app/pages/dashboard/PurchaseOrders.tsx; src/app/pages/dashboard/Reviews.tsx
+Category,dashboard.products.category; dashboard.products.categoryLabel; dashboard.inventory.category; dashboard.blog.category,src/app/pages/dashboard/Blog.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+Content (JSON),dashboard.blog.contentJSON,src/app/pages/dashboard/Blog.tsx
+Copy code,dashboard.coupons.copyCode,src/app/pages/dashboard/Coupons.tsx
+Cost Price,dashboard.inventory.costPrice,src/app/pages/dashboard/Inventory.tsx
+Coupon Code,dashboard.coupons.couponCode,src/app/pages/dashboard/Coupons.tsx
+Create and manage discount coupons,dashboard.coupons.subtitle,src/app/pages/dashboard/Coupons.tsx
+Currency,dashboard.settings.currency; dashboard.settings.storeInformation.currency,src/app/pages/dashboard/Settings.tsx
+Customer,dashboard.customers.customer,src/app/pages/dashboard/Analytics.tsx; src/app/pages/dashboard/Orders.tsx
+Customer Name,dashboard.orders.customer; dashboard.home.customer,src/app/pages/dashboard/Orders.tsx
+Date,dashboard.invoice.date,src/app/pages/dashboard/Analytics.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+Delete,dashboard.products.delete; dashboard.reviews.delete,src/app/pages/dashboard/Coupons.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+Delete Admin User?,dashboard.adminUsers.deleteAdminUser,src/app/pages/dashboard/AdminUsers.tsx
+Delete Post?,dashboard.blog.deletePost,src/app/pages/dashboard/Blog.tsx
+Discount Type,dashboard.coupons.discountType,src/app/pages/dashboard/Coupons.tsx
+Edit,dashboard.products.edit; dashboard.adminUsers.edit; dashboard.blog.edit,src/app/pages/dashboard/Coupons.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+Email,dashboard.customers.email; dashboard.invoice.email; dashboard.settings.storeInformation.email; dashboard.adminUsers.email,src/app/pages/Contact.tsx; src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/AdminUsers.tsx; src/app/pages/dashboard/Customers.tsx; src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/Settings.tsx
+Email Notifications,dashboard.settings.notifications.emailNotifications,src/app/pages/dashboard/Settings.tsx
+English,dashboard.settings.localization.languages.english,src/app/pages/dashboard/Settings.tsx
+Enter code,auth.verifyResetPage.eyebrow,src/app/pages/Cart.tsx
+Enter your password,auth.login.passwordPlaceholder,src/app/pages/Login.tsx
+Expected Delivery,dashboard.purchaseOrders.expectedDelivery,src/app/pages/dashboard/PurchaseOrders.tsx
+Expired,dashboard.inventory.expired; dashboard.coupons.expired,src/app/pages/dashboard/Coupons.tsx
+Expiry,dashboard.inventory.expiry,src/app/pages/dashboard/Inventory.tsx
+Expiry Date (Optional),dashboard.inventory.expiryDateOptional,src/app/pages/dashboard/Inventory.tsx
+FAQ,footer.faq,src/app/pages/Contact.tsx
+Fixed Amount,dashboard.coupons.fixedAmount,src/app/pages/dashboard/Coupons.tsx
+Full Name,checkout.fields.fullName; auth.signup.fullNameLabel,src/app/pages/CustomerAccount.tsx; src/app/pages/dashboard/Customers.tsx
+Happy Customers,testimonials.stat.customersLabel,src/app/pages/Login.tsx
+Inactive,dashboard.coupons.inactive,src/app/pages/dashboard/Coupons.tsx
+Items,dashboard.purchaseOrders.items,src/app/pages/dashboard/PurchaseOrders.tsx
+John Doe,dashboard.customers.fullNamePlaceholder; auth.signup.fullNamePlaceholder,src/app/pages/dashboard/Customers.tsx
+Language,dashboard.settings.localization.language,src/app/pages/dashboard/Settings.tsx
+Low Stock Alerts,dashboard.settings.lowStock,src/app/pages/dashboard/Settings.tsx
+Manage admin accounts and permissions,dashboard.adminUsers.subtitle,src/app/pages/dashboard/AdminUsers.tsx
+Manage customer reviews and feedback,dashboard.reviews.subtitle,src/app/pages/dashboard/Reviews.tsx
+Manage your customer relationships,dashboard.customers.subtitle,src/app/pages/dashboard/Customers.tsx
+Manage your supplier purchase orders,dashboard.purchaseOrders.subtitle,src/app/pages/dashboard/PurchaseOrders.tsx
+Manage your tea blog content,dashboard.blog.subtitle,src/app/pages/dashboard/Blog.tsx
+No coupons yet. Create your first one!,dashboard.coupons.noCouponsYet,src/app/pages/dashboard/Coupons.tsx
+No reviews found,dashboard.reviews.noReviewsFound,src/app/pages/dashboard/Reviews.tsx
+Notifications,dashboard.notifications; dashboard.settings.notifications; dashboard.settings.tabs.notifications,src/app/pages/dashboard/Settings.tsx
+Order Date,dashboard.orders.date; dashboard.home.date; dashboard.purchaseOrders.orderDate,src/app/pages/dashboard/PurchaseOrders.tsx
+Order ID,dashboard.invoice.orderId,src/app/pages/dashboard/Analytics.tsx
+Order Notifications,dashboard.settings.orderNotifs; dashboard.settings.notifications.orderNotifications,src/app/pages/dashboard/Settings.tsx
+Order Number,dashboard.orders.orderId; dashboard.orders.orderNumber; dashboard.home.orderId,src/app/pages/dashboard/Orders.tsx
+Order Status,dashboard.orders.orderStatus; dashboard.home.orderStatus,src/app/pages/dashboard/Analytics.tsx
+Orders,dashboard.nav.orders; dashboard.orders.title; dashboard.customers.orders,src/app/pages/dashboard/Customers.tsx
+PO Number,dashboard.purchaseOrders.poNumber,src/app/pages/dashboard/PurchaseOrders.tsx
+Pending,dashboard.orders.pending; dashboard.home.pending; dashboard.status.pending; dashboard.reviews.pending,src/app/pages/dashboard/Reviews.tsx
+Percentage,dashboard.coupons.percentage,src/app/pages/dashboard/Coupons.tsx
+Phone,dashboard.customers.phone; dashboard.invoice.phone; dashboard.settings.storeInformation.phone,src/app/pages/dashboard/Customers.tsx; src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/Settings.tsx
+Phone Number,dashboard.settings.phoneNumber; checkout.fields.phoneNumber; auth.signup.phoneLabel,src/app/pages/CustomerAccount.tsx
+Please start the password reset process again.,auth.verifyResetPage.formSubtitleFallback,src/app/pages/VerifyReset.tsx
+Price,dashboard.products.price; dashboard.inventory.price,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+Product,dashboard.inventory.product,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/Products.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+Product Name,dashboard.products.productName,src/app/pages/dashboard/Products.tsx
+Qty,dashboard.invoice.qty,src/app/pages/dashboard/Orders.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+Quantity,dashboard.inventory.quantity; dashboard.purchaseOrders.quantity,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+"Quantity (positive to add, negative to remove)",dashboard.inventory.quantityPositiveAddNegativeRemove,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+Read Time,dashboard.blog.readTime,src/app/pages/dashboard/Blog.tsx
+Reason,dashboard.inventory.reason,src/app/pages/dashboard/Customers.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+Received,dashboard.inventory.received; dashboard.purchaseOrders.received,src/app/pages/dashboard/Inventory.tsx
+Received Date,dashboard.inventory.receivedDate,src/app/pages/dashboard/Inventory.tsx
+Recent Orders,dashboard.home.recentOrders,src/app/pages/dashboard/Analytics.tsx
+Rejected,dashboard.reviews.rejected,src/app/pages/dashboard/Reviews.tsx
+Role,dashboard.adminUsers.role; dashboard.adminUsers.roleLabel,src/app/pages/dashboard/AdminUsers.tsx
+SKU,dashboard.products.sku,src/app/pages/dashboard/Products.tsx
+Search admin users...,dashboard.adminUsers.searchAdminUsers,src/app/pages/dashboard/AdminUsers.tsx
+Search posts...,dashboard.blog.searchPosts,src/app/pages/dashboard/Blog.tsx
+Search products...,dashboard.products.searchProducts; dashboard.inventory.searchProducts,src/app/pages/dashboard/CollectionsAdmin.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+Select product,dashboard.purchaseOrders.selectProduct,src/app/pages/dashboard/PurchaseOrders.tsx
+Sign in,auth.login.submit; auth.page.formTitleLogin; auth.page.tabSignIn; auth.page.switchToLogin; auth.forgotPage.signIn,src/app/pages/Login.tsx
+Signing in...,auth.login.submitting,src/app/pages/Login.tsx
+Slug (auto-generated),dashboard.blog.slug,src/app/pages/dashboard/Blog.tsx
+Status,dashboard.products.status; dashboard.products.statusLabel; dashboard.inventory.status; dashboard.purchaseOrders.status,src/app/pages/dashboard/Analytics.tsx; src/app/pages/dashboard/FAQs.tsx; src/app/pages/dashboard/HeroVisuals.tsx; src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/ProductLines.tsx; src/app/pages/dashboard/Products.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+Stock,dashboard.products.stock; dashboard.inventory.stock,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/Products.tsx
+Stock Status Overview,dashboard.inventory.stockStatusOverview,src/app/pages/dashboard/Inventory.tsx
+Store Information,dashboard.settings.storeInfo; dashboard.settings.storeInformation.title,src/app/pages/dashboard/Settings.tsx
+Store Name,dashboard.settings.storeName; dashboard.settings.storeInformation.storeName,src/app/pages/dashboard/Settings.tsx
+Subtotal,dashboard.invoice.subtotal,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/OrderConfirmed.tsx; src/app/pages/dashboard/Orders.tsx
+Super Admin,dashboard.adminUsers.superAdmin,src/app/pages/dashboard/AdminUsers.tsx
+Supplier,dashboard.inventory.supplier; dashboard.purchaseOrders.supplier,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+Supplier (Optional),dashboard.inventory.supplierOptional,src/app/pages/dashboard/Inventory.tsx
+Supplier name,dashboard.purchaseOrders.enterSupplier,src/app/pages/dashboard/Inventory.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+Tax,dashboard.invoice.tax,src/app/pages/OrderConfirmed.tsx
+Tax Rate (%),dashboard.settings.storeInformation.taxRate,src/app/pages/dashboard/Settings.tsx
+Time,dashboard.invoice.time,src/app/pages/dashboard/BrewingGuidesAdmin.tsx
+Time Zone,dashboard.settings.localization.timeZone,src/app/pages/dashboard/Settings.tsx
+Top selling products,dashboard.home.topSellingProducts,src/app/pages/dashboard/Analytics.tsx
+Total,dashboard.invoice.total; dashboard.purchaseOrders.total,src/app/pages/Cart.tsx; src/app/pages/Checkout.tsx; src/app/pages/CustomerAccount.tsx; src/app/pages/OrderConfirmed.tsx; src/app/pages/dashboard/Analytics.tsx; src/app/pages/dashboard/PurchaseOrders.tsx
+Total Spent,dashboard.customers.totalSpent,src/app/pages/dashboard/Customers.tsx
+Track and manage your tea inventory,dashboard.inventory.subtitle,src/app/pages/dashboard/Inventory.tsx
+Track inventory batches with expiry dates,dashboard.inventory.trackInventoryBatches,src/app/pages/dashboard/Inventory.tsx
+UTC,dashboard.settings.localization.timeZones.utc,src/app/pages/dashboard/Settings.tsx
+Unit Price,dashboard.purchaseOrders.unitPrice,src/app/pages/dashboard/Orders.tsx
+Usage,dashboard.coupons.usage,src/app/pages/dashboard/Coupons.tsx
+Usage Limit,dashboard.coupons.usageLimit,src/app/pages/dashboard/Coupons.tsx
+Username,dashboard.adminUsers.username,src/app/pages/dashboard/AdminUsers.tsx
+Valid From,dashboard.coupons.validFrom; dashboard.coupons.validFromLabel,src/app/pages/dashboard/Coupons.tsx
+Valid To,dashboard.coupons.validTo; dashboard.coupons.validToLabel,src/app/pages/dashboard/Coupons.tsx
+Value,dashboard.inventory.value,src/app/pages/dashboard/Inventory.tsx
+Wholesale,nav.wholesale,src/app/pages/Contact.tsx
+john@example.com,dashboard.customers.emailPlaceholder; auth.signup.emailPlaceholder,src/app/pages/dashboard/Customers.tsx
+post-slug,dashboard.blog.enterSlug,src/app/pages/dashboard/Blog.tsx

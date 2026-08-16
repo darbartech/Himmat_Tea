@@ -45,7 +45,15 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || result.message || t('auth.forgotPassword.genericError'));
+        const errorCode = result.rawError || result.error || result.message;
+        const isAccountNotFound =
+          response.status === 404 ||
+          errorCode === 'AUTH_EMAIL_NOT_FOUND' ||
+          (typeof errorCode === 'string' && errorCode.includes('No account found'));
+        if (isAccountNotFound) {
+          throw new Error(t('auth.forgotPassword.accountNotFound'));
+        }
+        throw new Error(t('auth.forgotPassword.genericError'));
       }
 
       router.push(`/verify-reset?email=${encodeURIComponent(data.email.trim())}`);
