@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Lock, Mail, MailCheck, MapPin, Phone, User, Eye, EyeOff } from 'lucide-react';
-import { signupFormSchema, SignupFormData } from './validation';
+import { createSignupFormSchema, SignupFormData } from './validation';
 import { useAuth } from '@/context/AuthContext';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/app/components/ui/input-otp';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface SignupFormProps {
   onSuccess?: () => void;
@@ -23,6 +24,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
 }) => {
   const router = useRouter();
   const { initiateCustomerSignup, verifyCustomerSignup, resendSignupOtp } = useAuth();
+  const { t } = useTranslation();
   const [step, setStep] = useState<'details' | 'otp'>('details');
   const [pendingEmail, setPendingEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +34,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   const [otp, setOtp] = useState('');
   const [resendIn, setResendIn] = useState(0);
   const [resending, setResending] = useState(false);
+
+  const signupFormSchema = useMemo(() => createSignupFormSchema(t), [t]);
 
   const {
     register,
@@ -70,10 +74,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     if (/[0-9]/.test(pwd)) strength++;
     if (/[@$!%*?&]/.test(pwd)) strength++;
 
-    if (strength <= 2) return { color: 'bg-red-500', label: 'Weak' };
-    if (strength <= 3) return { color: 'bg-yellow-500', label: 'Fair' };
-    if (strength <= 4) return { color: 'bg-blue-500', label: 'Good' };
-    return { color: 'bg-green-500', label: 'Strong' };
+    if (strength <= 2) return { color: 'bg-red-500', label: t('auth.signup.strengthWeak') };
+    if (strength <= 3) return { color: 'bg-yellow-500', label: t('auth.signup.strengthFair') };
+    if (strength <= 4) return { color: 'bg-blue-500', label: t('auth.signup.strengthGood') };
+    return { color: 'bg-green-500', label: t('auth.signup.strengthStrong') };
   };
 
   const passwordStrength = getPasswordStrength(password);
@@ -92,7 +96,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
       );
 
       if (!result.success) {
-        throw new Error(result.error || 'Signup failed');
+        throw new Error(result.error || t('auth.signup.genericError'));
       }
 
       setPendingEmail(data.email.trim().toLowerCase());
@@ -101,7 +105,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
       setStep('otp');
     } catch (error) {
       setApiError(
-        error instanceof Error ? error.message : 'Signup failed. Please try again.'
+        error instanceof Error ? error.message : t('auth.signup.genericError')
       );
     } finally {
       setIsLoading(false);
@@ -118,7 +122,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
       const result = await verifyCustomerSignup(pendingEmail, code);
 
       if (!result.success) {
-        throw new Error(result.error || 'Invalid verification code');
+        throw new Error(result.error || t('auth.signup.otpInvalidCode'));
       }
 
       reset();
@@ -140,7 +144,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     } catch (error) {
       setOtp('');
       setApiError(
-        error instanceof Error ? error.message : 'Invalid verification code. Please try again.'
+        error instanceof Error ? error.message : t('auth.signup.otpInvalidCodeRetry')
       );
     } finally {
       setIsLoading(false);
@@ -156,13 +160,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     try {
       const result = await resendSignupOtp(pendingEmail);
       if (!result.success) {
-        throw new Error(result.error || 'Could not resend the code. Please try again.');
+        throw new Error(result.error || t('auth.signup.otpResendError'));
       }
       setOtp('');
       setResendIn(60);
     } catch (error) {
       setApiError(
-        error instanceof Error ? error.message : 'Could not resend the code. Please try again.'
+        error instanceof Error ? error.message : t('auth.signup.otpResendError')
       );
     } finally {
       setResending(false);
@@ -183,10 +187,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#2d5a3d]/10">
               <MailCheck className="h-7 w-7 text-[#2d5a3d]" />
             </div>
-            <h3 className="text-lg font-semibold text-[#1c1917]">Verify your email</h3>
+            <h3 className="text-lg font-semibold text-[#1c1917]">{t('auth.signup.otpTitle')}</h3>
             <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[#6d6a63]">
-              We sent a 6-digit code to <span className="font-semibold text-[#1c1917]">{pendingEmail}</span>.
-              Enter it below to complete your registration.
+              {t('auth.signup.otpSubtitlePrefix')} <span className="font-semibold text-[#1c1917]">{pendingEmail}</span>.
+              {t('auth.signup.otpSubtitleSuffix')}
             </p>
           </div>
 
@@ -235,11 +239,11 @@ export const SignupForm: React.FC<SignupFormProps> = ({
               {isLoading ? (
                 <>
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  <span>Verifying...</span>
+                  <span>{t('auth.signup.otpVerifying')}</span>
                 </>
               ) : (
                 <>
-                  <span>Verify & Create Account</span>
+                  <span>{t('auth.signup.otpVerifyButton')}</span>
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
@@ -247,17 +251,17 @@ export const SignupForm: React.FC<SignupFormProps> = ({
 
             <div className="text-center text-sm text-[#6d6a63]">
               {resendIn > 0 ? (
-                <span>Resend code in {resendIn}s</span>
+                <span>{t('auth.signup.otpResendIn', { seconds: resendIn })}</span>
               ) : (
                 <>
-                  Didn&apos;t get it?{' '}
+                  {t('auth.signup.otpDidntGetIt')}{' '}
                   <button
                     type="button"
                     onClick={handleResend}
                     disabled={resending}
                     className="font-semibold text-[#2d5a3d] transition-opacity hover:underline disabled:opacity-50"
                   >
-                    {resending ? 'Sending...' : 'Resend code'}
+                    {resending ? t('auth.signup.otpSending') : t('auth.signup.otpResendCode')}
                   </button>
                 </>
               )}
@@ -271,7 +275,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-[#6d6a63] transition-colors hover:text-[#1c1917] disabled:opacity-50"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Edit your details
+                {t('auth.signup.otpEditDetails')}
               </button>
             </div>
           </form>
@@ -286,7 +290,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           <div className="space-y-1.5">
             <label htmlFor="signup-name" className="block text-sm font-medium text-[#1c1917]">
-              Full Name
+              {t('auth.signup.fullNameLabel')}
             </label>
             <div className="group relative">
               <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
@@ -297,7 +301,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                 aria-describedby={errors.name ? 'signup-name-error' : undefined}
                 aria-invalid={!!errors.name}
                 {...register('name')}
-                placeholder="John Doe"
+                placeholder={t('auth.signup.fullNamePlaceholder')}
                 className={`w-full rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-4 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
                   errors.name
                     ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
@@ -315,7 +319,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label htmlFor="signup-email" className="block text-sm font-medium text-[#1c1917]">
-                Email Address
+                {t('auth.signup.emailLabel')}
               </label>
               <div className="group relative">
                 <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
@@ -326,7 +330,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                   aria-describedby={errors.email ? 'signup-email-error' : undefined}
                   aria-invalid={!!errors.email}
                   {...register('email')}
-                  placeholder="john@example.com"
+                  placeholder={t('auth.signup.emailPlaceholder')}
                   className={`w-full rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-4 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
                     errors.email
                       ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
@@ -343,7 +347,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
 
             <div className="space-y-1.5">
               <label htmlFor="signup-phone" className="block text-sm font-medium text-[#1c1917]">
-                Phone Number
+                {t('auth.signup.phoneLabel')}
               </label>
               <div className="group relative">
                 <Phone className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
@@ -354,7 +358,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                   aria-describedby={errors.phone ? 'signup-phone-error' : undefined}
                   aria-invalid={!!errors.phone}
                   {...register('phone')}
-                  placeholder="+977 98XXXXXXXX"
+                  placeholder={t('auth.signup.phonePlaceholder')}
                   className={`w-full rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-4 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
                     errors.phone
                       ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
@@ -372,7 +376,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
 
           <div className="space-y-1.5">
             <label htmlFor="signup-password" className="block text-sm font-medium text-[#1c1917]">
-              Password
+              {t('auth.signup.passwordLabel')}
             </label>
             <div className="group relative">
               <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
@@ -383,7 +387,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                 aria-describedby={errors.password ? 'signup-password-error signup-password-strength' : 'signup-password-strength'}
                 aria-invalid={!!errors.password}
                 {...register('password')}
-                placeholder="Create a password"
+                placeholder={t('auth.signup.passwordPlaceholder')}
                 className={`w-full rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-11 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
                   errors.password
                     ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
@@ -394,7 +398,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a09b] transition-colors hover:text-[#2d5a3d] focus:outline-none focus:text-[#2d5a3d]"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? t('auth.signup.hidePassword') : t('auth.signup.showPassword')}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}
               </button>
@@ -420,7 +424,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
 
           <div className="space-y-1.5">
             <label htmlFor="signup-confirm-password" className="block text-sm font-medium text-[#1c1917]">
-              Confirm Password
+              {t('auth.signup.confirmPasswordLabel')}
             </label>
             <div className="group relative">
               <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
@@ -431,7 +435,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                 aria-describedby={errors.confirmPassword ? 'signup-confirm-password-error' : undefined}
                 aria-invalid={!!errors.confirmPassword}
                 {...register('confirmPassword')}
-                placeholder="Confirm your password"
+                placeholder={t('auth.signup.confirmPasswordPlaceholder')}
                 className={`w-full rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-11 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
                   errors.confirmPassword
                     ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
@@ -442,7 +446,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                 type="button"
                 onClick={() => setShowConfirmPassword((value) => !value)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a09b] transition-colors hover:text-[#2d5a3d] focus:outline-none focus:text-[#2d5a3d]"
-                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                aria-label={showConfirmPassword ? t('auth.signup.hideConfirmPassword') : t('auth.signup.showConfirmPassword')}
               >
                 {showConfirmPassword ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}
               </button>
@@ -456,7 +460,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
 
           <div className="space-y-1.5">
             <label htmlFor="signup-address" className="block text-sm font-medium text-[#1c1917]">
-              Address
+              {t('auth.signup.addressLabel')}
             </label>
             <div className="group relative">
               <MapPin className="pointer-events-none absolute left-3.5 top-3 h-4 w-4 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
@@ -466,7 +470,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                 aria-describedby={errors.address ? 'signup-address-error' : undefined}
                 aria-invalid={!!errors.address}
                 {...register('address')}
-                placeholder="Your delivery address"
+                placeholder={t('auth.signup.addressPlaceholder')}
                 rows={3}
                 className={`w-full resize-none rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-4 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
                   errors.address
@@ -495,13 +499,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({
             </div>
             <div className="text-sm">
               <label htmlFor="signup-agree-terms" className="cursor-pointer select-none text-[#6d6a63]">
-                I agree to the{' '}
+                {t('auth.signup.agreeToTermsPrefix')}{' '}
                 <Link href="/terms" className="font-semibold text-[#2d5a3d] hover:underline">
-                  Terms of Service
+                  {t('auth.signup.termsOfService')}
                 </Link>{' '}
-                and{' '}
+                {t('auth.signup.and')}{' '}
                 <Link href="/privacy-policy" className="font-semibold text-[#2d5a3d] hover:underline">
-                  Privacy Policy
+                  {t('auth.signup.privacyPolicy')}
                 </Link>
               </label>
               {errors.agreeToTerms && (
@@ -527,11 +531,11 @@ export const SignupForm: React.FC<SignupFormProps> = ({
             {isLoading ? (
               <>
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                <span>Sending Verification Code...</span>
+                <span>{t('auth.signup.submitting')}</span>
               </>
             ) : (
               <>
-                <span>Create Account</span>
+                <span>{t('auth.signup.submit')}</span>
                 <ArrowRight className="h-4 w-4" />
               </>
             )}

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/app/components/ui/input-otp';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface VerifyResetFormProps {
   email: string;
@@ -19,6 +20,7 @@ export const VerifyResetForm: React.FC<VerifyResetFormProps> = ({
   const [resendIn, setResendIn] = useState(0);
   const [resending, setResending] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (resendIn <= 0) return;
@@ -42,7 +44,7 @@ export const VerifyResetForm: React.FC<VerifyResetFormProps> = ({
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || result.message || 'Invalid or expired code');
+        throw new Error(result.error || result.message || t('auth.verifyReset.genericError'));
       }
 
       router.push('/reset-password');
@@ -51,7 +53,7 @@ export const VerifyResetForm: React.FC<VerifyResetFormProps> = ({
       setApiError(
         error instanceof Error
           ? error.message
-          : 'Invalid or expired code'
+          : t('auth.verifyReset.genericError')
       );
     } finally {
       setIsLoading(false);
@@ -74,7 +76,7 @@ export const VerifyResetForm: React.FC<VerifyResetFormProps> = ({
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || result.message || 'Could not resend the code. Please try again.');
+        throw new Error(result.error || result.message || t('auth.verifyReset.resendError'));
       }
 
       setOtp('');
@@ -83,7 +85,7 @@ export const VerifyResetForm: React.FC<VerifyResetFormProps> = ({
       setApiError(
         error instanceof Error
           ? error.message
-          : 'Could not resend the code. Please try again.'
+          : t('auth.verifyReset.resendError')
       );
     } finally {
       setResending(false);
@@ -141,26 +143,26 @@ export const VerifyResetForm: React.FC<VerifyResetFormProps> = ({
           {isLoading ? (
             <>
               <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
-              Verifying...
+              {t('auth.verifyReset.submitting')}
             </>
           ) : (
-            'Verify Code'
+            t('auth.verifyReset.submit')
           )}
         </button>
 
         <div className="text-center text-sm text-[#6d6a63]">
           {resendIn > 0 ? (
-            <>Resend code in {resendIn}s</>
+            <>{t('auth.verifyReset.resendIn', { seconds: resendIn })}</>
           ) : (
             <>
-              Didn&apos;t get it?{' '}
+              {t('auth.verifyReset.didntGetIt')}{' '}
               <button
                 type="button"
                 onClick={handleResend}
                 disabled={resending}
                 className="text-[#2d5a3d] font-semibold hover:underline disabled:opacity-50"
               >
-                {resending ? 'Sending...' : 'Resend code'}
+                {resending ? t('auth.verifyReset.sending') : t('auth.verifyReset.resendCode')}
               </button>
             </>
           )}

@@ -19,10 +19,12 @@ type SettingsType = {
   qrImageUrl?: string | null;
 };
 
-const STEPS = [
-  { num: 1, label: "Delivery" },
-  { num: 2, label: "Review & Place" },
-];
+function getCheckoutSteps(t: (key: string) => string) {
+  return [
+    { num: 1, label: t('checkout.steps.delivery') },
+    { num: 2, label: t('checkout.steps.reviewAndPlace') },
+  ];
+}
 
 function Field({
   label,
@@ -181,35 +183,35 @@ export default function Checkout() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Full name is required";
+      newErrors.name = t('checkout.validation.nameRequired');
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email address is required";
+      newErrors.email = t('checkout.validation.emailRequired');
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = t('checkout.validation.emailInvalid');
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
+      newErrors.phone = t('checkout.validation.phoneRequired');
     } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = "Please enter a valid phone number";
+      newErrors.phone = t('checkout.validation.phoneInvalid');
     }
 
     if (!formData.address.trim()) {
-      newErrors.address = "Address is required";
+      newErrors.address = t('checkout.validation.addressRequired');
     }
 
     if (!formData.city.trim()) {
-      newErrors.city = "City is required";
+      newErrors.city = t('checkout.validation.cityRequired');
     }
 
     if (!formData.province.trim()) {
-      newErrors.province = "Province is required";
+      newErrors.province = t('checkout.validation.provinceRequired');
     }
 
     if (formData.postal.trim() && !validatePostal(formData.postal)) {
-      newErrors.postal = "Please enter a valid postal code";
+      newErrors.postal = t('checkout.validation.postalInvalid');
     }
 
     setErrors(newErrors);
@@ -339,7 +341,7 @@ export default function Checkout() {
 
           <div className="flex items-center justify-center mb-12">
             <div className="flex items-center gap-0">
-              {STEPS.map((s, i) => (
+              {getCheckoutSteps(t).map((s, i) => (
                 <div key={s.num} className="flex items-center">
                   <div className="flex flex-col items-center">
                     <div
@@ -361,7 +363,7 @@ export default function Checkout() {
                       {s.label}
                     </span>
                   </div>
-                  {i < STEPS.length - 1 && (
+                  {i < getCheckoutSteps(t).length - 1 && (
                     <div
                       className={`w-24 h-0.5 mb-5 mx-3 transition-all ${
                         step > s.num
@@ -409,16 +411,16 @@ export default function Checkout() {
                   </h2>
                   <div className="space-y-4">
                     <Field
-                      label="Full Name"
+                      label={t('checkout.fields.fullName')}
                       name="name"
-                      placeholder="Aarav Sharma"
+                      placeholder={t('checkout.fields.fullNamePlaceholder')}
                       value={formData.name}
                       onChange={handleInputChange}
                       error={errors.name}
                     />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Field
-                        label="Email Address"
+                        label={t('checkout.fields.emailAddress')}
                         name="email"
                         type="email"
                         placeholder="aarav@example.com"
@@ -427,7 +429,7 @@ export default function Checkout() {
                         error={errors.email}
                       />
                       <Field
-                        label="Phone Number"
+                        label={t('checkout.fields.phoneNumber')}
                         name="phone"
                         type="tel"
                         placeholder="+977 98XXXXXXXX"
@@ -437,7 +439,7 @@ export default function Checkout() {
                       />
                     </div>
                     <Field
-                      label="Address"
+                      label={t('checkout.fields.address')}
                       name="address"
                       placeholder="House No., Street Name, Area"
                       value={formData.address}
@@ -446,17 +448,17 @@ export default function Checkout() {
                     />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Field
-                        label="City"
+                        label={t('checkout.fields.city')}
                         name="city"
-                        placeholder="Kathmandu"
+                        placeholder={t('checkout.fields.cityPlaceholder')}
                         value={formData.city}
                         onChange={handleInputChange}
                         error={errors.city}
                       />
                       <Field
-                        label="Province"
+                        label={t('checkout.fields.province')}
                         name="province"
-                        placeholder="Bagmati"
+                        placeholder={t('checkout.fields.provincePlaceholder')}
                         value={formData.province}
                         onChange={handleInputChange}
                         error={errors.province}
@@ -464,7 +466,7 @@ export default function Checkout() {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Field
-                        label="Postal Code"
+                        label={t('checkout.fields.postalCode')}
                         name="postal"
                         placeholder="44600 (optional)"
                         value={formData.postal}
@@ -693,7 +695,7 @@ export default function Checkout() {
                       <div className="flex justify-between text-sm text-[#78746e]">
                         <span>Shipping</span>
                         <span className={shippingFlatRate > 0 ? "text-[#1c1917] font-semibold" : "text-[#2d5a3d] font-semibold"}>
-                          {shippingFlatRate > 0 ? `${currency} ${shippingFlatRate.toLocaleString()}` : "Free"}
+                          {shippingFlatRate > 0 ? `${currency} ${shippingFlatRate.toLocaleString()}` : t('checkout.summary.free')}
                         </span>
                       </div>
                     </div>

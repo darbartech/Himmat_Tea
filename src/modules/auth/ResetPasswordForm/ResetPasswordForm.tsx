@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Lock, Eye, EyeOff } from 'lucide-react';
-import { resetPasswordSchema, ResetPasswordData } from './validation';
+import { createResetPasswordSchema, ResetPasswordData } from './validation';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ResetPasswordFormProps {
   className?: string;
@@ -20,6 +21,9 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const resetPasswordSchema = useMemo(() => createResetPasswordSchema(t), [t]);
 
   const {
     register,
@@ -43,10 +47,10 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
     if (/[0-9]/.test(pwd)) strength++;
     if (/[@$!%*?&]/.test(pwd)) strength++;
 
-    if (strength <= 2) return { color: 'bg-red-500', label: 'Weak' };
-    if (strength <= 3) return { color: 'bg-yellow-500', label: 'Fair' };
-    if (strength <= 4) return { color: 'bg-blue-500', label: 'Good' };
-    return { color: 'bg-green-500', label: 'Strong' };
+    if (strength <= 2) return { color: 'bg-red-500', label: t('auth.signup.strengthWeak') };
+    if (strength <= 3) return { color: 'bg-yellow-500', label: t('auth.signup.strengthFair') };
+    if (strength <= 4) return { color: 'bg-blue-500', label: t('auth.signup.strengthGood') };
+    return { color: 'bg-green-500', label: t('auth.signup.strengthStrong') };
   };
 
   const passwordStrength = getPasswordStrength(password);
@@ -65,7 +69,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || result.message || 'Could not reset your password. Please try again.');
+        throw new Error(result.error || result.message || t('auth.resetPassword.genericError'));
       }
 
       setSuccess(true);
@@ -76,7 +80,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       setApiError(
         error instanceof Error
           ? error.message
-          : 'Could not reset your password. Please try again.'
+          : t('auth.resetPassword.genericError')
       );
     } finally {
       setIsLoading(false);
@@ -90,9 +94,9 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
           <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
             <span className="text-green-600 text-2xl">✓</span>
           </div>
-          <p className="text-green-800 font-semibold">Password updated</p>
+          <p className="text-green-800 font-semibold">{t('auth.resetPassword.successTitle')}</p>
           <p className="mt-1 text-sm text-green-700">
-            Your password has been reset. Redirecting you to sign in...
+            {t('auth.resetPassword.successMessage')}
           </p>
         </div>
       </div>
@@ -107,7 +111,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
             htmlFor="reset-password"
             className="block text-sm font-medium text-[#1c1917] mb-1.5"
           >
-            New Password
+            {t('auth.resetPassword.newPasswordLabel')}
           </label>
           <div className="relative">
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e] aria-hidden" />
@@ -118,7 +122,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
               aria-describedby={errors.newPassword ? 'reset-password-error reset-password-strength' : 'reset-password-strength'}
               aria-invalid={!!errors.newPassword}
               {...register('newPassword')}
-              placeholder="Create a new password"
+              placeholder={t('auth.resetPassword.newPasswordPlaceholder')}
               className={`w-full pl-12 pr-12 py-3 rounded-xl border transition-colors text-sm focus:outline-none
                 ${errors.newPassword
                   ? 'border-red-300 bg-red-50 focus:border-red-500'
@@ -130,7 +134,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
               type="button"
               onClick={() => setShowNewPassword(!showNewPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-[#78746e] hover:text-[#2d5a3d] focus:outline-none"
-              aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
+              aria-label={showNewPassword ? t('auth.resetPassword.hidePassword') : t('auth.resetPassword.showPassword')}
             >
               {showNewPassword ? (
                 <EyeOff className="h-4 w-4" aria-hidden />
@@ -163,7 +167,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
             htmlFor="reset-confirm-password"
             className="block text-sm font-medium text-[#1c1917] mb-1.5"
           >
-            Confirm New Password
+            {t('auth.resetPassword.confirmPasswordLabel')}
           </label>
           <div className="relative">
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e] aria-hidden" />
@@ -174,7 +178,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
               aria-describedby={errors.confirmPassword ? 'reset-confirm-password-error' : undefined}
               aria-invalid={!!errors.confirmPassword}
               {...register('confirmPassword')}
-              placeholder="Confirm your new password"
+              placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')}
               className={`w-full pl-12 pr-12 py-3 rounded-xl border transition-colors text-sm focus:outline-none
                 ${errors.confirmPassword
                   ? 'border-red-300 bg-red-50 focus:border-red-500'
@@ -186,7 +190,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-[#78746e] hover:text-[#2d5a3d] focus:outline-none"
-              aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+              aria-label={showConfirmPassword ? t('auth.resetPassword.hideConfirmPassword') : t('auth.resetPassword.showConfirmPassword')}
             >
               {showConfirmPassword ? (
                 <EyeOff className="h-4 w-4" aria-hidden />
@@ -225,11 +229,11 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
           {isLoading ? (
             <>
               <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
-              Resetting...
+              {t('auth.resetPassword.submitting')}
             </>
           ) : (
             <>
-              Reset Password
+              {t('auth.resetPassword.submit')}
               <ArrowRight className="h-5 w-5" />
             </>
           )}

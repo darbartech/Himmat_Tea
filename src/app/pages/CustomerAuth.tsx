@@ -7,6 +7,7 @@ import Footer from '@/app/components/Footer';
 import { useAuth } from '@/context/AuthContext';
 import { Github, Chrome } from 'lucide-react';
 import { LoginForm, SignupForm } from '@/modules/auth';
+import { useTranslation } from '@/hooks/useTranslation';
 
 function getSafeRedirect(value: string | null): string {
   if (!value) return '/account';
@@ -24,6 +25,7 @@ export default function CustomerAuth() {
   const initialMode: 'login' | 'signup' = rawMode === 'signup' ? 'signup' : 'login';
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [socialLoading, setSocialLoading] = useState<'google' | 'github' | null>(null);
+  const { t } = useTranslation();
   
   const { socialLogin, isLoggedIn, userType, isLoading } = useAuth();
 
@@ -91,7 +93,7 @@ export default function CustomerAuth() {
               
               <div className="relative">
                 <span className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-[11px] uppercase tracking-[0.32em] font-semibold text-[#d8e5ce] border border-white/10">
-                  Customer {mode === 'login' ? 'login' : 'registration'}
+                  {mode === 'login' ? t('auth.page.badgeLogin') : t('auth.page.badgeSignup')}
                 </span>
                 
                 <h1
@@ -99,53 +101,53 @@ export default function CustomerAuth() {
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
                   {mode === 'login' 
-                    ? 'Welcome back to your account.' 
-                    : 'Join our community of tea lovers.'}
+                    ? t('auth.page.heroTitleLogin') 
+                    : t('auth.page.heroTitleSignup')}
                 </h1>
                 
                 <p className="mt-6 max-w-2xl text-base leading-8 text-[#d8e5ce]">
                   {mode === 'login'
-                    ? 'Sign in once and get instant access to your order tracker, saved addresses, personalized recommendations, and faster checkout.'
-                    : 'Create an account to save your details, track orders, and enjoy exclusive offers tailored just for you.'}
+                    ? t('auth.page.heroSubtitleLogin')
+                    : t('auth.page.heroSubtitleSignup')}
                 </p>
 
                 <div className="mt-10 grid gap-4 sm:grid-cols-2">
                   <div className="rounded-[24px] bg-white/10 p-5 border border-white/10 backdrop-blur-sm">
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#c8d3b9] mb-3">
-                      {mode === 'login' ? 'Your benefits' : 'Why join us?'}
+                      {mode === 'login' ? t('auth.page.benefitsTitleLogin') : t('auth.page.benefitsTitleSignup')}
                     </p>
                     <ul className="space-y-3 text-sm leading-7 text-[#ecf3e8]">
                       {mode === 'login' ? (
                         <>
-                          <li>Keep your deliveries on time</li>
-                          <li>Save your favorite items</li>
-                          <li>View purchase history</li>
+                          <li>{t('auth.page.benefitLogin1')}</li>
+                          <li>{t('auth.page.benefitLogin2')}</li>
+                          <li>{t('auth.page.benefitLogin3')}</li>
                         </>
                       ) : (
                         <>
-                          <li>Faster repeat checkout</li>
-                          <li>Personalized offers</li>
-                          <li>Secure profile management</li>
+                          <li>{t('auth.page.benefitSignup1')}</li>
+                          <li>{t('auth.page.benefitSignup2')}</li>
+                          <li>{t('auth.page.benefitSignup3')}</li>
                         </>
                       )}
                     </ul>
                   </div>
                   <div className="rounded-[24px] bg-white/10 p-5 border border-white/10 backdrop-blur-sm">
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#c8d3b9] mb-3">
-                      {mode === 'login' ? 'Quick access' : 'Get started'}
+                      {mode === 'login' ? t('auth.page.quickAccessTitleLogin') : t('auth.page.quickAccessTitleSignup')}
                     </p>
                     <ul className="space-y-3 text-sm leading-7 text-[#ecf3e8]">
                       {mode === 'login' ? (
                         <>
-                          <li>Track orders in real-time</li>
-                          <li>Manage saved addresses</li>
-                          <li>Access exclusive deals</li>
+                          <li>{t('auth.page.quickLogin1')}</li>
+                          <li>{t('auth.page.quickLogin2')}</li>
+                          <li>{t('auth.page.quickLogin3')}</li>
                         </>
                       ) : (
                         <>
-                          <li>Save delivery addresses</li>
-                          <li>Earn loyalty points</li>
-                          <li>Get early access to drops</li>
+                          <li>{t('auth.page.quickSignup1')}</li>
+                          <li>{t('auth.page.quickSignup2')}</li>
+                          <li>{t('auth.page.quickSignup3')}</li>
                         </>
                       )}
                     </ul>
@@ -158,18 +160,18 @@ export default function CustomerAuth() {
             <div className="rounded-[32px] bg-white p-8 shadow-xl border border-[#e1e5df] sm:p-10">
               <div className="mb-8 text-center">
                 <p className="text-xs uppercase tracking-[0.28em] text-[#2d5a3d] font-semibold mb-3">
-                  {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+                  {mode === 'login' ? t('auth.page.formEyebrowLogin') : t('auth.page.formEyebrowSignup')}
                 </p>
                 <h2
                   className="text-[clamp(2rem,3.5vw,2.75rem)] font-semibold text-[#1c1917] leading-tight"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  {mode === 'login' ? 'Sign In' : 'Join Us'}
+                  {mode === 'login' ? t('auth.page.formTitleLogin') : t('auth.page.formTitleSignup')}
                 </h2>
                 <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#6d6a63]">
                   {mode === 'login'
-                    ? 'Sign in to access your account, track orders, and more.'
-                    : 'Create an account to save your details and checkout faster.'}
+                    ? t('auth.page.formSubtitleLogin')
+                    : t('auth.page.formSubtitleSignup')}
                 </p>
               </div>
 
@@ -185,7 +187,7 @@ export default function CustomerAuth() {
                   ) : (
                     <Chrome className="h-5 w-5 text-red-500" />
                   )}
-                  Continue with Google
+                  {t('auth.page.continueWithGoogle')}
                 </button>
 
                 <button
@@ -198,7 +200,7 @@ export default function CustomerAuth() {
                   ) : (
                     <Github className="h-5 w-5" />
                   )}
-                  Continue with GitHub
+                  {t('auth.page.continueWithGithub')}
                 </button>
               </div>
 
@@ -209,7 +211,7 @@ export default function CustomerAuth() {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="bg-white px-4 text-[#6d6a63] font-medium">
-                    or continue with email
+                    {t('auth.page.orContinueWithEmail')}
                   </span>
                 </div>
               </div>
@@ -227,7 +229,7 @@ export default function CustomerAuth() {
                       : 'text-[#6d6a63] hover:text-[#2d5a3d]'
                   }`}
                 >
-                  Sign In
+                  {t('auth.page.tabSignIn')}
                 </button>
                 <button
                   onClick={() => {
@@ -240,7 +242,7 @@ export default function CustomerAuth() {
                       : 'text-[#6d6a63] hover:text-[#2d5a3d]'
                   }`}
                 >
-                  Sign Up
+                  {t('auth.page.tabSignUp')}
                 </button>
               </div>
 
@@ -264,13 +266,13 @@ export default function CustomerAuth() {
               <div className="mt-6 text-center">
                 <p className="text-sm text-[#6d6a63]">
                   {mode === 'login'
-                    ? "Don't have an account?"
-                    : 'Already have an account?'}
+                    ? t('auth.page.noAccountPrompt')
+                    : t('auth.page.hasAccountPrompt')}
                   <button
                     onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
                     className="ml-2 text-[#2d5a3d] font-semibold hover:underline transition-all"
                   >
-                    {mode === 'login' ? 'Sign up' : 'Sign in'}
+                    {mode === 'login' ? t('auth.page.switchToSignup') : t('auth.page.switchToLogin')}
                   </button>
                 </p>
               </div>

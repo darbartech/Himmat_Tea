@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { ArrowRight, Lock, Mail, Eye, EyeOff } from 'lucide-react';
-import { loginFormSchema, LoginFormData } from './validation';
+import { createLoginFormSchema, LoginFormData } from './validation';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -24,9 +25,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const router = useRouter();
   const { customerLogin } = useAuth();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+
+  const loginFormSchema = useMemo(() => createLoginFormSchema(t), [t]);
 
   const {
     register,
@@ -50,7 +54,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       const success = await customerLogin(data.email, data.password);
 
       if (!success) {
-        throw new Error('Invalid credentials');
+        throw new Error(t('auth.login.invalidCredentials'));
       }
 
       reset();
@@ -74,7 +78,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       setApiError(
         error instanceof Error 
           ? error.message 
-          : 'Login failed. Please try again.'
+          : t('auth.login.genericError')
       );
     } finally {
       setIsLoading(false);
@@ -90,7 +94,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             htmlFor="login-email" 
             className="block text-sm font-medium text-[#1c1917]"
           >
-            Email Address
+            {t('auth.login.emailLabel')}
           </label>
           <div className="relative group">
             <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
@@ -101,7 +105,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               aria-describedby={errors.email ? 'login-email-error' : undefined}
               aria-invalid={!!errors.email}
               {...register('email')}
-              placeholder="you@example.com"
+              placeholder={t('auth.login.emailPlaceholder')}
               className={`w-full pl-10 pr-4 py-2.5 rounded-xl border transition-all duration-200 text-sm focus:outline-none
                 ${errors.email 
                   ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
@@ -128,14 +132,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               htmlFor="login-password" 
               className="block text-sm font-medium text-[#1c1917]"
             >
-              Password
+              {t('auth.login.passwordLabel')}
             </label>
             {showForgotPassword && (
               <Link 
                 href="/forgot-password"
                 className="text-xs font-semibold text-[#2d5a3d] hover:text-[#234832] transition-colors"
               >
-                Forgot Password?
+                {t('auth.login.forgotPassword')}
               </Link>
             )}
           </div>
@@ -148,7 +152,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               aria-describedby={errors.password ? 'login-password-error' : undefined}
               aria-invalid={!!errors.password}
               {...register('password')}
-              placeholder="Enter your password"
+              placeholder={t('auth.login.passwordPlaceholder')}
               className={`w-full pl-10 pr-10 py-2.5 rounded-xl border transition-all duration-200 text-sm focus:outline-none
                 ${errors.password 
                   ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
@@ -160,7 +164,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a09b] hover:text-[#2d5a3d] transition-colors focus:outline-none focus:text-[#2d5a3d]"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? t('auth.login.hidePassword') : t('auth.login.showPassword')}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" aria-hidden />
@@ -192,7 +196,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             htmlFor="login-remember-me"
             className="text-sm text-[#6d6a63] cursor-pointer select-none"
           >
-            Remember Me
+            {t('auth.login.rememberMe')}
           </label>
         </div>
 
@@ -217,11 +221,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           {isLoading ? (
             <>
               <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
-              <span>Signing In...</span>
+              <span>{t('auth.login.submitting')}</span>
             </>
           ) : (
             <>
-              <span>Sign In</span>
+              <span>{t('auth.login.submit')}</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </>
           )}
