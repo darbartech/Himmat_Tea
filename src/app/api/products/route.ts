@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
 import { getCurrentAdmin } from '@/lib/auth'
 
-<<<<<<< HEAD
 type BaseProduct = Awaited<ReturnType<typeof prisma.product.findMany>>[number] & {
   productVariants: Array<{ variants: string | Array<any>; [k: string]: any }>
 }
@@ -21,30 +20,6 @@ function parseProduct(p: BaseProduct) {
 }
 
 export async function GET(request: NextRequest) {
-=======
-function parseCategories(raw: string | null | undefined): any[] | null {
-  if (!raw) return null
-  if (raw === '{}') return []
-  try {
-    const parsed = JSON.parse(raw)
-    if (Array.isArray(parsed)) return parsed
-    if (parsed && typeof parsed === 'object') return []
-    return []
-  } catch {
-    return []
-  }
-}
-
-function parseProductLine(pl: any) {
-  if (!pl) return pl
-  return {
-    ...pl,
-    categories: parseCategories(pl.categories),
-  }
-}
-
-export async function GET() {
->>>>>>> 82a9e5e369f08e2d34aad73619dcf89a4e6b59a4
   try {
     const { searchParams } = new URL(request.url)
     const isAdminView = searchParams.get('admin') === 'true'
