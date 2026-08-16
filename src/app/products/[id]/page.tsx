@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import ProductDetail from '@/app/pages/ProductDetail';
 import { Suspense } from 'react';
 
+import { useTranslation } from '../../../context/TranslationContext';
 // Product data for metadata
 const productsData: Record<
   string,
@@ -146,8 +147,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default function ProductDetailPage() {
+  const { t } = useTranslation();
+
   return (
-    <Suspense fallback={<div>Loading product...</div>}>
+    <Suspense fallback={<div>{t('productDetail.loading')}</div>}>
       <ProductDetail />
     </Suspense>
   );

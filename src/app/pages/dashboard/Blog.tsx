@@ -36,6 +36,7 @@ import {
 import { ImageUploadField } from "../../components/ui/image-upload-field";
 import Link from "next/link";
 
+import { useTranslation } from "@/hooks/useTranslation";
 const categories = ["All", "Brewing", "Origins", "Wellness", "Culture"];
 
 type BlogPost = {
@@ -78,6 +79,7 @@ export default function Blog() {
     readTime: "5 min read",
     body: JSON.stringify([{ type: "p", text: "" }]),
   });
+  const { t } = useTranslation();
 
   // Fetch all blog posts
   const fetchBlogPosts = async () => {
@@ -104,6 +106,8 @@ export default function Blog() {
   });
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { t } = useTranslation();
+
     const title = e.target.value;
     const autoSlug = generateSlug(title);
     setNewPost({ 
@@ -208,7 +212,7 @@ export default function Blog() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-[#78746e]">Loading blog posts...</p>
+        <p className="text-[#78746e]">{t('dashboard.blogAdmin.loading')}</p>
       </div>
     );
   }
@@ -221,7 +225,7 @@ export default function Blog() {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             Blog Posts
           </h1>
-          <p className="text-[#78746e] mt-1">Manage your tea blog content</p>
+          <p className="text-[#78746e] mt-1">{t('dashboard.blog.subtitle')}</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -245,29 +249,29 @@ export default function Blog() {
                     id="title"
                     value={newPost.title}
                     onChange={handleTitleChange}
-                    placeholder="Blog post title"
+                    placeholder={t('dashboard.blog.enterTitle')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="slug">Slug (auto-generated)</Label>
+                  <Label htmlFor="slug">{t('dashboard.blog.slug')}</Label>
                   <Input
                     id="slug"
                     value={newPost.slug}
                     onChange={(e) => setNewPost({ ...newPost, slug: e.target.value })}
-                    placeholder="post-slug"
+                    placeholder={t('dashboard.blog.enterSlug')}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category">{t('dashboard.products.category')}</Label>
                   <Select
                     value={newPost.category}
                     onValueChange={(value) => setNewPost({ ...newPost, category: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder={t('common.selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.slice(1).map((cat) => (
@@ -277,7 +281,7 @@ export default function Blog() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="readTime">Read Time</Label>
+                  <Label htmlFor="readTime">{t('dashboard.blog.readTime')}</Label>
                   <Input
                     id="readTime"
                     value={newPost.readTime}
@@ -292,7 +296,7 @@ export default function Blog() {
                 value={newPost.image}
                 onChange={(v) => setNewPost({ ...newPost, image: v })}
                 folder="blog"
-                placeholder="https://..."
+                placeholder={t('dashboard.blogAdmin.imageUrlPlaceholder')}
                 id="blog-image"
               />
 
@@ -302,13 +306,13 @@ export default function Blog() {
                   id="excerpt"
                   value={newPost.excerpt}
                   onChange={(e) => setNewPost({ ...newPost, excerpt: e.target.value })}
-                  placeholder="Brief description of the post"
+                  placeholder={t('dashboard.blog.enterExcerpt')}
                   rows={2}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="body">Content (JSON)</Label>
+                <Label htmlFor="body">{t('dashboard.blog.contentJSON')}</Label>
                 <Textarea
                   id="body"
                   value={newPost.body}
@@ -341,7 +345,7 @@ export default function Blog() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
           <Input
             type="text"
-            placeholder="Search posts..."
+            placeholder={t('dashboard.blog.searchPosts')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-11"
@@ -352,7 +356,7 @@ export default function Blog() {
           onValueChange={setSelectedCategory}
         >
           <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="All Categories" />
+            <SelectValue placeholder={t('dashboard.products.allCategories')} />
           </SelectTrigger>
           <SelectContent>
             {categories.map((cat) => (
@@ -410,13 +414,13 @@ export default function Blog() {
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Post?</AlertDialogTitle>
+                      <AlertDialogTitle>{t('dashboard.blog.deletePost')}</AlertDialogTitle>
                       <AlertDialogDescription>
                         Are you sure you want to delete "{post.title}"? This action cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel>{t('dashboard.products.cancel')}</AlertDialogCancel>
                       <AlertDialogAction onClick={() => handleDeletePost(post.id)} className="bg-red-600">
                         Delete
                       </AlertDialogAction>
@@ -429,7 +433,7 @@ export default function Blog() {
         ))}
         {filteredPosts.length === 0 && (
           <div className="col-span-full text-center py-12">
-            <p className="text-[#78746e]">No blog posts found</p>
+            <p className="text-[#78746e]">{t('dashboard.blogAdmin.noneFound')}</p>
           </div>
         )}
       </div>

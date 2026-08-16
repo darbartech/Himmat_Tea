@@ -29,6 +29,7 @@ import { Switch } from "../../components/ui/switch";
 import { ImageUploadField } from "../../components/ui/image-upload-field";
 import { api, ApiError } from "../../../lib/api-client";
 
+import { useTranslation } from "@/hooks/useTranslation";
 type HeroVisual = {
   id: string;
   imageUrl: string;
@@ -59,6 +60,7 @@ export default function HeroVisuals() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingHeroVisual, setEditingHeroVisual] = useState<HeroVisual | null>(null);
   const [newHeroVisual, setNewHeroVisual] = useState<Partial<HeroVisual>>({ ...EmptyHV });
+  const { t } = useTranslation();
 
   const fetchHeroVisuals = async () => {
     try {
@@ -164,7 +166,7 @@ export default function HeroVisuals() {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             Hero Visuals
           </h1>
-          <p className="text-[#78746e] mt-1">Manage the visuals for the hero section of your homepage</p>
+          <p className="text-[#78746e] mt-1">{t('dashboard.heroVisuals.manageDesc')}</p>
         </div>
         <div className="flex items-center gap-3">
           <Dialog
@@ -193,30 +195,30 @@ export default function HeroVisuals() {
                   value={newHeroVisual.imageUrl || ""}
                   onChange={(v) => setNewHeroVisual({ ...newHeroVisual, imageUrl: v })}
                   folder="hero-visuals"
-                  placeholder="https://example.com/image.jpg"
+                  placeholder={t('dashboard.heroVisuals.imageUrlPlaceholder')}
                   id="hero-image"
                   required
                 />
                 <div className="grid gap-2">
-                  <Label htmlFor="hv-title">Title (Optional)</Label>
+                  <Label htmlFor="hv-title">{t('common.titleOptional')}</Label>
                   <Input
                     id="hv-title"
                     value={newHeroVisual.title || ""}
                     onChange={(e) => setNewHeroVisual({ ...newHeroVisual, title: e.target.value })}
-                    placeholder="Premium Green Tea"
+                    placeholder={t('dashboard.heroVisuals.titlePlaceholder')}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="hv-subtitle">Subtitle (Optional)</Label>
+                  <Label htmlFor="hv-subtitle">{t('common.subtitleOptional')}</Label>
                   <Input
                     id="hv-subtitle"
                     value={newHeroVisual.subtitle || ""}
                     onChange={(e) => setNewHeroVisual({ ...newHeroVisual, subtitle: e.target.value })}
-                    placeholder="Hand-picked from the Himalayas"
+                    placeholder={t('dashboard.heroVisuals.subtitlePlaceholder')}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="hv-sortOrder">Sort Order</Label>
+                  <Label htmlFor="hv-sortOrder">{t('common.sortOrder')}</Label>
                   <Input
                     id="hv-sortOrder"
                     type="number"
@@ -226,7 +228,7 @@ export default function HeroVisuals() {
                   />
                 </div>
                 <div className="flex items-center justify-between rounded-lg border border-[#2d5a3d]/10 p-3 bg-[#f9f7f4]">
-                  <Label htmlFor="hv-isActive" className="font-medium">Active</Label>
+                  <Label htmlFor="hv-isActive" className="font-medium">{t('dashboard.customers.active')}</Label>
                   <Switch
                     id="hv-isActive"
                     checked={typeof newHeroVisual.isActive === "boolean" ? newHeroVisual.isActive : true}
@@ -265,11 +267,11 @@ export default function HeroVisuals() {
           <table className="w-full min-w-[520px]">
             <thead>
               <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Preview</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Title</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Status</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Sort Order</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap text-right">Actions</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('common.preview')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('common.title')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('dashboard.products.status')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('common.sortOrder')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap text-right">{t('dashboard.orders.action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2d5a3d]/5">
@@ -308,7 +310,7 @@ export default function HeroVisuals() {
                           ? "bg-[#e8f5ed] text-[#2d5a3d]"
                           : "bg-gray-100 text-gray-700"
                       }`}>
-                        {heroVisual.isActive ? "Active" : "Inactive"}
+                        {heroVisual.isActive ? t('common.active') : "Inactive"}
                       </span>
                     </td>
                     <td className="px-6 py-4 tabular-nums text-[#1c1917] whitespace-nowrap">
@@ -322,7 +324,7 @@ export default function HeroVisuals() {
                           onClick={() => handleEditHeroVisual(heroVisual)}
                           disabled={isSaving || deletingId !== null}
                           className="hover:bg-[#f0ede8]"
-                          title="Edit"
+                          title={t('dashboard.products.edit')}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -333,7 +335,7 @@ export default function HeroVisuals() {
                               size="sm"
                               onClick={() => requestDelete(heroVisual)}
                               disabled={deletingId === heroVisual.id}
-                              title="Delete"
+                              title={t('dashboard.products.delete')}
                             >
                               {deletingId === heroVisual.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -356,13 +358,13 @@ export default function HeroVisuals() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Hero Visual?</AlertDialogTitle>
+            <AlertDialogTitle>{t('dashboard.heroVisuals.deleteConfirm')}</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this visual? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingId !== null}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletingId !== null}>{t('dashboard.products.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               disabled={deletingId !== null}
               onClick={handleConfirmDelete}
@@ -374,7 +376,7 @@ export default function HeroVisuals() {
                   Deleting...
                 </>
               ) : (
-                "Delete"
+                t('common.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

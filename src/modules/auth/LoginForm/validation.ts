@@ -4,10 +4,10 @@ export type TFunc = (key: string, params?: Record<string, string | number>) => s
 
 export const createLoginFormSchema = (t: TFunc) => z.object({
   email: z.string()
-    .email(t('validation.email.invalid'))
-    .min(1, t('validation.email.required')),
+    .email("Please enter a valid email address")
+    .min(1, "Email is required"),
   password: z.string()
-    .min(1, t('validation.password.required')),
+    .min(1, "Password is required"),
   rememberMe: z.boolean().optional()
 });
 

@@ -4,23 +4,6 @@ import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-u
 import { getCurrentAdmin } from '@/lib/auth'
 import { ensureUniqueSlug } from '@/lib/slug'
 
-<<<<<<< HEAD
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const isAdminView = searchParams.get('admin') === 'true'
-    const adminUser = isAdminView ? await getCurrentAdmin() : null
-
-    const where: any = {}
-    if (!adminUser) {
-      where.isActive = true
-    }
-
-    const include: any = isAdminView ? { products: true } : undefined
-    const productLines = await prisma.productLine.findMany({
-      where,
-      include,
-=======
 function parseCategories(raw: string | null | undefined): any[] | null {
   if (!raw) return null
   if (raw === '{}') return []
@@ -45,7 +28,6 @@ export async function GET() {
       include: {
         products: { where: productWhere },
       },
->>>>>>> 82a9e5e369f08e2d34aad73619dcf89a4e6b59a4
       orderBy: { sortOrder: 'asc' },
     })
 
@@ -74,37 +56,9 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('Only SuperAdmin can create product lines', 403);
     }
     const body = await request.json()
-<<<<<<< HEAD
     if (typeof body.name !== 'string' || !body.name.trim()) {
       return createErrorResponse('Name is required', 400)
     }
-
-    const safeData: Record<string, any> = { name: body.name.trim() }
-    if (typeof body.description === 'string') safeData.description = body.description
-    if (typeof body.heroHeadline === 'string') safeData.heroHeadline = body.heroHeadline
-    if (typeof body.heroImage === 'string') safeData.heroImage = body.heroImage
-    if (typeof body.color === 'string') safeData.color = body.color
-    if (typeof body.ctaTitle === 'string') safeData.ctaTitle = body.ctaTitle
-    if (typeof body.ctaDescription === 'string') safeData.ctaDescription = body.ctaDescription
-    if (typeof body.ctaLinkText === 'string') safeData.ctaLinkText = body.ctaLinkText
-    if (typeof body.ctaLink === 'string') safeData.ctaLink = body.ctaLink
-    if (typeof body.isActive === 'boolean') safeData.isActive = body.isActive
-    if (typeof body.sortOrder === 'number' && !isNaN(body.sortOrder)) safeData.sortOrder = body.sortOrder
-    if (typeof body.categories !== 'undefined' && body.categories !== null) {
-      safeData.categories = body.categories
-    }
-
-    const slugInput =
-      typeof body.slug === 'string' && body.slug.trim() ? body.slug.trim() : body.name
-    safeData.slug = await ensureUniqueSlug(slugInput, async (c) => {
-      const exists = await prisma.productLine.findUnique({ where: { slug: c }, select: { id: true } })
-      return !!exists
-    })
-
-    const productLine = await prisma.productLine.create({
-      data: safeData as any,
-      include: { products: true },
-=======
 
     const data: any = {}
     if (body.slug != null) data.slug = String(body.slug)
@@ -125,12 +79,18 @@ export async function POST(request: NextRequest) {
     if (body.isActive != null) data.isActive = Boolean(body.isActive)
     if (body.sortOrder != null) data.sortOrder = Number(body.sortOrder)
 
+    const slugInput =
+      typeof data.slug === 'string' && data.slug.trim() ? data.slug.trim() : data.name
+    data.slug = await ensureUniqueSlug(slugInput, async (c) => {
+      const exists = await prisma.productLine.findUnique({ where: { slug: c }, select: { id: true } })
+      return !!exists
+    })
+
     const productLine = await prisma.productLine.create({
       data,
       include: {
         products: true,
       },
->>>>>>> 82a9e5e369f08e2d34aad73619dcf89a4e6b59a4
     })
 
     const parsed = {
@@ -147,4 +107,3 @@ export async function POST(request: NextRequest) {
     return handleApiError(error)
   }
 }
-

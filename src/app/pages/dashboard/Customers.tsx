@@ -35,6 +35,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Badge } from "../../components/ui/badge";
 
+import { useTranslation } from "@/hooks/useTranslation";
 interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -57,6 +58,7 @@ export default function Customers() {
     address: "",
   });
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const { t } = useTranslation();
   
   const loyaltyProgram = {
     tiers: [
@@ -174,7 +176,7 @@ export default function Customers() {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             Customers
           </h1>
-          <p className="text-[#78746e] mt-1">Manage your customer relationships</p>
+          <p className="text-[#78746e] mt-1">{t('dashboard.customers.subtitle')}</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -192,26 +194,26 @@ export default function Customers() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">{t('checkout.fields.fullName')}</Label>
                 <Input
                   id="name"
                   value={newCustomer.name}
                   onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
-                  placeholder="John Doe"
+                  placeholder={t('dashboard.customers.fullNamePlaceholder')}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('dashboard.customers.email')}</Label>
                 <Input
                   id="email"
                   type="email"
                   value={newCustomer.email}
                   onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-                  placeholder="john@example.com"
+                  placeholder={t('dashboard.customers.emailPlaceholder')}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t('dashboard.customers.phone')}</Label>
                 <Input
                   id="phone"
                   value={newCustomer.phone}
@@ -220,7 +222,7 @@ export default function Customers() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="address">Address</Label>
+                <Label htmlFor="address">{t('dashboard.settings.address')}</Label>
                 <Input
                   id="address"
                   value={newCustomer.address}
@@ -250,7 +252,7 @@ export default function Customers() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
           <Input
             type="text"
-            placeholder="Search customers by name or email..."
+            placeholder={t('dashboard.customers.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-11"
@@ -262,7 +264,7 @@ export default function Customers() {
       {isLoading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2d5a3d] mx-auto mb-4"></div>
-          <p className="text-lg font-medium text-[#1c1917]">Loading customers...</p>
+          <p className="text-lg font-medium text-[#1c1917]">{t('dashboard.customers.loading')}</p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -299,13 +301,13 @@ export default function Customers() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Customer?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('dashboard.customers.deleteConfirm')}</AlertDialogTitle>
                             <AlertDialogDescription>
                               Are you sure you want to delete "{customer.name}"? This will not delete their orders.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('dashboard.products.cancel')}</AlertDialogCancel>
                             <AlertDialogAction onClick={() => handleDeleteCustomer(customer.id)} className="bg-red-600">
                               Delete
                             </AlertDialogAction>
@@ -338,7 +340,7 @@ export default function Customers() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Gift className="h-5 w-5 text-[#2d5a3d]" />
-                        <span className="font-semibold text-[#1c1917]">Loyalty Points</span>
+                        <span className="font-semibold text-[#1c1917]">{t('account.loyaltyPoints')}</span>
                       </div>
                       <div className="flex gap-1">
                         <AlertDialog>
@@ -394,14 +396,14 @@ export default function Customers() {
 
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#2d5a3d]/5">
                     <div>
-                      <p className="text-xs text-[#78746e] uppercase tracking-wide mb-1">Orders</p>
+                      <p className="text-xs text-[#78746e] uppercase tracking-wide mb-1">{t('dashboard.nav.orders')}</p>
                       <p className="text-xl font-bold text-[#1c1917] flex items-center gap-1">
                         <ShoppingBag className="h-4 w-4" />
                         {customer.ordersCount}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-[#78746e] uppercase tracking-wide mb-1">Total Spent</p>
+                      <p className="text-xs text-[#78746e] uppercase tracking-wide mb-1">{t('dashboard.customers.totalSpent')}</p>
                       <p className="text-xl font-bold text-[#2d5a3d]">
                         ₹{customer.totalSpent.toLocaleString()}
                       </p>
@@ -423,32 +425,32 @@ export default function Customers() {
                         <>
                           <DialogHeader>
                             <DialogTitle className="text-2xl">{selectedCustomer.name}</DialogTitle>
-                            <DialogDescription>Customer details and order history</DialogDescription>
+                            <DialogDescription>{t('dashboard.customers.detailHistoryDesc')}</DialogDescription>
                           </DialogHeader>
                           <Tabs defaultValue="info">
                             <TabsList className="w-full grid grid-cols-2">
-                              <TabsTrigger value="info">Information</TabsTrigger>
-                              <TabsTrigger value="orders">Order History</TabsTrigger>
+                              <TabsTrigger value="info">{t('dashboard.customers.information')}</TabsTrigger>
+                              <TabsTrigger value="orders">{t('dashboard.customers.orderHistory')}</TabsTrigger>
                             </TabsList>
                             <TabsContent value="info" className="space-y-4 pt-4">
                               <div className="grid gap-3">
                                 <div>
-                                  <Label>Email</Label>
+                                  <Label>{t('dashboard.customers.email')}</Label>
                                   <p className="text-[#1c1917]">{selectedCustomer.email}</p>
                                 </div>
                                 <div>
-                                  <Label>Phone</Label>
+                                  <Label>{t('dashboard.customers.phone')}</Label>
                                   <p className="text-[#1c1917]">{selectedCustomer.phone}</p>
                                 </div>
                                 <div>
-                                  <Label>Address</Label>
+                                  <Label>{t('dashboard.settings.address')}</Label>
                                   <p className="text-[#1c1917]">{selectedCustomer.address}</p>
                                 </div>
                               </div>
                             </TabsContent>
                             <TabsContent value="orders" className="space-y-3 pt-4">
                               {getCustomerOrders(selectedCustomer.id).length === 0 ? (
-                                <p className="text-[#78746e] text-center py-8">No orders yet</p>
+                                <p className="text-[#78746e] text-center py-8">{t('account.noOrdersYet')}</p>
                               ) : (
                                 getCustomerOrders(selectedCustomer.id).map((order: any) => (
                                   <div key={order.id} className="p-4 border border-[#2d5a3d]/10 rounded-xl flex items-center justify-between">
@@ -492,7 +494,7 @@ export default function Customers() {
           </AlertDialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="pointsAmount">Points</Label>
+              <Label htmlFor="pointsAmount">{t('dashboard.customers.points')}</Label>
               <Input
                 id="pointsAmount"
                 type="number"
@@ -500,16 +502,16 @@ export default function Customers() {
                 max={pointsAction === "redeem" ? loyaltyPointsDialog?.loyaltyPoints : undefined}
                 value={pointsAmount}
                 onChange={(e) => setPointsAmount(Number(e.target.value))}
-                placeholder="Enter points"
+                placeholder={t('dashboard.customers.enterPoints')}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="pointsReason">Reason</Label>
+              <Label htmlFor="pointsReason">{t('dashboard.inventory.reason')}</Label>
               <Textarea
                 id="pointsReason"
                 value={pointsReason}
                 onChange={(e) => setPointsReason(e.target.value)}
-                placeholder="Enter reason"
+                placeholder={t('common.enterReason')}
               />
             </div>
           </div>

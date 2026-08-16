@@ -135,7 +135,7 @@ export default function Sourcing() {
           <div className="rounded-3xl overflow-hidden mb-24 h-[400px] lg:h-[500px]">
             <img
               src="https://images.unsplash.com/photo-1464716535967-a81e2fc45b22?w=1200&h=500&fit=crop"
-              alt="Tea plantation in Nepal"
+              alt={t('sourcing.imageAlt')}
               className="w-full h-full object-cover"
             />
           </div>

@@ -37,6 +37,7 @@ import {
 } from "../../components/ui/select";
 import { api, ApiError } from "../../../lib/api-client";
 
+import { useTranslation } from "@/hooks/useTranslation";
 type BrewingGuide = {
   id: string;
   title: string;
@@ -82,6 +83,7 @@ export default function BrewingGuidesAdmin() {
   const [editingGuide, setEditingGuide] = useState<BrewingGuide | null>(null);
   const [newGuide, setNewGuide] = useState<Partial<BrewingGuide>>({ ...EmptyGuide });
   const [filterTeaType, setFilterTeaType] = useState<string>("All");
+  const { t } = useTranslation();
 
   const fetchGuides = async () => {
     try {
@@ -194,12 +196,12 @@ export default function BrewingGuidesAdmin() {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             Brewing Guides
           </h1>
-          <p className="text-[#78746e] mt-1">Manage tea brewing instructions and guides</p>
+          <p className="text-[#78746e] mt-1">{t('dashboard.brewingGuides.manageDesc')}</p>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
           <Select value={filterTeaType} onValueChange={setFilterTeaType}>
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="All Tea Types" />
+              <SelectValue placeholder={t('dashboard.brewingGuides.allTeaTypes')} />
             </SelectTrigger>
             <SelectContent>
               {teaTypes.map((t) => (
@@ -244,7 +246,7 @@ export default function BrewingGuidesAdmin() {
                           slug: prev.slug || generateSlug(title),
                         }));
                       }}
-                      placeholder="How to Brew Perfect Darjeeling"
+                      placeholder={t('dashboard.brewingGuides.titlePlaceholder')}
                     />
                   </div>
                   <div className="grid gap-2">
@@ -253,7 +255,7 @@ export default function BrewingGuidesAdmin() {
                       id="bg-slug"
                       value={newGuide.slug || ""}
                       onChange={(e) => setNewGuide({ ...newGuide, slug: e.target.value })}
-                      placeholder="brew-darjeeling"
+                      placeholder={t('dashboard.brewingGuides.slugPlaceholder')}
                     />
                   </div>
                 </div>
@@ -265,7 +267,7 @@ export default function BrewingGuidesAdmin() {
                     rows={3}
                     value={newGuide.description || ""}
                     onChange={(e) => setNewGuide({ ...newGuide, description: e.target.value })}
-                    placeholder="A short summary of this brewing guide..."
+                    placeholder={t('dashboard.brewingGuides.excerptPlaceholder')}
                   />
                 </div>
 
@@ -274,19 +276,19 @@ export default function BrewingGuidesAdmin() {
                   value={newGuide.image || ""}
                   onChange={(v) => setNewGuide({ ...newGuide, image: v })}
                   folder="brewing-guides"
-                  placeholder="https://..."
+                  placeholder={t('dashboard.blogAdmin.imageUrlPlaceholder')}
                   id="bg-image"
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="bg-teaType">Tea Type</Label>
+                    <Label htmlFor="bg-teaType">{t('dashboard.brewingGuides.teaType')}</Label>
                     <Select
                       value={newGuide.teaType || "Green Tea"}
                       onValueChange={(v) => setNewGuide({ ...newGuide, teaType: v })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select tea type" />
+                        <SelectValue placeholder={t('dashboard.brewingGuides.selectTeaType')} />
                       </SelectTrigger>
                       <SelectContent>
                         {TEA_TYPES.map((t) => (
@@ -296,7 +298,7 @@ export default function BrewingGuidesAdmin() {
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="bg-waterTemp">Water Temperature</Label>
+                    <Label htmlFor="bg-waterTemp">{t('dashboard.brewingGuides.waterTemperature')}</Label>
                     <Input
                       id="bg-waterTemp"
                       value={newGuide.waterTemp || ""}
@@ -305,7 +307,7 @@ export default function BrewingGuidesAdmin() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="bg-steepingTime">Steeping Time</Label>
+                    <Label htmlFor="bg-steepingTime">{t('dashboard.brewingGuides.steepingTime')}</Label>
                     <Input
                       id="bg-steepingTime"
                       value={newGuide.steepingTime || ""}
@@ -317,7 +319,7 @@ export default function BrewingGuidesAdmin() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="bg-leafQuantity">Leaf Quantity</Label>
+                    <Label htmlFor="bg-leafQuantity">{t('dashboard.brewingGuides.leafQuantity')}</Label>
                     <Input
                       id="bg-leafQuantity"
                       value={newGuide.leafQuantity || ""}
@@ -326,7 +328,7 @@ export default function BrewingGuidesAdmin() {
                     />
                   </div>
                   <div className="flex items-center justify-between rounded-lg border border-[#2d5a3d]/10 p-3 bg-[#f9f7f4]">
-                    <Label htmlFor="bg-isActive" className="font-medium">Active (Visible)</Label>
+                    <Label htmlFor="bg-isActive" className="font-medium">{t('common.activeVisible')}</Label>
                     <Switch
                       id="bg-isActive"
                       checked={typeof newGuide.isActive === "boolean" ? newGuide.isActive : true}
@@ -373,8 +375,8 @@ export default function BrewingGuidesAdmin() {
         ) : filteredGuides.length === 0 ? (
           <div className="col-span-full text-center py-16 text-[#78746e] bg-white rounded-2xl border border-[#2d5a3d]/5">
             <ChefHat className="h-10 w-10 mx-auto mb-3 text-[#2d5a3d]/30" />
-            <p className="font-medium mb-1">No brewing guides found</p>
-            <p className="text-sm">Create your first guide to help customers brew the perfect cup</p>
+            <p className="font-medium mb-1">{t('dashboard.brewingGuides.noneFound')}</p>
+            <p className="text-sm">{t('dashboard.brewingGuides.noneFoundDesc')}</p>
           </div>
         ) : (
           filteredGuides.map((guide) => (
@@ -446,15 +448,15 @@ export default function BrewingGuidesAdmin() {
                 </p>
                 <div className="grid grid-cols-3 gap-2 text-xs pt-3 border-t border-[#2d5a3d]/5">
                   <div>
-                    <p className="text-[#78746e] uppercase tracking-wider text-[10px] font-semibold mb-0.5">Temp</p>
+                    <p className="text-[#78746e] uppercase tracking-wider text-[10px] font-semibold mb-0.5">{t('dashboard.brewingGuides.temp')}</p>
                     <p className="font-medium text-[#1c1917]">{guide.waterTemp || "—"}</p>
                   </div>
                   <div>
-                    <p className="text-[#78746e] uppercase tracking-wider text-[10px] font-semibold mb-0.5">Time</p>
+                    <p className="text-[#78746e] uppercase tracking-wider text-[10px] font-semibold mb-0.5">{t('dashboard.invoice.time')}</p>
                     <p className="font-medium text-[#1c1917]">{guide.steepingTime || "—"}</p>
                   </div>
                   <div>
-                    <p className="text-[#78746e] uppercase tracking-wider text-[10px] font-semibold mb-0.5">Leaves</p>
+                    <p className="text-[#78746e] uppercase tracking-wider text-[10px] font-semibold mb-0.5">{t('dashboard.brewingGuides.leaves')}</p>
                     <p className="font-medium text-[#1c1917] truncate">{guide.leafQuantity || "—"}</p>
                   </div>
                 </div>
@@ -467,13 +469,13 @@ export default function BrewingGuidesAdmin() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Brewing Guide?</AlertDialogTitle>
+            <AlertDialogTitle>{t('dashboard.brewingGuides.deleteConfirm')}</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete &ldquo;{deleteTarget?.title}&rdquo;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingId !== null}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletingId !== null}>{t('dashboard.products.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               disabled={deletingId !== null}
               onClick={handleConfirmDelete}

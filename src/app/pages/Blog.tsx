@@ -210,7 +210,7 @@ export default function Blog() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Your email address"
+                    placeholder={t('blog.emailPlaceholder')}
                     required
                     className="flex-1 lg:w-64 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-white/40"
                   />

@@ -32,6 +32,7 @@ import { api, ApiError } from "../../../lib/api-client";
 import { useAuth } from "../../../context/AuthContext";
 import { Badge } from "../../components/ui/badge";
 
+import { useTranslation } from "@/hooks/useTranslation";
 type ProductLineCategory = {
   id: string;
   name: string;
@@ -105,6 +106,8 @@ export default function ProductLines() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingProductLine, setEditingProductLine] = useState<ProductLine | null>(null);
   const [newProductLine, setNewProductLine] = useState<Partial<ProductLine>>({ ...EmptyPL });
+
+  const { t } = useTranslation();
 
   const fetchProductLines = async () => {
     try {
@@ -212,7 +215,7 @@ export default function ProductLines() {
             Product Lines
           </h1>
           <div className="flex items-center gap-2 mt-1">
-            <p className="text-[#78746e]">Manage your tea product lines and their sections</p>
+            <p className="text-[#78746e]">{t('dashboard.productLines.manageDesc')}</p>
             {!isSuperAdmin && (
               <Badge variant="secondary" className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200">
                 View only — Super Admin required to edit
@@ -264,7 +267,7 @@ export default function ProductLines() {
                           slug: prev.slug || generateSlug(name),
                         }));
                       }}
-                      placeholder="Green Tea Collection"
+                      placeholder={t('dashboard.productLines.namePlaceholder')}
                     />
                   </div>
                   <div className="grid gap-2">
@@ -275,7 +278,7 @@ export default function ProductLines() {
                       onChange={(e) =>
                         setNewProductLine({ ...newProductLine, slug: e.target.value })
                       }
-                      placeholder="green-tea"
+                      placeholder={t('dashboard.productLines.slugPlaceholder')}
                     />
                   </div>
                 </div>
@@ -289,7 +292,7 @@ export default function ProductLines() {
                     onChange={(e) =>
                       setNewProductLine({ ...newProductLine, description: e.target.value })
                     }
-                    placeholder="Briefly describe this product line..."
+                    placeholder={t('dashboard.productLines.descPlaceholder')}
                   />
                 </div>
 
@@ -298,24 +301,24 @@ export default function ProductLines() {
                   value={newProductLine.heroImage || ""}
                   onChange={(v) => setNewProductLine({ ...newProductLine, heroImage: v })}
                   folder="product-lines"
-                  placeholder="https://..."
+                  placeholder={t('dashboard.blogAdmin.imageUrlPlaceholder')}
                   id="pl-hero-image"
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="pl-heroHeadline">Hero Headline</Label>
+                    <Label htmlFor="pl-heroHeadline">{t('dashboard.productLines.heroHeadline')}</Label>
                     <Input
                       id="pl-heroHeadline"
                       value={newProductLine.heroHeadline || ""}
                       onChange={(e) =>
                         setNewProductLine({ ...newProductLine, heroHeadline: e.target.value })
                       }
-                      placeholder="The finest green teas from Himalayan gardens"
+                      placeholder={t('dashboard.productLines.heroHeadlinePlaceholder')}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="pl-color">Theme Color</Label>
+                    <Label htmlFor="pl-color">{t('dashboard.productLines.themeColor')}</Label>
                     <div className="flex items-center gap-2">
                       <Input
                         id="pl-color"
@@ -332,40 +335,40 @@ export default function ProductLines() {
                         onChange={(e) =>
                           setNewProductLine({ ...newProductLine, color: e.target.value })
                         }
-                        aria-label="Color picker"
+                        aria-label={t('a11y.colorPicker')}
                       />
                     </div>
                   </div>
                 </div>
 
                 <div className="grid gap-3 border-t pt-4">
-                  <Label className="text-base font-medium">Call to Action (Optional)</Label>
+                  <Label className="text-base font-medium">{t('dashboard.productLines.ctaOptional')}</Label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="pl-ctaTitle">CTA Title</Label>
+                      <Label htmlFor="pl-ctaTitle">{t('dashboard.productLines.ctaTitle')}</Label>
                       <Input
                         id="pl-ctaTitle"
                         value={newProductLine.ctaTitle || ""}
                         onChange={(e) =>
                           setNewProductLine({ ...newProductLine, ctaTitle: e.target.value })
                         }
-                        placeholder="Ready to explore?"
+                        placeholder={t('dashboard.productLines.ctaTitlePlaceholder')}
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="pl-ctaLinkText">CTA Button Text</Label>
+                      <Label htmlFor="pl-ctaLinkText">{t('dashboard.productLines.ctaButtonText')}</Label>
                       <Input
                         id="pl-ctaLinkText"
                         value={newProductLine.ctaLinkText || ""}
                         onChange={(e) =>
                           setNewProductLine({ ...newProductLine, ctaLinkText: e.target.value })
                         }
-                        placeholder="Browse Collection"
+                        placeholder={t('dashboard.productLines.ctaButtonPlaceholder')}
                       />
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="pl-ctaDescription">CTA Description</Label>
+                    <Label htmlFor="pl-ctaDescription">{t('dashboard.productLines.ctaDescription')}</Label>
                     <Textarea
                       id="pl-ctaDescription"
                       rows={2}
@@ -373,11 +376,11 @@ export default function ProductLines() {
                       onChange={(e) =>
                         setNewProductLine({ ...newProductLine, ctaDescription: e.target.value })
                       }
-                      placeholder="A short blurb for the CTA section..."
+                      placeholder={t('dashboard.productLines.ctaDescPlaceholder')}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="pl-ctaLink">CTA Link</Label>
+                    <Label htmlFor="pl-ctaLink">{t('dashboard.productLines.ctaLink')}</Label>
                     <Input
                       id="pl-ctaLink"
                       value={newProductLine.ctaLink || ""}
@@ -391,7 +394,7 @@ export default function ProductLines() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="pl-sortOrder">Sort Order</Label>
+                    <Label htmlFor="pl-sortOrder">{t('common.sortOrder')}</Label>
                     <Input
                       id="pl-sortOrder"
                       type="number"
@@ -403,7 +406,7 @@ export default function ProductLines() {
                     />
                   </div>
                   <div className="flex items-center justify-between rounded-lg border border-[#2d5a3d]/10 p-3 bg-[#f9f7f4]">
-                    <Label htmlFor="pl-isActive" className="font-medium">Active</Label>
+                    <Label htmlFor="pl-isActive" className="font-medium">{t('dashboard.customers.active')}</Label>
                     <Switch
                       id="pl-isActive"
                       checked={typeof newProductLine.isActive === "boolean" ? newProductLine.isActive : true}
@@ -443,11 +446,11 @@ export default function ProductLines() {
           <table className="w-full">
             <thead>
               <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Line</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Slug</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Status</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Order</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap text-right">Actions</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('dashboard.productLines.line')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('common.slug')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('dashboard.products.status')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('common.order')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap text-right">{t('dashboard.orders.action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2d5a3d]/5">
@@ -494,7 +497,7 @@ export default function ProductLines() {
                             : "bg-gray-100 text-gray-700"
                         }`}
                       >
-                        {pl.isActive ? "Active" : "Inactive"}
+                        {pl.isActive ? t('common.active') : "Inactive"}
                       </span>
                     </td>
                     <td className="px-6 py-4 tabular-nums text-[#1c1917] whitespace-nowrap">
@@ -509,7 +512,7 @@ export default function ProductLines() {
                               size="sm"
                               onClick={() => handleEditProductLine(pl)}
                               disabled={isSaving || deletingId !== null}
-                              title="Edit"
+                              title={t('dashboard.products.edit')}
                               className="hover:bg-[#f0ede8]"
                             >
                               <Edit className="h-4 w-4" />
@@ -519,7 +522,7 @@ export default function ProductLines() {
                               size="sm"
                               onClick={() => requestDelete(pl)}
                               disabled={deletingId === pl.id}
-                              title="Delete"
+                              title={t('dashboard.products.delete')}
                             >
                               {deletingId === pl.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -546,7 +549,7 @@ export default function ProductLines() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Product Line?</AlertDialogTitle>
+            <AlertDialogTitle>{t('dashboard.productLines.deleteConfirm')}</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete{" "}
               <span className="font-semibold text-[#1c1917]">{deleteTarget?.name}</span>? This
@@ -554,7 +557,7 @@ export default function ProductLines() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingId !== null}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletingId !== null}>{t('dashboard.products.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               disabled={deletingId !== null}
               onClick={handleConfirmDelete}
@@ -566,7 +569,7 @@ export default function ProductLines() {
                   Deleting...
                 </>
               ) : (
-                "Delete"
+                t('common.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

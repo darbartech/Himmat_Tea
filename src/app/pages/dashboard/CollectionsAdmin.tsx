@@ -32,6 +32,7 @@ import { Badge } from "../../components/ui/badge";
 import { ScrollArea } from "../../components/ui/scroll-area";
 import { api, ApiError } from "../../../lib/api-client";
 
+import { useTranslation } from "@/hooks/useTranslation";
 type Product = {
   id: number;
   name: string;
@@ -86,6 +87,7 @@ export default function CollectionsAdmin() {
     selectedProductIds: [],
   });
   const [productSearch, setProductSearch] = useState("");
+  const { t } = useTranslation();
 
   const fetchAll = async () => {
     try {
@@ -115,6 +117,8 @@ export default function CollectionsAdmin() {
   }, []);
 
   const toggleProductId = (pid: number) => {
+    const { t } = useTranslation();
+
     setNewCollection((prev) => {
       const current = prev.selectedProductIds || [];
       const has = current.includes(pid);
@@ -221,7 +225,7 @@ export default function CollectionsAdmin() {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             Collections
           </h1>
-          <p className="text-[#78746e] mt-1">Group products into curated collections</p>
+          <p className="text-[#78746e] mt-1">{t('dashboard.collections.groupDesc')}</p>
         </div>
         <Dialog
           open={isAddDialogOpen}
@@ -262,7 +266,7 @@ export default function CollectionsAdmin() {
                         slug: prev.slug || generateSlug(title),
                       }));
                     }}
-                    placeholder="Summer Favorites"
+                    placeholder={t('dashboard.collections.namePlaceholder')}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -271,7 +275,7 @@ export default function CollectionsAdmin() {
                     id="col-slug"
                     value={newCollection.slug || ""}
                     onChange={(e) => setNewCollection({ ...newCollection, slug: e.target.value })}
-                    placeholder="summer-favorites"
+                    placeholder={t('dashboard.collections.slugPlaceholder')}
                   />
                 </div>
               </div>
@@ -283,7 +287,7 @@ export default function CollectionsAdmin() {
                   rows={3}
                   value={newCollection.description || ""}
                   onChange={(e) => setNewCollection({ ...newCollection, description: e.target.value })}
-                  placeholder="Describe this collection..."
+                  placeholder={t('dashboard.collections.descPlaceholder')}
                 />
               </div>
 
@@ -292,7 +296,7 @@ export default function CollectionsAdmin() {
                 value={newCollection.image || ""}
                 onChange={(v) => setNewCollection({ ...newCollection, image: v })}
                 folder="collections"
-                placeholder="https://..."
+                placeholder={t('dashboard.blogAdmin.imageUrlPlaceholder')}
                 id="col-image"
               />
 
@@ -306,7 +310,7 @@ export default function CollectionsAdmin() {
                     <Input
                       value={productSearch}
                       onChange={(e) => setProductSearch(e.target.value)}
-                      placeholder="Search products..."
+                      placeholder={t('dashboard.products.searchProducts')}
                       className="pl-10"
                     />
                   </div>
@@ -364,7 +368,7 @@ export default function CollectionsAdmin() {
               </div>
 
               <div className="flex items-center justify-between rounded-lg border border-[#2d5a3d]/10 p-3 bg-[#f9f7f4]">
-                <Label htmlFor="col-isActive" className="font-medium">Active (Visible on site)</Label>
+                <Label htmlFor="col-isActive" className="font-medium">{t('common.activeVisibleOnSite')}</Label>
                 <Switch
                   id="col-isActive"
                   checked={typeof newCollection.isActive === "boolean" ? newCollection.isActive : true}
@@ -410,8 +414,8 @@ export default function CollectionsAdmin() {
         ) : collections.length === 0 ? (
           <div className="col-span-full text-center py-16 text-[#78746e] bg-white rounded-2xl border border-[#2d5a3d]/5">
             <Layers className="h-10 w-10 mx-auto mb-3 text-[#2d5a3d]/30" />
-            <p className="font-medium mb-1">No collections found</p>
-            <p className="text-sm">Create your first collection to group related products together</p>
+            <p className="font-medium mb-1">{t('dashboard.collections.noneFound')}</p>
+            <p className="text-sm">{t('dashboard.collections.noneFoundDesc')}</p>
           </div>
         ) : (
           collections.map((coll) => (
@@ -507,13 +511,13 @@ export default function CollectionsAdmin() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Collection?</AlertDialogTitle>
+            <AlertDialogTitle>{t('dashboard.collections.deleteConfirm')}</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete &ldquo;{deleteTarget?.title}&rdquo;? Products will remain in your catalog, only the collection grouping will be removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingId !== null}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletingId !== null}>{t('dashboard.products.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               disabled={deletingId !== null}
               onClick={handleConfirmDelete}

@@ -40,6 +40,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../../lib/api-client";
 import { BRAND } from "../../../config/brand";
 
+import { useTranslation } from "@/hooks/useTranslation";
 type ProductLineRef = {
   id: number;
   slug: string;
@@ -118,6 +119,8 @@ export default function Products() {
   const [imageUploadTab, setImageUploadTab] = useState<"upload" | "url">("upload");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const tableRef = useRef<HTMLDivElement>(null);
+
+  const { t } = useTranslation();
 
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ['products'],
@@ -252,11 +255,11 @@ export default function Products() {
     const csvData = filteredProducts.map((product: Product) => ({
       "Product ID": product.id,
       "Name": product.name,
-      "Category": product.category,
-      "Price": product.price,
+      [t('dashboard.faqs.category')]: product.category,
+      [t('dashboard.purchaseOrders.pricePlaceholder')]: product.price,
       "Stock": product.stock,
       "Status": product.status,
-      "Description": product.description
+      [t('dashboard.products.descriptionLabel')]: product.description
     }));
     exportToCSV(csvData, { filename: "products" });
   };
@@ -457,17 +460,17 @@ export default function Products() {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="name">Product Name</Label>
+                  <Label htmlFor="name">{t('dashboard.products.productName')}</Label>
                   <Input
                     id="name"
                     value={newProduct.name}
                     onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                    placeholder="e.g., Premium Green Tea"
+                    placeholder={t('dashboard.products.namePlaceholder')}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="productLine">Product Line</Label>
+                    <Label htmlFor="productLine">{t('dashboard.products.productLine')}</Label>
                     <Select
                       value={newProduct.productLineId != null ? String(newProduct.productLineId) : ""}
                       onValueChange={(value) => {
@@ -476,7 +479,7 @@ export default function Products() {
                       }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select product line" />
+                        <SelectValue placeholder={t('dashboard.products.selectProductLine')} />
                       </SelectTrigger>
                       <SelectContent>
                         {storeProductLines.filter((pl: any) => pl.isActive).map((pl: any) => (
@@ -486,13 +489,13 @@ export default function Products() {
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="category">{t('dashboard.products.category')}</Label>
                     <Select
                       value={newProduct.category}
                       onValueChange={(value) => setNewProduct({ ...newProduct, category: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t('common.selectCategory')} />
                       </SelectTrigger>
                       <SelectContent>
                         {["green", "black", "herbal", "oolong", "white", "toor", "moong", "chana", "masoor", "urad", "gift-hampers", "tea-sets"].map((cat) => (
@@ -504,7 +507,7 @@ export default function Products() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="price">Price (Rs.)</Label>
+                    <Label htmlFor="price">{t('dashboard.products.priceRs')}</Label>
                     <Input
                       id="price"
                       type="number"
@@ -514,7 +517,7 @@ export default function Products() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="stock">Stock Quantity</Label>
+                    <Label htmlFor="stock">{t('dashboard.products.stockQuantity')}</Label>
                     <Input
                       id="stock"
                       type="number"
@@ -526,16 +529,16 @@ export default function Products() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="sku">SKU</Label>
+                    <Label htmlFor="sku">{t('dashboard.products.sku')}</Label>
                     <Input
                       id="sku"
                       value={newProduct.sku}
                       onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })}
-                      placeholder="TEA-001"
+                      placeholder={t('dashboard.products.skuPlaceholderAlt')}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="reorderPoint">Reorder Point</Label>
+                    <Label htmlFor="reorderPoint">{t('dashboard.products.reorderPoint')}</Label>
                     <Input
                       id="reorderPoint"
                       type="number"
@@ -546,7 +549,7 @@ export default function Products() {
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label>Product Image</Label>
+                  <Label>{t('dashboard.products.productImage')}</Label>
                   <Tabs value={imageUploadTab} onValueChange={(v) => setImageUploadTab(v as "upload" | "url")}>
                     <TabsList className="mb-2">
                       <TabsTrigger value="upload" className="flex items-center gap-1">
@@ -580,13 +583,13 @@ export default function Products() {
                           {uploadingImage ? (
                             <div className="flex flex-col items-center gap-2 text-[#2d5a3d]">
                               <Loader2 className="h-8 w-8 animate-spin" />
-                              <p className="text-sm font-medium">Uploading...</p>
+                              <p className="text-sm font-medium">{t('common.uploading')}</p>
                             </div>
                           ) : newProduct.imageUrl ? (
                             <div className="relative w-full h-full rounded-xl overflow-hidden">
                               <img
                                 src={newProduct.imageUrl}
-                                alt="Preview"
+                                alt={t('common.preview')}
                                 className="w-full h-full object-contain p-2"
                               />
                               <div className="absolute top-2 right-2 flex gap-1">
@@ -636,13 +639,13 @@ export default function Products() {
                           id="image"
                           value={newProduct.imageUrl}
                           onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
-                          placeholder="https://..."
+                          placeholder={t('dashboard.blogAdmin.imageUrlPlaceholder')}
                         />
                         {newProduct.imageUrl && (
                           <div className="relative w-full h-36 rounded-xl overflow-hidden border border-[#2d5a3d]/10">
                             <img
                               src={newProduct.imageUrl}
-                              alt="Preview"
+                              alt={t('common.preview')}
                               className="w-full h-full object-contain p-2"
                               onError={(e) => {
                                 (e.target as HTMLImageElement).style.display = 'none';
@@ -655,16 +658,16 @@ export default function Products() {
                   </Tabs>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">{t('common.description')}</Label>
                   <Textarea
                     id="description"
                     value={newProduct.description}
                     onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                    placeholder="Product description"
+                    placeholder={t('dashboard.products.descriptionPlaceholder')}
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="isBestseller">Mark as Bestseller</Label>
+                  <Label htmlFor="isBestseller">{t('dashboard.products.markBestseller')}</Label>
                   <Switch
                     id="isBestseller"
                     checked={newProduct.isBestseller}
@@ -699,7 +702,7 @@ export default function Products() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
           <Input
             type="text"
-            placeholder="Search products..."
+            placeholder={t('dashboard.products.searchProducts')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-11"
@@ -710,10 +713,10 @@ export default function Products() {
           onValueChange={setSelectedProductLine}
         >
           <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="All Product Lines" />
+            <SelectValue placeholder={t('dashboard.products.allProductLines')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="All">All Product Lines</SelectItem>
+            <SelectItem value="All">{t('dashboard.products.allProductLines')}</SelectItem>
             {storeProductLines.filter((pl: any) => pl.isActive).map((pl: any) => (
               <SelectItem key={pl.id} value={String(pl.id)}>{pl.name}</SelectItem>
             ))}
@@ -726,13 +729,13 @@ export default function Products() {
           <table className="w-full min-w-[800px]">
             <thead>
               <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
-                <th className="px-6 py-4 font-medium">Product</th>
-                <th className="px-6 py-4 font-medium">Product Line</th>
-                <th className="px-6 py-4 font-medium">Category</th>
-                <th className="px-6 py-4 font-medium">Price</th>
-                <th className="px-6 py-4 font-medium">Stock</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
+                <th className="px-6 py-4 font-medium">{t('dashboard.inventory.product')}</th>
+                <th className="px-6 py-4 font-medium">{t('dashboard.products.productLine')}</th>
+                <th className="px-6 py-4 font-medium">{t('dashboard.products.category')}</th>
+                <th className="px-6 py-4 font-medium">{t('dashboard.products.price')}</th>
+                <th className="px-6 py-4 font-medium">{t('dashboard.products.stock')}</th>
+                <th className="px-6 py-4 font-medium">{t('dashboard.products.status')}</th>
+                <th className="px-6 py-4 font-medium text-right">{t('dashboard.orders.action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2d5a3d]/5">
@@ -808,7 +811,7 @@ export default function Products() {
                           </DialogHeader>
                           <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                              <Label htmlFor="quantity">Quantity (positive to add, negative to remove)</Label>
+                              <Label htmlFor="quantity">{t('dashboard.inventory.quantityPositiveAddNegativeRemove')}</Label>
                               <Input
                                 id="quantity"
                                 type="number"
@@ -816,18 +819,18 @@ export default function Products() {
                                 onChange={(e) =>
                                   setStockAdjustment({ ...stockAdjustment, quantity: Number(e.target.value) })
                                 }
-                                placeholder="e.g., 50 or -10"
+                                placeholder={t('dashboard.inventory.quantityHelpPlaceholder')}
                               />
                             </div>
                             <div className="grid gap-2">
-                              <Label htmlFor="reason">Reason</Label>
+                              <Label htmlFor="reason">{t('dashboard.inventory.reason')}</Label>
                               <Textarea
                                 id="reason"
                                 value={stockAdjustment.reason}
                                 onChange={(e) =>
                                   setStockAdjustment({ ...stockAdjustment, reason: e.target.value })
                                 }
-                                placeholder="e.g., Restock from supplier, Return, etc."
+                                placeholder={t('dashboard.inventory.reasonPlaceholder')}
                               />
                             </div>
                           </div>
@@ -875,13 +878,13 @@ export default function Products() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Product?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('dashboard.products.deleteConfirmTitle')}</AlertDialogTitle>
                             <AlertDialogDescription>
                               Are you sure you want to delete "{product.name}"? This action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('dashboard.products.cancel')}</AlertDialogCancel>
                             <AlertDialogAction onClick={() => handleDeleteProduct(product.id)} className="bg-red-600">
                               Delete
                             </AlertDialogAction>

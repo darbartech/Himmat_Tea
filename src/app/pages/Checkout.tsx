@@ -441,7 +441,7 @@ export default function Checkout() {
                     <Field
                       label={t('checkout.fields.address')}
                       name="address"
-                      placeholder="House No., Street Name, Area"
+                      placeholder={t('checkout.fields.addressPlaceholder')}
                       value={formData.address}
                       onChange={handleInputChange}
                       error={errors.address}
@@ -484,12 +484,12 @@ export default function Checkout() {
                           onChange={handleInputChange}
                           className="w-full px-4 py-3 rounded-xl border border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] text-[#1c1917] focus:outline-none focus:border-[#2d5a3d] transition-colors text-sm cursor-pointer"
                         >
-                          <option value="np">Nepal</option>
-                          <option value="in">India</option>
-                          <option value="us">USA</option>
+                          <option value="np">{t('checkout.countries.nepal')}</option>
+                          <option value="in">{t('checkout.countries.india')}</option>
+                          <option value="us">{t('checkout.countries.usa')}</option>
                           <option value="gb">UK</option>
-                          <option value="au">Australia</option>
-                          <option value="other">Other</option>
+                          <option value="au">{t('checkout.countries.australia')}</option>
+                          <option value="other">{t('checkout.countries.other')}</option>
                         </select>
                       </div>
                     </div>
@@ -555,11 +555,11 @@ export default function Checkout() {
                       </h3>
                     </div>
                     <div className="p-5 text-sm text-[#1c1917] space-y-1.5">
-                      <p><span className="text-[#78746e] w-28 inline-block">Name:</span> {formData.name}</p>
-                      <p><span className="text-[#78746e] w-28 inline-block">Email:</span> {formData.email}</p>
-                      <p><span className="text-[#78746e] w-28 inline-block">Phone:</span> {formData.phone}</p>
+                      <p><span className="text-[#78746e] w-28 inline-block">{t('checkout.summary.nameLabel')}</span> {formData.name}</p>
+                      <p><span className="text-[#78746e] w-28 inline-block">{t('checkout.summary.emailLabel')}</span> {formData.email}</p>
+                      <p><span className="text-[#78746e] w-28 inline-block">{t('checkout.summary.phoneLabel')}</span> {formData.phone}</p>
                       <p className="leading-relaxed">
-                        <span className="text-[#78746e] w-28 inline-block align-top">Address:</span>
+                        <span className="text-[#78746e] w-28 inline-block align-top">{t('checkout.summary.addressLabel')}</span>
                         {fullAddress}
                       </p>
                     </div>
@@ -643,7 +643,7 @@ export default function Checkout() {
                 </h3>
 
                 {cart.length === 0 ? (
-                  <p className="text-sm text-[#78746e]">Your cart is empty.</p>
+                  <p className="text-sm text-[#78746e]">{t('checkout.emptyCart')}</p>
                 ) : (
                   <>
                     <div className="space-y-4 mb-5">
@@ -685,7 +685,7 @@ export default function Checkout() {
 
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between text-sm text-[#78746e]">
-                        <span>Subtotal</span>
+                        <span>{t('dashboard.invoice.subtotal')}</span>
                         <span>{currency}&nbsp;{subtotal.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-sm text-[#78746e]">
@@ -693,7 +693,7 @@ export default function Checkout() {
                         <span>{currency}&nbsp;{taxAmount.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-sm text-[#78746e]">
-                        <span>Shipping</span>
+                        <span>{t('cart.shipping')}</span>
                         <span className={shippingFlatRate > 0 ? "text-[#1c1917] font-semibold" : "text-[#2d5a3d] font-semibold"}>
                           {shippingFlatRate > 0 ? `${currency} ${shippingFlatRate.toLocaleString()}` : t('checkout.summary.free')}
                         </span>
@@ -703,7 +703,7 @@ export default function Checkout() {
                     <div className="h-px bg-[rgba(28,25,23,0.08)] mb-4" />
 
                     <div className="flex justify-between text-lg font-bold text-[#1c1917]">
-                      <span>Total</span>
+                      <span>{t('dashboard.invoice.total')}</span>
                       <span>{currency}&nbsp;{grandTotal.toLocaleString()}</span>
                     </div>
                   </>

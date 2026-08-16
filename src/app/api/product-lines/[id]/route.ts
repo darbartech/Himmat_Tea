@@ -23,15 +23,9 @@ function parseCategories(raw: string | null | undefined): any[] | null {
 
 export async function GET(request: NextRequest, { params }: Params) {
   try {
-<<<<<<< HEAD
-=======
     const adminUser = await getCurrentAdmin();
     const isAdmin = !!adminUser;
->>>>>>> 82a9e5e369f08e2d34aad73619dcf89a4e6b59a4
     const { id } = await params
-    const { searchParams } = new URL(request.url)
-    const isAdminView = searchParams.get('admin') === 'true'
-    const adminUser = isAdminView ? await getCurrentAdmin() : null
 
     const where: any = {}
     const parsed = parseInt(id)
@@ -48,14 +42,11 @@ export async function GET(request: NextRequest, { params }: Params) {
     if (!productLine) {
       return createErrorResponse('Product line not found', 404)
     }
-    if (!adminUser && !productLine.isActive) {
+    if (!isAdmin && !productLine.isActive) {
       return createErrorResponse('Product line not found', 404)
     }
-    if (!isAdmin && !productLine.isActive) {
-      return NextResponse.json({ error: 'Product line not found' }, { status: 404 })
-    }
 
-    const parsed = {
+    const parsedLine = {
       ...productLine,
       categories: parseCategories(productLine.categories),
       products: productLine.products.map(p => ({
@@ -64,7 +55,7 @@ export async function GET(request: NextRequest, { params }: Params) {
       })),
     }
 
-    return createResponse(parsed)
+    return createResponse(parsedLine)
   } catch (error) {
     return handleApiError(error)
   }
@@ -86,44 +77,11 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
     const body = await request.json()
 
-<<<<<<< HEAD
     const existing = await prisma.productLine.findUnique({ where: { id: parsedId } })
     if (!existing) {
       return createErrorResponse('Product line not found', 404)
     }
 
-    const safeData: Record<string, any> = {}
-    if (typeof body.name === 'string' && body.name.trim()) safeData.name = body.name.trim()
-    if (typeof body.description === 'string') safeData.description = body.description
-    if (typeof body.heroHeadline === 'string') safeData.heroHeadline = body.heroHeadline
-    if (typeof body.heroImage === 'string') safeData.heroImage = body.heroImage
-    if (typeof body.color === 'string') safeData.color = body.color
-    if (typeof body.ctaTitle === 'string') safeData.ctaTitle = body.ctaTitle
-    if (typeof body.ctaDescription === 'string') safeData.ctaDescription = body.ctaDescription
-    if (typeof body.ctaLinkText === 'string') safeData.ctaLinkText = body.ctaLinkText
-    if (typeof body.ctaLink === 'string') safeData.ctaLink = body.ctaLink
-    if (typeof body.isActive === 'boolean') safeData.isActive = body.isActive
-    if (typeof body.sortOrder === 'number' && !isNaN(body.sortOrder)) safeData.sortOrder = body.sortOrder
-    if (typeof body.categories !== 'undefined' && body.categories !== null) {
-      safeData.categories = body.categories
-    }
-
-    if (typeof body.slug === 'string' || typeof safeData.name === 'string') {
-      const slugInput =
-        typeof body.slug === 'string' && body.slug.trim()
-          ? body.slug.trim()
-          : (safeData.name || existing.name)
-      const candidate = slugInput === existing.slug ? existing.slug : await ensureUniqueSlug(slugInput, async (c) => {
-        const taken = await prisma.productLine.findUnique({ where: { slug: c }, select: { id: true } })
-        return !!taken && taken.id !== parsedId
-      })
-      safeData.slug = candidate
-    }
-
-    const productLine = await prisma.productLine.update({
-      where: { id: parsedId },
-      data: safeData,
-=======
     const data: any = {}
     if (body.slug != null) data.slug = String(body.slug)
     if (body.name != null) data.name = String(body.name)
@@ -143,14 +101,25 @@ export async function PUT(request: NextRequest, { params }: Params) {
     if (body.isActive != null) data.isActive = Boolean(body.isActive)
     if (body.sortOrder != null) data.sortOrder = Number(body.sortOrder)
 
+    if (typeof data.slug === 'string' || typeof data.name === 'string') {
+      const slugInput =
+        typeof data.slug === 'string' && data.slug.trim()
+          ? data.slug.trim()
+          : (data.name || existing.name)
+      const candidate = slugInput === existing.slug ? existing.slug : await ensureUniqueSlug(slugInput, async (c) => {
+        const taken = await prisma.productLine.findUnique({ where: { slug: c }, select: { id: true } })
+        return !!taken && taken.id !== parsedId
+      })
+      data.slug = candidate
+    }
+
     const productLine = await prisma.productLine.update({
-      where: { id: parseInt(id) },
+      where: { id: parsedId },
       data,
->>>>>>> 82a9e5e369f08e2d34aad73619dcf89a4e6b59a4
       include: { products: true },
     })
 
-    const parsed = {
+    const parsedLine = {
       ...productLine,
       categories: parseCategories(productLine.categories),
       products: productLine.products.map(p => ({
@@ -159,7 +128,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       })),
     }
 
-    return createResponse(parsed)
+    return createResponse(parsedLine)
   } catch (error) {
     return handleApiError(error)
   }
@@ -189,4 +158,3 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     return handleApiError(error)
   }
 }
-

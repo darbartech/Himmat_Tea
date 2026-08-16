@@ -36,6 +36,7 @@ import {
 } from "../../components/ui/select";
 import { api, ApiError } from "../../../lib/api-client";
 
+import { useTranslation } from "@/hooks/useTranslation";
 type FAQ = {
   id: string;
   question: string;
@@ -69,6 +70,7 @@ export default function FAQs() {
   const [editingFAQ, setEditingFAQ] = useState<FAQ | null>(null);
   const [newFAQ, setNewFAQ] = useState<Partial<FAQ>>({ ...EmptyFAQ });
   const [filterCategory, setFilterCategory] = useState<string>("All");
+  const { t } = useTranslation();
 
   const fetchFAQs = async () => {
     try {
@@ -177,12 +179,12 @@ export default function FAQs() {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             FAQs
           </h1>
-          <p className="text-[#78746e] mt-1">Manage frequently asked questions and answers</p>
+          <p className="text-[#78746e] mt-1">{t('dashboard.faqs.manageDesc')}</p>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
           <Select value={filterCategory} onValueChange={setFilterCategory}>
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="All Categories" />
+              <SelectValue placeholder={t('dashboard.products.allCategories')} />
             </SelectTrigger>
             <SelectContent>
               {categories.map((c) => (
@@ -219,7 +221,7 @@ export default function FAQs() {
                     id="faq-question"
                     value={newFAQ.question || ""}
                     onChange={(e) => setNewFAQ({ ...newFAQ, question: e.target.value })}
-                    placeholder="What is your return policy?"
+                    placeholder={t('dashboard.faqs.questionPlaceholder')}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -229,18 +231,18 @@ export default function FAQs() {
                     rows={6}
                     value={newFAQ.answer || ""}
                     onChange={(e) => setNewFAQ({ ...newFAQ, answer: e.target.value })}
-                    placeholder="Write a detailed answer..."
+                    placeholder={t('dashboard.faqs.answerPlaceholder')}
                   />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="faq-category">Category</Label>
+                    <Label htmlFor="faq-category">{t('dashboard.products.category')}</Label>
                     <Select
                       value={newFAQ.category || "General"}
                       onValueChange={(v) => setNewFAQ({ ...newFAQ, category: v })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t('common.selectCategory')} />
                       </SelectTrigger>
                       <SelectContent>
                         {FAQ_CATEGORIES.map((c) => (
@@ -250,7 +252,7 @@ export default function FAQs() {
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="faq-order">Display Order</Label>
+                    <Label htmlFor="faq-order">{t('dashboard.faqs.displayOrder')}</Label>
                     <Input
                       id="faq-order"
                       type="number"
@@ -261,7 +263,7 @@ export default function FAQs() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between rounded-lg border border-[#2d5a3d]/10 p-3 bg-[#f9f7f4]">
-                  <Label htmlFor="faq-isActive" className="font-medium">Active (Visible on site)</Label>
+                  <Label htmlFor="faq-isActive" className="font-medium">{t('common.activeVisibleOnSite')}</Label>
                   <Switch
                     id="faq-isActive"
                     checked={typeof newFAQ.isActive === "boolean" ? newFAQ.isActive : true}
@@ -300,11 +302,11 @@ export default function FAQs() {
           <table className="w-full min-w-[600px]">
             <thead>
               <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
-                <th className="px-6 py-4 font-medium whitespace-nowrap w-16">Order</th>
-                <th className="px-6 py-4 font-medium">Question</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Category</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Status</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap text-right">Actions</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap w-16">{t('common.order')}</th>
+                <th className="px-6 py-4 font-medium">{t('dashboard.faqs.question')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('dashboard.products.category')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('dashboard.products.status')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap text-right">{t('dashboard.orders.action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2d5a3d]/5">
@@ -361,7 +363,7 @@ export default function FAQs() {
                           size="sm"
                           onClick={() => handleEditFAQ(faq)}
                           disabled={isSaving || deletingId !== null}
-                          title="Edit"
+                          title={t('dashboard.products.edit')}
                           className="hover:bg-[#f0ede8]"
                         >
                           <Edit className="h-4 w-4" />
@@ -373,7 +375,7 @@ export default function FAQs() {
                               size="sm"
                               onClick={() => requestDelete(faq)}
                               disabled={deletingId === faq.id}
-                              title="Delete"
+                              title={t('dashboard.products.delete')}
                             >
                               {deletingId === faq.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -396,13 +398,13 @@ export default function FAQs() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete FAQ?</AlertDialogTitle>
+            <AlertDialogTitle>{t('dashboard.faqs.deleteConfirm')}</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this FAQ? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingId !== null}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletingId !== null}>{t('dashboard.products.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               disabled={deletingId !== null}
               onClick={handleConfirmDelete}
@@ -414,7 +416,7 @@ export default function FAQs() {
                   Deleting...
                 </>
               ) : (
-                "Delete"
+                t('common.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

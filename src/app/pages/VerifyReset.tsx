@@ -6,7 +6,10 @@ import Navigation from '@/app/components/Navigation';
 import Footer from '@/app/components/Footer';
 import { VerifyResetForm } from '@/modules/auth/VerifyResetForm';
 
+import { useTranslation } from '../../context/TranslationContext';
 export default function VerifyResetPage() {
+  const { t } = useTranslation();
+
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
 
@@ -52,7 +55,7 @@ export default function VerifyResetPage() {
                       <span className="font-semibold text-[#1c1917]">{validEmail}</span>.
                     </>
                   ) : (
-                    <>Please start the password reset process again.</>
+                    <>{t('auth.verifyResetPage.formSubtitleFallback')}</>
                   )}
                 </p>
               </div>

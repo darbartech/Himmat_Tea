@@ -8,8 +8,6 @@ import Testimonials from "@/app/components/Testimonials";
 import Footer from "@/app/components/Footer";
 import { prisma } from "@/lib/prisma";
 import { initialMockProducts } from "@/lib/mock-data";
-import CTA from "../components/CTA";
-import HeroVisuals from "./dashboard/HeroVisuals";
 
 const fallbackProductLines = [
   {
@@ -71,7 +69,6 @@ export default async function LandingPage() {
       <ProductLinesShowcase productLines={productLines} />
       <ProductsSection />
       <Features />
-      <CTA />
       <Testimonials />
       <Footer />
     </div>

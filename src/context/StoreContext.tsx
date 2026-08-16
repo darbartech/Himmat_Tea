@@ -29,7 +29,7 @@ export interface Batch {
 }
 
 export interface ProductLine {
-  id: number;
+  id: number | string;
   slug: string;
   name: string;
   description: string;
@@ -77,7 +77,7 @@ export interface Review {
 
 export interface Product {
   id: number;
-  productLineId?: number | null;
+  productLineId?: number | string | null;
   productLine?: ProductLine;
   name: string;
   category: string;

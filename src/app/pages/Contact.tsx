@@ -30,7 +30,7 @@ export default function Contact() {
 
               <div className="space-y-6 mb-12">
                 {[
-                  { icon: Mail, title: "Email", value: "support@godgifted.com" },
+                  { icon: Mail, title: t('contact.fields.email'), value: "support@godgifted.com" },
                   { icon: Phone, title: "Phone", value: "+977 1 234 567" },
                   { icon: MapPin, title: "Address", value: "Kathmandu, Nepal" },
                 ].map((item, i) => (
@@ -49,7 +49,7 @@ export default function Contact() {
               <div className="bg-white p-6 rounded-2xl border border-[rgba(28,25,23,0.06)]">
                 <div className="flex items-center gap-3 mb-3">
                   <MessageSquare className="h-6 w-6 text-[#2d5a3d]" />
-                  <p className="font-semibold text-[#1c1917]">FAQ</p>
+                  <p className="font-semibold text-[#1c1917]">{t('footer.faq')}</p>
                 </div>
                 <div className="space-y-3 text-sm text-[#78746e]">
                   <p>• Shipping times and returns</p>
@@ -70,7 +70,7 @@ export default function Contact() {
                   <h3 className="text-2xl font-semibold text-[#1c1917] mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
                     Thank You!
                   </h3>
-                  <p className="text-[#78746e]">We'll get back to you as soon as possible.</p>
+                  <p className="text-[#78746e]">{t('contact.responseNote')}</p>
                 </div>
               ) : (
                 <form
@@ -81,7 +81,7 @@ export default function Contact() {
                   className="space-y-6"
                 >
                   <div>
-                    <label className="block text-sm font-medium text-[#1c1917] mb-2">Name</label>
+                    <label className="block text-sm font-medium text-[#1c1917] mb-2">{t('common.name')}</label>
                     <input
                       required
                       type="text"
@@ -91,7 +91,7 @@ export default function Contact() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#1c1917] mb-2">Email</label>
+                    <label className="block text-sm font-medium text-[#1c1917] mb-2">{t('dashboard.customers.email')}</label>
                     <input
                       required
                       type="email"
@@ -101,22 +101,22 @@ export default function Contact() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#1c1917] mb-2">Subject</label>
+                    <label className="block text-sm font-medium text-[#1c1917] mb-2">{t('contact.fields.subject')}</label>
                     <select
                       value={form.subject}
                       onChange={(e) => setForm({ ...form, subject: e.target.value })}
                       className="w-full px-4 py-3 rounded-xl border border-[rgba(28,25,23,0.1)] bg-[#f9f7f4] focus:outline-none focus:border-[#2d5a3d]"
                     >
-                      <option value="">Select a topic</option>
-                      <option value="general">General Inquiry</option>
-                      <option value="order">Order Support</option>
-                      <option value="himmat-tea">Himmat Tea Inquiry</option>
-                      <option value="godgifted-dal">Godgifted Dal Inquiry</option>
-                      <option value="wholesale">Wholesale</option>
+                      <option value="">{t('contact.fields.selectTopic')}</option>
+                      <option value="general">{t('contact.topics.generalInquiry')}</option>
+                      <option value="order">{t('contact.topics.orderSupport')}</option>
+                      <option value="himmat-tea">{t('contact.topics.himmatTeaInquiry')}</option>
+                      <option value="godgifted-dal">{t('contact.topics.godgiftedDalInquiry')}</option>
+                      <option value="wholesale">{t('nav.wholesale')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#1c1917] mb-2">Message</label>
+                    <label className="block text-sm font-medium text-[#1c1917] mb-2">{t('contact.fields.message')}</label>
                     <textarea
                       required
                       rows={5}

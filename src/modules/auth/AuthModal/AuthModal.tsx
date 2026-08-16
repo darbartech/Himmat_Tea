@@ -7,6 +7,7 @@ import { LoginForm } from '../LoginForm';
 import { SignupForm } from '../SignupForm';
 import { useAuth } from '@/context/AuthContext';
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -34,6 +35,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const router = useRouter();
   const modalRef = useRef<HTMLDivElement>(null);
   const firstFocusableRef = useRef<HTMLButtonElement>(null);
+  const { t } = useTranslation();
 
   const safeRedirectTo = getSafeRedirect(redirectTo);
 
@@ -160,7 +162,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               ref={firstFocusableRef}
               onClick={onClose}
               className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#f9f7f4] border border-[#e8e9e5] hover:bg-[#f0ede8] hover:border-[#d4d6cf] transition-all"
-              aria-label="Close"
+              aria-label={t('a11y.close')}
             >
               <X className="h-4 w-4 text-[#1c1917]" />
             </button>

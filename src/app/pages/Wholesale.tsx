@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
+import { useTranslation } from '../../context/TranslationContext';
 import {
   ArrowRight,
   Check,
@@ -160,6 +161,8 @@ const inputClass =
   "w-full px-4 py-3 rounded-xl border border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] text-[#1c1917] placeholder:text-[#b0aba4] text-sm focus:outline-none focus:ring-2 focus:ring-[#2d5a3d]/25 focus:border-[#2d5a3d] transition-all";
 
 export default function Wholesale() {
+  const { t } = useTranslation();
+
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -267,7 +270,7 @@ export default function Wholesale() {
           <div className="mt-8 rounded-2xl overflow-hidden h-[260px] lg:h-[340px]">
             <img
               src="https://images.unsplash.com/photo-1520201163981-8cc95007dd2a?w=1400&h=500&fit=crop"
-              alt="Café wholesale partner"
+              alt={t('wholesale.cafeImageAlt')}
               className="w-full h-full object-cover"
             />
           </div>
@@ -590,7 +593,7 @@ export default function Wholesale() {
               >
                 Trusted by Businesses
                 <br />
-                <span className="text-[#2d5a3d]">Across the World</span>
+                <span className="text-[#2d5a3d]">{t('wholesale.acrossTheWorld')}</span>
               </h2>
             </div>
             <div className="flex items-center gap-2 text-sm text-[#78746e]">
@@ -796,7 +799,7 @@ export default function Wholesale() {
                         <input
                           value={form.business}
                           onChange={set("business")}
-                          placeholder="Your business name"
+                          placeholder={t('wholesale.businessNamePlaceholder')}
                           className={inputClass}
                           required
                         />
@@ -808,7 +811,7 @@ export default function Wholesale() {
                         <input
                           value={form.contact}
                           onChange={set("contact")}
-                          placeholder="Your full name"
+                          placeholder={t('careers.fullNamePlaceholder')}
                           className={inputClass}
                           required
                         />
@@ -832,12 +835,12 @@ export default function Wholesale() {
                               Select type…
                             </option>
                             <option>Café</option>
-                            <option>Restaurant</option>
-                            <option>Retailer</option>
-                            <option>Hotel / Resort</option>
-                            <option>Online Store</option>
-                            <option>Distributor</option>
-                            <option>Other</option>
+                            <option>{t('wholesale.businessType.restaurant')}</option>
+                            <option>{t('wholesale.businessType.retailer')}</option>
+                            <option>{t('wholesale.businessType.hotel')}</option>
+                            <option>{t('wholesale.businessType.onlineStore')}</option>
+                            <option>{t('wholesale.businessType.distributor')}</option>
+                            <option>{t('checkout.countries.other')}</option>
                           </select>
                           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e] pointer-events-none" />
                         </div>
@@ -849,7 +852,7 @@ export default function Wholesale() {
                         <input
                           value={form.country}
                           onChange={set("country")}
-                          placeholder="e.g. United Kingdom"
+                          placeholder={t('wholesale.countryPlaceholder')}
                           className={inputClass}
                           required
                         />
@@ -865,7 +868,7 @@ export default function Wholesale() {
                           value={form.email}
                           onChange={set("email")}
                           type="email"
-                          placeholder="you@business.com"
+                          placeholder={t('wholesale.businessEmailPlaceholder')}
                           className={inputClass}
                           required
                         />
@@ -897,7 +900,7 @@ export default function Wholesale() {
                           <option value="" disabled>
                             Select volume…
                           </option>
-                          <option>Under 1 kg</option>
+                          <option>{t('wholesale.under1kg')}</option>
                           <option>1–5 kg</option>
                           <option>5–20 kg</option>
                           <option>20–50 kg</option>
@@ -926,7 +929,7 @@ export default function Wholesale() {
                             }}
                             className="w-4 h-4 accent-[#2d5a3d]"
                           />
-                          <span className="text-sm">Himmat Tea</span>
+                          <span className="text-sm">{t('wholesale.brand.himmatTea')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -942,7 +945,7 @@ export default function Wholesale() {
                             }}
                             className="w-4 h-4 accent-[#b8862f]"
                           />
-                          <span className="text-sm">Godgifted Dal</span>
+                          <span className="text-sm">{t('wholesale.brand.godgiftedDal')}</span>
                         </label>
                       </div>
                     </div>

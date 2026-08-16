@@ -50,11 +50,6 @@ async function uploadWithOptions(
   folder: string,
   options: Record<string, any>
 ): Promise<UploadedFileData> {
-<<<<<<< HEAD
-  // -----------------------------------------
-  // Validate file size
-  // -----------------------------------------
-
   if (file.size <= 0) {
     throw new Error(`File "${file.name}" is empty.`);
   }
@@ -69,67 +64,15 @@ async function uploadWithOptions(
     );
   }
 
-  // -----------------------------------------
-  // Validate MIME type
-  // -----------------------------------------
-
   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
     throw new Error(
       `Unsupported file type "${file.type}". Allowed types: JPG, PNG, WebP, GIF, AVIF, SVG.`
     );
   }
 
-  // -----------------------------------------
-  // Convert File -> Buffer
-  // -----------------------------------------
-
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  if (!buffer.length) {
-    throw new Error(`Could not read file "${file.name}".`);
-  }
-
-  // -----------------------------------------
-  // Cloudinary credentials check
-  // -----------------------------------------
-
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
   const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
   const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim();
-=======
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  const fileSizeKB = file.size / 1024;
-  const timeoutMs =
-    fileSizeKB > 2048
-      ? 120_000
-      : fileSizeKB > 1024
-      ? 90_000
-      : DEFAULT_UPLOAD_TIMEOUT_MS;
-
-  const uploadPromise = new Promise<UploadedFileData>((resolve, reject) => {
-    try {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        options,
-        (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve({
-              url: result!.secure_url,
-              publicId: result!.public_id,
-              width: result!.width,
-              height: result!.height,
-              format: result!.format,
-              originalName: file.name,
-              bytes: result!.bytes,
-            });
-          }
-        }
-      );
->>>>>>> 06da89314e26d17ea9aedc8f181672a739f869db
 
   if (!cloudName) {
     throw new Error("CLOUDINARY_CLOUD_NAME is missing.");
@@ -143,29 +86,26 @@ async function uploadWithOptions(
     throw new Error("CLOUDINARY_API_SECRET is missing.");
   }
 
-  // -----------------------------------------
-  // Convert Buffer -> Data URI
-  // -----------------------------------------
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  if (!buffer.length) {
+    throw new Error(`Could not read file "${file.name}".`);
+  }
 
   const base64 = buffer.toString("base64");
-
   const dataUri = `data:${file.type};base64,${base64}`;
 
-  // -----------------------------------------
-  // Upload to Cloudinary
-  // -----------------------------------------
-
-  const result = await cloudinary.uploader.upload(dataUri, {
+  const mergedOptions: Record<string, any> = {
     folder,
     resource_type: "image",
     use_filename: true,
     unique_filename: true,
     overwrite: false,
-  });
+    ...(options || {}),
+  };
 
-  // -----------------------------------------
-  // Return normalized response
-  // -----------------------------------------
+  const result = await cloudinary.uploader.upload(dataUri, mergedOptions);
 
   return {
     url: result.secure_url,
@@ -231,10 +171,6 @@ async function uploadSingleFile(
 
 export async function POST(request: NextRequest) {
   try {
-    // -----------------------------------------
-    // Admin authentication
-    // -----------------------------------------
-
     const adminUser = await getCurrentAdmin();
 
     if (!adminUser) {
@@ -244,10 +180,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // -----------------------------------------
-    // Read multipart/form-data
-    // -----------------------------------------
-
     const formData = await request.formData();
 
     const folderValue = formData.get("folder");
@@ -256,10 +188,6 @@ export async function POST(request: NextRequest) {
       typeof folderValue === "string" && folderValue.trim()
         ? folderValue.trim()
         : "himmat-tea";
-
-    // -----------------------------------------
-    // Collect files
-    // -----------------------------------------
 
     const allFiles: File[] = [];
 
@@ -285,20 +213,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // -----------------------------------------
-    // No files
-    // -----------------------------------------
-
     if (allFiles.length === 0) {
       return createErrorResponse(
         "No file(s) provided.",
         400
       );
     }
-
-    // -----------------------------------------
-    // Upload files
-    // -----------------------------------------
 
     const uploaded: UploadedFileData[] = [];
     const errors: string[] = [];
@@ -338,20 +258,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // -----------------------------------------
-    // All failed
-    // -----------------------------------------
-
     if (uploaded.length === 0) {
       return createErrorResponse(
         `All uploads failed: ${errors.join("; ")}`,
         400
       );
     }
-
-    // -----------------------------------------
-    // Single file response
-    // -----------------------------------------
 
     if (
       singleFile &&
@@ -366,10 +278,6 @@ export async function POST(request: NextRequest) {
             : undefined,
       });
     }
-
-    // -----------------------------------------
-    // Multiple files response
-    // -----------------------------------------
 
     return createResponse({
       success: true,
@@ -395,10 +303,6 @@ export async function DELETE(
   request: NextRequest
 ) {
   try {
-    // -----------------------------------------
-    // Admin authentication
-    // -----------------------------------------
-
     const adminUser = await getCurrentAdmin();
 
     if (!adminUser) {
@@ -407,10 +311,6 @@ export async function DELETE(
         401
       );
     }
-
-    // -----------------------------------------
-    // Get public ID
-    // -----------------------------------------
 
     const { searchParams } =
       new URL(request.url);
@@ -424,10 +324,6 @@ export async function DELETE(
         400
       );
     }
-
-    // -----------------------------------------
-    // Delete from Cloudinary
-    // -----------------------------------------
 
     const result =
       await cloudinary.uploader.destroy(

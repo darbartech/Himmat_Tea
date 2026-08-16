@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/context/StoreContext";
 
+import { useTranslation } from '../../context/TranslationContext';
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
@@ -51,6 +52,8 @@ const FEATURES = [
 ];
 
 export default function Hero() {
+  const { t } = useTranslation();
+
   const { ref: stageWrapRef, inView } = useInView<HTMLDivElement>();
   const { heroVisuals } = useStore();
   const [hovering, setHovering] = useState(false);
@@ -113,7 +116,7 @@ export default function Hero() {
           >
             Nature’s Gift,
             <br />
-            <em className="not-italic text-[#2d5a3d]">Steeped in Grace</em>
+            <em className="not-italic text-[#2d5a3d]">{t('hero.tagline')}</em>
           </h1>
 
           <div className="h-0.5 w-16 bg-[#c8a96e] mb-5" />
@@ -196,7 +199,7 @@ export default function Hero() {
             <div className="relative h-full w-full flex items-center justify-center">
               <img
                 src="/Hero section.png"
-                alt="Hero section"
+                alt={t('hero.imageAlt')}
                 className="h-full w-full object-contain"
               />
             </div>

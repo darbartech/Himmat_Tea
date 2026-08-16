@@ -525,55 +525,55 @@ export default function ProductDetail() {
 
               {/* Share Buttons */}
               <div className="mb-4">
-                <p className="text-sm font-semibold text-[#1c1917] mb-3">Share this product</p>
+                <p className="text-sm font-semibold text-[#1c1917] mb-3">{t('productDetail.share.title')}</p>
                 <div className="flex flex-wrap gap-2">
                   {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
                     <button
                       onClick={() => handleShare("native")}
                       className="flex items-center gap-2 px-3 py-2.5 bg-[#2d5a3d] text-white rounded-xl hover:bg-[#234832] transition-colors"
-                      aria-label="Share via native share dialog"
-                      title="Share"
+                      aria-label={t('productDetail.share.native')}
+                      title={t('productDetail.share.button')}
                     >
                       <Share2 className="h-5 w-5" />
-                      <span className="text-sm font-medium hidden sm:inline">Share</span>
+                      <span className="text-sm font-medium hidden sm:inline">{t('productDetail.share.button')}</span>
                     </button>
                   )}
                   <button
                     onClick={() => handleShare("facebook")}
                     className="p-2.5 bg-[#1877f2] text-white rounded-xl hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1877f2]"
-                    aria-label="Share on Facebook"
-                    title="Share on Facebook"
+                    aria-label={t('productDetail.share.facebook')}
+                    title={t('productDetail.share.facebook')}
                   >
                     <Facebook className="h-5 w-5" />
                   </button>
                   <button
                     onClick={() => handleShare("twitter")}
                     className="p-2.5 bg-black text-white rounded-xl hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
-                    aria-label="Share on X (Twitter)"
-                    title="Share on X (Twitter)"
+                    aria-label={t('productDetail.share.twitter')}
+                    title={t('productDetail.share.twitter')}
                   >
                     <Twitter className="h-5 w-5" />
                   </button>
                   <button
                     onClick={() => handleShare("whatsapp")}
                     className="p-2.5 bg-[#25d366] text-white rounded-xl hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#25d366]"
-                    aria-label="Share on WhatsApp"
-                    title="Share on WhatsApp"
+                    aria-label={t('productDetail.share.whatsapp')}
+                    title={t('productDetail.share.whatsapp')}
                   >
                     <MessageCircle className="h-5 w-5" />
                   </button>
                   <button
                     onClick={() => handleShare("linkedin")}
                     className="p-2.5 bg-[#0077b5] text-white rounded-xl hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0077b5]"
-                    aria-label="Share on LinkedIn"
-                    title="Share on LinkedIn"
+                    aria-label={t('productDetail.share.linkedin')}
+                    title={t('productDetail.share.linkedin')}
                   >
                     <Linkedin className="h-5 w-5" />
                   </button>
                   <button
                     onClick={() => handleShare("copy")}
                     className={`p-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${copied ? "bg-[#2d5a3d] text-white focus:ring-[#2d5a3d]" : "bg-[#78746e] text-white hover:opacity-90 focus:ring-[#78746e]"}`}
-                    aria-label="Copy product link"
+                    aria-label={t('productDetail.share.copyLink')}
                     title={copied ? "Copied!" : "Copy Link"}
                   >
                     {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
@@ -770,7 +770,7 @@ export default function ProductDetail() {
                     ))
                   ) : (
                     <div className="text-center py-10">
-                      <p className="text-[#78746e]">No reviews yet. Be the first to review this product!</p>
+                      <p className="text-[#78746e]">{t('productDetail.noReviewsYet')}</p>
                     </div>
                   )}
                 </div>

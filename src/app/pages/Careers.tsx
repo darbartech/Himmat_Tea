@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
 import Link from "next/link";
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   MapPin,
   Clock,
@@ -305,6 +306,7 @@ function ApplyDialog({
   open: boolean;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const [done, setDone] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -389,7 +391,7 @@ function ApplyDialog({
               <input
                 value={form.name}
                 onChange={set("name")}
-                placeholder="Your full name"
+                placeholder={t('careers.fullNamePlaceholder')}
                 className={inputCls}
                 required
               />
@@ -404,7 +406,7 @@ function ApplyDialog({
                   value={form.email}
                   onChange={set("email")}
                   type="email"
-                  placeholder="you@email.com"
+                  placeholder={t('careers.emailPlaceholder')}
                   className={inputCls}
                   required
                 />
@@ -431,7 +433,7 @@ function ApplyDialog({
                 value={form.linkedin}
                 onChange={set("linkedin")}
                 type="url"
-                placeholder="https://linkedin.com/in/yourname"
+                placeholder={t('careers.linkedinPlaceholder')}
                 className={inputCls}
               />
             </div>
@@ -664,6 +666,7 @@ function JobCard({ job, onApply }: { job: Job; onApply: (job: Job) => void }) {
 ───────────────────────────────────────────── */
 
 export default function Careers() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("All");
   const [applyJob, setApplyJob] = useState<Job | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -753,7 +756,7 @@ export default function Careers() {
           <div className="mt-8 rounded-2xl overflow-hidden h-[260px] lg:h-[360px]">
             <img
               src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1400&h=500&fit=crop"
-              alt="Godgifted team at work"
+              alt={t('careers.teamImageAlt')}
               className="w-full h-full object-cover"
             />
           </div>

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useCurrency } from "@/context/CurrencyContext";
 import { Check, Package, Sparkles, Star } from "lucide-react";
 
+import { useTranslation } from "@/hooks/useTranslation";
 interface Plan {
   id: string;
   name: string;
@@ -116,6 +117,7 @@ const subFaqs = [
 export default function Subscribe() {
   const [billing, setBilling] = useState<"monthly" | "quarterly">("monthly");
   const { formatPrice } = useCurrency();
+  const { t } = useTranslation();
 
   const handleSubscribe = (planName: string) => {
     toast.success("Subscription started! Check your email.");
@@ -249,13 +251,13 @@ export default function Subscribe() {
                   {/* Tea Info */}
                   <div className="bg-[#f9f7f4] rounded-xl px-4 py-3 mb-6 flex gap-6">
                     <div>
-                      <p className="text-xs text-[#78746e] mb-0.5">Teas</p>
+                      <p className="text-xs text-[#78746e] mb-0.5">{t('subscribe.teasLabel')}</p>
                       <p className="font-semibold text-[#1c1917]">
                         {plan.teas} varieties
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#78746e] mb-0.5">Weight</p>
+                      <p className="text-xs text-[#78746e] mb-0.5">{t('dashboard.orders.weight')}</p>
                       <p className="font-semibold text-[#1c1917]">
                         {plan.weight}
                       </p>

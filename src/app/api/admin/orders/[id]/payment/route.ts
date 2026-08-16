@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
 import { getCurrentAdmin } from '@/lib/auth'
@@ -85,7 +86,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     const now = new Date()
 
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       let newOrderStatus = order.status
 
       if (decision === 'PAID') {

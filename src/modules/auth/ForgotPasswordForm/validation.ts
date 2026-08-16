@@ -4,8 +4,8 @@ export type TFunc = (key: string, params?: Record<string, string | number>) => s
 
 export const createForgotPasswordSchema = (t: TFunc) => z.object({
   email: z.string()
-    .email(t('validation.email.invalid'))
-    .min(1, t('validation.email.required'))
+    .email("Please enter a valid email address")
+    .min(1, "Email is required")
 });
 
 export type ForgotPasswordData = z.infer<ReturnType<typeof createForgotPasswordSchema>>;

@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
 import { getCurrentUser, getCurrentAdmin } from '@/lib/auth'
@@ -329,7 +330,7 @@ export async function POST(request: NextRequest) {
     let createdOrderItems: { productId: number; quantity: number; name: string }[] | undefined
 
     try {
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         for (const item of lineItems) {
           const updated = await tx.product.updateMany({
             where: {

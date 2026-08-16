@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
 import { getCurrentAdmin } from '@/lib/auth'
@@ -105,7 +106,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       return createErrorResponse('Collection not found', 404)
     }
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.collectionItem.deleteMany({ where: { collectionId: id } })
       await tx.collection.delete({ where: { id } })
     })

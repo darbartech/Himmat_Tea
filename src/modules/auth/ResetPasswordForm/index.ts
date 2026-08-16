@@ -1,2 +1,7 @@
+import { createResetPasswordSchema, type ResetPasswordData } from './validation';
+
+const _t = (key: string) => key;
+const resetPasswordSchema = createResetPasswordSchema(_t);
+
 export { ResetPasswordForm, default } from './ResetPasswordForm';
-export { resetPasswordSchema, type ResetPasswordData } from './validation';
+export { createResetPasswordSchema, resetPasswordSchema, type ResetPasswordData };

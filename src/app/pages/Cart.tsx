@@ -209,13 +209,13 @@ export default function Cart() {
                     {promoApplied ? (
                       <div className="flex items-center gap-2 text-sm text-[#2d5a3d] bg-[#2d5a3d]/10 px-4 py-2.5 rounded-xl">
                         <span>✓</span>
-                        <span className="font-medium">Promo code applied!</span>
+                        <span className="font-medium">{t('cart.promoApplied')}</span>
                       </div>
                     ) : (
                       <div className="flex gap-2">
                         <input
                           type="text"
-                          placeholder="Enter code"
+                          placeholder={t('auth.verifyResetPage.eyebrow')}
                           value={promo}
                           onChange={(e) => setPromo(e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && applyPromo()}
@@ -236,12 +236,12 @@ export default function Cart() {
                   {/* Totals */}
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm text-[#78746e]">
-                      <span>Subtotal</span>
+                      <span>{t('dashboard.invoice.subtotal')}</span>
                       <span>{formatPrice(cartTotal)}</span>
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <div className="flex justify-between text-sm text-[#78746e]">
-                        <span>Shipping</span>
+                        <span>{t('cart.shipping')}</span>
                         <span className="text-[#2d5a3d] font-semibold">
                           Free
                         </span>
@@ -254,7 +254,7 @@ export default function Cart() {
                     </div>
                     <div className="h-px bg-[rgba(28,25,23,0.08)]" />
                     <div className="flex justify-between text-lg font-bold text-[#1c1917]">
-                      <span>Total</span>
+                      <span>{t('dashboard.invoice.total')}</span>
                       <span>{formatPrice(cartTotal)}</span>
                     </div>
                   </div>

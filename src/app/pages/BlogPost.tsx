@@ -106,7 +106,7 @@ export default function BlogPost() {
                     <p className="text-sm font-medium text-[#1c1917]">
                       Himmat Tea Team
                     </p>
-                    <p className="text-xs text-[#78746e]">Editorial</p>
+                    <p className="text-xs text-[#78746e]">{t('blog.editorialLabel')}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-[#78746e] ml-auto">
@@ -220,7 +220,7 @@ export default function BlogPost() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Your email address"
+                      placeholder={t('blog.emailPlaceholder')}
                       required
                       className="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-white/40"
                     />

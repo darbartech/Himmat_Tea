@@ -4,11 +4,14 @@ import React, { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
+import { useTranslation } from '../../context/TranslationContext';
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { t } = useTranslation();
+
   const { isLoggedIn, userType, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -32,7 +35,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Checking Authentication...</div>
+        <div className="text-xl">{t('auth.checkingAuthentication')}</div>
       </div>
     );
   }

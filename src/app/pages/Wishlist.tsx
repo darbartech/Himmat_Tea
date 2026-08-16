@@ -9,7 +9,10 @@ import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 
+import { useTranslation } from '../../context/TranslationContext';
 export default function Wishlist() {
+  const { t } = useTranslation();
+
   const { wishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
   const { formatPrice } = useCurrency();
@@ -125,7 +128,7 @@ export default function Wishlist() {
                           toast.success(`${product.name} removed from wishlist!`);
                         }}
                         className="p-2.5 border-2 border-[rgba(28,25,23,0.12)] rounded-xl text-[#78746e] hover:border-red-400 hover:text-red-500 transition-all"
-                        title="Remove from Wishlist"
+                        title={t('wishlist.removeItem')}
                       >
                         <Heart className="h-5 w-5" fill="none" />
                       </button>

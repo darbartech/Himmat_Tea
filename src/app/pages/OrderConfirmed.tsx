@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api-client";
 
+import { useTranslation } from '../../context/TranslationContext';
 interface OrderItem {
   id: number;
   productId: number;
@@ -55,6 +56,8 @@ interface Settings {
 }
 
 export default function OrderConfirmed() {
+  const { t } = useTranslation();
+
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -339,7 +342,7 @@ export default function OrderConfirmed() {
                   <div className="bg-white border border-[rgba(28,25,23,0.1)] rounded-2xl p-4">
                     <img
                       src={settings.qrImageUrl}
-                      alt="Payment QR Code"
+                      alt={t('dashboard.settings.paymentQrCode')}
                       className="w-56 h-56 object-contain"
                     />
                   </div>
@@ -451,7 +454,7 @@ export default function OrderConfirmed() {
 
             <div className="border-t border-[rgba(28,25,23,0.08)] mt-4 pt-4 space-y-2">
               <div className="flex justify-between text-sm text-[#78746e]">
-                <span>Subtotal</span>
+                <span>{t('dashboard.invoice.subtotal')}</span>
 
                 <span>
                   {currency}&nbsp;
@@ -460,7 +463,7 @@ export default function OrderConfirmed() {
               </div>
 
               <div className="flex justify-between text-sm text-[#78746e]">
-                <span>Tax</span>
+                <span>{t('dashboard.invoice.tax')}</span>
 
                 <span>
                   {currency}&nbsp;
@@ -469,7 +472,7 @@ export default function OrderConfirmed() {
               </div>
 
               <div className="flex justify-between text-sm text-[#78746e]">
-                <span>Shipping</span>
+                <span>{t('cart.shipping')}</span>
 
                 <span>
                   {order.shippingCost > 0
@@ -479,7 +482,7 @@ export default function OrderConfirmed() {
               </div>
 
               <div className="border-t border-[rgba(28,25,23,0.08)] pt-3 mt-3 flex justify-between text-lg font-bold text-[#1c1917]">
-                <span>Total</span>
+                <span>{t('dashboard.invoice.total')}</span>
 
                 <span>
                   {currency}&nbsp;

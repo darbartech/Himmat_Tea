@@ -6,7 +6,7 @@ import {
   Trash2, MinusCircle
 } from "lucide-react";
 import { useStore } from "../../../context/StoreContext";
-import { useTranslation } from "../../../hooks/useTranslation";
+import { useTranslation } from "@/hooks/useTranslation";
 import { api, ApiError } from "../../../lib/api-client";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
@@ -208,6 +208,7 @@ function OrderInvoice({
   invoiceRef: React.RefObject<HTMLDivElement>;
   settings: any;
 }) {
+  const { t } = useTranslation();
   const cgstRate = settings.taxRate / 2;
   const sgstRate = settings.taxRate / 2;
   const cgstAmount = order.total * (cgstRate / 100);
@@ -413,10 +414,10 @@ function OrderInvoice({
                 { label: "#",           align: "left",   width: "36px" },
                 { label: "Description", align: "left",   width: "auto" },
                 { label: "HSN/SAC",     align: "center", width: "90px" },
-                { label: "Qty",         align: "center", width: "60px" },
-                { label: "Unit Price",  align: "right",  width: "100px" },
-                { label: "Discount",    align: "right",  width: "90px" },
-                { label: "Amount",      align: "right",  width: "110px" },
+                { label: t('dashboard.orders.qty'),         align: "center", width: "60px" },
+                { label: t('dashboard.orders.unitPrice'),  align: "right",  width: "100px" },
+                { label: t('dashboard.orders.discount'),    align: "right",  width: "90px" },
+                { label: t('dashboard.orders.amountColumn'),      align: "right",  width: "110px" },
               ].map((col) => (
                 <th
                   key={col.label}
@@ -526,11 +527,11 @@ function OrderInvoice({
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <tbody>
               <tr>
-                <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px" }}>Subtotal</td>
+                <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px" }}>{t('dashboard.invoice.subtotal')}</td>
                 <td style={{ fontSize: "13px", textAlign: "right", fontWeight: 500, color: "#1a1a1a", paddingBottom: "8px" }}>₹{fmt(subtotal)}</td>
               </tr>
               <tr>
-                <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px" }}>Discount</td>
+                <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px" }}>{t('common.discount')}</td>
                 <td style={{ fontSize: "13px", textAlign: "right", color: "#16a34a", paddingBottom: "8px" }}>— ₹0.00</td>
               </tr>
               {settings.gstNumber ? (
@@ -1273,7 +1274,7 @@ export default function Orders() {
             </span>
             <Select value={bulkStatus} onValueChange={(val) => setBulkStatus(val as OrderStatus)}>
               <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Select status" />
+                <SelectValue placeholder={t('common.selectStatus')} />
               </SelectTrigger>
               <SelectContent>
                 {CHANGEABLE_STATUSES.map((s) => (
@@ -1420,11 +1421,11 @@ export default function Orders() {
                               </AlertDialogHeader>
                               <div className="py-4 space-y-4">
                                 <div>
-                                  <Label htmlFor="refund-amount">Refund Amount (optional)</Label>
+                                  <Label htmlFor="refund-amount">{t('dashboard.orders.refundAmountOptional')}</Label>
                                   <Input
                                     id="refund-amount"
                                     type="number"
-                                    placeholder="Full amount if left empty"
+                                    placeholder={t('dashboard.orders.fullAmountIfEmpty')}
                                     value={refundAmount}
                                     onChange={(e) => setRefundAmount(e.target.value)}
                                     className="mt-2"
@@ -1593,13 +1594,13 @@ export default function Orders() {
                         </div>
                         <Input
                           type="text"
-                          placeholder="Transaction reference (optional)"
+                          placeholder={t('dashboard.orders.transactionRefOptional')}
                           value={paymentReference}
                           onChange={(e) => setPaymentReference(e.target.value)}
                           className="mt-2 text-sm"
                         />
                         <textarea
-                          placeholder="Reject reason (sent to customer, optional)"
+                          placeholder={t('dashboard.orders.rejectReasonOptional')}
                           value={rejectReason}
                           onChange={(e) => setRejectReason(e.target.value)}
                           rows={2}
@@ -1625,23 +1626,23 @@ export default function Orders() {
 
               {/* Tracking Info */}
               <div className="px-6 py-4 border-b border-gray-100">
-                <h3 className="text-lg font-bold text-[#1c1917] mb-4">Tracking Information</h3>
+                <h3 className="text-lg font-bold text-[#1c1917] mb-4">{t('dashboard.orders.trackingInformation')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="tracking-number">Tracking Number</Label>
+                    <Label htmlFor="tracking-number">{t('dashboard.orders.trackingNumber')}</Label>
                     <Input
                       id="tracking-number"
-                      placeholder="Enter tracking number"
+                      placeholder={t('dashboard.orders.trackingNumberPlaceholder')}
                       value={trackingNumber}
                       onChange={(e) => setTrackingNumber(e.target.value)}
                       className="mt-2"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="courier-partner">Courier Partner</Label>
+                    <Label htmlFor="courier-partner">{t('dashboard.orders.courierPartner')}</Label>
                     <Input
                       id="courier-partner"
-                      placeholder="Enter courier partner"
+                      placeholder={t('dashboard.orders.courierPartnerPlaceholder')}
                       value={courierPartner}
                       onChange={(e) => setCourierPartner(e.target.value)}
                       className="mt-2"
@@ -1668,10 +1669,10 @@ export default function Orders() {
 
               {/* Internal Notes */}
               <div className="px-6 py-4 border-b border-gray-100">
-                <h3 className="text-lg font-bold text-[#1c1917] mb-4">Internal Notes</h3>
+                <h3 className="text-lg font-bold text-[#1c1917] mb-4">{t('dashboard.orders.internalNotes')}</h3>
                 <div className="flex gap-3 mb-4">
                   <Input
-                    placeholder="Add a note..."
+                    placeholder={t('dashboard.orders.addNotePlaceholder')}
                     value={newInternalNote}
                     onChange={(e) => setNewInternalNote(e.target.value)}
                   />
@@ -1738,7 +1739,7 @@ export default function Orders() {
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="max-w-[960px] w-full max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-[#1c1917]">Create New Order</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-[#1c1917]">{t('dashboard.orders.createNewOrder')}</DialogTitle>
             <DialogDescription className="text-sm text-[#78746e]">
               Enter the order details below. The order number is auto-generated but can be edited.
             </DialogDescription>
@@ -1747,7 +1748,7 @@ export default function Orders() {
           <div className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <Label htmlFor="create-order-number">Order Number</Label>
+                <Label htmlFor="create-order-number">{t('dashboard.orders.orderId')}</Label>
                 <Input
                   id="create-order-number"
                   value={createOrderNumber}
@@ -1760,7 +1761,7 @@ export default function Orders() {
               </div>
 
               <div>
-                <Label htmlFor="create-order-status">Initial Status</Label>
+                <Label htmlFor="create-order-status">{t('dashboard.orders.initialStatus')}</Label>
                 <Select value={createStatus} onValueChange={setCreateStatus}>
                   <SelectTrigger className="mt-2">
                     <SelectValue />
@@ -1774,10 +1775,10 @@ export default function Orders() {
               </div>
 
               <div>
-                <Label htmlFor="create-customer">Customer</Label>
+                <Label htmlFor="create-customer">{t('dashboard.customers.customer')}</Label>
                 <Select value={createCustomerId} onValueChange={handleCustomerSelect}>
                   <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select a customer…" />
+                    <SelectValue placeholder={t('dashboard.orders.selectCustomerPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {allCustomers.map((c) => (
@@ -1790,7 +1791,7 @@ export default function Orders() {
               </div>
 
               <div>
-                <Label htmlFor="create-customer-name">Customer Name</Label>
+                <Label htmlFor="create-customer-name">{t('dashboard.orders.customer')}</Label>
                 <Input
                   id="create-customer-name"
                   value={createCustomerName}
@@ -1800,7 +1801,7 @@ export default function Orders() {
               </div>
 
               <div>
-                <Label htmlFor="create-customer-email">Email</Label>
+                <Label htmlFor="create-customer-email">{t('dashboard.customers.email')}</Label>
                 <Input
                   id="create-customer-email"
                   type="email"
@@ -1811,7 +1812,7 @@ export default function Orders() {
               </div>
 
               <div>
-                <Label htmlFor="create-customer-phone">Phone</Label>
+                <Label htmlFor="create-customer-phone">{t('dashboard.customers.phone')}</Label>
                 <Input
                   id="create-customer-phone"
                   value={createCustomerPhone}
@@ -1821,14 +1822,14 @@ export default function Orders() {
               </div>
 
               <div className="sm:col-span-2">
-                <Label htmlFor="create-shipping">Shipping Address</Label>
+                <Label htmlFor="create-shipping">{t('dashboard.orders.shippingAddress')}</Label>
                 <Textarea
                   id="create-shipping"
                   rows={2}
                   value={createShippingAddress}
                   onChange={(e) => setCreateShippingAddress(e.target.value)}
                   className="mt-2"
-                  placeholder="Street, City, State, PIN"
+                  placeholder={t('dashboard.orders.shippingAddressPlaceholder')}
                 />
               </div>
             </div>
@@ -1836,7 +1837,7 @@ export default function Orders() {
             {/* ── Items table ── */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <Label className="text-sm font-semibold text-[#1c1917]">Order Items</Label>
+                <Label className="text-sm font-semibold text-[#1c1917]">{t('account.orderItems')}</Label>
                 <Button
                   type="button"
                   variant="secondary"
@@ -1851,11 +1852,11 @@ export default function Orders() {
                 <table className="w-full min-w-[640px]">
                   <thead className="bg-[#f9f7f4] text-[#78746e] text-xs uppercase tracking-wide">
                     <tr>
-                      <th className="px-3 py-3 text-left font-semibold w-[38%]">Product</th>
-                      <th className="px-3 py-3 text-left font-semibold w-[10%]">Qty</th>
-                      <th className="px-3 py-3 text-left font-semibold w-[14%]">Unit Price</th>
-                      <th className="px-3 py-3 text-left font-semibold w-[14%]">Weight</th>
-                      <th className="px-3 py-3 text-right font-semibold w-[14%]">Amount</th>
+                      <th className="px-3 py-3 text-left font-semibold w-[38%]">{t('dashboard.inventory.product')}</th>
+                      <th className="px-3 py-3 text-left font-semibold w-[10%]">{t('dashboard.invoice.qty')}</th>
+                      <th className="px-3 py-3 text-left font-semibold w-[14%]">{t('dashboard.purchaseOrders.unitPrice')}</th>
+                      <th className="px-3 py-3 text-left font-semibold w-[14%]">{t('dashboard.orders.weight')}</th>
+                      <th className="px-3 py-3 text-right font-semibold w-[14%]">{t('dashboard.invoice.amount')}</th>
                       <th className="px-3 py-3 w-[10%]"></th>
                     </tr>
                   </thead>
@@ -1868,7 +1869,7 @@ export default function Orders() {
                             onValueChange={(v) => handleItemProductSelect(idx, v)}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="Select product…" />
+                              <SelectValue placeholder={t('dashboard.orders.selectProductPlaceholder')} />
                             </SelectTrigger>
                             <SelectContent>
                               {allProducts.filter((p: any) => p.isActive !== false).map((p: any) => (
@@ -1931,11 +1932,11 @@ export default function Orders() {
               <div className="sm:col-span-2 flex justify-end">
                 <div className="w-full sm:w-[300px] bg-[#f9f7f4] rounded-xl p-4 border border-[#2d5a3d]/10 space-y-2 text-sm">
                   <div className="flex justify-between text-[#78746e]">
-                    <span>Subtotal</span>
+                    <span>{t('dashboard.invoice.subtotal')}</span>
                     <span className="tabular-nums">₹{fmt(createSubtotal)}</span>
                   </div>
                   <div className="flex justify-between text-[#78746e]">
-                    <span>Shipping (flat rate)</span>
+                    <span>{t('dashboard.orders.shippingFlatRate')}</span>
                     <span className="tabular-nums">₹{fmt(createShipping)}</span>
                   </div>
                   <div className="flex justify-between text-[#78746e]">
@@ -1943,7 +1944,7 @@ export default function Orders() {
                     <span className="tabular-nums">₹{fmt(createTax)}</span>
                   </div>
                   <div className="pt-2 border-t border-[#2d5a3d]/15 flex justify-between font-bold text-[#1c1917] text-base">
-                    <span>Grand Total</span>
+                    <span>{t('dashboard.orders.grandTotal')}</span>
                     <span className="tabular-nums">₹{fmt(createGrandTotal)}</span>
                   </div>
                 </div>

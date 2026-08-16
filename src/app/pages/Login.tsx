@@ -12,7 +12,10 @@ import { Eye, EyeOff, AlertCircle, ArrowLeft, ChevronRight } from "lucide-react"
 import { toast } from "sonner";
 import Image from "next/image";
 
+import { useTranslation } from '../../context/TranslationContext';
 export default function Login() {
+  const { t } = useTranslation();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -71,13 +74,13 @@ export default function Login() {
             className="inline-flex items-center gap-2 mb-12 text-[#78746e] hover:text-[#2d5a3d] transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span className="text-sm font-medium">Back to Home</span>
+            <span className="text-sm font-medium">{t('auth.backToHome')}</span>
           </Link>
 
           {/* Logo */}
               <Image
               src="/logo.svg"
-              alt="GodGifted Logo"
+              alt={t('auth.logoAlt')}
               width={100}
               height={100}
               className="w-[150px] h-[100%]"
@@ -116,7 +119,7 @@ export default function Login() {
                 id="username"
                 name="username"
                 type="text"
-                placeholder="Enter your username or email"
+                placeholder={t('auth.enterUsernameOrEmail')}
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value);
@@ -142,7 +145,7 @@ export default function Login() {
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  placeholder={t('auth.login.passwordPlaceholder')}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
@@ -177,11 +180,11 @@ export default function Login() {
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Signing in...</span>
+                  <span>{t('auth.login.submitting')}</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-2">
-                  <span>Sign in</span>
+                  <span>{t('auth.login.submit')}</span>
                   <ChevronRight className="h-4 w-4" />
                 </div>
               )}
@@ -195,7 +198,7 @@ export default function Login() {
         {/* Background Image */}
         <img
           src="https://imgs.search.brave.com/laq4WDrhQXqaasssQIbDDX-4-2_F39fPSfplq-EARFE/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMudmVjdGVlenku/Y29tL3N5c3RlbS9y/ZXNvdXJjZXMvdGh1/bWJuYWlscy8wMTEv/NTk5LzM0NC9zbWFs/bC90ZWEtY3VwLXdp/dGgtYW5kLXRlYS1s/ZWFmLXNhY2tpbmct/b24tdGhlLXdvb2Rl/bi10YWJsZS1hbmQt/dGhlLXRlYS1wbGFu/dGF0aW9ucy1iYWNr/Z3JvdW5kLXBob3Rv/LmpwZw"
-          alt="Tea leaves being harvested in a lush plantation"
+          alt={t('auth.heroImageAlt')}
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
@@ -221,15 +224,15 @@ export default function Login() {
             <div className="grid grid-cols-3 gap-6">
               <div>
                 <div className="text-3xl font-bold text-[#c8a96e]">50+</div>
-                <div className="text-sm text-white/70 mt-1">Tea Varieties</div>
+                <div className="text-sm text-white/70 mt-1">{t('auth.stats.teaVarieties')}</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-[#c8a96e]">10K+</div>
-                <div className="text-sm text-white/70 mt-1">Happy Customers</div>
+                <div className="text-sm text-white/70 mt-1">{t('testimonials.stat.customersLabel')}</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-[#c8a96e]">15+</div>
-                <div className="text-sm text-white/70 mt-1">Years of Excellence</div>
+                <div className="text-sm text-white/70 mt-1">{t('auth.stats.yearsOfExcellence')}</div>
               </div>
             </div>
           </div>

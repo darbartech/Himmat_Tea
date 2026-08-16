@@ -422,7 +422,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 type="button"
                                 onClick={(e) => deleteNotification(notification.id, e)}
                                 className="p-1.5 rounded-md text-[#78746e] hover:text-red-600 hover:bg-red-50 transition-colors"
-                                aria-label="Delete notification"
+                                aria-label={t('a11y.deleteNotification')}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
@@ -444,13 +444,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-[#f0ede8] transition-colors">
                   <Avatar className="h-9 w-9 border-2 border-[#2d5a3d]/10">
-                    <AvatarImage src="" alt="Admin" />
+                    <AvatarImage src="" alt={t('dashboard.adminUsers.admin')} />
                     <AvatarFallback className="bg-gradient-to-br from-[#2d5a3d] to-[#0b7c33] text-white font-semibold">
                       GG
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium text-[#1c1917]">Admin</p>
+                    <p className="text-sm font-medium text-[#1c1917]">{t('dashboard.adminUsers.admin')}</p>
                     <p className="text-xs text-[#78746e]">admin@godgifted.com</p>
                   </div>
                   <ChevronDown className="h-4 w-4 text-[#78746e] hidden md:block" />

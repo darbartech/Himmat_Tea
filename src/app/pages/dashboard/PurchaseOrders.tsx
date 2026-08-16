@@ -16,6 +16,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   Select,
   SelectContent,
@@ -104,6 +105,8 @@ export default function PurchaseOrders() {
   const [itemQuantity, setItemQuantity] = useState<number>(0);
   const [itemUnitPrice, setItemUnitPrice] = useState<number>(0);
   const [itemRemovingId, setItemRemovingId] = useState<number | null>(null);
+
+  const { t } = useTranslation();
 
   const loadAll = async () => {
     try {
@@ -363,7 +366,7 @@ export default function PurchaseOrders() {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             Purchase Orders
           </h1>
-          <p className="text-[#78746e] mt-1">Manage your supplier purchase orders</p>
+          <p className="text-[#78746e] mt-1">{t('dashboard.purchaseOrders.subtitle')}</p>
         </div>
         <Dialog
           open={isAddDialogOpen}
@@ -395,7 +398,7 @@ export default function PurchaseOrders() {
                     id="poNumber"
                     value={newPO.poNumber}
                     onChange={(e) => setNewPO((prev) => ({ ...prev, poNumber: e.target.value }))}
-                    placeholder="PO-2024-001"
+                    placeholder={t('dashboard.purchaseOrders.poNumberPlaceholder')}
                     disabled={isSaving}
                   />
                 </div>
@@ -405,7 +408,7 @@ export default function PurchaseOrders() {
                     id="supplier"
                     value={newPO.supplier}
                     onChange={(e) => setNewPO((prev) => ({ ...prev, supplier: e.target.value }))}
-                    placeholder="Supplier name"
+                    placeholder={t('dashboard.purchaseOrders.enterSupplier')}
                     disabled={isSaving}
                   />
                 </div>
@@ -413,14 +416,14 @@ export default function PurchaseOrders() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="po-status">Status</Label>
+                  <Label htmlFor="po-status">{t('dashboard.products.status')}</Label>
                   <Select
                     value={newPO.status}
                     onValueChange={(value: string) => setNewPO((prev) => ({ ...prev, status: value }))}
                     disabled={isSaving}
                   >
                     <SelectTrigger id="po-status">
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder={t('common.selectStatus')} />
                     </SelectTrigger>
                     <SelectContent>
                       {statuses.map((s) => (
@@ -432,7 +435,7 @@ export default function PurchaseOrders() {
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="orderDate">Order Date</Label>
+                  <Label htmlFor="orderDate">{t('dashboard.orders.date')}</Label>
                   <Input
                     id="orderDate"
                     type="date"
@@ -442,7 +445,7 @@ export default function PurchaseOrders() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="expectedDeliveryDate">Expected Delivery</Label>
+                  <Label htmlFor="expectedDeliveryDate">{t('dashboard.purchaseOrders.expectedDelivery')}</Label>
                   <Input
                     id="expectedDeliveryDate"
                     type="date"
@@ -456,18 +459,18 @@ export default function PurchaseOrders() {
               </div>
 
               <div className="space-y-4 border-t pt-4">
-                <Label className="text-base font-medium">Items</Label>
+                <Label className="text-base font-medium">{t('dashboard.purchaseOrders.items')}</Label>
 
                 <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-12 gap-3 items-end">
                   <div className="sm:col-span-4 lg:col-span-5 grid gap-2">
-                    <Label htmlFor="po-product">Product</Label>
+                    <Label htmlFor="po-product">{t('dashboard.inventory.product')}</Label>
                     <Select
                       value={selectedProduct}
                       onValueChange={setSelectedProduct}
                       disabled={isSaving}
                     >
                       <SelectTrigger id="po-product">
-                        <SelectValue placeholder="Select product" />
+                        <SelectValue placeholder={t('dashboard.purchaseOrders.selectProduct')} />
                       </SelectTrigger>
                       <SelectContent>
                         {products.map((product) => (
@@ -479,11 +482,11 @@ export default function PurchaseOrders() {
                     </Select>
                   </div>
                   <div className="sm:col-span-2 lg:col-span-3 grid gap-2">
-                    <Label htmlFor="po-qty">Quantity</Label>
+                    <Label htmlFor="po-qty">{t('dashboard.inventory.quantity')}</Label>
                     <Input
                       id="po-qty"
                       type="number"
-                      placeholder="Qty"
+                      placeholder={t('dashboard.invoice.qty')}
                       min={0}
                       value={itemQuantity}
                       onChange={(e) => setItemQuantity(Number(e.target.value))}
@@ -495,7 +498,7 @@ export default function PurchaseOrders() {
                     <Input
                       id="po-price"
                       type="number"
-                      placeholder="Price"
+                      placeholder={t('dashboard.products.price')}
                       min={0}
                       step="0.01"
                       value={itemUnitPrice}
@@ -508,10 +511,10 @@ export default function PurchaseOrders() {
                       onClick={addItemToPO}
                       disabled={isSaving}
                       className="bg-[#2d5a3d] hover:bg-[#234832] w-full sm:w-auto"
-                      aria-label="Add item"
+                      aria-label={t('a11y.addItem')}
                     >
                       <Plus className="h-4 w-4 mr-1" />
-                      <span className="sm:hidden lg:inline">Add</span>
+                      <span className="sm:hidden lg:inline">{t('dashboard.inventory.add')}</span>
                     </Button>
                   </div>
                 </div>
@@ -521,10 +524,10 @@ export default function PurchaseOrders() {
                     <table className="w-full min-w-[520px] text-sm">
                       <thead>
                         <tr className="text-left text-[#78746e] border-b border-[#2d5a3d]/10">
-                          <th className="py-2 pr-2 font-medium">Product</th>
-                          <th className="py-2 px-2 font-medium text-right w-20">Qty</th>
-                          <th className="py-2 px-2 font-medium text-right w-28">Unit</th>
-                          <th className="py-2 px-2 font-medium text-right w-28">Total</th>
+                          <th className="py-2 pr-2 font-medium">{t('dashboard.inventory.product')}</th>
+                          <th className="py-2 px-2 font-medium text-right w-20">{t('dashboard.invoice.qty')}</th>
+                          <th className="py-2 px-2 font-medium text-right w-28">{t('common.unit')}</th>
+                          <th className="py-2 px-2 font-medium text-right w-28">{t('dashboard.invoice.total')}</th>
                           <th className="py-2 pl-2 w-14"></th>
                         </tr>
                       </thead>
@@ -585,13 +588,13 @@ export default function PurchaseOrders() {
               </div>
 
               <div className="grid gap-2 border-t pt-4">
-                <Label htmlFor="po-notes">Notes (Optional)</Label>
+                <Label htmlFor="po-notes">{t('common.notesOptional')}</Label>
                 <Textarea
                   id="po-notes"
                   rows={2}
                   value={newPO.notes || ""}
                   onChange={(e) => setNewPO((prev) => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Additional notes..."
+                  placeholder={t('dashboard.purchaseOrders.notesPlaceholder')}
                   disabled={isSaving}
                 />
               </div>
@@ -626,7 +629,7 @@ export default function PurchaseOrders() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
           <Input
             type="text"
-            placeholder="Search by PO number or supplier..."
+            placeholder={t('dashboard.purchaseOrders.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-11"
@@ -639,12 +642,12 @@ export default function PurchaseOrders() {
           <table className="w-full min-w-[720px]">
             <thead>
               <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
-                <th className="px-6 py-4 font-medium whitespace-nowrap">PO Number</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Supplier</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Date</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Total</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Status</th>
-                <th className="px-6 py-4 font-medium text-right whitespace-nowrap">Actions</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('dashboard.purchaseOrders.poNumber')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('dashboard.inventory.supplier')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('dashboard.invoice.date')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('dashboard.invoice.total')}</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">{t('dashboard.products.status')}</th>
+                <th className="px-6 py-4 font-medium text-right whitespace-nowrap">{t('dashboard.orders.action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2d5a3d]/5">
@@ -702,7 +705,7 @@ export default function PurchaseOrders() {
                               variant="secondary"
                               size="sm"
                               onClick={() => handleReceivePO(po)}
-                              title="Mark as Received"
+                              title={t('dashboard.purchaseOrders.markReceived')}
                               disabled={rowBusy || isSaving}
                             >
                               {receivingId === po.id ? (
@@ -717,7 +720,7 @@ export default function PurchaseOrders() {
                             size="sm"
                             onClick={() => handleEditPO(po)}
                             className="hover:bg-[#f0ede8]"
-                            title="Edit"
+                            title={t('dashboard.products.edit')}
                             disabled={rowBusy || isSaving}
                           >
                             <Edit className="h-4 w-4" />
@@ -728,7 +731,7 @@ export default function PurchaseOrders() {
                                 variant="destructive"
                                 size="sm"
                                 onClick={() => handleRequestDelete(po)}
-                                title="Delete"
+                                title={t('dashboard.products.delete')}
                                 disabled={rowBusy}
                               >
                                 {deletingId === po.id ? (
@@ -753,7 +756,7 @@ export default function PurchaseOrders() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Purchase Order?</AlertDialogTitle>
+            <AlertDialogTitle>{t('dashboard.purchaseOrders.deleteConfirm')}</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete{" "}
               <span className="font-semibold text-[#1c1917]">
@@ -763,7 +766,7 @@ export default function PurchaseOrders() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingId !== null}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletingId !== null}>{t('dashboard.products.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               disabled={deletingId !== null}
               onClick={handleConfirmDelete}
@@ -775,7 +778,7 @@ export default function PurchaseOrders() {
                   Deleting...
                 </>
               ) : (
-                "Delete"
+                t('common.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

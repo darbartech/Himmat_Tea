@@ -25,6 +25,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../../lib/api-client";
 import { toast } from "sonner";
 
+import { useTranslation } from '../../../context/TranslationContext';
 type Coupon = {
   id: string;
   code: string;
@@ -42,6 +43,8 @@ type Coupon = {
 };
 
 const Coupons = () => {
+  const { t } = useTranslation();
+
   const queryClient = useQueryClient();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
@@ -175,15 +178,15 @@ const Coupons = () => {
     const isExpired = new Date(coupon.validTo) < new Date();
     const isLimitReached = coupon.usedCount >= coupon.usageLimit;
     if (!coupon.isActive) {
-      return <Badge className="bg-gray-100 text-gray-800">Inactive</Badge>;
+      return <Badge className="bg-gray-100 text-gray-800">{t('dashboard.coupons.inactive')}</Badge>;
     }
     if (isExpired) {
-      return <Badge className="bg-red-100 text-red-800">Expired</Badge>;
+      return <Badge className="bg-red-100 text-red-800">{t('dashboard.inventory.expired')}</Badge>;
     }
     if (isLimitReached) {
-      return <Badge className="bg-orange-100 text-orange-800">Limit Reached</Badge>;
+      return <Badge className="bg-orange-100 text-orange-800">{t('dashboard.coupons.limitReached')}</Badge>;
     }
-    return <Badge className="bg-green-100 text-green-800">Active</Badge>;
+    return <Badge className="bg-green-100 text-green-800">{t('dashboard.customers.active')}</Badge>;
   };
 
   const formatDiscountType = (type: string) => {
@@ -209,7 +212,7 @@ const Coupons = () => {
           >
             Coupons
           </h1>
-          <p className="text-[#78746e]">Create and manage discount coupons</p>
+          <p className="text-[#78746e]">{t('dashboard.coupons.subtitle')}</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
           if (!open) resetForm();
@@ -230,18 +233,18 @@ const Coupons = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Coupon Code</Label>
+                  <Label>{t('dashboard.coupons.couponCode')}</Label>
                   <Input
                     value={formData.code}
                     onChange={(e) =>
                       setFormData({ ...formData, code: e.target.value.toUpperCase() })
                     }
-                    placeholder="e.g., WELCOME10"
+                    placeholder={t('dashboard.coupons.codePlaceholder')}
                     required
                   />
                 </div>
                 <div>
-                  <Label>Discount Type</Label>
+                  <Label>{t('dashboard.coupons.discountType')}</Label>
                   <Select
                     value={formData.discountType}
                     onValueChange={(value: any) =>
@@ -252,8 +255,8 @@ const Coupons = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="percentage">Percentage</SelectItem>
-                      <SelectItem value="fixed">Fixed Amount</SelectItem>
+                      <SelectItem value="percentage">{t('dashboard.coupons.percentage')}</SelectItem>
+                      <SelectItem value="fixed">{t('dashboard.coupons.fixedAmount')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -308,7 +311,7 @@ const Coupons = () => {
                   />
                 </div>
                 <div>
-                  <Label>Usage Limit</Label>
+                  <Label>{t('dashboard.coupons.usageLimit')}</Label>
                   <Input
                     type="number"
                     value={formData.usageLimit}
@@ -326,7 +329,7 @@ const Coupons = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Valid From</Label>
+                  <Label>{t('dashboard.coupons.validFrom')}</Label>
                   <Input
                     type="date"
                     value={formData.validFrom}
@@ -335,7 +338,7 @@ const Coupons = () => {
                   />
                 </div>
                 <div>
-                  <Label>Valid To</Label>
+                  <Label>{t('dashboard.coupons.validTo')}</Label>
                   <Input
                     type="date"
                     value={formData.validTo}
@@ -352,7 +355,7 @@ const Coupons = () => {
                       setFormData({ ...formData, isActive: checked })
                     }
                   />
-                  <Label>Active</Label>
+                  <Label>{t('dashboard.customers.active')}</Label>
                 </div>
               </div>
               <div className="flex gap-2 justify-end pt-4">
@@ -388,13 +391,13 @@ const Coupons = () => {
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Coupon?</AlertDialogTitle>
+              <AlertDialogTitle>{t('dashboard.coupons.deleteConfirm')}</AlertDialogTitle>
               <AlertDialogDescription>
                 Are you sure you want to delete this coupon? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('dashboard.products.cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={confirmDelete}
                 className="bg-red-600 hover:bg-red-700"
@@ -414,7 +417,7 @@ const Coupons = () => {
         {coupons.length === 0 ? (
           <Card>
             <CardContent className="pt-6 text-center text-[#78746e]">
-              <p>No coupons yet. Create your first one!</p>
+              <p>{t('dashboard.coupons.noCouponsYet')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -449,7 +452,7 @@ const Coupons = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => copyToClipboard(coupon.code)}
-                      title="Copy code"
+                      title={t('dashboard.coupons.copyCode')}
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
@@ -457,7 +460,7 @@ const Coupons = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleEdit(coupon)}
-                      title="Edit"
+                      title={t('dashboard.products.edit')}
                     >
                       <Edit2 className="h-4 w-4" />
                     </Button>
@@ -466,7 +469,7 @@ const Coupons = () => {
                       size="icon"
                       onClick={() => handleDelete(coupon.id)}
                       className="text-red-600"
-                      title="Delete"
+                      title={t('dashboard.products.delete')}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -476,19 +479,19 @@ const Coupons = () => {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <p className="text-[#78746e]">Usage</p>
+                    <p className="text-[#78746e]">{t('dashboard.coupons.usage')}</p>
                     <p className="font-semibold text-[#1c1917]">
                       {coupon.usedCount}/{coupon.usageLimit}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[#78746e]">Max Discount</p>
+                    <p className="text-[#78746e]">{t('dashboard.coupons.maxDiscountColumn')}</p>
                     <p className="font-semibold text-[#1c1917]">₹{coupon.maxDiscount}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4 text-[#78746e]" />
                     <div>
-                      <p className="text-[#78746e]">Valid From</p>
+                      <p className="text-[#78746e]">{t('dashboard.coupons.validFrom')}</p>
                       <p className="font-semibold text-[#1c1917]">
                         {new Date(coupon.validFrom).toLocaleDateString()}
                       </p>
@@ -497,7 +500,7 @@ const Coupons = () => {
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4 text-[#78746e]" />
                     <div>
-                      <p className="text-[#78746e]">Valid To</p>
+                      <p className="text-[#78746e]">{t('dashboard.coupons.validTo')}</p>
                       <p className="font-semibold text-[#1c1917]">
                         {new Date(coupon.validTo).toLocaleDateString()}
                       </p>

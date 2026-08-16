@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { useTranslation } from '../../../context/TranslationContext';
 import {
   Select,
   SelectContent,
@@ -40,6 +41,8 @@ type Settings = {
 };
 
 export default function Settings() {
+  const { t } = useTranslation();
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingQR, setUploadingQR] = useState(false);
@@ -164,7 +167,7 @@ export default function Settings() {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             Settings
           </h1>
-          <p className="text-[#78746e] mt-1">Manage your store settings</p>
+          <p className="text-[#78746e] mt-1">{t('dashboard.settings.manageDesc')}</p>
         </div>
         <Button className="bg-[#2d5a3d] hover:bg-[#234832]" onClick={handleSave} disabled={saving}>
           {saving ? (
@@ -208,17 +211,17 @@ export default function Settings() {
               <div className="p-6">
                 <TabsContent value="general" className="space-y-6 mt-0">
                   <div>
-                    <h3 className="text-lg font-semibold text-[#1c1917] mb-4">Store Information</h3>
+                    <h3 className="text-lg font-semibold text-[#1c1917] mb-4">{t('dashboard.settings.storeInfo')}</h3>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Store Name</Label>
+                        <Label>{t('dashboard.settings.storeName')}</Label>
                         <Input
                           value={localSettings.storeName}
                           onChange={(e) => setLocalSettings({ ...localSettings, storeName: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Email</Label>
+                        <Label>{t('dashboard.customers.email')}</Label>
                         <Input
                           type="email"
                           value={localSettings.storeEmail}
@@ -226,18 +229,18 @@ export default function Settings() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Phone</Label>
+                        <Label>{t('dashboard.customers.phone')}</Label>
                         <Input
                           value={localSettings.storePhone}
                           onChange={(e) => setLocalSettings({ ...localSettings, storePhone: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>GST Number</Label>
+                        <Label>{t('dashboard.settings.gstNumber')}</Label>
                         <Input
                           value={localSettings.gstNumber ?? ""}
                           onChange={(e) => setLocalSettings({ ...localSettings, gstNumber: e.target.value || null })}
-                          placeholder="e.g., 27AABCU9603R1ZX"
+                          placeholder={t('dashboard.settings.gstNumberPlaceholder')}
                         />
                       </div>
                     </div>
@@ -246,11 +249,11 @@ export default function Settings() {
 
                 <TabsContent value="payments" className="space-y-6 mt-0">
                   <div>
-                    <h3 className="text-lg font-semibold text-[#1c1917] mb-4">Payment & Tax Settings</h3>
+                    <h3 className="text-lg font-semibold text-[#1c1917] mb-4">{t('dashboard.settings.paymentTaxSettings')}</h3>
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-4 md:col-span-2">
                         <div className="space-y-2">
-                          <Label>Tax Rate (%)</Label>
+                          <Label>{t('dashboard.settings.storeInformation.taxRate')}</Label>
                           <Input
                             type="number"
                             step="0.01"
@@ -268,14 +271,14 @@ export default function Settings() {
                             min={0}
                             value={localSettings.shippingFlatRate}
                             onChange={(e) => setLocalSettings({ ...localSettings, shippingFlatRate: Number(e.target.value) })}
-                            placeholder="Flat rate for shipping (0 for free)"
+                            placeholder={t('dashboard.settings.flatShippingRatePlaceholder')}
                           />
                         </div>
                       </div>
 
                       <Card className="md:col-span-2 border-[#2d5a3d]/10">
                         <CardHeader className="pb-2">
-                          <CardTitle className="text-base">Payment QR Code</CardTitle>
+                          <CardTitle className="text-base">{t('dashboard.settings.paymentQrCode')}</CardTitle>
                           <CardDescription className="text-sm">
                             Upload a QR code for manual QR-based payments. Customers will see this during checkout.
                           </CardDescription>
@@ -302,13 +305,13 @@ export default function Settings() {
                               {uploadingQR ? (
                                 <div className="flex flex-col items-center gap-2 text-[#2d5a3d]">
                                   <Loader2 className="h-8 w-8 animate-spin" />
-                                  <p className="text-sm font-medium">Uploading...</p>
+                                  <p className="text-sm font-medium">{t('common.uploading')}</p>
                                 </div>
                               ) : localSettings.qrImageUrl ? (
                                 <div className="relative w-full h-full rounded-xl overflow-hidden">
                                   <img
                                     src={localSettings.qrImageUrl}
-                                    alt="Payment QR Code"
+                                    alt={t('dashboard.settings.paymentQrCode')}
                                     className="w-full h-full object-contain p-4"
                                   />
                                   <div className="absolute top-3 right-3 flex gap-1">
@@ -359,11 +362,11 @@ export default function Settings() {
 
                 <TabsContent value="notifications" className="space-y-6 mt-0">
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-[#1c1917] mb-4">Notifications</h3>
+                    <h3 className="text-lg font-semibold text-[#1c1917] mb-4">{t('dashboard.notifications')}</h3>
                     <div className="flex items-center justify-between py-3 border-b border-[#2d5a3d]/5 last:border-b-0">
                       <div>
-                        <p className="font-medium text-[#1c1917]">Order Notifications</p>
-                        <p className="text-sm text-[#78746e]">Get notified when new orders are placed</p>
+                        <p className="font-medium text-[#1c1917]">{t('dashboard.settings.orderNotifs')}</p>
+                        <p className="text-sm text-[#78746e]">{t('dashboard.settings.orderNotificationsDesc')}</p>
                       </div>
                       <Switch
                         checked={localSettings.notificationsEnabled}
@@ -372,8 +375,8 @@ export default function Settings() {
                     </div>
                     <div className="flex items-center justify-between py-3 border-b border-[#2d5a3d]/5 last:border-b-0">
                       <div>
-                        <p className="font-medium text-[#1c1917]">Email Notifications</p>
-                        <p className="text-sm text-[#78746e]">Receive email updates for new orders to store email</p>
+                        <p className="font-medium text-[#1c1917]">{t('dashboard.settings.notifications.emailNotifications')}</p>
+                        <p className="text-sm text-[#78746e]">{t('dashboard.settings.emailNotificationsDesc')}</p>
                       </div>
                       <Switch
                         checked={true}
@@ -382,8 +385,8 @@ export default function Settings() {
                     </div>
                     <div className="flex items-center justify-between py-3 border-b border-[#2d5a3d]/5 last:border-b-0">
                       <div>
-                        <p className="font-medium text-[#1c1917]">Low Stock Alerts</p>
-                        <p className="text-sm text-[#78746e]">Alert when product stock falls below threshold</p>
+                        <p className="font-medium text-[#1c1917]">{t('dashboard.settings.lowStock')}</p>
+                        <p className="text-sm text-[#78746e]">{t('dashboard.settings.lowStockAlertsDesc')}</p>
                       </div>
                       <Switch
                         checked={true}
@@ -396,7 +399,7 @@ export default function Settings() {
                 <TabsContent value="localization" className="space-y-6 mt-0">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Currency</Label>
+                      <Label>{t('dashboard.settings.currency')}</Label>
                       <Select
                         value={localSettings.currency}
                         onValueChange={(value) => setLocalSettings({ ...localSettings, currency: value })}
@@ -406,7 +409,7 @@ export default function Settings() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="₹">Indian Rupee (₹)</SelectItem>
-                          <SelectItem value="Rs.">Nepalese Rupee (Rs.)</SelectItem>
+                          <SelectItem value="Rs.">{t('dashboard.settings.nepaleseRupee')}</SelectItem>
                           <SelectItem value="$">US Dollar ($)</SelectItem>
                           <SelectItem value="€">Euro (€)</SelectItem>
                           <SelectItem value="£">British Pound (£)</SelectItem>
@@ -414,21 +417,21 @@ export default function Settings() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Language</Label>
+                      <Label>{t('dashboard.settings.localization.language')}</Label>
                       <Select defaultValue="en">
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="en">English</SelectItem>
-                          <SelectItem value="hi">Hindi</SelectItem>
-                          <SelectItem value="ne">Nepali</SelectItem>
-                          <SelectItem value="gu">Gujarati</SelectItem>
+                          <SelectItem value="en">{t('dashboard.settings.localization.languages.english')}</SelectItem>
+                          <SelectItem value="hi">{t('dashboard.settings.languages.hindi')}</SelectItem>
+                          <SelectItem value="ne">{t('dashboard.settings.languages.nepali')}</SelectItem>
+                          <SelectItem value="gu">{t('dashboard.settings.languages.gujarati')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Time Zone</Label>
+                      <Label>{t('dashboard.settings.localization.timeZone')}</Label>
                       <Select defaultValue="Asia/Kolkata">
                         <SelectTrigger>
                           <SelectValue />
@@ -436,21 +439,21 @@ export default function Settings() {
                         <SelectContent>
                           <SelectItem value="Asia/Kathmandu">Nepal Standard Time (UTC+5:45)</SelectItem>
                           <SelectItem value="Asia/Kolkata">India Standard Time (UTC+5:30)</SelectItem>
-                          <SelectItem value="UTC">UTC</SelectItem>
+                          <SelectItem value="UTC">{t('dashboard.settings.localization.timeZones.utc')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Weight Unit</Label>
+                      <Label>{t('dashboard.settings.weightUnit')}</Label>
                       <Select defaultValue="g">
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="g">Grams (g)</SelectItem>
-                          <SelectItem value="kg">Kilograms (kg)</SelectItem>
-                          <SelectItem value="oz">Ounces (oz)</SelectItem>
-                          <SelectItem value="lb">Pounds (lb)</SelectItem>
+                          <SelectItem value="g">{t('dashboard.settings.units.grams')}</SelectItem>
+                          <SelectItem value="kg">{t('dashboard.settings.units.kilograms')}</SelectItem>
+                          <SelectItem value="oz">{t('dashboard.settings.units.ounces')}</SelectItem>
+                          <SelectItem value="lb">{t('dashboard.settings.units.pounds')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -459,28 +462,28 @@ export default function Settings() {
 
                 <TabsContent value="inventory" className="space-y-6 mt-0">
                   <div>
-                    <h3 className="text-lg font-semibold text-[#1c1917] mb-4">Inventory Settings</h3>
+                    <h3 className="text-lg font-semibold text-[#1c1917] mb-4">{t('dashboard.settings.inventorySettings')}</h3>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Low Stock Threshold</Label>
+                        <Label>{t('dashboard.settings.lowStockThreshold')}</Label>
                         <Input
                           type="number"
                           min={0}
                           value={localSettings.lowStockThreshold}
                           onChange={(e) => setLocalSettings({ ...localSettings, lowStockThreshold: Number(e.target.value) })}
-                          placeholder="Alert when stock is below this number"
+                          placeholder={t('dashboard.settings.lowStockThresholdPlaceholder')}
                         />
                         <p className="text-xs text-[#78746e]">
                           Products with stock at or below this number will be marked as "Low Stock"
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <Label>Default Reorder Point</Label>
+                        <Label>{t('dashboard.settings.defaultReorderPoint')}</Label>
                         <Input
                           type="number"
                           min={0}
                           defaultValue={50}
-                          placeholder="Default reorder point for new products"
+                          placeholder={t('dashboard.settings.defaultReorderPointPlaceholder')}
                         />
                         <p className="text-xs text-[#78746e]">
                           Default reorder point applied to newly created products

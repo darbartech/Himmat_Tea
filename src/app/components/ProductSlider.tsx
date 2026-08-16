@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, useCarousel, type CarouselApi } from './ui/carousel';
 import { useCart } from '@/context/CartContext';
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface Product {
   id: number;
   name: string;
@@ -17,6 +18,7 @@ interface Product {
 }
 
 function CustomNavigation() {
+  const { t } = useTranslation();
   const { scrollPrev, scrollNext, canScrollPrev, canScrollNext } = useCarousel();
 
   return (
@@ -31,7 +33,7 @@ function CustomNavigation() {
         }`}
       >
         <ArrowLeft className="w-5 h-5 transition-transform group-hover:scale-110" />
-        <span className="sr-only">Previous slide</span>
+        <span className="sr-only">{t('a11y.previousSlide')}</span>
       </button>
       <button
         onClick={scrollNext}
@@ -43,7 +45,7 @@ function CustomNavigation() {
         }`}
       >
         <ArrowRight className="w-5 h-5 transition-transform group-hover:scale-110" />
-        <span className="sr-only">Next slide</span>
+        <span className="sr-only">{t('a11y.nextSlide')}</span>
       </button>
     </div>
   );
@@ -145,6 +147,8 @@ function SliderContent({ products }: { products: Product[] }) {
 }
 
 export default function ProductSlider({ products }: { products: Product[] }) {
+  const { t } = useTranslation();
+
   const [carouselApi, setCarouselApi] = React.useState<CarouselApi | null>(null);
   const [isPaused, setIsPaused] = React.useState(false);
 

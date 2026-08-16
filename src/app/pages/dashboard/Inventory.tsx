@@ -49,6 +49,7 @@ import {
 } from "../../components/ui/tabs";
 import { Alert, AlertTitle, AlertDescription } from "../../components/ui/alert";
 
+import { useTranslation } from "@/hooks/useTranslation";
 type Product = any;
 type InventoryTransaction = any;
 type Settings = any;
@@ -84,6 +85,8 @@ export default function Inventory() {
   const [isAdjusting, setIsAdjusting] = useState(false);
   const [isBatchSaving, setIsBatchSaving] = useState(false);
   const [batchDeletingId, setBatchDeletingId] = useState<number | null>(null);
+
+  const { t } = useTranslation();
 
   const loadAll = async () => {
     setLoading(true);
@@ -394,7 +397,7 @@ export default function Inventory() {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             Inventory Management
           </h1>
-          <p className="text-[#78746e] mt-1">Track and manage your tea inventory</p>
+          <p className="text-[#78746e] mt-1">{t('dashboard.inventory.subtitle')}</p>
         </div>
       </div>
 
@@ -410,7 +413,7 @@ export default function Inventory() {
           variant={bannerMessage.type === "destructive" ? "destructive" : "default"}
         >
           <Info className="h-4 w-4" />
-          <AlertTitle className="font-semibold">Notice</AlertTitle>
+          <AlertTitle className="font-semibold">{t('common.notice')}</AlertTitle>
           <AlertDescription>{bannerMessage.message}</AlertDescription>
         </Alert>
       )}
@@ -418,7 +421,7 @@ export default function Inventory() {
       {error && (
         <Alert className="bg-red-50 border-red-400 text-red-800" variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle className="font-semibold">Failed to load data</AlertTitle>
+          <AlertTitle className="font-semibold">{t('common.failedToLoadData')}</AlertTitle>
           <AlertDescription className="flex items-center gap-3 flex-wrap">
             <span>{error}</span>
             <Button size="sm" variant="secondary" onClick={loadAll}>
@@ -545,19 +548,19 @@ export default function Inventory() {
 
               <div className="bg-white rounded-2xl shadow-sm border border-[#2d5a3d]/5 overflow-hidden">
                 <div className="p-6 border-b border-[#2d5a3d]/5">
-                  <h2 className="text-lg font-semibold text-[#1c1917]">Stock Status Overview</h2>
-                  <p className="text-sm text-[#78746e]">Current stock levels for all products</p>
+                  <h2 className="text-lg font-semibold text-[#1c1917]">{t('dashboard.inventory.stockStatusOverview')}</h2>
+                  <p className="text-sm text-[#78746e]">{t('dashboard.inventory.currentStockLevels')}</p>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
-                        <th className="px-6 py-4 font-medium">Product</th>
-                        <th className="px-6 py-4 font-medium">Category</th>
-                        <th className="px-6 py-4 font-medium">Price</th>
-                        <th className="px-6 py-4 font-medium">Stock</th>
-                        <th className="px-6 py-4 font-medium">Status</th>
-                        <th className="px-6 py-4 font-medium text-right">Action</th>
+                        <th className="px-6 py-4 font-medium">{t('dashboard.inventory.product')}</th>
+                        <th className="px-6 py-4 font-medium">{t('dashboard.products.category')}</th>
+                        <th className="px-6 py-4 font-medium">{t('dashboard.products.price')}</th>
+                        <th className="px-6 py-4 font-medium">{t('dashboard.products.stock')}</th>
+                        <th className="px-6 py-4 font-medium">{t('dashboard.products.status')}</th>
+                        <th className="px-6 py-4 font-medium text-right">{t('dashboard.inventory.action')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#2d5a3d]/5">
@@ -622,7 +625,7 @@ export default function Inventory() {
                                   </DialogHeader>
                                   <div className="grid gap-4 py-4">
                                     <div className="grid gap-2">
-                                      <Label htmlFor="quantity">Quantity (positive to add, negative to remove)</Label>
+                                      <Label htmlFor="quantity">{t('dashboard.inventory.quantityPositiveAddNegativeRemove')}</Label>
                                       <Input
                                         id="quantity"
                                         type="number"
@@ -630,18 +633,18 @@ export default function Inventory() {
                                         onChange={(e) =>
                                           setStockAdjustment({ ...stockAdjustment, quantity: Number(e.target.value) })
                                         }
-                                        placeholder="e.g., 50 or -10"
+                                        placeholder={t('dashboard.inventory.quantityHelpPlaceholder')}
                                       />
                                     </div>
                                     <div className="grid gap-2">
-                                      <Label htmlFor="reason">Reason</Label>
+                                      <Label htmlFor="reason">{t('dashboard.inventory.reason')}</Label>
                                       <Textarea
                                         id="reason"
                                         value={stockAdjustment.reason}
                                         onChange={(e) =>
                                           setStockAdjustment({ ...stockAdjustment, reason: e.target.value })
                                         }
-                                        placeholder="e.g., Restock from supplier, Return, etc."
+                                        placeholder={t('dashboard.inventory.reasonPlaceholder')}
                                       />
                                     </div>
                                   </div>
@@ -712,7 +715,7 @@ export default function Inventory() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
               <Input
                 type="text"
-                placeholder="Search products..."
+                placeholder={t('dashboard.products.searchProducts')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-11"
@@ -720,7 +723,7 @@ export default function Inventory() {
             </div>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="All Categories" />
+                <SelectValue placeholder={t('dashboard.products.allCategories')} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
@@ -740,13 +743,13 @@ export default function Inventory() {
                 <table className="w-full">
                   <thead>
                     <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
-                      <th className="px-6 py-4 font-medium">Product</th>
-                      <th className="px-6 py-4 font-medium">Category</th>
-                      <th className="px-6 py-4 font-medium">Price</th>
-                      <th className="px-6 py-4 font-medium">Stock</th>
-                      <th className="px-6 py-4 font-medium">Status</th>
-                      <th className="px-6 py-4 font-medium">Value</th>
-                      <th className="px-6 py-4 font-medium text-right">Action</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.product')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.products.category')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.products.price')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.products.stock')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.products.status')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.value')}</th>
+                      <th className="px-6 py-4 font-medium text-right">{t('dashboard.inventory.action')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#2d5a3d]/5">
@@ -817,7 +820,7 @@ export default function Inventory() {
                                 </DialogHeader>
                                 <div className="grid gap-4 py-4">
                                   <div className="grid gap-2">
-                                    <Label htmlFor="quantity">Quantity (positive to add, negative to remove)</Label>
+                                    <Label htmlFor="quantity">{t('dashboard.inventory.quantityPositiveAddNegativeRemove')}</Label>
                                     <Input
                                       id="quantity"
                                       type="number"
@@ -825,18 +828,18 @@ export default function Inventory() {
                                       onChange={(e) =>
                                         setStockAdjustment({ ...stockAdjustment, quantity: Number(e.target.value) })
                                       }
-                                      placeholder="e.g., 50 or -10"
+                                      placeholder={t('dashboard.inventory.quantityHelpPlaceholder')}
                                     />
                                   </div>
                                   <div className="grid gap-2">
-                                    <Label htmlFor="reason">Reason</Label>
+                                    <Label htmlFor="reason">{t('dashboard.inventory.reason')}</Label>
                                     <Textarea
                                       id="reason"
                                       value={stockAdjustment.reason}
                                       onChange={(e) =>
                                         setStockAdjustment({ ...stockAdjustment, reason: e.target.value })
                                       }
-                                      placeholder="e.g., Restock from supplier, Return, etc."
+                                      placeholder={t('dashboard.inventory.reasonPlaceholder')}
                                     />
                                   </div>
                                 </div>
@@ -881,8 +884,8 @@ export default function Inventory() {
         <TabsContent value="batches" className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-[#1c1917]">Batch Management</h2>
-              <p className="text-sm text-[#78746e]">Track inventory batches with expiry dates</p>
+              <h2 className="text-lg font-semibold text-[#1c1917]">{t('dashboard.inventory.batchManagement')}</h2>
+              <p className="text-sm text-[#78746e]">{t('dashboard.inventory.trackInventoryBatches')}</p>
             </div>
             <Select onValueChange={(val) => {
               const product = products.find(p => p.id === Number(val));
@@ -901,7 +904,7 @@ export default function Inventory() {
               }
             }}>
               <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Add Batch..." />
+                <SelectValue placeholder={t('dashboard.inventory.addBatch')} />
               </SelectTrigger>
               <SelectContent>
                 {products.map((product) => (
@@ -921,14 +924,14 @@ export default function Inventory() {
                 <table className="w-full">
                   <thead>
                     <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
-                      <th className="px-6 py-4 font-medium">Product</th>
-                      <th className="px-6 py-4 font-medium">Batch Number</th>
-                      <th className="px-6 py-4 font-medium">Quantity</th>
-                      <th className="px-6 py-4 font-medium">Received</th>
-                      <th className="px-6 py-4 font-medium">Expiry</th>
-                      <th className="px-6 py-4 font-medium">Supplier</th>
-                      <th className="px-6 py-4 font-medium">Status</th>
-                      <th className="px-6 py-4 font-medium text-right">Actions</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.product')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.batchNumber')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.quantity')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.received')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.expiry')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.supplier')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.products.status')}</th>
+                      <th className="px-6 py-4 font-medium text-right">{t('dashboard.orders.action')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#2d5a3d]/5">
@@ -1036,16 +1039,16 @@ export default function Inventory() {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="batchNumber">Batch Number</Label>
+                  <Label htmlFor="batchNumber">{t('dashboard.inventory.batchNumber')}</Label>
                   <Input
                     id="batchNumber"
                     value={batchForm.batchNumber}
                     onChange={(e) => setBatchForm({ ...batchForm, batchNumber: e.target.value })}
-                    placeholder="BATCH-001"
+                    placeholder={t('dashboard.inventory.batchNumberPlaceholder')}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="quantity">Quantity</Label>
+                  <Label htmlFor="quantity">{t('dashboard.inventory.quantity')}</Label>
                   <Input
                     id="quantity"
                     type="number"
@@ -1055,7 +1058,7 @@ export default function Inventory() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="receivedDate">Received Date</Label>
+                  <Label htmlFor="receivedDate">{t('dashboard.inventory.receivedDate')}</Label>
                   <Input
                     id="receivedDate"
                     type="date"
@@ -1064,7 +1067,7 @@ export default function Inventory() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="expiryDate">Expiry Date (Optional)</Label>
+                  <Label htmlFor="expiryDate">{t('dashboard.inventory.expiryDateOptional')}</Label>
                   <Input
                     id="expiryDate"
                     type="date"
@@ -1073,16 +1076,16 @@ export default function Inventory() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="supplier">Supplier (Optional)</Label>
+                  <Label htmlFor="supplier">{t('dashboard.inventory.supplierOptional')}</Label>
                   <Input
                     id="supplier"
                     value={batchForm.supplier}
                     onChange={(e) => setBatchForm({ ...batchForm, supplier: e.target.value })}
-                    placeholder="Supplier name"
+                    placeholder={t('dashboard.purchaseOrders.enterSupplier')}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="costPrice">Cost Price</Label>
+                  <Label htmlFor="costPrice">{t('dashboard.inventory.costPrice')}</Label>
                   <Input
                     id="costPrice"
                     type="number"
@@ -1137,10 +1140,10 @@ export default function Inventory() {
                 }
               >
                 <SelectTrigger id="product-filter" className="w-[250px]">
-                  <SelectValue placeholder="All products" />
+                  <SelectValue placeholder={t('dashboard.inventory.allProducts')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All products</SelectItem>
+                  <SelectItem value="all">{t('dashboard.inventory.allProducts')}</SelectItem>
                   {products.map((product) => (
                     <SelectItem key={product.id} value={product.id.toString()}>
                       {product.name}
@@ -1159,13 +1162,13 @@ export default function Inventory() {
                 <table className="w-full">
                   <thead>
                     <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
-                      <th className="px-6 py-4 font-medium">Product</th>
-                      <th className="px-6 py-4 font-medium">Type</th>
-                      <th className="px-6 py-4 font-medium">Quantity</th>
-                      <th className="px-6 py-4 font-medium">Stock Change</th>
-                      <th className="px-6 py-4 font-medium">Reason</th>
-                      <th className="px-6 py-4 font-medium">Reference</th>
-                      <th className="px-6 py-4 font-medium">Date</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.product')}</th>
+                      <th className="px-6 py-4 font-medium">{t('common.type')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.quantity')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.stockChange')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.inventory.reason')}</th>
+                      <th className="px-6 py-4 font-medium">{t('common.reference')}</th>
+                      <th className="px-6 py-4 font-medium">{t('dashboard.invoice.date')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#2d5a3d]/5">

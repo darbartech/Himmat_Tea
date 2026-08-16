@@ -4,6 +4,7 @@ import Link from "next/link";
 import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
 
+import { useTranslation } from '../../context/TranslationContext';
 const lastUpdated = "July 2026";
 
 const sections = [
@@ -20,6 +21,8 @@ const sections = [
 ];
 
 export default function Terms() {
+  const { t } = useTranslation();
+
   return (
     <div
       className="min-h-screen bg-[#f9f7f4]"
@@ -408,7 +411,7 @@ export default function Terms() {
                 </p>
                 <div className="space-y-2 text-sm text-white/80">
                   <p>
-                    <strong className="text-white">Email:</strong>{" "}
+                    <strong className="text-white">{t('checkout.summary.emailLabel')}</strong>{" "}
                     <a
                       href="mailto:support@godgifted.com"
                       className="text-[#c8a96e] hover:underline"
@@ -417,7 +420,7 @@ export default function Terms() {
                     </a>
                   </p>
                   <p>
-                    <strong className="text-white">Address:</strong> Godgifted,
+                    <strong className="text-white">{t('checkout.summary.addressLabel')}</strong> Godgifted,
                     Kathmandu, Nepal
                   </p>
                 </div>

@@ -253,7 +253,7 @@ export default function ProductsCatalog() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
                 <input
                   type="text"
-                  placeholder="Search products or origin…"
+                  placeholder={t('products.searchPlaceholder')}
                   value={search}
                   onChange={(e) => {
                     setSearch(e.target.value);
@@ -267,10 +267,10 @@ export default function ProductsCatalog() {
                 onChange={(e) => setSort(e.target.value)}
                 className="px-4 py-2.5 bg-white rounded-xl border border-[rgba(28,25,23,0.08)] text-sm focus:outline-none focus:border-[#2d5a3d] cursor-pointer"
               >
-                <option value="featured">Featured</option>
+                <option value="featured">{t('products.sort.featured')}</option>
                 <option value="price-asc">Price: Low → High</option>
                 <option value="price-desc">Price: High → Low</option>
-                <option value="rating">Top Rated</option>
+                <option value="rating">{t('products.sort.topRated')}</option>
               </select>
             </div>
           </div>

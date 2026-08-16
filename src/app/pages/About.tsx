@@ -87,7 +87,7 @@ export default function About() {
             <div className="rounded-3xl overflow-hidden aspect-[4/5] lg:aspect-auto lg:h-[560px]">
               <img
                 src="https://images.unsplash.com/photo-1455853828816-0c301a011711?w=800&h=700&fit=crop"
-                alt="Farm in Nepal"
+                alt={t('about.farmImageAlt')}
                 className="w-full h-full object-cover"
               />
             </div>

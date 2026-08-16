@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import CustomerAccount from "@/app/pages/CustomerAccount";
 import { Suspense } from "react";
 
+import { useTranslation } from '../../context/TranslationContext';
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET
   if (!secret) {
@@ -36,7 +37,7 @@ export default async function AccountPage() {
   }
 
   return (
-    <Suspense fallback={<div>Loading account...</div>}>
+    <Suspense fallback={<div>{"Loading account..."}</div>}>
       <CustomerAccount />
     </Suspense>
   );

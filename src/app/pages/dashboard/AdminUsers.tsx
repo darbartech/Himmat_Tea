@@ -51,6 +51,7 @@ export default function AdminUsers() {
     role: "admin" as "admin" | "superadmin",
     isActive: true,
   });
+  const { t } = useTranslation();
   
   // Fetch admin users from API on mount
   const fetchAdminUsers = async () => {
@@ -118,6 +119,8 @@ export default function AdminUsers() {
   };
 
   const handleEditUser = (user: any) => {
+    const { t } = useTranslation();
+
     setEditingUser(user);
     setNewUser({
       username: user.username,
@@ -137,7 +140,7 @@ export default function AdminUsers() {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             Admin Users
           </h1>
-          <p className="text-[#78746e] mt-1">Manage admin accounts and permissions</p>
+          <p className="text-[#78746e] mt-1">{t('dashboard.adminUsers.subtitle')}</p>
         </div>
         {userType === "admin" && (currentUser as any)?.role === "superadmin" && (
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -156,22 +159,22 @@ export default function AdminUsers() {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="username">{t('dashboard.adminUsers.username')}</Label>
                   <Input
                     id="username"
                     value={newUser.username}
                     onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                    placeholder="Enter username"
+                    placeholder={t('dashboard.adminUsers.usernamePlaceholder')}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('dashboard.customers.email')}</Label>
                   <Input
                     id="email"
                     type="email"
                     value={newUser.email}
                     onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                    placeholder="admin@example.com"
+                    placeholder={t('dashboard.adminUsers.emailPlaceholder')}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -183,21 +186,21 @@ export default function AdminUsers() {
                     type="password"
                     value={newUser.password}
                     onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                    placeholder="Enter password"
+                    placeholder={t('dashboard.adminUsers.passwordPlaceholder')}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role">{t('dashboard.adminUsers.role')}</Label>
                   <Select
                     value={newUser.role}
                     onValueChange={(value: "admin" | "superadmin") => setNewUser({ ...newUser, role: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
+                      <SelectValue placeholder={t('common.selectRole')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="superadmin">Super Admin</SelectItem>
+                      <SelectItem value="admin">{t('dashboard.adminUsers.admin')}</SelectItem>
+                      <SelectItem value="superadmin">{t('dashboard.adminUsers.superAdmin')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -207,7 +210,7 @@ export default function AdminUsers() {
                     checked={newUser.isActive}
                     onCheckedChange={(checked) => setNewUser({ ...newUser, isActive: checked })}
                   />
-                  <Label htmlFor="isActive">Account Active</Label>
+                  <Label htmlFor="isActive">{t('dashboard.adminUsers.accountActive')}</Label>
                 </div>
               </div>
               <div className="flex justify-end gap-3">
@@ -232,7 +235,7 @@ export default function AdminUsers() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
           <Input
             type="text"
-            placeholder="Search admin users..."
+            placeholder={t('dashboard.adminUsers.searchAdminUsers')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-11"
@@ -253,7 +256,7 @@ export default function AdminUsers() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className={user.role === "superadmin" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}>
-                      {user.role === "superadmin" ? "Super Admin" : "Admin"}
+                      {user.role === "superadmin" ? "Super Admin" : t('dashboard.layout.admin')}
                     </Badge>
                     {!user.isActive && (
                       <Badge variant="outline" className="text-red-600 border-red-200">
@@ -300,13 +303,13 @@ export default function AdminUsers() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Admin User?</AlertDialogTitle>
+                              <AlertDialogTitle>{t('dashboard.adminUsers.deleteAdminUser')}</AlertDialogTitle>
                               <AlertDialogDescription>
                                 Are you sure you want to delete "{user.username}"? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel>{t('dashboard.products.cancel')}</AlertDialogCancel>
                               <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-red-600">
                                 Delete
                               </AlertDialogAction>

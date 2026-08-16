@@ -1,9 +1,12 @@
 import { NextRequest } from 'next/server'
+import type { PrismaClient } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
 import { getCurrentAdmin } from '@/lib/auth'
 import { sendCustomerOrderStatusEmail } from '@/lib/email'
 import { z } from 'zod'
+
+type Tx = PrismaClient
 
 interface Params {
   params: Promise<{ id: string }>
@@ -87,7 +90,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     const now = new Date()
 
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx: Tx) => {
       const updateData: any = { status }
       if (trackingNumber !== undefined) updateData.trackingNumber = trackingNumber
       if (courierPartner !== undefined) updateData.courierPartner = courierPartner
@@ -104,7 +107,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
               select: { id: true, stock: true, name: true },
             })
           : []
-        const productMap = new Map(productsBefore.map(p => [p.id, p]))
+        const productMap = new Map<number, { id: number; stock: number; name: string }>(productsBefore.map((p: { id: number; stock: number; name: string }) => [p.id, p]))
 
         if (productIds.length > 0) {
           const qtyByProduct = new Map<number, number>()

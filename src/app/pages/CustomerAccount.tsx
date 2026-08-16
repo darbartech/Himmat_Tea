@@ -7,6 +7,7 @@ import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api-client";
+import { useTranslation } from "@/hooks/useTranslation";
 import { 
   LogOut, 
   ShoppingBag, 
@@ -67,6 +68,7 @@ export default function CustomerAccount() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 5;
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (authLoading) return;
@@ -122,6 +124,8 @@ export default function CustomerAccount() {
   };
 
   const trackingSteps = (status: string) => {
+    const { t } = useTranslation();
+
     const steps = [
       { id: 1, label: 'Order Placed', status: 'completed', icon: CheckCircle2 },
       { id: 2, label: 'Payment Verified', status: ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'REFUNDED'].includes(status) ? 'completed' : 'pending', icon: CheckCircle2 },
@@ -241,7 +245,7 @@ export default function CustomerAccount() {
                     {ordersLoading ? (
                       <div className="text-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2d5a3d] mx-auto mb-4"></div>
-                        <p className="text-lg font-medium text-[#1c1917]">Loading your orders...</p>
+                        <p className="text-lg font-medium text-[#1c1917]">{t('account.loadingOrders')}</p>
                       </div>
                     ) : error ? (
                       <div className="text-center py-12">
@@ -257,8 +261,8 @@ export default function CustomerAccount() {
                     ) : orders.length === 0 ? (
                       <div className="text-center py-12">
                         <ShoppingBag className="h-12 w-12 text-[#78746e] mx-auto mb-4" />
-                        <p className="text-lg font-medium text-[#1c1917] mb-2">No orders yet</p>
-                        <p className="text-sm text-[#78746e] mb-6">Once you place an order, it will show up here.</p>
+                        <p className="text-lg font-medium text-[#1c1917] mb-2">{t('account.noOrdersYet')}</p>
+                        <p className="text-sm text-[#78746e] mb-6">{t('account.noOrdersDesc')}</p>
                         <Link 
                           href="/products"
                           className="inline-flex items-center gap-2 px-6 py-3 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] transition-colors"
@@ -292,7 +296,7 @@ export default function CustomerAccount() {
                             </div>
                             <div className="flex items-center gap-4">
                               <div>
-                                <p className="text-xs text-[#78746e]">Total</p>
+                                <p className="text-xs text-[#78746e]">{t('dashboard.invoice.total')}</p>
                                 <p className="font-semibold text-[#1c1917]">
                                   Rs. {(selectedOrder.grandTotal || selectedOrder.total || 0).toLocaleString()}
                                 </p>
@@ -306,7 +310,7 @@ export default function CustomerAccount() {
                           <div className="p-5 space-y-6">
                             {/* Order Tracking Timeline */}
                             <div>
-                              <h3 className="text-sm font-semibold text-[#1c1917] mb-4">Order Tracking</h3>
+                              <h3 className="text-sm font-semibold text-[#1c1917] mb-4">{t('account.orderTracking')}</h3>
                               <div className="relative">
                                 <div className="absolute top-5 left-[15px] bottom-5 w-0.5 bg-[rgba(28,25,23,0.1)]"></div>
                                 {trackingSteps(selectedOrder.status).map((step, index, arr) => {
@@ -338,7 +342,7 @@ export default function CustomerAccount() {
 
                             {/* Order Items */}
                             <div>
-                              <h3 className="text-sm font-semibold text-[#1c1917] mb-4">Order Items</h3>
+                              <h3 className="text-sm font-semibold text-[#1c1917] mb-4">{t('account.orderItems')}</h3>
                               <div className="space-y-3">
                                 {(selectedOrder.items || []).map((item) => (
                                   <div key={item.id} className="flex items-center justify-between">
@@ -399,7 +403,7 @@ export default function CustomerAccount() {
                                 </div>
                                 <div className="flex items-center gap-4">
                                   <div>
-                                    <p className="text-xs text-[#78746e]">Total</p>
+                                    <p className="text-xs text-[#78746e]">{t('dashboard.invoice.total')}</p>
                                     <p className="font-semibold text-[#1c1917]">
                                       Rs. {(order.grandTotal || order.total || 0).toLocaleString()}
                                     </p>
@@ -493,7 +497,7 @@ export default function CustomerAccount() {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-[#78746e] text-sm">
                           <User className="h-4 w-4" />
-                          <span>Full Name</span>
+                          <span>{t('checkout.fields.fullName')}</span>
                         </div>
                         <p className="font-semibold text-[#1c1917]">{customer.name}</p>
                       </div>
@@ -501,7 +505,7 @@ export default function CustomerAccount() {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-[#78746e] text-sm">
                           <Mail className="h-4 w-4" />
-                          <span>Email</span>
+                          <span>{t('dashboard.customers.email')}</span>
                         </div>
                         <p className="font-semibold text-[#1c1917]">{customer.email}</p>
                       </div>
@@ -509,7 +513,7 @@ export default function CustomerAccount() {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-[#78746e] text-sm">
                           <Phone className="h-4 w-4" />
-                          <span>Phone Number</span>
+                          <span>{t('dashboard.settings.phoneNumber')}</span>
                         </div>
                         <p className="font-semibold text-[#1c1917]">{customer.phone || 'Not set'}</p>
                       </div>
@@ -517,7 +521,7 @@ export default function CustomerAccount() {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-[#78746e] text-sm">
                           <MapPin className="h-4 w-4" />
-                          <span>Address</span>
+                          <span>{t('dashboard.settings.address')}</span>
                         </div>
                         <p className="font-semibold text-[#1c1917]">{customer.address || 'Not set'}</p>
                       </div>
@@ -527,11 +531,11 @@ export default function CustomerAccount() {
                       <div className="p-5 bg-[#c8a96e]/10 rounded-xl border border-[#c8a96e]/20">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm font-medium text-[#1c1917]">Loyalty Points</p>
+                            <p className="text-sm font-medium text-[#1c1917]">{t('account.loyaltyPoints')}</p>
                             <p className="text-3xl font-bold text-[#c8a96e]">{customer.loyaltyPoints}</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-xs text-[#78746e]">Member Tier</p>
+                            <p className="text-xs text-[#78746e]">{t('account.memberTier')}</p>
                             <p className="font-semibold text-[#1c1917]">{customer.tier || 'Bronze'}</p>
                           </div>
                         </div>

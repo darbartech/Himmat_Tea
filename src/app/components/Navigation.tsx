@@ -519,7 +519,7 @@ export default function Navigation() {
 
                 <button
                   onClick={prev}
-                  aria-label="Previous announcement"
+                  aria-label={t('a11y.previousAnnouncement')}
                   className="shrink-0 p-1.5 rounded-[var(--radius-sm)] hover:bg-white/15 transition-colors duration-[var(--duration-fast)] mr-2.5"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
@@ -548,7 +548,7 @@ export default function Navigation() {
 
                 <button
                   onClick={next}
-                  aria-label="Next announcement"
+                  aria-label={t('a11y.nextAnnouncement')}
                   className="shrink-0 p-1.5 rounded-[var(--radius-sm)] hover:bg-white/15 transition-colors duration-[var(--duration-fast)] ml-2.5"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -556,7 +556,7 @@ export default function Navigation() {
 
                 <button
                   onClick={() => setDismissed(true)}
-                  aria-label="Dismiss"
+                  aria-label={t('a11y.dismiss')}
                   className="shrink-0 p-1.5 rounded-[var(--radius-sm)] hover:bg-white/15 transition-colors duration-[var(--duration-fast)] ml-1"
                 >
                   <X className="h-3.5 w-3.5 opacity-70" />
@@ -733,7 +733,7 @@ export default function Navigation() {
                     setLangOpen(!langOpen)
                   }
                   className="flex items-center justify-center w-9 h-9 rounded-[var(--radius-md)] hover:bg-secondary transition-colors text-foreground"
-                  aria-label="Select language"
+                  aria-label={t('a11y.selectLanguage')}
                 >
                   <Globe className="h-[18px] w-[18px] text-muted-foreground" />
                 </button>
@@ -794,9 +794,9 @@ export default function Navigation() {
                 onClick={() =>
                   setSearchOpen(true)
                 }
-                title="Search products"
+                title={t('a11y.searchProducts')}
                 className="p-2.5 rounded-[var(--radius-md)] hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
-                aria-label="Search products"
+                aria-label={t('a11y.searchProducts')}
               >
                 <Search className="h-[18px] w-[18px]" />
               </button>
@@ -811,7 +811,7 @@ export default function Navigation() {
               <Link
                 href="/cart"
                 className="group relative flex items-center justify-center p-2.5 rounded-[var(--radius-md)] hover:bg-secondary transition-colors text-foreground"
-                aria-label="Cart"
+                aria-label={t('a11y.cart')}
               >
                 <div className="relative">
 
@@ -974,7 +974,7 @@ export default function Navigation() {
                 onClick={() =>
                   setSearchOpen(true)
                 }
-                aria-label="Search products"
+                aria-label={t('a11y.searchProducts')}
               >
                 <Search className="h-4 w-4" />
               </button>
@@ -984,7 +984,7 @@ export default function Navigation() {
               <Link
                 href="/cart"
                 className="relative p-2.5 rounded-[var(--radius-md)] hover:bg-secondary transition-colors text-foreground"
-                aria-label="Cart"
+                aria-label={t('a11y.cart')}
               >
 
                 <ShoppingBag className="h-4 w-4" />
@@ -1005,7 +1005,7 @@ export default function Navigation() {
                 onClick={() =>
                   setMobileOpen(!mobileOpen)
                 }
-                aria-label="Toggle menu"
+                aria-label={t('a11y.toggleMenu')}
                 aria-expanded={mobileOpen}
               >
                 {mobileOpen ? (
@@ -1078,7 +1078,7 @@ export default function Navigation() {
               setMobileOpen(false)
             }
             className="p-2 rounded-[var(--radius-md)] hover:bg-secondary transition-colors text-muted-foreground"
-            aria-label="Close menu"
+            aria-label={t('a11y.closeMenu')}
           >
             <X className="h-5 w-5" />
           </button>
@@ -1196,7 +1196,7 @@ export default function Navigation() {
                 setLangOpen(!langOpen)
               }
               className="w-full flex items-center justify-center px-3 py-3 rounded-[var(--radius-lg)] hover:bg-secondary"
-              aria-label="Select language"
+              aria-label={t('a11y.selectLanguage')}
             >
               <Globe className="h-4 w-4 text-muted-foreground" />
             </button>
@@ -1333,7 +1333,7 @@ export default function Navigation() {
                       event.target.value,
                     )
                   }
-                  placeholder="Search teas, origins, types…"
+                  placeholder={t('nav.searchPlaceholder')}
                   className="flex-1 text-[1.0625rem] text-foreground placeholder:text-muted-foreground/70 outline-none bg-transparent"
                 />
 
@@ -1344,7 +1344,7 @@ export default function Navigation() {
                       setSearchQuery("")
                     }
                     className="shrink-0 p-1.5 rounded-full hover:bg-secondary"
-                    aria-label="Clear search"
+                    aria-label={t('a11y.clearSearch')}
                   >
                     <X className="h-3.5 w-3.5 text-muted-foreground" />
                   </button>
@@ -1358,7 +1358,7 @@ export default function Navigation() {
                     setSearchOpen(false)
                   }
                   className="shrink-0 flex items-center justify-center w-8 h-8 rounded-[var(--radius-md)] bg-secondary border border-border"
-                  aria-label="Close search"
+                  aria-label={t('a11y.closeSearch')}
                 >
                   <X className="h-4 w-4 text-foreground" />
                 </button>

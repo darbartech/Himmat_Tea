@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError } from '@/lib/api-utils'
 import { getCurrentAdmin } from '@/lib/auth'
@@ -53,7 +54,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     if (body.supplier !== undefined) safeData.supplier = body.supplier || null;
     if (typeof body.costPrice === 'number') safeData.costPrice = body.costPrice;
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       let updated = await tx.batch.update({
         where: { id: parseInt(id) },
         data: safeData,
@@ -129,7 +130,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       return createErrorResponse('Batch not found', 404);
     }
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const qty = Number(existing.quantity) || 0;
       if (qty > 0) {
         const productCurrent = await tx.product.findUnique({

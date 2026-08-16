@@ -1,3 +1,5 @@
+'use client';
+
 import { TrendingUp, TrendingDown, ShoppingBag, Users, DollarSign, Package, TrendingUp as TrendingUpIcon, AlertTriangle, RefreshCw } from "lucide-react";
 import {
   LineChart,
@@ -21,6 +23,7 @@ import { api, ApiError } from "../../../lib/api-client";
 import { Skeleton } from "../../components/ui/skeleton";
 import { Button } from "../../components/ui/button";
 
+import { useTranslation } from '@/hooks/useTranslation';
 const COLORS = ["#2d5a3d", "#4a9d7a", "#c8a96e", "#0b7c33", "#68d391"];
 
 type TimePeriod = "week" | "month" | "quarter" | "year";
@@ -101,6 +104,7 @@ function unwrapList(res: any): any[] {
 }
 
 export default function Analytics() {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
@@ -268,7 +272,7 @@ export default function Analytics() {
             <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
               Analytics
             </h1>
-            <p className="text-[#78746e] mt-1">Track your tea business performance</p>
+            <p className="text-[#78746e] mt-1">{t('dashboard.analytics.trackPerformance')}</p>
           </div>
           <div className="flex gap-2">
             {(["week", "month", "quarter", "year"] as TimePeriod[]).map((p) => (
@@ -406,8 +410,8 @@ export default function Analytics() {
             {/* Revenue Trend */}
             <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-[#2d5a3d]/5">
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-[#1c1917]">Revenue Trend</h3>
-                <p className="text-sm text-[#78746e]">Monthly revenue for the last 6 months</p>
+                <h3 className="text-lg font-semibold text-[#1c1917]">{t('dashboard.analytics.revenueTrend')}</h3>
+                <p className="text-sm text-[#78746e]">{t('dashboard.analytics.revenueTrendDesc')}</p>
               </div>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
@@ -437,8 +441,8 @@ export default function Analytics() {
             {/* Order Status Distribution */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#2d5a3d]/5">
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-[#1c1917]">Order Status</h3>
-                <p className="text-sm text-[#78746e]">Distribution by status</p>
+                <h3 className="text-lg font-semibold text-[#1c1917]">{t('dashboard.orders.orderStatus')}</h3>
+                <p className="text-sm text-[#78746e]">{t('dashboard.analytics.distributionByStatus')}</p>
               </div>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
@@ -467,8 +471,8 @@ export default function Analytics() {
           {/* Product Performance */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#2d5a3d]/5">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-[#1c1917]">Product Performance</h3>
-              <p className="text-sm text-[#78746e]">Top selling products</p>
+              <h3 className="text-lg font-semibold text-[#1c1917]">{t('dashboard.analytics.productPerformance')}</h3>
+              <p className="text-sm text-[#78746e]">{t('dashboard.home.topSellingProducts')}</p>
             </div>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -490,18 +494,18 @@ export default function Analytics() {
           {/* Recent Orders Table */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#2d5a3d]/5">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-[#1c1917]">Recent Orders</h3>
-              <p className="text-sm text-[#78746e]">Latest 5 orders</p>
+              <h3 className="text-lg font-semibold text-[#1c1917]">{t('dashboard.home.recentOrders')}</h3>
+              <p className="text-sm text-[#78746e]">{t('dashboard.analytics.latest5Orders')}</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-[#f0f9f4]">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-[#78746e]">Order ID</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-[#78746e]">Customer</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-[#78746e]">Date</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-[#78746e]">Total</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-[#78746e]">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-[#78746e]">{t('dashboard.invoice.orderId')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-[#78746e]">{t('dashboard.customers.customer')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-[#78746e]">{t('dashboard.invoice.date')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-[#78746e]">{t('dashboard.invoice.total')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-[#78746e]">{t('dashboard.products.status')}</th>
                   </tr>
                 </thead>
                 <tbody>

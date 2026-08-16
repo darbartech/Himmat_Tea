@@ -1,0 +1,1443 @@
+{
+  "files": [
+    {
+      "file": "src/app/components/ProductSlider.tsx",
+      "items": [
+        {
+          "file": "src/app/components/ProductSlider.tsx",
+          "bucket": "B",
+          "text": "Next slide",
+          "key": "a11y.nextSlide"
+        },
+        {
+          "file": "src/app/components/ProductSlider.tsx",
+          "bucket": "B",
+          "text": "Previous slide",
+          "key": "a11y.previousSlide"
+        }
+      ]
+    },
+    {
+      "file": "src/app/forgot-password/page.tsx",
+      "items": [
+        {
+          "file": "src/app/forgot-password/page.tsx",
+          "bucket": "B",
+          "text": "Loading...",
+          "key": "common.loading"
+        }
+      ]
+    },
+    {
+      "file": "src/app/pages/Careers.tsx",
+      "items": [
+        {
+          "file": "src/app/pages/Careers.tsx",
+          "bucket": "B",
+          "text": "you@email.com",
+          "key": "careers.emailPlaceholder"
+        },
+        {
+          "file": "src/app/pages/Careers.tsx",
+          "bucket": "B",
+          "text": "Your full name",
+          "key": "careers.fullNamePlaceholder"
+        },
+        {
+          "file": "src/app/pages/Careers.tsx",
+          "bucket": "B",
+          "text": "https://linkedin.com/in/yourname",
+          "key": "careers.linkedinPlaceholder"
+        },
+        {
+          "file": "src/app/pages/Careers.tsx",
+          "bucket": "B",
+          "text": "Godgifted team at work",
+          "key": "careers.teamImageAlt"
+        },
+        {
+          "file": "src/app/pages/Careers.tsx",
+          "bucket": "B",
+          "text": "Your full name",
+          "key": "wholesale.fullNamePlaceholder"
+        }
+      ]
+    },
+    {
+      "file": "src/app/pages/CustomerAccount.tsx",
+      "items": [
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "A",
+          "text": "Address",
+          "keys": [
+            "dashboard.settings.address",
+            "checkout.fields.address",
+            "auth.signup.addressLabel"
+          ]
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "A",
+          "text": "Email",
+          "keys": [
+            "dashboard.customers.email",
+            "dashboard.invoice.email",
+            "dashboard.settings.storeInformation.email",
+            "dashboard.adminUsers.email"
+          ]
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "A",
+          "text": "Full Name",
+          "keys": [
+            "checkout.fields.fullName",
+            "auth.signup.fullNameLabel"
+          ]
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "A",
+          "text": "Phone Number",
+          "keys": [
+            "dashboard.settings.phoneNumber",
+            "checkout.fields.phoneNumber",
+            "auth.signup.phoneLabel"
+          ]
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "A",
+          "text": "Total",
+          "keys": [
+            "dashboard.invoice.total",
+            "dashboard.purchaseOrders.total"
+          ]
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Full Name",
+          "key": "account.fullName"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Loading your orders...",
+          "key": "account.loadingOrders"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Loyalty Points",
+          "key": "account.loyaltyPoints"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Member Tier",
+          "key": "account.memberTier"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Once you place an order, it will show up here.",
+          "key": "account.noOrdersDesc"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "No orders yet",
+          "key": "account.noOrdersYet"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Order Items",
+          "key": "account.orderItems"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Order Tracking",
+          "key": "account.orderTracking"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Total",
+          "key": "cart.total"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Total",
+          "key": "checkout.summary.total"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Email",
+          "key": "contact.fields.email"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Address",
+          "key": "dashboard.customers.address"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Full Name",
+          "key": "dashboard.customers.fullName"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Loyalty Points",
+          "key": "dashboard.customers.loyaltyPoints"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "No orders yet",
+          "key": "dashboard.customers.noOrdersYet"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Email",
+          "key": "dashboard.orders.email"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Order Items",
+          "key": "dashboard.orders.orderItems"
+        },
+        {
+          "file": "src/app/pages/CustomerAccount.tsx",
+          "bucket": "B",
+          "text": "Total",
+          "key": "order.summary.total"
+        }
+      ]
+    },
+    {
+      "file": "src/app/pages/ProductDetail.tsx",
+      "items": [
+        {
+          "file": "src/app/pages/ProductDetail.tsx",
+          "bucket": "B",
+          "text": "No reviews yet. Be the first to review this product!",
+          "key": "productDetail.noReviewsYet"
+        },
+        {
+          "file": "src/app/pages/ProductDetail.tsx",
+          "bucket": "B",
+          "text": "Share",
+          "key": "productDetail.share.button"
+        },
+        {
+          "file": "src/app/pages/ProductDetail.tsx",
+          "bucket": "B",
+          "text": "Copy product link",
+          "key": "productDetail.share.copyLink"
+        },
+        {
+          "file": "src/app/pages/ProductDetail.tsx",
+          "bucket": "B",
+          "text": "Share on Facebook",
+          "key": "productDetail.share.facebook"
+        },
+        {
+          "file": "src/app/pages/ProductDetail.tsx",
+          "bucket": "B",
+          "text": "Share on LinkedIn",
+          "key": "productDetail.share.linkedin"
+        },
+        {
+          "file": "src/app/pages/ProductDetail.tsx",
+          "bucket": "B",
+          "text": "Share via native share dialog",
+          "key": "productDetail.share.native"
+        },
+        {
+          "file": "src/app/pages/ProductDetail.tsx",
+          "bucket": "B",
+          "text": "Share this product",
+          "key": "productDetail.share.title"
+        },
+        {
+          "file": "src/app/pages/ProductDetail.tsx",
+          "bucket": "B",
+          "text": "Share on X (Twitter)",
+          "key": "productDetail.share.twitter"
+        },
+        {
+          "file": "src/app/pages/ProductDetail.tsx",
+          "bucket": "B",
+          "text": "Share on WhatsApp",
+          "key": "productDetail.share.whatsapp"
+        }
+      ]
+    },
+    {
+      "file": "src/app/pages/Terms.tsx",
+      "items": [
+        {
+          "file": "src/app/pages/Terms.tsx",
+          "bucket": "B",
+          "text": "Address:",
+          "key": "checkout.summary.addressLabel"
+        },
+        {
+          "file": "src/app/pages/Terms.tsx",
+          "bucket": "B",
+          "text": "Email:",
+          "key": "checkout.summary.emailLabel"
+        }
+      ]
+    },
+    {
+      "file": "src/app/pages/dashboard/AdminUsers.tsx",
+      "items": [
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "A",
+          "text": "Account Active",
+          "keys": [
+            "dashboard.adminUsers.accountActive"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "A",
+          "text": "Admin",
+          "keys": [
+            "dashboard.adminUsers.admin"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "A",
+          "text": "Cancel",
+          "keys": [
+            "dashboard.products.cancel",
+            "dashboard.adminUsers.cancel",
+            "dashboard.inventory.cancel",
+            "dashboard.purchaseOrders.cancel",
+            "dashboard.coupons.cancel",
+            "dashboard.blog.cancel"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "A",
+          "text": "Delete Admin User?",
+          "keys": [
+            "dashboard.adminUsers.deleteAdminUser"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "A",
+          "text": "Email",
+          "keys": [
+            "dashboard.customers.email",
+            "dashboard.invoice.email",
+            "dashboard.settings.storeInformation.email",
+            "dashboard.adminUsers.email"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "A",
+          "text": "Manage admin accounts and permissions",
+          "keys": [
+            "dashboard.adminUsers.subtitle"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "A",
+          "text": "Role",
+          "keys": [
+            "dashboard.adminUsers.role",
+            "dashboard.adminUsers.roleLabel"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "A",
+          "text": "Search admin users...",
+          "keys": [
+            "dashboard.adminUsers.searchAdminUsers"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "A",
+          "text": "Super Admin",
+          "keys": [
+            "dashboard.adminUsers.superAdmin"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "A",
+          "text": "Username",
+          "keys": [
+            "dashboard.adminUsers.username"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Cancel",
+          "key": "common.cancel"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Select role",
+          "key": "common.selectRole"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Email",
+          "key": "contact.fields.email"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Delete Admin User?",
+          "key": "dashboard.adminUsers.deleteConfirmTitle"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "admin@example.com",
+          "key": "dashboard.adminUsers.emailPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Manage admin accounts and permissions",
+          "key": "dashboard.adminUsers.manageDesc"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Enter password",
+          "key": "dashboard.adminUsers.passwordPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Search admin users...",
+          "key": "dashboard.adminUsers.searchPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Select role",
+          "key": "dashboard.adminUsers.selectRole"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Enter username",
+          "key": "dashboard.adminUsers.usernamePlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Admin",
+          "key": "dashboard.layout.admin"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Admin",
+          "key": "dashboard.layout.adminAlt"
+        },
+        {
+          "file": "src/app/pages/dashboard/AdminUsers.tsx",
+          "bucket": "B",
+          "text": "Email",
+          "key": "dashboard.orders.email"
+        }
+      ]
+    },
+    {
+      "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+      "items": [
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "A",
+          "text": "Cancel",
+          "keys": [
+            "dashboard.products.cancel",
+            "dashboard.adminUsers.cancel",
+            "dashboard.inventory.cancel",
+            "dashboard.purchaseOrders.cancel",
+            "dashboard.coupons.cancel",
+            "dashboard.blog.cancel"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "A",
+          "text": "Search products...",
+          "keys": [
+            "dashboard.products.searchProducts",
+            "dashboard.inventory.searchProducts"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "Active (Visible on site)",
+          "key": "common.activeVisibleOnSite"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "Cancel",
+          "key": "common.cancel"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "Search products...",
+          "key": "common.searchProductsPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "https://...",
+          "key": "dashboard.blogAdmin.imageUrlPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "https://...",
+          "key": "dashboard.brewingGuides.imageUrlPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "Delete Collection?",
+          "key": "dashboard.collections.deleteConfirm"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "Describe this collection...",
+          "key": "dashboard.collections.descPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "Group products into curated collections",
+          "key": "dashboard.collections.groupDesc"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "https://...",
+          "key": "dashboard.collections.imageUrlPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "Summer Favorites",
+          "key": "dashboard.collections.namePlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "No collections found",
+          "key": "dashboard.collections.noneFound"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "Create your first collection to group related products together",
+          "key": "dashboard.collections.noneFoundDesc"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "Search products...",
+          "key": "dashboard.collections.searchProductsPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "summer-favorites",
+          "key": "dashboard.collections.slugPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "Active (Visible on site)",
+          "key": "dashboard.faqs.activeVisibleOnSite"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "https://...",
+          "key": "dashboard.productLines.imageUrlPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "https://...",
+          "key": "dashboard.products.imageUrlPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/CollectionsAdmin.tsx",
+          "bucket": "B",
+          "text": "Search products...",
+          "key": "dashboard.products.searchPlaceholder"
+        }
+      ]
+    },
+    {
+      "file": "src/app/pages/dashboard/FAQs.tsx",
+      "items": [
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "A",
+          "text": "Actions",
+          "keys": [
+            "dashboard.orders.action",
+            "dashboard.home.action"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "A",
+          "text": "All Categories",
+          "keys": [
+            "dashboard.products.allCategories",
+            "dashboard.inventory.allCategories",
+            "dashboard.blog.allCategories"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "A",
+          "text": "Cancel",
+          "keys": [
+            "dashboard.products.cancel",
+            "dashboard.adminUsers.cancel",
+            "dashboard.inventory.cancel",
+            "dashboard.purchaseOrders.cancel",
+            "dashboard.coupons.cancel",
+            "dashboard.blog.cancel"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "A",
+          "text": "Category",
+          "keys": [
+            "dashboard.products.category",
+            "dashboard.products.categoryLabel",
+            "dashboard.inventory.category",
+            "dashboard.blog.category"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "A",
+          "text": "Delete",
+          "keys": [
+            "dashboard.products.delete",
+            "dashboard.reviews.delete"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "A",
+          "text": "Edit",
+          "keys": [
+            "dashboard.products.edit",
+            "dashboard.adminUsers.edit",
+            "dashboard.blog.edit"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "A",
+          "text": "Status",
+          "keys": [
+            "dashboard.products.status",
+            "dashboard.products.statusLabel",
+            "dashboard.inventory.status",
+            "dashboard.purchaseOrders.status"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Active (Visible on site)",
+          "key": "common.activeVisibleOnSite"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "All Categories",
+          "key": "common.allCategories"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Cancel",
+          "key": "common.cancel"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Delete",
+          "key": "common.delete"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Edit",
+          "key": "common.edit"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Order",
+          "key": "common.order"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Select category",
+          "key": "common.selectCategory"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "All Categories",
+          "key": "dashboard.blogAdmin.allCategoriesPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Active (Visible on site)",
+          "key": "dashboard.faqs.activeVisibleOnSite"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "All Categories",
+          "key": "dashboard.faqs.allCategories"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Write a detailed answer...",
+          "key": "dashboard.faqs.answerPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Category",
+          "key": "dashboard.faqs.category"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Delete FAQ?",
+          "key": "dashboard.faqs.deleteConfirm"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Display Order",
+          "key": "dashboard.faqs.displayOrder"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Manage frequently asked questions and answers",
+          "key": "dashboard.faqs.manageDesc"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Order",
+          "key": "dashboard.faqs.order"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Question",
+          "key": "dashboard.faqs.question"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "What is your return policy?",
+          "key": "dashboard.faqs.questionPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "Select category",
+          "key": "dashboard.faqs.selectCategory"
+        },
+        {
+          "file": "src/app/pages/dashboard/FAQs.tsx",
+          "bucket": "B",
+          "text": "All Categories",
+          "key": "dashboard.inventory.allCategories"
+        }
+      ]
+    },
+    {
+      "file": "src/app/pages/dashboard/ProductLines.tsx",
+      "items": [
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "A",
+          "text": "Actions",
+          "keys": [
+            "dashboard.orders.action",
+            "dashboard.home.action"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "A",
+          "text": "Active",
+          "keys": [
+            "dashboard.customers.active",
+            "dashboard.home.active",
+            "dashboard.inventory.active",
+            "dashboard.coupons.active"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "A",
+          "text": "Cancel",
+          "keys": [
+            "dashboard.products.cancel",
+            "dashboard.adminUsers.cancel",
+            "dashboard.inventory.cancel",
+            "dashboard.purchaseOrders.cancel",
+            "dashboard.coupons.cancel",
+            "dashboard.blog.cancel"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "A",
+          "text": "Delete",
+          "keys": [
+            "dashboard.products.delete",
+            "dashboard.reviews.delete"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "A",
+          "text": "Edit",
+          "keys": [
+            "dashboard.products.edit",
+            "dashboard.adminUsers.edit",
+            "dashboard.blog.edit"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "A",
+          "text": "Status",
+          "keys": [
+            "dashboard.products.status",
+            "dashboard.products.statusLabel",
+            "dashboard.inventory.status",
+            "dashboard.purchaseOrders.status"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Color picker",
+          "key": "a11y.colorPicker"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Active",
+          "key": "common.active"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Cancel",
+          "key": "common.cancel"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Delete",
+          "key": "common.delete"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Edit",
+          "key": "common.edit"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Order",
+          "key": "common.order"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Slug",
+          "key": "common.slug"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Sort Order",
+          "key": "common.sortOrder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "https://...",
+          "key": "dashboard.blogAdmin.imageUrlPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "https://...",
+          "key": "dashboard.brewingGuides.imageUrlPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "https://...",
+          "key": "dashboard.collections.imageUrlPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Active",
+          "key": "dashboard.coupons.active"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Order",
+          "key": "dashboard.faqs.order"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Browse Collection",
+          "key": "dashboard.productLines.ctaButtonPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "CTA Button Text",
+          "key": "dashboard.productLines.ctaButtonText"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "A short blurb for the CTA section...",
+          "key": "dashboard.productLines.ctaDescPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "CTA Description",
+          "key": "dashboard.productLines.ctaDescription"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "CTA Link",
+          "key": "dashboard.productLines.ctaLink"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Call to Action (Optional)",
+          "key": "dashboard.productLines.ctaOptional"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "CTA Title",
+          "key": "dashboard.productLines.ctaTitle"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Ready to explore?",
+          "key": "dashboard.productLines.ctaTitlePlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Delete Product Line?",
+          "key": "dashboard.productLines.deleteConfirm"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Briefly describe this product line...",
+          "key": "dashboard.productLines.descPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Hero Headline",
+          "key": "dashboard.productLines.heroHeadline"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "The finest green teas from Himalayan gardens",
+          "key": "dashboard.productLines.heroHeadlinePlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "https://...",
+          "key": "dashboard.productLines.imageUrlPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Line",
+          "key": "dashboard.productLines.line"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Manage your tea product lines and their sections",
+          "key": "dashboard.productLines.manageDesc"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Green Tea Collection",
+          "key": "dashboard.productLines.namePlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Slug",
+          "key": "dashboard.productLines.slug"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "green-tea",
+          "key": "dashboard.productLines.slugPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "Theme Color",
+          "key": "dashboard.productLines.themeColor"
+        },
+        {
+          "file": "src/app/pages/dashboard/ProductLines.tsx",
+          "bucket": "B",
+          "text": "https://...",
+          "key": "dashboard.products.imageUrlPlaceholder"
+        }
+      ]
+    },
+    {
+      "file": "src/app/pages/dashboard/Settings.tsx",
+      "items": [
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Currency",
+          "keys": [
+            "dashboard.settings.currency",
+            "dashboard.settings.storeInformation.currency"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Email",
+          "keys": [
+            "dashboard.customers.email",
+            "dashboard.invoice.email",
+            "dashboard.settings.storeInformation.email",
+            "dashboard.adminUsers.email"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Email Notifications",
+          "keys": [
+            "dashboard.settings.notifications.emailNotifications"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "English",
+          "keys": [
+            "dashboard.settings.localization.languages.english"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Language",
+          "keys": [
+            "dashboard.settings.localization.language"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Low Stock Alerts",
+          "keys": [
+            "dashboard.settings.lowStock"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Notifications",
+          "keys": [
+            "dashboard.notifications",
+            "dashboard.settings.notifications",
+            "dashboard.settings.tabs.notifications"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Order Notifications",
+          "keys": [
+            "dashboard.settings.orderNotifs",
+            "dashboard.settings.notifications.orderNotifications"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Phone",
+          "keys": [
+            "dashboard.customers.phone",
+            "dashboard.invoice.phone",
+            "dashboard.settings.storeInformation.phone"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Store Information",
+          "keys": [
+            "dashboard.settings.storeInfo",
+            "dashboard.settings.storeInformation.title"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Store Name",
+          "keys": [
+            "dashboard.settings.storeName",
+            "dashboard.settings.storeInformation.storeName"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Tax Rate (%)",
+          "keys": [
+            "dashboard.settings.storeInformation.taxRate"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "Time Zone",
+          "keys": [
+            "dashboard.settings.localization.timeZone"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "A",
+          "text": "UTC",
+          "keys": [
+            "dashboard.settings.localization.timeZones.utc"
+          ]
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Uploading...",
+          "key": "common.uploading"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Email",
+          "key": "contact.fields.email"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Email",
+          "key": "dashboard.orders.email"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Phone",
+          "key": "dashboard.orders.phone"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Default Reorder Point",
+          "key": "dashboard.settings.defaultReorderPoint"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Default reorder point for new products",
+          "key": "dashboard.settings.defaultReorderPointPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Email Notifications",
+          "key": "dashboard.settings.emailNotifications"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Receive email updates for new orders to store email",
+          "key": "dashboard.settings.emailNotificationsDesc"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Flat rate for shipping (0 for free)",
+          "key": "dashboard.settings.flatShippingRatePlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "GST Number",
+          "key": "dashboard.settings.gstNumber"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "e.g., 27AABCU9603R1ZX",
+          "key": "dashboard.settings.gstNumberPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Inventory Settings",
+          "key": "dashboard.settings.inventorySettings"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Language",
+          "key": "dashboard.settings.language"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "English",
+          "key": "dashboard.settings.languages.english"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Gujarati",
+          "key": "dashboard.settings.languages.gujarati"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Hindi",
+          "key": "dashboard.settings.languages.hindi"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Nepali",
+          "key": "dashboard.settings.languages.nepali"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Low Stock Alerts",
+          "key": "dashboard.settings.lowStockAlerts"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Alert when product stock falls below threshold",
+          "key": "dashboard.settings.lowStockAlertsDesc"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Low Stock Threshold",
+          "key": "dashboard.settings.lowStockThreshold"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Alert when stock is below this number",
+          "key": "dashboard.settings.lowStockThresholdPlaceholder"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Manage your store settings",
+          "key": "dashboard.settings.manageDesc"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Nepalese Rupee (Rs.)",
+          "key": "dashboard.settings.nepaleseRupee"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Notifications",
+          "key": "dashboard.settings.notifications"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Order Notifications",
+          "key": "dashboard.settings.orderNotifications"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Get notified when new orders are placed",
+          "key": "dashboard.settings.orderNotificationsDesc"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Payment QR Code",
+          "key": "dashboard.settings.paymentQrCode"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Payment & Tax Settings",
+          "key": "dashboard.settings.paymentTaxSettings"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Store Information",
+          "key": "dashboard.settings.storeInformation"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Tax Rate (%)",
+          "key": "dashboard.settings.taxRate"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Time Zone",
+          "key": "dashboard.settings.timeZone"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Grams (g)",
+          "key": "dashboard.settings.units.grams"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Kilograms (kg)",
+          "key": "dashboard.settings.units.kilograms"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Ounces (oz)",
+          "key": "dashboard.settings.units.ounces"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Pounds (lb)",
+          "key": "dashboard.settings.units.pounds"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "UTC",
+          "key": "dashboard.settings.utc"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Weight Unit",
+          "key": "dashboard.settings.weightUnit"
+        },
+        {
+          "file": "src/app/pages/dashboard/Settings.tsx",
+          "bucket": "B",
+          "text": "Payment QR Code",
+          "key": "order.paymentQrAlt"
+        }
+      ]
+    },
+    {
+      "file": "src/modules/auth/AuthModal/AuthModal.tsx",
+      "items": [
+        {
+          "file": "src/modules/auth/AuthModal/AuthModal.tsx",
+          "bucket": "B",
+          "text": "Close",
+          "key": "a11y.close"
+        }
+      ]
+    }
+  ]
+}

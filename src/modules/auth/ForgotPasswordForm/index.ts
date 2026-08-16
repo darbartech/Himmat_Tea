@@ -1,2 +1,7 @@
+import { createForgotPasswordSchema, type ForgotPasswordData } from './validation';
+
+const _t = (key: string) => key;
+const forgotPasswordSchema = createForgotPasswordSchema(_t);
+
 export { ForgotPasswordForm, default } from './ForgotPasswordForm';
-export { forgotPasswordSchema, type ForgotPasswordData } from './validation';
+export { createForgotPasswordSchema, forgotPasswordSchema, type ForgotPasswordData };

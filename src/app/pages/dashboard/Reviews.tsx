@@ -24,6 +24,7 @@ import {
 } from "../../components/ui/alert-dialog";
 import { toast } from "sonner";
 
+import { useTranslation } from '../../../context/TranslationContext';
 type Review = {
   id: number;
   productId: number;
@@ -42,6 +43,8 @@ type Review = {
 };
 
 const Reviews = () => {
+  const { t } = useTranslation();
+
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
@@ -155,11 +158,11 @@ const Reviews = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Approved":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Approved</Badge>;
-      case "Pending":
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pending</Badge>;
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{t('dashboard.reviews.approved')}</Badge>;
+      case t('dashboard.reviews.pending'):
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">{t('dashboard.orders.pending')}</Badge>;
       case "Rejected":
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Rejected</Badge>;
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">{t('dashboard.reviews.rejected')}</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -175,7 +178,7 @@ const Reviews = () => {
   };
 
   const counts = {
-    Pending: reviews.filter((r) => getStatus(r) === "Pending").length,
+    Pending: reviews.filter((r) => getStatus(r) === t('dashboard.reviews.pending')).length,
     Approved: reviews.filter((r) => getStatus(r) === "Approved").length,
     Rejected: reviews.filter((r) => getStatus(r) === "Rejected").length,
   };
@@ -187,12 +190,12 @@ const Reviews = () => {
           <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
             Reviews
           </h1>
-          <p className="text-[#78746e] mt-1">Manage customer reviews and feedback</p>
+          <p className="text-[#78746e] mt-1">{t('dashboard.reviews.subtitle')}</p>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {["All", "Pending", "Approved", "Rejected"].map((status) => (
+        {["All", t('dashboard.reviews.pending'), "Approved", "Rejected"].map((status) => (
           <Button
             key={status}
             variant={filter === status ? "primary" : "ghost"}
@@ -222,7 +225,7 @@ const Reviews = () => {
         <div className="grid gap-4">
           <Card>
             <CardContent className="pt-6 text-center text-[#78746e]">
-              <p>No reviews found</p>
+              <p>{t('dashboard.reviews.noReviewsFound')}</p>
             </CardContent>
           </Card>
         </div>
@@ -320,7 +323,7 @@ const Reviews = () => {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Review?</AlertDialogTitle>
+            <AlertDialogTitle>{t('dashboard.reviews.deleteConfirm')}</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this review from{" "}
               <span className="font-semibold text-[#1c1917]">
@@ -330,7 +333,7 @@ const Reviews = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingId !== null}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletingId !== null}>{t('dashboard.products.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               disabled={deletingId !== null}
               onClick={handleConfirmDelete}
