@@ -51,10 +51,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setApiError(null);
 
     try {
-      const success = await customerLogin(data.email, data.password);
+      const result = await customerLogin(data.email, data.password);
 
-      if (!success) {
-        throw new Error(t('auth.login.invalidCredentials'));
+      if (!result.success) {
+        throw new Error(result.error || t('auth.login.invalidCredentials'));
       }
 
       reset();

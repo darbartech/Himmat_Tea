@@ -72,6 +72,7 @@
   "auth.page.benefitsTitleSignup": "登録するメリット",
   "auth.page.continueWithGithub": "GitHubで続ける",
   "auth.page.continueWithGoogle": "Googleで続ける",
+  "auth.page.continueWithFacebook": "Facebookで続ける",
   "auth.page.formEyebrowLogin": "おかえりなさい",
   "auth.page.formEyebrowSignup": "アカウント作成",
   "auth.page.formSubtitleLogin": "サインインしてアカウントにアクセスし、注文状況などを確認しましょう。",

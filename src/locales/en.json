@@ -72,6 +72,7 @@
   "auth.page.benefitsTitleSignup": "Why join us?",
   "auth.page.continueWithGithub": "Continue with GitHub",
   "auth.page.continueWithGoogle": "Continue with Google",
+  "auth.page.continueWithFacebook": "Continue with Facebook",
   "auth.page.formEyebrowLogin": "Welcome Back",
   "auth.page.formEyebrowSignup": "Create Account",
   "auth.page.formSubtitleLogin": "Sign in to access your account, track orders, and more.",

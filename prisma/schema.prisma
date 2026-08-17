@@ -94,6 +94,7 @@ model Customer {
   image              String?
   googleId           String?              @unique
   githubId           String?              @unique
+  facebookId         String?              @unique
   ordersCount        Int                  @default(0)
   totalSpent         Float                @default(0)
   loyaltyPoints      Int                  @default(0)

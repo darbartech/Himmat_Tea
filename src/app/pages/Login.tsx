@@ -39,7 +39,6 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    // Client-side validation
     if (!username.trim()) {
       setError("Please enter your username");
       return;
@@ -50,15 +49,14 @@ export default function Login() {
     }
 
     setIsSubmitting(true);
-    // Simulate a small delay for better UX
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    const success = await login(username, password);
-    if (success) {
+    const result = await login(username, password);
+    if (result.success) {
       toast.success("Welcome back!");
       navigate.push("/himmat_admin_8526/dashboard");
     } else {
-      setError("Invalid credentials. Please try again.");
+      setError(result.error || "Invalid credentials. Please try again.");
     }
     setIsSubmitting(false);
   };
@@ -78,37 +76,36 @@ export default function Login() {
           </Link>
 
           {/* Logo */}
-              <Image
-              src="/logo.svg"
-              alt={t('auth.logoAlt')}
-              width={100}
-              height={100}
-              className="w-[150px] h-[100%]"
-             
-            />
+          <Image
+            src="/logo.svg"
+            alt={t('auth.logoAlt')}
+            width={140}
+            height={140}
+            className="w-auto h-[56px] mb-10"
+          />
 
           {/* Header */}
-          <div className="mb-10">
+          <div className="mb-8">
             <h1
-              className="text-4xl font-bold text-[#1c1917] mb-3"
+              className="text-4xl font-semibold text-[#1c1917] mb-3 leading-tight"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
               Welcome back
             </h1>
-            <p className="text-[#78746e] text-lg">
+            <p className="text-[#6d6a63] text-lg leading-7">
               Sign in to your admin dashboard
             </p>
           </div>
 
           {error && (
-            <Alert variant="destructive" role="alert" className="mb-8 border-red-200 bg-red-50 text-red-800">
+            <Alert variant="destructive" role="alert" className="mb-8 border-red-200 bg-red-50 text-red-800 rounded-xl">
               <AlertCircle className="h-4 w-4 text-red-600" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-            <div className="space-y-2.5">
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+            <div className="space-y-2">
               <Label 
                 htmlFor="username" 
                 className="text-[#1c1917] text-sm font-medium"
@@ -129,11 +126,11 @@ export default function Login() {
                 aria-describedby={error ? "username-error" : undefined}
                 aria-invalid={!!error}
                 disabled={isSubmitting}
-                className="h-12 px-4 border-[rgba(28,25,23,0.15)] bg-white focus:border-[#2d5a3d] focus:ring-2 focus:ring-[#2d5a3d]/10 transition-all duration-200 text-[#1c1917] placeholder:text-[#b0aba4]"
+                className="h-12 px-4 rounded-xl border-[#e8e9e5] bg-[#fafaf8] focus:border-[#2d5a3d] focus:ring-2 focus:ring-[#2d5a3d]/10 transition-all duration-200 text-[#1c1917] placeholder:text-[#b0aba4] hover:border-[#d4d6cf]"
               />
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <Label 
                 htmlFor="password" 
                 className="text-[#1c1917] text-sm font-medium"
@@ -155,18 +152,18 @@ export default function Login() {
                   aria-describedby={error ? "password-error" : undefined}
                   aria-invalid={!!error}
                   disabled={isSubmitting}
-                  className="h-12 px-4 pr-12 border-[rgba(28,25,23,0.15)] bg-white focus:border-[#2d5a3d] focus:ring-2 focus:ring-[#2d5a3d]/10 transition-all duration-200 text-[#1c1917] placeholder:text-[#b0aba4]"
+                  className="h-12 px-4 pr-12 rounded-xl border-[#e8e9e5] bg-[#fafaf8] focus:border-[#2d5a3d] focus:ring-2 focus:ring-[#2d5a3d]/10 transition-all duration-200 text-[#1c1917] placeholder:text-[#b0aba4] hover:border-[#d4d6cf]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#78746e] hover:text-[#1c1917] transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#a1a09b] hover:text-[#2d5a3d] transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4.5 w-4.5" />
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <Eye className="h-4.5 w-4.5" />
+                    <Eye className="h-4 w-4" />
                   )}
                 </button>
               </div>
@@ -174,7 +171,7 @@ export default function Login() {
 
             <Button
               type="submit"
-              className="w-full cursor-pointer h-12 bg-[#2d5a3d] hover:bg-[#244a33] text-white text-base font-medium rounded-lg transition-all duration-200 shadow-lg shadow-[#2d5a3d]/20 hover:shadow-xl hover:shadow-[#2d5a3d]/25"
+              className="w-full cursor-pointer h-12 bg-[#2d5a3d] hover:bg-[#244a33] text-white text-base font-medium rounded-xl transition-all duration-200 shadow-lg shadow-[#2d5a3d]/20 hover:shadow-xl hover:shadow-[#2d5a3d]/25 active:scale-[0.99]"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -193,46 +190,35 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right Section - Image & Branding */}
-      <div className="hidden lg:flex flex-1 relative overflow-hidden">
-        {/* Background Image */}
-        <img
-          src="https://imgs.search.brave.com/laq4WDrhQXqaasssQIbDDX-4-2_F39fPSfplq-EARFE/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMudmVjdGVlenku/Y29tL3N5c3RlbS9y/ZXNvdXJjZXMvdGh1/bWJuYWlscy8wMTEv/NTk5LzM0NC9zbWFs/bC90ZWEtY3VwLXdp/dGgtYW5kLXRlYS1s/ZWFmLXNhY2tpbmct/b24tdGhlLXdvb2Rl/bi10YWJsZS1hbmQt/dGhlLXRlYS1wbGFu/dGF0aW9ucy1iYWNr/Z3JvdW5kLXBob3Rv/LmpwZw"
-          alt={t('auth.heroImageAlt')}
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
-        />
-        
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0b7c33]/95 via-[#0b7c33]/40 to-transparent" />
-        
-        {/* Branding Content */}
-        <div className="relative z-10 h-full flex flex-col justify-end p-16">
+      {/* Right Section - Branding Panel */}
+      <div className="hidden lg:flex flex-1 relative overflow-hidden bg-[#2d5a3d]">
+        <div className="h-full w-full flex flex-col justify-end p-16">
           <div className="max-w-md">
-            
+            <span className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-[11px] uppercase tracking-[0.32em] font-semibold text-[#d8e5ce] border border-white/10 mb-8">
+              Himmat Tea
+            </span>
             <h2
-              className="text-5xl lg:text-6xl font-bold text-white mb-5 leading-tight"
+              className="text-5xl lg:text-6xl font-semibold text-white mb-5 leading-tight"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
               Crafting the perfect cup
             </h2>
-            <p className="text-white/85 text-lg leading-relaxed mb-10">
+            <p className="text-[#d8e5ce] text-lg leading-relaxed mb-10">
               Experience the art of tea with Himmat Tea. From the finest plantations to your cup.
             </p>
 
-            {/* Stats */}
             <div className="grid grid-cols-3 gap-6">
               <div>
                 <div className="text-3xl font-bold text-[#c8a96e]">50+</div>
-                <div className="text-sm text-white/70 mt-1">{t('auth.stats.teaVarieties')}</div>
+                <div className="text-sm text-[#d8e5ce] mt-1">{t('auth.stats.teaVarieties')}</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-[#c8a96e]">10K+</div>
-                <div className="text-sm text-white/70 mt-1">{t('testimonials.stat.customersLabel')}</div>
+                <div className="text-sm text-[#d8e5ce] mt-1">{t('testimonials.stat.customersLabel')}</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-[#c8a96e]">15+</div>
-                <div className="text-sm text-white/70 mt-1">{t('auth.stats.yearsOfExcellence')}</div>
+                <div className="text-sm text-[#d8e5ce] mt-1">{t('auth.stats.yearsOfExcellence')}</div>
               </div>
             </div>
           </div>

@@ -72,6 +72,7 @@
   "auth.page.benefitsTitleSignup": "为什么要注册？",
   "auth.page.continueWithGithub": "使用 GitHub 继续",
   "auth.page.continueWithGoogle": "使用 Google 继续",
+  "auth.page.continueWithFacebook": "使用 Facebook 继续",
   "auth.page.formEyebrowLogin": "欢迎回来",
   "auth.page.formEyebrowSignup": "创建账户",
   "auth.page.formSubtitleLogin": "登录以访问您的账户、跟踪订单，体验更多功能。",

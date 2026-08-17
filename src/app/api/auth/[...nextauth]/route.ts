@@ -1,5 +1,6 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import FacebookProvider from "next-auth/providers/facebook";
 import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../../lib/prisma";
@@ -10,6 +11,10 @@ const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID!,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
     }),
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID!,
@@ -37,6 +42,12 @@ const authOptions: NextAuthOptions = {
               await prisma.customer.update({
                 where: { id: existingCustomer.id },
                 data: { googleId: account.providerAccountId },
+              });
+            }
+            if (account.provider === "facebook" && !existingCustomer.facebookId) {
+              await prisma.customer.update({
+                where: { id: existingCustomer.id },
+                data: { facebookId: account.providerAccountId },
               });
             }
             if (account.provider === "github" && !existingCustomer.githubId) {
@@ -76,6 +87,7 @@ const authOptions: NextAuthOptions = {
                 phone,
                 address,
                 googleId: account.provider === "google" ? account.providerAccountId : null,
+                facebookId: account.provider === "facebook" ? account.providerAccountId : null,
                 githubId: account.provider === "github" ? account.providerAccountId : null,
               },
             });

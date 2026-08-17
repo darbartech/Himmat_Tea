@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Navigation from '@/app/components/Navigation';
 import Footer from '@/app/components/Footer';
 import { useAuth } from '@/context/AuthContext';
-import { Github, Chrome } from 'lucide-react';
+import { Chrome, Facebook } from 'lucide-react';
 import { LoginForm, SignupForm } from '@/modules/auth';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -24,7 +24,7 @@ export default function CustomerAuth() {
   const safeRedirectTo = getSafeRedirect(rawRedirect);
   const initialMode: 'login' | 'signup' = rawMode === 'signup' ? 'signup' : 'login';
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
-  const [socialLoading, setSocialLoading] = useState<'google' | 'github' | null>(null);
+  const [socialLoading, setSocialLoading] = useState<'google' | 'facebook' | null>(null);
   const { t } = useTranslation();
   
   const { socialLogin, isLoggedIn, userType, isLoading } = useAuth();
@@ -54,9 +54,8 @@ export default function CustomerAuth() {
     );
   }
 
-  const handleSocialLogin = async (provider: 'google' | 'github') => {
+  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
     setSocialLoading(provider);
-    
     try {
       const success = await socialLogin(provider);
       if (success) {
@@ -85,73 +84,66 @@ export default function CustomerAuth() {
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] items-start">
             {/* Left Brand Panel */}
-            <section className="rounded-[32px] bg-[#2d5a3d] p-10 text-white shadow-[0_40px_120px_rgba(45,90,61,0.15)] sm:p-12 lg:p-14 relative overflow-hidden">
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-white/20 blur-3xl"></div>
-                <div className="absolute -left-20 -bottom-20 w-60 h-60 rounded-full bg-white/10 blur-3xl"></div>
-              </div>
+            <section className="rounded-[32px] bg-[#2d5a3d] p-10 text-white shadow-[0_40px_120px_rgba(45,90,61,0.15)] sm:p-12 lg:p-14">
+              <span className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-[11px] uppercase tracking-[0.32em] font-semibold text-[#d8e5ce] border border-white/10">
+                {mode === 'login' ? t('auth.page.badgeLogin') : t('auth.page.badgeSignup')}
+              </span>
               
-              <div className="relative">
-                <span className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-[11px] uppercase tracking-[0.32em] font-semibold text-[#d8e5ce] border border-white/10">
-                  {mode === 'login' ? t('auth.page.badgeLogin') : t('auth.page.badgeSignup')}
-                </span>
-                
-                <h1
-                  className="mt-8 text-[clamp(2.75rem,4vw,4.5rem)] font-semibold leading-[0.95] max-w-3xl"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
-                >
-                  {mode === 'login' 
-                    ? t('auth.page.heroTitleLogin') 
-                    : t('auth.page.heroTitleSignup')}
-                </h1>
-                
-                <p className="mt-6 max-w-2xl text-base leading-8 text-[#d8e5ce]">
-                  {mode === 'login'
-                    ? t('auth.page.heroSubtitleLogin')
-                    : t('auth.page.heroSubtitleSignup')}
-                </p>
+              <h1
+                className="mt-8 text-[clamp(2.75rem,4vw,4.5rem)] font-semibold leading-[0.95] max-w-3xl"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                {mode === 'login' 
+                  ? t('auth.page.heroTitleLogin') 
+                  : t('auth.page.heroTitleSignup')}
+              </h1>
+              
+              <p className="mt-6 max-w-2xl text-base leading-8 text-[#d8e5ce]">
+                {mode === 'login'
+                  ? t('auth.page.heroSubtitleLogin')
+                  : t('auth.page.heroSubtitleSignup')}
+              </p>
 
-                <div className="mt-10 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-[24px] bg-white/10 p-5 border border-white/10 backdrop-blur-sm">
-                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#c8d3b9] mb-3">
-                      {mode === 'login' ? t('auth.page.benefitsTitleLogin') : t('auth.page.benefitsTitleSignup')}
-                    </p>
-                    <ul className="space-y-3 text-sm leading-7 text-[#ecf3e8]">
-                      {mode === 'login' ? (
-                        <>
-                          <li>{t('auth.page.benefitLogin1')}</li>
-                          <li>{t('auth.page.benefitLogin2')}</li>
-                          <li>{t('auth.page.benefitLogin3')}</li>
-                        </>
-                      ) : (
-                        <>
-                          <li>{t('auth.page.benefitSignup1')}</li>
-                          <li>{t('auth.page.benefitSignup2')}</li>
-                          <li>{t('auth.page.benefitSignup3')}</li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
-                  <div className="rounded-[24px] bg-white/10 p-5 border border-white/10 backdrop-blur-sm">
-                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#c8d3b9] mb-3">
-                      {mode === 'login' ? t('auth.page.quickAccessTitleLogin') : t('auth.page.quickAccessTitleSignup')}
-                    </p>
-                    <ul className="space-y-3 text-sm leading-7 text-[#ecf3e8]">
-                      {mode === 'login' ? (
-                        <>
-                          <li>{t('auth.page.quickLogin1')}</li>
-                          <li>{t('auth.page.quickLogin2')}</li>
-                          <li>{t('auth.page.quickLogin3')}</li>
-                        </>
-                      ) : (
-                        <>
-                          <li>{t('auth.page.quickSignup1')}</li>
-                          <li>{t('auth.page.quickSignup2')}</li>
-                          <li>{t('auth.page.quickSignup3')}</li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
+              <div className="mt-10 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[24px] bg-white/10 p-5 border border-white/10">
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#c8d3b9] mb-3">
+                    {mode === 'login' ? t('auth.page.benefitsTitleLogin') : t('auth.page.benefitsTitleSignup')}
+                  </p>
+                  <ul className="space-y-2.5 text-sm leading-7 text-[#ecf3e8]">
+                    {mode === 'login' ? (
+                      <>
+                        <li>{t('auth.page.benefitLogin1')}</li>
+                        <li>{t('auth.page.benefitLogin2')}</li>
+                        <li>{t('auth.page.benefitLogin3')}</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>{t('auth.page.benefitSignup1')}</li>
+                        <li>{t('auth.page.benefitSignup2')}</li>
+                        <li>{t('auth.page.benefitSignup3')}</li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+                <div className="rounded-[24px] bg-white/10 p-5 border border-white/10">
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#c8d3b9] mb-3">
+                    {mode === 'login' ? t('auth.page.quickAccessTitleLogin') : t('auth.page.quickAccessTitleSignup')}
+                  </p>
+                  <ul className="space-y-2.5 text-sm leading-7 text-[#ecf3e8]">
+                    {mode === 'login' ? (
+                      <>
+                        <li>{t('auth.page.quickLogin1')}</li>
+                        <li>{t('auth.page.quickLogin2')}</li>
+                        <li>{t('auth.page.quickLogin3')}</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>{t('auth.page.quickSignup1')}</li>
+                        <li>{t('auth.page.quickSignup2')}</li>
+                        <li>{t('auth.page.quickSignup3')}</li>
+                      </>
+                    )}
+                  </ul>
                 </div>
               </div>
             </section>
@@ -191,16 +183,16 @@ export default function CustomerAuth() {
                 </button>
 
                 <button
-                  onClick={() => handleSocialLogin('github')}
+                  onClick={() => handleSocialLogin('facebook')}
                   disabled={!!socialLoading}
-                  className="w-full flex items-center justify-center gap-3 rounded-2xl bg-[#1c1917] px-5 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-[#111] disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98]"
+                  className="w-full flex items-center justify-center gap-3 rounded-2xl bg-[#1877F2] px-5 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-[#166FE5] disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98] shadow-lg shadow-[#1877F2]/15 hover:shadow-xl hover:shadow-[#1877F2]/25"
                 >
-                  {socialLoading === 'github' ? (
+                  {socialLoading === 'facebook' ? (
                     <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
                   ) : (
-                    <Github className="h-5 w-5" />
+                    <Facebook className="h-5 w-5" />
                   )}
-                  {t('auth.page.continueWithGithub')}
+                  {t('auth.page.continueWithFacebook')}
                 </button>
               </div>
 
@@ -217,7 +209,7 @@ export default function CustomerAuth() {
               </div>
 
               {/* Mode Toggle */}
-              <div className="flex rounded-2xl border border-[#e8e9e5] bg-[#f7f7f4] p-1 text-sm font-semibold text-[#5e5b53] mb-8">
+              <div className="flex rounded-2xl border border-[#e8e9e5] bg-[#f7f7f4] p-1 text-sm font-semibold text-[#5e5b53] mb-6">
                 <button
                   onClick={() => {
                     setMode('login');

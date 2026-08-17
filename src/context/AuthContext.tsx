@@ -40,8 +40,8 @@ interface AuthContextType {
   currentUser: User | null;
   userType: "admin" | "customer" | null;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
-  customerLogin: (email: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  customerLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   initiateCustomerSignup: (
     name: string,
     email: string,
@@ -54,7 +54,7 @@ interface AuthContextType {
     otp: string
   ) => Promise<{ success: boolean; error?: string }>;
   resendSignupOtp: (email: string) => Promise<{ success: boolean; error?: string }>;
-  socialLogin: (provider: "google" | "github") => Promise<boolean>;
+  socialLogin: (provider: "google" | "facebook" | "github") => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -276,7 +276,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const login = async (
     username: string,
     password: string
-  ): Promise<boolean> => {
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       if (process.env.NODE_ENV === "development") {
         console.log(
@@ -299,22 +299,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           );
         }
         persistUser(response.user, "admin");
-        return true;
+        return { success: true };
       }
-    } catch {
+      return { success: false, error: "Invalid credentials. Please try again." };
+    } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.log("[AUTH] Admin login failed — invalid credentials");
       }
-      // Login failed
+      const message = error instanceof Error ? error.message : "Invalid credentials. Please try again.";
+      return { success: false, error: message };
     }
-
-    return false;
   };
 
   const customerLogin = async (
     email: string,
     password: string
-  ): Promise<boolean> => {
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       if (process.env.NODE_ENV === "development") {
         console.log(
@@ -337,18 +337,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           );
         }
         persistUser(response.user, "customer");
-        return true;
+        return { success: true };
       }
-    } catch {
+      return { success: false, error: "Invalid credentials. Please try again." };
+    } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.log(
           "[AUTH] Customer login failed — invalid credentials or server error"
         );
       }
-      // Customer login failed
+      const message = error instanceof Error ? error.message : "Invalid credentials. Please try again.";
+      return { success: false, error: message };
     }
-
-    return false;
   };
 
   const initiateCustomerSignup = async (
@@ -456,7 +456,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const socialLogin = async (
-    provider: "google" | "github"
+    provider: "google" | "facebook" | "github"
   ): Promise<boolean> => {
     try {
       if (process.env.NODE_ENV === "development") {

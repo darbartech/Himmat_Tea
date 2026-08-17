@@ -1,12 +1,9 @@
 import ForgotPasswordPage from "@/app/pages/ForgotPassword";
 import { Suspense } from "react";
 
-import { useTranslation } from '../../context/TranslationContext';
 export default function ForgotPasswordRoute() {
-  const { t } = useTranslation();
-
   return (
-    <Suspense fallback={<div>{t('common.loading')}</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#eef4ea] flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2d5a3d]"></div></div>}>
       <ForgotPasswordPage />
     </Suspense>
   );
