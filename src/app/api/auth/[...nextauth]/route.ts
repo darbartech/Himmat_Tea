@@ -38,33 +38,34 @@ const authOptions: NextAuthOptions = {
           });
 
           if (existingCustomer) {
-            if (account.provider === "google" && !existingCustomer.googleId) {
+            const ec = existingCustomer as any;
+            if (account.provider === "google" && !ec.googleId) {
               await prisma.customer.update({
-                where: { id: existingCustomer.id },
-                data: { googleId: account.providerAccountId },
+                where: { id: ec.id },
+                data: { googleId: account.providerAccountId } as any,
               });
             }
-            if (account.provider === "facebook" && !existingCustomer.facebookId) {
+            if (account.provider === "facebook" && !ec.facebookId) {
               await prisma.customer.update({
-                where: { id: existingCustomer.id },
-                data: { facebookId: account.providerAccountId },
+                where: { id: ec.id },
+                data: { facebookId: account.providerAccountId } as any,
               });
             }
-            if (account.provider === "github" && !existingCustomer.githubId) {
+            if (account.provider === "github" && !ec.githubId) {
               await prisma.customer.update({
-                where: { id: existingCustomer.id },
-                data: { githubId: account.providerAccountId },
+                where: { id: ec.id },
+                data: { githubId: account.providerAccountId } as any,
               });
             }
-            if (!existingCustomer.emailVerified) {
+            if (!ec.emailVerified) {
               await prisma.customer.update({
-                where: { id: existingCustomer.id },
+                where: { id: ec.id },
                 data: { emailVerified: new Date() },
               });
             }
-            if (!existingCustomer.image && user.image) {
+            if (!ec.image && user.image) {
               await prisma.customer.update({
-                where: { id: existingCustomer.id },
+                where: { id: ec.id },
                 data: { image: user.image },
               });
             }
@@ -89,7 +90,7 @@ const authOptions: NextAuthOptions = {
                 googleId: account.provider === "google" ? account.providerAccountId : null,
                 facebookId: account.provider === "facebook" ? account.providerAccountId : null,
                 githubId: account.provider === "github" ? account.providerAccountId : null,
-              },
+              } as any,
             });
           }
         } catch (err) {

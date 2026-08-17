@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Lock, Mail, MailCheck, MapPin, Phone, User, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MailCheck, Eye, EyeOff } from 'lucide-react';
 import { createSignupFormSchema, SignupFormData } from './validation';
 import { useAuth } from '@/context/AuthContext';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/app/components/ui/input-otp';
@@ -182,366 +182,350 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   if (step === 'otp') {
     return (
       <div className={`w-full ${className}`}>
-        <div className="rounded-[26px] border border-[#e9e3d9] bg-white p-4 shadow-sm sm:p-5">
-          <div className="mb-6 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#2d5a3d]/10">
-              <MailCheck className="h-7 w-7 text-[#2d5a3d]" />
-            </div>
-            <h3 className="text-lg font-semibold text-[#1c1917]">{t('auth.signup.otpTitle')}</h3>
-            <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[#6d6a63]">
-              {t('auth.signup.otpSubtitlePrefix')} <span className="font-semibold text-[#1c1917]">{pendingEmail}</span>.
-              {t('auth.signup.otpSubtitleSuffix')}
-            </p>
+        <div className="text-center mb-8">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#2d5a3d]/10">
+            <MailCheck className="h-10 w-10 text-[#2d5a3d]" />
           </div>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleVerify(otp);
-            }}
-            className="space-y-5"
-            noValidate
-          >
-            <InputOTP
-              maxLength={6}
-              value={otp}
-              onChange={(value) => {
-                setOtp(value);
-                setApiError(null);
-              }}
-              onComplete={handleVerify}
-              disabled={isLoading}
-              containerClassName="justify-center"
-            >
-              <InputOTPGroup>
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <InputOTPSlot
-                    key={i}
-                    index={i}
-                    className="h-12 w-11 border-[#e8e9e5] bg-[#fafaf8] text-lg font-semibold text-[#1c1917] transition-all duration-200 first:rounded-xl last:rounded-xl data-[active=true]:border-[#2d5a3d] data-[active=true]:ring-[#2d5a3d]/20 sm:h-14 sm:w-12"
-                  />
-                ))}
-              </InputOTPGroup>
-            </InputOTP>
-
-            {apiError && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700" role="alert" aria-live="polite">
-                {apiError}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading || otp.length !== 6}
-              aria-disabled={isLoading || otp.length !== 6}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2d5a3d] px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#2d5a3d]/20 transition-all duration-200 hover:bg-[#234832] hover:shadow-xl hover:shadow-[#2d5a3d]/30 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.99]"
-            >
-              {isLoading ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  <span>{t('auth.signup.otpVerifying')}</span>
-                </>
-              ) : (
-                <>
-                  <span>{t('auth.signup.otpVerifyButton')}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
-
-            <div className="text-center text-sm text-[#6d6a63]">
-              {resendIn > 0 ? (
-                <span>{t('auth.signup.otpResendIn', { seconds: resendIn })}</span>
-              ) : (
-                <>
-                  {t('auth.signup.otpDidntGetIt')}{' '}
-                  <button
-                    type="button"
-                    onClick={handleResend}
-                    disabled={resending}
-                    className="font-semibold text-[#2d5a3d] transition-opacity hover:underline disabled:opacity-50"
-                  >
-                    {resending ? t('auth.signup.otpSending') : t('auth.signup.otpResendCode')}
-                  </button>
-                </>
-              )}
-            </div>
-
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={goBackToDetails}
-                disabled={isLoading}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#6d6a63] transition-colors hover:text-[#1c1917] disabled:opacity-50"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                {t('auth.signup.otpEditDetails')}
-              </button>
-            </div>
-          </form>
+          <h3 className="text-2xl font-semibold text-[#1c1917] mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+            {t('auth.signup.otpTitle')}
+          </h3>
+          <p className="mx-auto max-w-sm text-[15px] leading-7 text-[#6d6a63]">
+            {t('auth.signup.otpSubtitlePrefix')} <span className="font-semibold text-[#1c1917]">{pendingEmail}</span>.
+            {t('auth.signup.otpSubtitleSuffix')}
+          </p>
         </div>
-      </div>
-    );
-  }
 
-  return (
-    <div className={`w-full ${className}`}>
-      <div className="rounded-[26px] border border-[#e9e3d9] bg-white p-4 shadow-sm sm:p-5">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-          <div className="space-y-1.5">
-            <label htmlFor="signup-name" className="block text-sm font-medium text-[#1c1917]">
-              {t('auth.signup.fullNameLabel')}
-            </label>
-            <div className="group relative">
-              <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
-              <input
-                id="signup-name"
-                type="text"
-                autoComplete="name"
-                aria-describedby={errors.name ? 'signup-name-error' : undefined}
-                aria-invalid={!!errors.name}
-                {...register('name')}
-                placeholder={t('auth.signup.fullNamePlaceholder')}
-                className={`w-full rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-4 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
-                  errors.name
-                    ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                    : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-2 focus:ring-[#2d5a3d]/10'
-                }`}
-              />
-            </div>
-            {errors.name && (
-              <p id="signup-name-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
-                {errors.name.message}
-              </p>
-            )}
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label htmlFor="signup-email" className="block text-sm font-medium text-[#1c1917]">
-                {t('auth.signup.emailLabel')}
-              </label>
-              <div className="group relative">
-                <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
-                <input
-                  id="signup-email"
-                  type="email"
-                  autoComplete="email"
-                  aria-describedby={errors.email ? 'signup-email-error' : undefined}
-                  aria-invalid={!!errors.email}
-                  {...register('email')}
-                  placeholder={t('auth.signup.emailPlaceholder')}
-                  className={`w-full rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-4 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
-                    errors.email
-                      ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                      : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-2 focus:ring-[#2d5a3d]/10'
-                  }`}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleVerify(otp);
+          }}
+          className="space-y-6"
+          noValidate
+        >
+          <InputOTP
+            maxLength={6}
+            value={otp}
+            onChange={(value) => {
+              setOtp(value);
+              setApiError(null);
+            }}
+            onComplete={handleVerify}
+            disabled={isLoading}
+            containerClassName="justify-center"
+          >
+            <InputOTPGroup>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <InputOTPSlot
+                  key={i}
+                  index={i}
+                  className="h-14 w-12 sm:h-16 sm:w-14 rounded-2xl border-[#e8e9e5] bg-[#fafaf8] text-xl font-semibold text-[#1c1917] transition-all duration-200 first:rounded-2xl last:rounded-2xl data-[active=true]:border-[#2d5a3d] data-[active=true]:ring-4 data-[active=true]:ring-[#2d5a3d]/15 mx-1"
                 />
-              </div>
-              {errors.email && (
-                <p id="signup-email-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="signup-phone" className="block text-sm font-medium text-[#1c1917]">
-                {t('auth.signup.phoneLabel')}
-              </label>
-              <div className="group relative">
-                <Phone className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
-                <input
-                  id="signup-phone"
-                  type="tel"
-                  autoComplete="tel"
-                  aria-describedby={errors.phone ? 'signup-phone-error' : undefined}
-                  aria-invalid={!!errors.phone}
-                  {...register('phone')}
-                  placeholder={t('auth.signup.phonePlaceholder')}
-                  className={`w-full rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-4 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
-                    errors.phone
-                      ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                      : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-2 focus:ring-[#2d5a3d]/10'
-                  }`}
-                />
-              </div>
-              {errors.phone && (
-                <p id="signup-phone-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
-                  {errors.phone.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label htmlFor="signup-password" className="block text-sm font-medium text-[#1c1917]">
-              {t('auth.signup.passwordLabel')}
-            </label>
-            <div className="group relative">
-              <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
-              <input
-                id="signup-password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                aria-describedby={errors.password ? 'signup-password-error signup-password-strength' : 'signup-password-strength'}
-                aria-invalid={!!errors.password}
-                {...register('password')}
-                placeholder={t('auth.signup.passwordPlaceholder')}
-                className={`w-full rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-11 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
-                  errors.password
-                    ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                    : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-2 focus:ring-[#2d5a3d]/10'
-                }`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((value) => !value)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a09b] transition-colors hover:text-[#2d5a3d] focus:outline-none focus:text-[#2d5a3d]"
-                aria-label={showPassword ? t('auth.signup.hidePassword') : t('auth.signup.showPassword')}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}
-              </button>
-            </div>
-
-            {password && (
-              <div id="signup-password-strength" className="mt-2">
-                <div className="flex items-center gap-2">
-                  <div className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${passwordStrength.color}`} />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#78746e]">
-                    {passwordStrength.label}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {errors.password && (
-              <p id="signup-password-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <label htmlFor="signup-confirm-password" className="block text-sm font-medium text-[#1c1917]">
-              {t('auth.signup.confirmPasswordLabel')}
-            </label>
-            <div className="group relative">
-              <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
-              <input
-                id="signup-confirm-password"
-                type={showConfirmPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                aria-describedby={errors.confirmPassword ? 'signup-confirm-password-error' : undefined}
-                aria-invalid={!!errors.confirmPassword}
-                {...register('confirmPassword')}
-                placeholder={t('auth.signup.confirmPasswordPlaceholder')}
-                className={`w-full rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-11 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
-                  errors.confirmPassword
-                    ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                    : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-2 focus:ring-[#2d5a3d]/10'
-                }`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((value) => !value)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a09b] transition-colors hover:text-[#2d5a3d] focus:outline-none focus:text-[#2d5a3d]"
-                aria-label={showConfirmPassword ? t('auth.signup.hideConfirmPassword') : t('auth.signup.showConfirmPassword')}
-              >
-                {showConfirmPassword ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}
-              </button>
-            </div>
-            {errors.confirmPassword && (
-              <p id="signup-confirm-password-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
-                {errors.confirmPassword.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <label htmlFor="signup-address" className="block text-sm font-medium text-[#1c1917]">
-              {t('auth.signup.addressLabel')}
-            </label>
-            <div className="group relative">
-              <MapPin className="pointer-events-none absolute left-3.5 top-3 h-4 w-4 text-[#a1a09b] transition-colors group-focus-within:text-[#2d5a3d]" />
-              <textarea
-                id="signup-address"
-                autoComplete="street-address"
-                aria-describedby={errors.address ? 'signup-address-error' : undefined}
-                aria-invalid={!!errors.address}
-                {...register('address')}
-                placeholder={t('auth.signup.addressPlaceholder')}
-                rows={3}
-                className={`w-full resize-none rounded-2xl border bg-[#fafaf8] py-3 pl-10 pr-4 text-sm text-[#1c1917] transition-all duration-200 placeholder:text-[#9b9a97] focus:outline-none ${
-                  errors.address
-                    ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                    : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-2 focus:ring-[#2d5a3d]/10'
-                }`}
-              />
-            </div>
-            {errors.address && (
-              <p id="signup-address-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
-                {errors.address.message}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-start gap-2">
-            <div className="flex h-5 items-center pt-0.5">
-              <input
-                id="signup-agree-terms"
-                type="checkbox"
-                aria-describedby="signup-terms-error"
-                aria-invalid={!!errors.agreeToTerms}
-                {...register('agreeToTerms')}
-                className="h-4 w-4 cursor-pointer rounded border-[#d4d6cf] text-[#2d5a3d] focus:ring-[#2d5a3d] focus:ring-offset-0"
-              />
-            </div>
-            <div className="text-sm">
-              <label htmlFor="signup-agree-terms" className="cursor-pointer select-none text-[#6d6a63]">
-                {t('auth.signup.agreeToTermsPrefix')}{' '}
-                <Link href="/terms" className="font-semibold text-[#2d5a3d] hover:underline">
-                  {t('auth.signup.termsOfService')}
-                </Link>{' '}
-                {t('auth.signup.and')}{' '}
-                <Link href="/privacy-policy" className="font-semibold text-[#2d5a3d] hover:underline">
-                  {t('auth.signup.privacyPolicy')}
-                </Link>
-              </label>
-              {errors.agreeToTerms && (
-                <p id="signup-terms-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
-                  {errors.agreeToTerms.message}
-                </p>
-              )}
-            </div>
-          </div>
+              ))}
+            </InputOTPGroup>
+          </InputOTP>
 
           {apiError && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700" role="alert" aria-live="polite">
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700" role="alert" aria-live="polite">
               {apiError}
             </div>
           )}
 
           <button
             type="submit"
-            disabled={isLoading}
-            aria-disabled={isLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2d5a3d] px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#2d5a3d]/20 transition-all duration-200 hover:bg-[#234832] hover:shadow-xl hover:shadow-[#2d5a3d]/30 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.99]"
+            disabled={isLoading || otp.length !== 6}
+            aria-disabled={isLoading || otp.length !== 6}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2d5a3d] px-5 py-4 text-[15px] font-semibold text-white shadow-lg shadow-[#2d5a3d]/20 transition-all duration-200 hover:bg-[#234832] hover:shadow-xl hover:shadow-[#2d5a3d]/30 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98]"
           >
             {isLoading ? (
               <>
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                <span>{t('auth.signup.submitting')}</span>
+                <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <span>{t('auth.signup.otpVerifying')}</span>
               </>
             ) : (
               <>
-                <span>{t('auth.signup.submit')}</span>
-                <ArrowRight className="h-4 w-4" />
+                <span>{t('auth.signup.otpVerifyButton')}</span>
+                <ArrowRight className="h-5 w-5" />
               </>
             )}
           </button>
+
+          <div className="text-center text-sm text-[#6d6a63]">
+            {resendIn > 0 ? (
+              <span>{t('auth.signup.otpResendIn', { seconds: resendIn })}</span>
+            ) : (
+              <>
+                {t('auth.signup.otpDidntGetIt')}{' '}
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resending}
+                  className="font-semibold text-[#2d5a3d] transition-opacity hover:underline disabled:opacity-50"
+                >
+                  {resending ? t('auth.signup.otpSending') : t('auth.signup.otpResendCode')}
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={goBackToDetails}
+              disabled={isLoading}
+              className="inline-flex items-center gap-2 text-sm font-medium text-[#6d6a63] transition-colors hover:text-[#1c1917] disabled:opacity-50"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {t('auth.signup.otpEditDetails')}
+            </button>
+          </div>
         </form>
       </div>
+    );
+  }
+
+  return (
+    <div className={`w-full ${className}`}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        <div className="space-y-2">
+          <label htmlFor="signup-name" className="block text-sm font-medium text-[#1c1917]">
+            {t('auth.signup.fullNameLabel')}
+          </label>
+          <input
+            id="signup-name"
+            type="text"
+            autoComplete="name"
+            aria-describedby={errors.name ? 'signup-name-error' : undefined}
+            aria-invalid={!!errors.name}
+            {...register('name')}
+            placeholder={t('auth.signup.fullNamePlaceholder')}
+            className={`w-full rounded-2xl border bg-[#fafaf8] py-4 px-5 text-[15px] text-[#1c1917] transition-all duration-200 placeholder:text-[#b0aba4] focus:outline-none ${
+              errors.name
+                ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-4 focus:ring-red-100'
+                : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-4 focus:ring-[#2d5a3d]/10'
+            }`}
+          />
+          {errors.name && (
+            <p id="signup-name-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
+              {errors.name.message}
+            </p>
+          )}
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label htmlFor="signup-email" className="block text-sm font-medium text-[#1c1917]">
+              {t('auth.signup.emailLabel')}
+            </label>
+            <input
+              id="signup-email"
+              type="email"
+              autoComplete="email"
+              aria-describedby={errors.email ? 'signup-email-error' : undefined}
+              aria-invalid={!!errors.email}
+              {...register('email')}
+              placeholder={t('auth.signup.emailPlaceholder')}
+              className={`w-full rounded-2xl border bg-[#fafaf8] py-4 px-5 text-[15px] text-[#1c1917] transition-all duration-200 placeholder:text-[#b0aba4] focus:outline-none ${
+                errors.email
+                  ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-4 focus:ring-red-100'
+                  : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-4 focus:ring-[#2d5a3d]/10'
+              }`}
+            />
+            {errors.email && (
+              <p id="signup-email-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="signup-phone" className="block text-sm font-medium text-[#1c1917]">
+              {t('auth.signup.phoneLabel')}
+            </label>
+            <input
+              id="signup-phone"
+              type="tel"
+              autoComplete="tel"
+              aria-describedby={errors.phone ? 'signup-phone-error' : undefined}
+              aria-invalid={!!errors.phone}
+              {...register('phone')}
+              placeholder={t('auth.signup.phonePlaceholder')}
+              className={`w-full rounded-2xl border bg-[#fafaf8] py-4 px-5 text-[15px] text-[#1c1917] transition-all duration-200 placeholder:text-[#b0aba4] focus:outline-none ${
+                errors.phone
+                  ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-4 focus:ring-red-100'
+                  : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-4 focus:ring-[#2d5a3d]/10'
+              }`}
+            />
+            {errors.phone && (
+              <p id="signup-phone-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
+                {errors.phone.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="signup-password" className="block text-sm font-medium text-[#1c1917]">
+            {t('auth.signup.passwordLabel')}
+          </label>
+          <div className="relative">
+            <input
+              id="signup-password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="new-password"
+              aria-describedby={errors.password ? 'signup-password-error signup-password-strength' : 'signup-password-strength'}
+              aria-invalid={!!errors.password}
+              {...register('password')}
+              placeholder={t('auth.signup.passwordPlaceholder')}
+              className={`w-full rounded-2xl border bg-[#fafaf8] py-4 px-5 pr-12 text-[15px] text-[#1c1917] transition-all duration-200 placeholder:text-[#b0aba4] focus:outline-none ${
+                errors.password
+                  ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-4 focus:ring-red-100'
+                  : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-4 focus:ring-[#2d5a3d]/10'
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#78746e] transition-colors hover:text-[#2d5a3d] focus:outline-none focus:text-[#2d5a3d] p-1"
+              aria-label={showPassword ? t('auth.signup.hidePassword') : t('auth.signup.showPassword')}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
+            </button>
+          </div>
+
+          {password && (
+            <div id="signup-password-strength" className="mt-2">
+              <div className="flex items-center gap-2">
+                <div className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${passwordStrength.color}`} />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#78746e]">
+                  {passwordStrength.label}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {errors.password && (
+            <p id="signup-password-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
+              {errors.password.message}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="signup-confirm-password" className="block text-sm font-medium text-[#1c1917]">
+            {t('auth.signup.confirmPasswordLabel')}
+          </label>
+          <div className="relative">
+            <input
+              id="signup-confirm-password"
+              type={showConfirmPassword ? 'text' : 'password'}
+              autoComplete="new-password"
+              aria-describedby={errors.confirmPassword ? 'signup-confirm-password-error' : undefined}
+              aria-invalid={!!errors.confirmPassword}
+              {...register('confirmPassword')}
+              placeholder={t('auth.signup.confirmPasswordPlaceholder')}
+              className={`w-full rounded-2xl border bg-[#fafaf8] py-4 px-5 pr-12 text-[15px] text-[#1c1917] transition-all duration-200 placeholder:text-[#b0aba4] focus:outline-none ${
+                errors.confirmPassword
+                  ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-4 focus:ring-red-100'
+                  : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-4 focus:ring-[#2d5a3d]/10'
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((value) => !value)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#78746e] transition-colors hover:text-[#2d5a3d] focus:outline-none focus:text-[#2d5a3d] p-1"
+              aria-label={showConfirmPassword ? t('auth.signup.hideConfirmPassword') : t('auth.signup.showConfirmPassword')}
+            >
+              {showConfirmPassword ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
+            </button>
+          </div>
+          {errors.confirmPassword && (
+            <p id="signup-confirm-password-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
+              {errors.confirmPassword.message}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="signup-address" className="block text-sm font-medium text-[#1c1917]">
+            {t('auth.signup.addressLabel')}
+          </label>
+          <textarea
+            id="signup-address"
+            autoComplete="street-address"
+            aria-describedby={errors.address ? 'signup-address-error' : undefined}
+            aria-invalid={!!errors.address}
+            {...register('address')}
+            placeholder={t('auth.signup.addressPlaceholder')}
+            rows={3}
+            className={`w-full resize-none rounded-2xl border bg-[#fafaf8] py-4 px-5 text-[15px] text-[#1c1917] transition-all duration-200 placeholder:text-[#b0aba4] focus:outline-none ${
+              errors.address
+                ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-4 focus:ring-red-100'
+                : 'border-[#e8e9e5] hover:border-[#d4d6cf] focus:border-[#2d5a3d] focus:ring-4 focus:ring-[#2d5a3d]/10'
+            }`}
+          />
+          {errors.address && (
+            <p id="signup-address-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
+              {errors.address.message}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-start gap-2">
+          <div className="flex h-5 items-center pt-0.5">
+            <input
+              id="signup-agree-terms"
+              type="checkbox"
+              aria-describedby="signup-terms-error"
+              aria-invalid={!!errors.agreeToTerms}
+              {...register('agreeToTerms')}
+              className="h-4 w-4 cursor-pointer rounded border-[#d4d6cf] text-[#2d5a3d] focus:ring-[#2d5a3d] focus:ring-offset-0"
+            />
+          </div>
+          <div className="text-sm">
+            <label htmlFor="signup-agree-terms" className="cursor-pointer select-none text-[#6d6a63]">
+              {t('auth.signup.agreeToTermsPrefix')}{' '}
+              <Link href="/terms" className="font-semibold text-[#2d5a3d] hover:underline">
+                {t('auth.signup.termsOfService')}
+              </Link>{' '}
+              {t('auth.signup.and')}{' '}
+              <Link href="/privacy-policy" className="font-semibold text-[#2d5a3d] hover:underline">
+                {t('auth.signup.privacyPolicy')}
+              </Link>
+            </label>
+            {errors.agreeToTerms && (
+              <p id="signup-terms-error" className="mt-1 text-sm font-medium text-red-600" role="alert">
+                {errors.agreeToTerms.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {apiError && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700" role="alert" aria-live="polite">
+            {apiError}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          aria-disabled={isLoading}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2d5a3d] px-5 py-4 text-[15px] font-semibold text-white shadow-lg shadow-[#2d5a3d]/20 transition-all duration-200 hover:bg-[#234832] hover:shadow-xl hover:shadow-[#2d5a3d]/30 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98]"
+        >
+          {isLoading ? (
+            <>
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <span>{t('auth.signup.submitting')}</span>
+            </>
+          ) : (
+            <>
+              <span>{t('auth.signup.submit')}</span>
+              <ArrowRight className="h-5 w-5" />
+            </>
+          )}
+        </button>
+      </form>
     </div>
   );
 };

@@ -165,29 +165,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       icon: Package 
     },
     { 
-      name: "Product Lines", 
+      name: t("dashboard.nav.productLines"), 
       href: "/himmat_admin_8526/dashboard/product-lines", 
-      icon: LayoutDashboard 
+      icon: Layers 
     },
     { 
-      name: "Hero Visuals", 
+      name: t("dashboard.nav.heroVisuals"), 
       href: "/himmat_admin_8526/dashboard/hero-visuals", 
       icon: Image 
     },
     { 
-      name: "FAQs", 
+      name: t("dashboard.nav.faqs"), 
       href: "/himmat_admin_8526/dashboard/faqs", 
       icon: HelpCircle 
     },
     { 
-      name: "Brewing Guides", 
+      name: t("dashboard.nav.brewingGuides"), 
       href: "/himmat_admin_8526/dashboard/brewing-guides", 
       icon: ChefHat 
     },
     { 
-      name: "Collections", 
+      name: t("dashboard.nav.collections"), 
       href: "/himmat_admin_8526/dashboard/collections", 
-      icon: Layers 
+      icon: LayoutDashboard 
     },
     { 
       name: t("dashboard.nav.orders"), 
@@ -320,7 +320,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {langOpen && (
                 <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl border border-[rgba(28,25,23,0.08)] py-1.5 px-1.5 min-w-[190px] z-50">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-[#78746e] font-semibold px-3 pt-1 pb-2">
-                    Language
+                    {t("dashboard.language")}
                   </p>
                   {Object.entries(langMeta).map(([code, meta]) => (
                     <button

@@ -6,7 +6,7 @@ import { getCurrentAdmin } from '@/lib/auth'
 import { sendCustomerOrderStatusEmail } from '@/lib/email'
 import { z } from 'zod'
 
-type Tx = PrismaClient
+type Tx = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">
 
 interface Params {
   params: Promise<{ id: string }>

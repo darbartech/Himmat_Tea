@@ -43,20 +43,20 @@ import Image from "next/image";
 const ANNOUNCEMENTS = [
   {
     icon: Truck,
-    text: "Free shipping on orders over Rs. 3,000 — Use code",
-    code: "GODGIFTED",
+    textKey: "announcements.freeShipping.text",
+    codeKey: "announcements.freeShipping.code",
     link: "/shipping-returns",
   },
   {
     icon: Sparkles,
-    text: "Spring Harvest 2026 is here — Limited lots, shop before they're gone",
-    code: "",
+    textKey: "announcements.springHarvest.text",
+    codeKey: "",
     link: "/collections/seasonal",
   },
   {
     icon: Tag,
-    text: "Wholesale pricing for cafés, hotels & retailers — Apply today",
-    code: "",
+    textKey: "announcements.wholesale.text",
+    codeKey: "",
     link: "/wholesale",
   },
 ];
@@ -68,22 +68,22 @@ const ANNOUNCEMENTS = [
 const QUICK_LINKS = [
   {
     icon: Leaf,
-    label: "Green Tea",
+    labelKey: "nav.greenTea",
     href: "/products?category=green",
   },
   {
     icon: Coffee,
-    label: "Black Tea",
+    labelKey: "nav.blackTea",
     href: "/products?category=black",
   },
   {
     icon: Flame,
-    label: "Oolong Tea",
+    labelKey: "nav.oolongTea",
     href: "/products?category=oolong",
   },
   {
     icon: Star,
-    label: "Best Sellers",
+    labelKey: "nav.bestSellers",
     href: "/collections/best-sellers",
   },
 ];
@@ -366,7 +366,7 @@ export default function Navigation() {
 
   const navLinks = [
     {
-      label: "Products",
+      label: t("nav.products"),
       href: "/products",
       children: [
         ...productLines
@@ -376,7 +376,7 @@ export default function Navigation() {
             href: `/${productLine.slug}`,
           })),
         {
-          label: "All Products",
+          label: t("nav.allProducts"),
           href: "/products",
         },
       ],
@@ -535,12 +535,12 @@ export default function Navigation() {
                     href={current.link}
                     className="text-[12.5px] font-light tracking-wide truncate hover:text-primary-foreground/80 transition-colors duration-[var(--duration-fast)]"
                   >
-                    {current.text}
+                    {t(current.textKey)}
                   </Link>
 
-                  {current.code && (
+                  {current.codeKey && (
                     <span className="shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-[var(--radius-sm)] bg-accent/15 border border-accent/40 text-[10.5px] font-bold tracking-[0.12em] text-accent">
-                      {current.code}
+                      {t(current.codeKey)}
                     </span>
                   )}
 
@@ -742,7 +742,7 @@ export default function Navigation() {
                   <div className="absolute top-full right-0 mt-2 bg-card rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)] border border-border py-1.5 px-1.5 min-w-[190px] z-50">
 
                     <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-semibold px-3 pt-1 pb-2">
-                      Language
+                      {t('nav.languageDropdown')}
                     </p>
 
                     {Object.entries(langMeta).map(
@@ -839,15 +839,17 @@ export default function Navigation() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setProfileMenuOpen(
-                      (open) => !open,
-                    )
-                  }
+                  onClick={() => {
+                    if (!showLoggedInState) {
+                      router.push('/customer-auth');
+                    } else {
+                      setProfileMenuOpen((open) => !open);
+                    }
+                  }}
                   aria-label={
                     showLoggedInState
-                      ? "Open profile menu"
-                      : "Open account menu"
+                      ? t('nav.myAccountLabel')
+                      : t('nav.loginLabel')
                   }
                   aria-expanded={
                     profileMenuOpen
@@ -865,38 +867,13 @@ export default function Navigation() {
 
                 </button>
 
-                {profileMenuOpen && (
+                {profileMenuOpen && showLoggedInState && (
                   <div className="absolute top-full right-0 mt-2 w-52 bg-card rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)] border border-border p-1.5 z-50">
 
-                    {showLoggedInState ? (
-                      <>
-                        {userType === "admin" && (
-                          <Link
-                            href="/himmat_admin_8526/dashboard"
-                            onClick={() =>
-                              setProfileMenuOpen(
-                                false,
-                              )
-                            }
-                            className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary"
-                          >
-                            <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
-                            {t("nav.dashboard")}
-                          </Link>
-                        )}
-
-                        <div className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm font-semibold text-foreground">
-
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                            {loggedInUserInitial}
-                          </div>
-
-                          {loggedInUserName}
-
-                        </div>
-
+                    <>
+                      {userType === "admin" && (
                         <Link
-                          href="/account"
+                          href="/himmat_admin_8526/dashboard"
                           onClick={() =>
                             setProfileMenuOpen(
                               false,
@@ -904,56 +881,53 @@ export default function Navigation() {
                           }
                           className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary"
                         >
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          Profile
+                          <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
+                          {t("nav.dashboard")}
                         </Link>
+                      )}
 
-                        <div className="my-1 border-t border-border" />
+                      <div className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm font-semibold text-foreground">
 
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            setProfileMenuOpen(false);
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                          {loggedInUserInitial}
+                        </div>
 
-                            await logout();
+                        {loggedInUserName}
 
-                            router.replace("/");
+                      </div>
 
-                            router.refresh();
-                          }}
-                          className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary"
-                        >
-                          <LogOut className="h-4 w-4 text-muted-foreground" />
-                          Logout
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setProfileMenuOpen(false);
-                            setAuthModalOpen(true);
-                          }}
-                          className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary"
-                        >
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          Log in
-                        </button>
+                      <Link
+                        href="/account"
+                        onClick={() =>
+                          setProfileMenuOpen(
+                            false,
+                          )
+                        }
+                        className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary"
+                      >
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        {t("nav.profileLabel")}
+                      </Link>
 
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setProfileMenuOpen(false);
-                            setAuthModalOpen(true);
-                          }}
-                          className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary"
-                        >
-                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                          Sign up
-                        </button>
-                      </>
-                    )}
+                      <div className="my-1 border-t border-border" />
+
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setProfileMenuOpen(false);
+
+                          await logout();
+
+                          router.replace("/");
+
+                          router.refresh();
+                        }}
+                        className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-[var(--radius-md)] text-sm font-medium text-foreground hover:bg-secondary"
+                      >
+                        <LogOut className="h-4 w-4 text-muted-foreground" />
+                        {t("dashboard.logout")}
+                      </button>
+                    </>
 
                   </div>
                 )}
@@ -1274,7 +1248,7 @@ export default function Navigation() {
               className="inline-flex items-center justify-center gap-2 w-full h-11 px-4 text-sm font-semibold rounded-[var(--radius-lg)] bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <User className="h-4 w-4 opacity-80" />
-              Sign up
+              {t("nav.signupLabel")}
             </Link>
           )}
 
@@ -1287,7 +1261,7 @@ export default function Navigation() {
               className="inline-flex items-center justify-center gap-2 w-full h-11 px-4 text-sm font-semibold rounded-[var(--radius-lg)] bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <User className="h-4 w-4 opacity-80" />
-              My Account
+              {t("nav.myAccountLabel")}
             </Link>
           )}
 
@@ -1498,13 +1472,11 @@ export default function Navigation() {
                             "'Playfair Display', serif",
                         }}
                       >
-                        No teas found for “
-                        {searchQuery}”
+                        {t('nav.noTeasFoundPrefix')}{searchQuery}{t('nav.noTeasFoundSuffix')}
                       </p>
 
                       <p className="text-sm text-muted-foreground mb-5">
-                        Try “green”, “Nepal”,
-                        or “herbal”
+                        {t('nav.trySearchSuggestions')}
                       </p>
 
                       <Button
@@ -1517,7 +1489,7 @@ export default function Navigation() {
                         }
                       >
                         <Link href="/products">
-                          View All Teas
+                          {t('nav.viewAllTeas')}
                           <ArrowRight className="h-4 w-4" />
                         </Link>
                       </Button>
@@ -1534,7 +1506,7 @@ export default function Navigation() {
                     <div>
 
                       <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold px-2 mb-3">
-                        Browse by Category
+                        {t('nav.browseByCategory')}
                       </p>
 
                       <div className="grid grid-cols-2 gap-2">
@@ -1542,11 +1514,11 @@ export default function Navigation() {
                         {QUICK_LINKS.map(
                           ({
                             icon: Icon,
-                            label,
+                            labelKey,
                             href,
                           }) => (
                             <Link
-                              key={label}
+                              key={labelKey}
                               href={href}
                               onClick={() =>
                                 setSearchOpen(
@@ -1561,7 +1533,7 @@ export default function Navigation() {
                               </span>
 
                               <span className="text-sm font-medium text-foreground group-hover:text-primary">
-                                {label}
+                                {t(labelKey)}
                               </span>
 
                             </Link>
@@ -1575,7 +1547,7 @@ export default function Navigation() {
                     <div>
 
                       <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold px-2 mb-2.5">
-                        Trending Searches
+                        {t('nav.trendingSearches')}
                       </p>
 
                       <div className="flex flex-wrap gap-2 px-1">
