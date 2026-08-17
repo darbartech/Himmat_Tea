@@ -57,12 +57,11 @@ export async function POST(request: NextRequest) {
     const otpHash = await bcrypt.hash(otp, 12)
     const expiresAt = new Date(Date.now() + SIGNUP_OTP_TTL_MINUTES * 60_000)
 
-    await prisma.$transaction([
-      prisma.signupVerification.deleteMany({ where: { email, usedAt: null } }),
-      prisma.signupVerification.create({
-        data: { email, name, phone, address, passwordHash, otpHash, expiresAt }
-      })
-    ])
+    await prisma.signupVerification.upsert({
+      where: { email },
+      create: { email, name, phone, address, passwordHash, otpHash, expiresAt },
+      update: { name, phone, address, passwordHash, otpHash, expiresAt, attempts: 0, usedAt: null }
+    })
 
     await sendSignupVerificationEmail(email, otp, SIGNUP_OTP_TTL_MINUTES, name)
 
