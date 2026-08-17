@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
+import { createResponse, createErrorResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
+import { getCurrentAdmin } from '@/lib/auth'
 
 export async function GET() {
   try {
+    const adminUser = await getCurrentAdmin()
+    if (!adminUser) {
+      return createErrorResponse('Unauthorized - admin only', 401)
+    }
     const [
       totalOrders, 
       totalProducts, 

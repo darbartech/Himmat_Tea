@@ -323,6 +323,9 @@ export async function POST(request: NextRequest) {
       orderNumber = await generateOrderNumber(now)
       orderUniqAttempts++
     }
+    if (orderUniqAttempts >= 5) {
+      return createErrorResponse('Unable to generate unique order number. Please refresh and try again.', 409)
+    }
 
     const initialStatus = isAdmin && data.status ? data.status : 'AWAITING_PAYMENT'
 
@@ -387,7 +390,7 @@ export async function POST(request: NextRequest) {
 
         createdOrderId = order.id
         createdOrderItems = order.items
-      }, { timeout: 15_000, maxWait: 15_000 })
+      }, { timeout: 60_000, maxWait: 10_000 })
 
       if (createdOrderId && createdOrderItems) {
         const refreshed = await prisma.product.findMany({

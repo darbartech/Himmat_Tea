@@ -20,8 +20,62 @@ const ALLOWED_MIME_TYPES = [
   "image/webp",
   "image/gif",
   "image/avif",
-  "image/svg+xml",
 ];
+
+const FILE_SIGNATURES: Array<{ mime: string; match: (buf: Buffer) => boolean }> = [
+  {
+    mime: "image/jpeg",
+    match: (b) => b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
+  },
+  {
+    mime: "image/png",
+    match: (b) =>
+      b.length >= 8 &&
+      b[0] === 0x89 &&
+      b[1] === 0x50 &&
+      b[2] === 0x4e &&
+      b[3] === 0x47 &&
+      b[4] === 0x0d &&
+      b[5] === 0x0a &&
+      b[6] === 0x1a &&
+      b[7] === 0x0a,
+  },
+  {
+    mime: "image/gif",
+    match: (b) =>
+      b.length >= 6 &&
+      b[0] === 0x47 &&
+      b[1] === 0x49 &&
+      b[2] === 0x46 &&
+      b[3] === 0x38 &&
+      (b[4] === 0x37 || b[4] === 0x39) &&
+      b[5] === 0x61,
+  },
+  {
+    mime: "image/webp",
+    match: (b) =>
+      b.length >= 12 &&
+      b[0] === 0x52 &&
+      b[1] === 0x49 &&
+      b[2] === 0x46 &&
+      b[3] === 0x46 &&
+      b[8] === 0x57 &&
+      b[9] === 0x45 &&
+      b[10] === 0x42 &&
+      b[11] === 0x50,
+  },
+  {
+    mime: "image/avif",
+    match: (b) =>
+      b.length >= 12 &&
+      b[4] === 0x66 &&
+      b[5] === 0x74 &&
+      b[6] === 0x79 &&
+      b[7] === 0x70,
+  },
+];
+
+const ALLOWED_TYPES_HUMAN = "JPG, PNG, WebP, GIF, AVIF";
 
 type UploadedFileData = {
   url: string;
@@ -43,13 +97,9 @@ function humanFileSize(bytes: number): string {
   }
 
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-} 
+}
 
-async function uploadWithOptions(
-  file: File,
-  folder: string,
-  options: Record<string, any>
-): Promise<UploadedFileData> {
+function validateFileForUpload(file: File, buffer?: Buffer) {
   if (file.size <= 0) {
     throw new Error(`File "${file.name}" is empty.`);
   }
@@ -58,17 +108,42 @@ async function uploadWithOptions(
     throw new Error(
       `File "${file.name}" (${humanFileSize(
         file.size
-      )}) exceeds the maximum allowed size of ${humanFileSize(
-        MAX_FILE_SIZE
-      )}.`
+      )}) exceeds the maximum allowed size of ${humanFileSize(MAX_FILE_SIZE)}.`
     );
   }
 
   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
     throw new Error(
-      `Unsupported file type "${file.type}". Allowed types: JPG, PNG, WebP, GIF, AVIF, SVG.`
+      `Unsupported file type "${file.type}". Allowed types: ${ALLOWED_TYPES_HUMAN}.`
     );
   }
+
+  if (buffer) {
+    const sigMatch = FILE_SIGNATURES.find((s) => s.mime === file.type && s.match(buffer));
+    if (!sigMatch) {
+      throw new Error(
+        `File "${file.name}" content does not match its declared type "${file.type}". Allowed types: ${ALLOWED_TYPES_HUMAN}.`
+      );
+    }
+  }
+}
+
+async function readFileBuffer(file: File): Promise<Buffer> {
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  if (!buffer.length) {
+    throw new Error(`Could not read file "${file.name}".`);
+  }
+  return buffer;
+}
+
+async function uploadWithOptions(
+  file: File,
+  folder: string,
+  options: Record<string, any>
+): Promise<UploadedFileData> {
+  const buffer = await readFileBuffer(file);
+  validateFileForUpload(file, buffer);
 
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
   const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
@@ -84,13 +159,6 @@ async function uploadWithOptions(
 
   if (!apiSecret) {
     throw new Error("CLOUDINARY_API_SECRET is missing.");
-  }
-
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  if (!buffer.length) {
-    throw new Error(`Could not read file "${file.name}".`);
   }
 
   const base64 = buffer.toString("base64");
@@ -122,18 +190,7 @@ async function uploadSingleFile(
   file: File,
   folder: string
 ): Promise<UploadedFileData> {
-  if (file.size > MAX_FILE_SIZE) {
-    throw new Error(
-      `File "${file.name}" (${humanFileSize(file.size)}) exceeds the ${humanFileSize(
-        MAX_FILE_SIZE
-      )} size limit. Resize or compress it before uploading.`
-    );
-  }
-  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-    throw new Error(
-      `Unsupported file type: ${file.type}. Allowed: JPG, PNG, WebP, GIF, AVIF, SVG.`
-    );
-  }
+  validateFileForUpload(file);
 
   const normalizedFolder = folder?.trim() || 'himmat-tea';
   const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET?.trim();

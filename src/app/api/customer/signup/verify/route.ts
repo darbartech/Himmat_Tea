@@ -105,7 +105,11 @@ export async function POST(request: NextRequest) {
       email: customer.email,
       type: 'customer'
     }, {
-      currentUserCookieValue: JSON.stringify({ ...customer, type: 'customer' }),
+      currentUserCookieValue: JSON.stringify({
+        id: customer.id,
+        name: customer.name,
+        type: 'customer'
+      }),
       userTypeCookieValue: 'customer'
     })
 

@@ -36,23 +36,20 @@ export async function POST(request: NextRequest) {
       where: { email: normalizedEmail }
     })
 
-    if (!customer) {
-      return createErrorResponse(USER_ERRORS.AUTH.EMAIL_NOT_FOUND, 401)
+    const dummyHash = '$2a$12$C9AYYmcLVGYlGoO4vSZTPud9ArJwbGRsJ6TUsNULzR48z8fOnTXbS'
+    let passwordMatch = false
+    try {
+      passwordMatch = await bcrypt.compare(password, customer?.passwordHash ?? dummyHash)
+    } catch {
+      passwordMatch = false
+    }
+
+    if (!customer || !passwordMatch) {
+      return createErrorResponse(USER_ERRORS.AUTH.INVALID_CREDENTIALS, 401)
     }
 
     if (!customer.emailVerified) {
       return createErrorResponse('Please verify your email address before logging in.', 403)
-    }
-
-    let passwordMatch = false
-    try {
-      passwordMatch = await bcrypt.compare(password, customer.passwordHash ?? '')
-    } catch {
-      return createErrorResponse(USER_ERRORS.AUTH.INVALID_CREDENTIALS, 401)
-    }
-
-    if (!passwordMatch) {
-      return createErrorResponse(USER_ERRORS.AUTH.PASSWORD_MISMATCH, 401)
     }
 
     await setAuthCookie({
@@ -63,14 +60,6 @@ export async function POST(request: NextRequest) {
       currentUserCookieValue: JSON.stringify({
         id: customer.id,
         name: customer.name,
-        email: customer.email,
-        phone: customer.phone,
-        address: customer.address,
-        loyaltyPoints: customer.loyaltyPoints,
-        tier: customer.tier,
-        ordersCount: customer.ordersCount,
-        totalSpent: customer.totalSpent,
-        createdAt: customer.createdAt,
         type: 'customer'
       }),
       userTypeCookieValue: 'customer'

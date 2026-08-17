@@ -1128,9 +1128,9 @@ export default function Inventory() {
 
         <TabsContent value="transactions" className="space-y-6">
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#2d5a3d]/5">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-[#78746e]" />
-              <Label htmlFor="product-filter" className="text-sm font-medium text-[#1c1917]">
+            <div className="flex flex-wrap items-center gap-2">
+              <Filter className="h-4 w-4 text-[#78746e] shrink-0" />
+              <Label htmlFor="product-filter" className="text-sm font-medium text-[#1c1917] shrink-0">
                 Filter by product:
               </Label>
               <Select
@@ -1139,7 +1139,7 @@ export default function Inventory() {
                   setSelectedTransactionProduct(val === "all" ? null : Number(val))
                 }
               >
-                <SelectTrigger id="product-filter" className="w-[250px]">
+                <SelectTrigger id="product-filter" className="w-full sm:w-[250px]">
                   <SelectValue placeholder={t('dashboard.inventory.allProducts')} />
                 </SelectTrigger>
                 <SelectContent>

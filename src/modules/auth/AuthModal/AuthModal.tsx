@@ -108,11 +108,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   const handleAuthSuccess = () => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(
-        `[AUTH] AuthModal handleAuthSuccess → closing modal + redirecting to ${safeRedirectTo}`
-      );
-    }
     onClose();
     router.replace(safeRedirectTo);
     router.refresh();

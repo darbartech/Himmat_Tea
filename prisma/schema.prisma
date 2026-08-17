@@ -233,6 +233,9 @@ model InternalNote {
   id        String   @id @default(cuid())
   orderId   String
   text      String
+  /// Denormalized string copy of AdminUser.id (Int). Stored as String for
+  /// historical compatibility; adminName and timestamp are the primary
+  /// display fields so this column is intentionally NOT a foreign key.
   adminId   String
   adminName String
   timestamp DateTime @default(now())

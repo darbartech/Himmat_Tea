@@ -19,6 +19,7 @@ export interface CartItem {
   image: string;
   quantity: number;
   weight?: string;
+  stock?: number;
 }
 
 interface CartContextType {
@@ -131,14 +132,22 @@ export function CartProvider({
             i.weight === item.weight
         );
 
+        const stock = typeof item.stock === "number" ? item.stock : Infinity;
+
         if (existing) {
+          const cap =
+            typeof existing.stock === "number" ? existing.stock : stock;
+          const nextQty = Math.min(existing.quantity + 1, Math.max(0, cap));
+          if (nextQty === existing.quantity) return prev;
           return prev.map((i) =>
             i.id === item.id &&
             i.variantId === item.variantId &&
             i.weight === item.weight
               ? {
                   ...i,
-                  quantity: i.quantity + 1,
+                  quantity: nextQty,
+                  stock:
+                    typeof i.stock === "number" ? i.stock : item.stock,
                 }
               : i
           );
@@ -174,7 +183,10 @@ export function CartProvider({
           item.id === id
             ? {
                 ...item,
-                quantity,
+                quantity:
+                  typeof item.stock === "number"
+                    ? Math.min(quantity, item.stock)
+                    : quantity,
               }
             : item
         )

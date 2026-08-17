@@ -19,6 +19,7 @@ function getJwtSecret(): string {
 
 interface DecodedPayload {
   id: number
+  email: string
   type: 'customer' | 'admin'
 }
 
@@ -28,6 +29,7 @@ function verifyTokenWithSecret(token: string): DecodedPayload | null {
     const decoded = jwt.verify(token, secret, { algorithms: ['HS256'] }) as DecodedPayload
     if (
       typeof decoded.id === 'number' &&
+      typeof decoded.email === 'string' &&
       (decoded.type === 'customer' || decoded.type === 'admin')
     ) {
       return decoded
@@ -50,13 +52,6 @@ function verifyCustomerToken(req: NextRequest): boolean {
   if (!token) return false
   const decoded = verifyTokenWithSecret(token)
   return decoded?.type === 'customer' && typeof decoded.id === 'number'
-}
-
-function verifyAnyAuthenticated(req: NextRequest): boolean {
-  const token = req.cookies.get('himmat_sessionToken')?.value
-  if (!token) return false
-  const decoded = verifyTokenWithSecret(token)
-  return decoded !== null && typeof decoded.id === 'number'
 }
 
 export function middleware(req: NextRequest) {
@@ -100,15 +95,17 @@ export function middleware(req: NextRequest) {
     pathname.startsWith('/api/customers') ||
     pathname.startsWith('/api/coupons') ||
     pathname.startsWith('/api/admin') ||
+    pathname.startsWith('/api/analytics') ||
+    pathname.startsWith('/api/upload') ||
+    pathname.startsWith('/api/batches') ||
+    pathname.startsWith('/api/purchase-orders') ||
+    pathname.startsWith('/api/inventory/transactions') ||
+    pathname.startsWith('/api/hero-visuals') ||
+    pathname.startsWith('/api/product-lines') ||
+    pathname.startsWith('/api/reviews') ||
     (pathname.startsWith('/api/settings') && req.method !== 'GET')
   ) {
     if (!verifyAdminToken(req)) {
-      return NextResponse.json({ error: 'Unauthorized', success: false }, { status: 401 })
-    }
-  }
-
-  if (pathname.startsWith('/api/orders')) {
-    if (!verifyAnyAuthenticated(req)) {
       return NextResponse.json({ error: 'Unauthorized', success: false }, { status: 401 })
     }
   }
@@ -136,6 +133,7 @@ export const config = {
     '/api/seed/:path*',
     '/api/admin/:path*',
     '/api/settings/:path*',
-    '/api/exchange-rates/:path*'
+    '/api/exchange-rates/:path*',
+    '/api/analytics/:path*'
   ]
 }

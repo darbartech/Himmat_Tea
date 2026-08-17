@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { createErrorResponse, createResponse, handleApiError } from '@/lib/api-utils';
 import { sendPartnershipEnquiryAlertEmail } from '@/lib/email';
+import { rateLimitAuth } from '@/lib/rate-limit';
 
 const partnershipSchema = z.object({
   business: z.string().min(1, 'Business name is required'),
@@ -42,6 +43,11 @@ function buildEnquiryFingerprint(data: {
 
 export async function POST(request: NextRequest) {
   try {
+    const rl = rateLimitAuth(request)
+    if (!rl.allowed) {
+      return createErrorResponse(rl.error || 'Too many requests. Please try again later.', 429)
+    }
+
     const body = await request.json();
     const parsed = partnershipSchema.safeParse(body);
 

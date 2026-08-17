@@ -309,7 +309,6 @@ export default function DashboardHome() {
           <button
             onClick={() => {
               try {
-                console.log("Downloading report, orders count:", orders.length);
                 downloadReport(orders);
                 toast.success(t("dashboard.home.reportDownloaded"));
               } catch (error) {

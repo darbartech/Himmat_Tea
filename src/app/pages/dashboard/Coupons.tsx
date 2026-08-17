@@ -231,7 +231,7 @@ const Coupons = () => {
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>{t('dashboard.coupons.couponCode')}</Label>
                   <Input
@@ -261,7 +261,7 @@ const Coupons = () => {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>
                     Discount Value{" "}
@@ -295,7 +295,7 @@ const Coupons = () => {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Minimum Order Amount (₹)</Label>
                   <Input
@@ -327,7 +327,7 @@ const Coupons = () => {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>{t('dashboard.coupons.validFrom')}</Label>
                   <Input

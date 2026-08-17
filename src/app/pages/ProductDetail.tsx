@@ -176,18 +176,11 @@ export default function ProductDetail() {
   const product = allProducts.find((p: Product) => p.id === productId) || null;
   const relatedProducts = allProducts.filter((p: Product) => p.id !== productId).slice(0, 3);
 
-  // Track share clicks for analytics
   function trackShare(platform: string) {
     setShareAnalytics(prev => ({
       ...prev,
       [platform]: (prev[platform] || 0) + 1
     }));
-    console.log(`Share tracked: ${platform}`, {
-      productId: id,
-      productName: product?.name,
-      platform,
-      timestamp: new Date().toISOString()
-    });
   }
 
   async function handleShare(platform: string) {
@@ -242,8 +235,7 @@ export default function ProductDetail() {
               text: shareText,
               url: currentProductUrl,
             });
-          } catch (err) {
-            console.log("Share cancelled", err);
+          } catch {
           }
         }
         break;
@@ -252,7 +244,8 @@ export default function ProductDetail() {
 
   function handleAddToCart() {
     if (!product) return;
-    for (let i = 0; i < quantity; i++) {
+    const cappedQty = Math.max(1, Math.min(quantity, product.stock || quantity));
+    for (let i = 0; i < cappedQty; i++) {
       addToCart({
         id: product.id.toString(),
         productId: product.id,
@@ -260,6 +253,7 @@ export default function ProductDetail() {
         price: Math.round(product.price * weightMultipliers[selectedWeight]),
         image: product.imageUrl,
         weight: selectedWeight,
+        stock: product.stock,
       });
     }
     toast.success(`${product.name} added to cart!`);

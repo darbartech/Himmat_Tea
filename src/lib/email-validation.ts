@@ -3,6 +3,18 @@ import { prisma } from '@/lib/prisma'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 const DNS_TIMEOUT_MS = 4_000
+const MX_CACHE_TTL_MS = 6 * 60 * 60 * 1000
+
+/**
+ * In-memory cache for DNS MX / A / AAAA lookup results per domain.
+ *
+ * Avoids redundant slow DNS lookups (up to 4s each) during signup bursts
+ * or abuse attempts against the same domain. Note this cache is per-process
+ * (not shared across serverless instances) — same class of limitation as
+ * the rate limiter. Acceptable because MX checks are best-effort and the
+ * real proof of email ownership is OTP verification.
+ */
+const mxCache: Map<string, { value: boolean; cachedAt: number }> = new Map()
 
 /**
  * Known disposable / temporary email providers.
@@ -232,9 +244,13 @@ export async function hasMailHost(
     return false
   }
 
-  /**
-   * First check MX records.
-   */
+  const cached = mxCache.get(normalized)
+  if (cached && Date.now() - cached.cachedAt < MX_CACHE_TTL_MS) {
+    return cached.value
+  }
+
+  let result = false
+
   try {
     const mx = await withTimeout(
       resolveMx(normalized),
@@ -242,42 +258,40 @@ export async function hasMailHost(
     )
 
     if (mx.length > 0) {
-      return true
+      result = true
     }
   } catch (error: any) {
-    /**
-     * ENOTFOUND means the domain could not be resolved.
-     *
-     * Other errors such as timeout or temporary DNS failures
-     * should not automatically reject a legitimate signup.
-     */
     if (error?.code === 'ENOTFOUND') {
-      return false
+      result = false
+    } else {
+      console.warn(
+        `[Email Validation] MX lookup failed for ${normalized}:`,
+        error
+      )
     }
+  }
 
-    console.warn(
-      `[Email Validation] MX lookup failed for ${normalized}:`,
-      error
+  if (!result) {
+    const [ipv4, ipv6] = await Promise.allSettled([
+      withTimeout(resolve4(normalized), DNS_TIMEOUT_MS),
+      withTimeout(resolve6(normalized), DNS_TIMEOUT_MS),
+    ])
+
+    result = (
+      (ipv4.status === 'fulfilled' &&
+        ipv4.value.length > 0) ||
+      (ipv6.status === 'fulfilled' &&
+        ipv6.value.length > 0)
     )
   }
 
-  /**
-   * RFC-compatible fallback:
-   *
-   * If a domain does not publish MX records, mail delivery can
-   * potentially fall back to the domain's A/AAAA records.
-   */
-  const [ipv4, ipv6] = await Promise.allSettled([
-    withTimeout(resolve4(normalized), DNS_TIMEOUT_MS),
-    withTimeout(resolve6(normalized), DNS_TIMEOUT_MS),
-  ])
+  try {
+    mxCache.set(normalized, { value: result, cachedAt: Date.now() })
+  } catch {
+    /* noop */
+  }
 
-  return (
-    (ipv4.status === 'fulfilled' &&
-      ipv4.value.length > 0) ||
-    (ipv6.status === 'fulfilled' &&
-      ipv6.value.length > 0)
-  )
+  return result
 }
 
 /**

@@ -5,6 +5,7 @@ import {
   CheckSquare, Square, ChevronLeft, ChevronRight, AlertTriangle,
   Trash2, MinusCircle
 } from "lucide-react";
+import { toast } from "sonner";
 import { useStore } from "../../../context/StoreContext";
 import { useTranslation } from "@/hooks/useTranslation";
 import { api, ApiError } from "../../../lib/api-client";
@@ -288,13 +289,17 @@ function OrderInvoice({
               TAX INVOICE
             </div>
             <div style={{ marginTop: "14px" }}>
-              <table style={{ borderCollapse: "collapse", marginLeft: "auto" }}>
+              <table style={{ borderCollapse: "collapse", marginLeft: "auto", tableLayout: "fixed", width: "220px" }}>
+                <colgroup>
+                  <col style={{ width: "100px" }} />
+                  <col style={{ width: "120px" }} />
+                </colgroup>
                 <tbody>
                   <tr>
                     <td style={{ fontSize: "11px", color: "#888888", paddingRight: "16px", paddingBottom: "5px", textAlign: "right", whiteSpace: "nowrap" }}>
                       INVOICE NO.
                     </td>
-                    <td style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a1a", paddingBottom: "5px", textAlign: "right" }}>
+                    <td style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a1a", paddingBottom: "5px", textAlign: "right", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {order.orderNumber || order.id}
                     </td>
                   </tr>
@@ -341,89 +346,130 @@ function OrderInvoice({
       </div>
 
       {/* ── Address section ── */}
-      <div style={{
-        display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
-        borderBottom: "1px solid #e5e5e5",
-        background: "#f9fafb",
-      }}>
-        {/* Bill To */}
-        <div style={{ padding: "24px 32px", borderRight: "1px solid #e5e5e5" }}>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", marginBottom: "10px", textTransform: "uppercase" }}>
-            Bill To
-          </div>
-          <div style={{ fontSize: "14px", fontWeight: 700, color: "#1a1a1a" }}>{order.customerName}</div>
-          {order.customerEmail && (
-            <div style={{ fontSize: "12px", color: "#555555", marginTop: "4px" }}>{order.customerEmail}</div>
-          )}
-          {order.customerPhone && (
-            <div style={{ fontSize: "12px", color: "#555555", marginTop: "2px" }}>{order.customerPhone}</div>
-          )}
-          {order.shippingAddress && (
-            <div style={{ fontSize: "12px", color: "#555555", marginTop: "6px", lineHeight: "1.6", whiteSpace: "pre-line" }}>
-              {order.shippingAddress}
-            </div>
-          )}
-        </div>
+      <div style={{ borderBottom: "1px solid #e5e5e5", background: "#f9fafb" }}>
+        {/* Use an exact-pixel <table> because html2canvas has partial grid/flex support
+            and frequently miscalculates row height → next block overlaps. */}
+        <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "265px" }} />
+            <col style={{ width: "264px" }} />
+            <col style={{ width: "265px" }} />
+          </colgroup>
+          <tbody>
+            <tr>
+              {/* Bill To */}
+              <td
+                style={{
+                  padding: "24px 32px",
+                  borderRight: "1px solid #e5e5e5",
+                  verticalAlign: "top",
+                  boxSizing: "border-box",
+                }}
+              >
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", marginBottom: "10px", textTransform: "uppercase" }}>
+                  Bill To
+                </div>
+                <div style={{ fontSize: "14px", fontWeight: 700, color: "#1a1a1a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.customerName}</div>
+                {order.customerEmail && (
+                  <div style={{ fontSize: "12px", color: "#555555", marginTop: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.customerEmail}</div>
+                )}
+                {order.customerPhone && (
+                  <div style={{ fontSize: "12px", color: "#555555", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.customerPhone}</div>
+                )}
+                {order.shippingAddress && (
+                  <div style={{ fontSize: "12px", color: "#555555", marginTop: "6px", lineHeight: "1.6", whiteSpace: "pre-line", wordBreak: "break-word" }}>
+                    {order.shippingAddress}
+                  </div>
+                )}
+              </td>
 
-        {/* Ship To */}
-        <div style={{ padding: "24px 32px", borderRight: "1px solid #e5e5e5" }}>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", marginBottom: "10px", textTransform: "uppercase" }}>
-            Ship To
-          </div>
-          <div style={{ fontSize: "14px", fontWeight: 700, color: "#1a1a1a" }}>{order.customerName}</div>
-          {order.shippingAddress && (
-            <div style={{ fontSize: "12px", color: "#555555", marginTop: "6px", lineHeight: "1.6", whiteSpace: "pre-line" }}>
-              {order.shippingAddress}
-            </div>
-          )}
-        </div>
+              {/* Ship To */}
+              <td
+                style={{
+                  padding: "24px 32px",
+                  borderRight: "1px solid #e5e5e5",
+                  verticalAlign: "top",
+                  boxSizing: "border-box",
+                }}
+              >
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", marginBottom: "10px", textTransform: "uppercase" }}>
+                  Ship To
+                </div>
+                <div style={{ fontSize: "14px", fontWeight: 700, color: "#1a1a1a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.customerName}</div>
+                {order.shippingAddress && (
+                  <div style={{ fontSize: "12px", color: "#555555", marginTop: "6px", lineHeight: "1.6", whiteSpace: "pre-line", wordBreak: "break-word" }}>
+                    {order.shippingAddress}
+                  </div>
+                )}
+              </td>
 
-        {/* Order Info */}
-        <div style={{ padding: "24px 32px" }}>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", marginBottom: "10px", textTransform: "uppercase" }}>
-            Order Info
-          </div>
-          <table style={{ borderCollapse: "collapse", width: "100%" }}>
-            <tbody>
-              {[
-                ["Order No.", order.orderNumber || order.id],
-                ["Status", order.status],
-                ["Items", String(order.items.length)],
-                ["Order Date", fmtDate(invoiceDate)],
-              ].map(([label, val]) => (
-                <tr key={label}>
-                  <td style={{ fontSize: "11px", color: "#888888", paddingBottom: "5px", paddingRight: "8px", whiteSpace: "nowrap" }}>
-                    {label}
-                  </td>
-                  <td style={{ fontSize: "12px", fontWeight: 600, color: "#333333", paddingBottom: "5px" }}>
-                    {val}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              {/* Order Info */}
+              <td
+                style={{
+                  padding: "24px 32px",
+                  verticalAlign: "top",
+                  boxSizing: "border-box",
+                }}
+              >
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", marginBottom: "10px", textTransform: "uppercase" }}>
+                  Order Info
+                </div>
+                <table style={{ borderCollapse: "collapse", width: "100%", tableLayout: "fixed" }}>
+                  <colgroup>
+                    <col style={{ width: "48%" }} />
+                    <col style={{ width: "52%" }} />
+                  </colgroup>
+                  <tbody>
+                    {[
+                      ["Order No.", order.orderNumber || order.id],
+                      ["Status", order.status],
+                      ["Items", String(order.items.length)],
+                      ["Order Date", fmtDate(invoiceDate)],
+                    ].map(([label, val]) => (
+                      <tr key={label}>
+                        <td style={{ fontSize: "11px", color: "#888888", paddingBottom: "5px", paddingRight: "8px", whiteSpace: "nowrap" }}>
+                          {label}
+                        </td>
+                        <td style={{ fontSize: "12px", fontWeight: 600, color: "#333333", paddingBottom: "5px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {val}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {/* ── Line items table ── */}
       <div style={{ padding: "0 48px" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "36px" }} />
+            <col style={{ width: "212px" }} />
+            <col style={{ width: "90px" }} />
+            <col style={{ width: "60px" }} />
+            <col style={{ width: "100px" }} />
+            <col style={{ width: "90px" }} />
+            <col style={{ width: "110px" }} />
+          </colgroup>
           <thead>
             <tr style={{ borderBottom: "2px solid #1a3a2a" }}>
               {[
-                { label: "#",           align: "left",   width: "36px" },
-                { label: "Description", align: "left",   width: "auto" },
-                { label: "HSN/SAC",     align: "center", width: "90px" },
-                { label: t('dashboard.orders.qty'),         align: "center", width: "60px" },
-                { label: t('dashboard.orders.unitPrice'),  align: "right",  width: "100px" },
-                { label: t('dashboard.orders.discount'),    align: "right",  width: "90px" },
-                { label: t('dashboard.orders.amountColumn'),      align: "right",  width: "110px" },
-              ].map((col) => (
+                { label: "#",           align: "left" },
+                { label: "Description", align: "left" },
+                { label: "HSN/SAC",     align: "center" },
+                { label: t('dashboard.orders.qty'),         align: "center" },
+                { label: t('dashboard.orders.unitPrice'),  align: "right" },
+                { label: t('dashboard.orders.discount'),    align: "right" },
+                { label: t('dashboard.orders.amountColumn'),      align: "right" },
+              ].map((col, i) => (
                 <th
                   key={col.label}
                   style={{
                     textAlign: col.align as any,
-                    width: col.width,
                     fontSize: "10px",
                     fontWeight: 700,
                     color: "#888888",
@@ -431,8 +477,11 @@ function OrderInvoice({
                     textTransform: "uppercase",
                     paddingTop: "18px",
                     paddingBottom: "10px",
-                    paddingLeft: col.align === "left" ? "0" : "8px",
+                    paddingLeft: col.align === "left" ? (i === 0 ? "0" : "8px") : "8px",
                     paddingRight: col.align === "right" ? "0" : "8px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {col.label}
@@ -449,26 +498,26 @@ function OrderInvoice({
                   background: idx % 2 === 0 ? "#ffffff" : "#fafafa",
                 }}
               >
-                <td style={{ paddingTop: "13px", paddingBottom: "13px", fontSize: "12px", color: "#aaaaaa", textAlign: "left" }}>
+                <td style={{ paddingTop: "13px", paddingBottom: "13px", paddingRight: "0", fontSize: "12px", color: "#aaaaaa", textAlign: "left", verticalAlign: "top", whiteSpace: "nowrap" }}>
                   {String(idx + 1).padStart(2, "0")}
                 </td>
-                <td style={{ paddingTop: "13px", paddingBottom: "13px", paddingRight: "8px" }}>
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a1a" }}>{item.name}</div>
-                  <div style={{ fontSize: "11px", color: "#999999", marginTop: "2px" }}>SKU: {item.id}</div>
+                <td style={{ paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", paddingRight: "8px", verticalAlign: "top" }}>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a1a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "normal", wordBreak: "break-word", lineHeight: "1.4" }}>{itemName(item)}</div>
+                  <div style={{ fontSize: "11px", color: "#999999", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>SKU: {String(item.productId || item.id || "")}</div>
                 </td>
-                <td style={{ textAlign: "center", paddingTop: "13px", paddingBottom: "13px", fontSize: "12px", color: "#666666" }}>
+                <td style={{ textAlign: "center", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", paddingRight: "8px", fontSize: "12px", color: "#666666", verticalAlign: "top", whiteSpace: "nowrap" }}>
                   0902
                 </td>
-                <td style={{ textAlign: "center", paddingTop: "13px", paddingBottom: "13px", fontSize: "13px", fontWeight: 600, color: "#1a1a1a" }}>
+                <td style={{ textAlign: "center", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", paddingRight: "8px", fontSize: "13px", fontWeight: 600, color: "#1a1a1a", verticalAlign: "top", whiteSpace: "nowrap" }}>
                   {item.quantity}
                 </td>
-                <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", fontSize: "12px", color: "#555555" }}>
+                <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", paddingRight: "0", fontSize: "12px", color: "#555555", verticalAlign: "top", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                   ₹{fmt(itemPrice(item))}
                 </td>
-                <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", fontSize: "12px", color: "#aaaaaa" }}>
+                <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", paddingRight: "0", fontSize: "12px", color: "#aaaaaa", verticalAlign: "top", whiteSpace: "nowrap" }}>
                   —
                 </td>
-                <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", fontSize: "13px", fontWeight: 700, color: "#1a1a1a" }}>
+                <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", paddingRight: "0", fontSize: "13px", fontWeight: 700, color: "#1a1a1a", verticalAlign: "top", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                   ₹{fmt(itemAmount(item))}
                 </td>
               </tr>
@@ -478,106 +527,133 @@ function OrderInvoice({
       </div>
 
       {/* ── Totals + bank details ── */}
-      <div style={{ display: "flex", justifyContent: "space-between", padding: "28px 48px 0", gap: "32px" }}>
+      {/* Outer table: 2 columns. 48px outer padding → 794 - 96 = 698 px available.
+          gap: 32px → left=406 right=260  */}
+      <div style={{ padding: "28px 48px 0" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "406px" }} />
+            <col style={{ width: "32px" }} />
+            <col style={{ width: "260px" }} />
+          </colgroup>
+          <tbody>
+            <tr>
+              {/* Left column — bank + amount in words */}
+              <td style={{ verticalAlign: "top" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "8px" }}>
+                  Payment Details
+                </div>
+                <table style={{ borderCollapse: "collapse", tableLayout: "fixed", width: "100%" }}>
+                  <colgroup>
+                    <col style={{ width: "120px" }} />
+                    <col style={{ width: "286px" }} />
+                  </colgroup>
+                  <tbody>
+                    {[
+                      ["Bank Name", "State Bank of India"],
+                      ["Account No.", "XXXX XXXX XXXX 4521"],
+                      ["IFSC Code", "SBIN0001234"],
+                      ["Branch", "New Delhi Main"],
+                    ].map(([label, val]) => (
+                      <tr key={label}>
+                        <td style={{ fontSize: "11px", color: "#888888", paddingBottom: "4px", paddingRight: "16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {label}
+                        </td>
+                        <td style={{ fontSize: "12px", color: "#333333", fontWeight: 500, paddingBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {val}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
 
-        {/* Bank / notes (left) */}
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "8px" }}>
-            Payment Details
-          </div>
-          <table style={{ borderCollapse: "collapse" }}>
-            <tbody>
-              {[
-                ["Bank Name", "State Bank of India"],
-                ["Account No.", "XXXX XXXX XXXX 4521"],
-                ["IFSC Code", "SBIN0001234"],
-                ["Branch", "New Delhi Main"],
-              ].map(([label, val]) => (
-                <tr key={label}>
-                  <td style={{ fontSize: "11px", color: "#888888", paddingBottom: "4px", paddingRight: "16px", whiteSpace: "nowrap" }}>
-                    {label}
-                  </td>
-                  <td style={{ fontSize: "12px", color: "#333333", fontWeight: 500, paddingBottom: "4px" }}>
-                    {val}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Amount in words */}
-          <div style={{
-            marginTop: "20px",
-            padding: "12px 16px",
-            background: "#f0fdf4",
-            border: "1px solid #bbf7d0",
-            borderRadius: "4px",
-          }}>
-            <div style={{ fontSize: "10px", fontWeight: 700, color: "#16a34a", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: "4px" }}>
-              Amount in Words
-            </div>
-            <div style={{ fontSize: "13px", fontWeight: 600, color: "#14532d" }}>
-              {numberToWords(order.grandTotal)} Rupees Only
-            </div>
-          </div>
-        </div>
-
-        {/* Totals table (right) */}
-        <div style={{ minWidth: "260px" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <tbody>
-              <tr>
-                <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px" }}>{t('dashboard.invoice.subtotal')}</td>
-                <td style={{ fontSize: "13px", textAlign: "right", fontWeight: 500, color: "#1a1a1a", paddingBottom: "8px" }}>₹{fmt(subtotal)}</td>
-              </tr>
-              <tr>
-                <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px" }}>{t('common.discount')}</td>
-                <td style={{ fontSize: "13px", textAlign: "right", color: "#16a34a", paddingBottom: "8px" }}>— ₹0.00</td>
-              </tr>
-              {settings.gstNumber ? (
-                <>
-                  <tr>
-                    <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px" }}>CGST ({cgstRate}%)</td>
-                    <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "8px" }}>₹{fmt(cgstAmount)}</td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "12px" }}>SGST ({sgstRate}%)</td>
-                    <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "12px" }}>₹{fmt(sgstAmount)}</td>
-                  </tr>
-                </>
-              ) : (
-                <tr>
-                  <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "12px" }}>Tax ({settings.taxRate}%)</td>
-                  <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "12px" }}>₹{fmt(order.tax)}</td>
-                </tr>
-              )}
-              <tr style={{ borderTop: "2px solid #1a3a2a" }}>
-                <td style={{ fontSize: "15px", fontWeight: 800, color: "#1a1a1a", paddingTop: "12px" }}>
-                  TOTAL DUE
-                </td>
-                <td style={{
-                  fontSize: "18px", fontWeight: 800, textAlign: "right",
-                  color: "#1a3a2a", paddingTop: "12px",
+                {/* Amount in words */}
+                <div style={{
+                  marginTop: "20px",
+                  padding: "12px 16px",
+                  background: "#f0fdf4",
+                  border: "1px solid #bbf7d0",
+                  borderRadius: "4px",
+                  boxSizing: "border-box",
                 }}>
-                  ₹{fmt(order.grandTotal)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <div style={{ fontSize: "10px", fontWeight: 700, color: "#16a34a", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: "4px" }}>
+                    Amount in Words
+                  </div>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#14532d", lineHeight: "1.5", wordBreak: "break-word" }}>
+                    {numberToWords(order.grandTotal)} Rupees Only
+                  </div>
+                </div>
+              </td>
 
-          {/* Signature box */}
-          <div style={{
-            marginTop: "32px",
-            borderTop: "1px solid #cccccc",
-            paddingTop: "8px",
-            textAlign: "center",
-          }}>
-            <div style={{ height: "36px" }} />
-            <div style={{ borderTop: "1px solid #aaaaaa", paddingTop: "6px", fontSize: "11px", color: "#888888" }}>
-              Authorised Signatory for {settings.storeName}
-            </div>
-          </div>
-        </div>
+              {/* Gap column — spacer only */}
+              <td style={{ width: "32px", padding: "0", fontSize: "0", lineHeight: "0" }} />
+
+              {/* Right column — totals table + signature */}
+              <td style={{ verticalAlign: "top", width: "260px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+                  <colgroup>
+                    <col style={{ width: "143px" }} />
+                    <col style={{ width: "117px" }} />
+                  </colgroup>
+                  <tbody>
+                    <tr>
+                      <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t('dashboard.invoice.subtotal')}</td>
+                      <td style={{ fontSize: "13px", textAlign: "right", fontWeight: 500, color: "#1a1a1a", paddingBottom: "8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>₹{fmt(subtotal)}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t('common.discount')}</td>
+                      <td style={{ fontSize: "13px", textAlign: "right", color: "#16a34a", paddingBottom: "8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>— ₹0.00</td>
+                    </tr>
+                    {settings.gstNumber ? (
+                      <>
+                        <tr>
+                          <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>CGST ({cgstRate}%)</td>
+                          <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>₹{fmt(cgstAmount)}</td>
+                        </tr>
+                        <tr>
+                          <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>SGST ({sgstRate}%)</td>
+                          <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "12px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>₹{fmt(sgstAmount)}</td>
+                        </tr>
+                      </>
+                    ) : (
+                      <tr>
+                        <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tax ({settings.taxRate}%)</td>
+                        <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "12px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>₹{fmt(order.tax)}</td>
+                      </tr>
+                    )}
+                    <tr>
+                      <td colSpan={2} style={{ borderTop: "2px solid #1a3a2a", padding: "0" }} />
+                    </tr>
+                    <tr>
+                      <td style={{ fontSize: "15px", fontWeight: 800, color: "#1a1a1a", paddingTop: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        TOTAL DUE
+                      </td>
+                      <td style={{
+                        fontSize: "18px", fontWeight: 800, textAlign: "right",
+                        color: "#1a3a2a", paddingTop: "12px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums",
+                      }}>
+                        ₹{fmt(order.grandTotal)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* Signature box */}
+                <div style={{
+                  marginTop: "32px",
+                  borderTop: "1px solid #cccccc",
+                  paddingTop: "8px",
+                  textAlign: "center",
+                }}>
+                  <div style={{ height: "36px" }} />
+                  <div style={{ borderTop: "1px solid #aaaaaa", paddingTop: "6px", fontSize: "11px", color: "#888888" }}>
+                    Authorised Signatory for {settings.storeName}
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {/* ── Terms & notes ── */}
@@ -587,35 +663,45 @@ function OrderInvoice({
         background: "#fafafa",
         border: "1px solid #e5e5e5",
         borderRadius: "4px",
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "24px",
+        boxSizing: "border-box",
       }}>
-        <div>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "6px" }}>
-            Terms & Conditions
-          </div>
-          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-            {[
-              "Goods once sold cannot be returned without prior approval.",
-              "Payment is due within 30 days of the invoice date.",
-              "Subject to local jurisdiction.",
-            ].map((t, i) => (
-              <li key={i} style={{ fontSize: "11px", color: "#666666", marginBottom: "3px" }}>
-                {i + 1}. {t}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "6px" }}>
-            Notes
-          </div>
-          <p style={{ fontSize: "11px", color: "#666666", margin: 0 }}>
-            Thank you for your business! We appreciate your continued trust in {settings.storeName}.
-            For any queries regarding this invoice, please reach us at {settings.storeEmail}.
-          </p>
-        </div>
+        <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "324px" }} />
+            <col style={{ width: "24px" }} />
+            <col style={{ width: "324px" }} />
+          </colgroup>
+          <tbody>
+            <tr>
+              <td style={{ verticalAlign: "top" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "6px" }}>
+                  Terms & Conditions
+                </div>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {[
+                    "Goods once sold cannot be returned without prior approval.",
+                    "Payment is due within 30 days of the invoice date.",
+                    "Subject to local jurisdiction.",
+                  ].map((t, i) => (
+                    <li key={i} style={{ fontSize: "11px", color: "#666666", marginBottom: "3px", lineHeight: "1.5", wordBreak: "break-word" }}>
+                      {i + 1}. {t}
+                    </li>
+                  ))}
+                </ul>
+              </td>
+              <td style={{ width: "24px", padding: "0", fontSize: "0", lineHeight: "0" }} />
+              <td style={{ verticalAlign: "top" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "6px" }}>
+                  Notes
+                </div>
+                <p style={{ fontSize: "11px", color: "#666666", margin: 0, lineHeight: "1.5", wordBreak: "break-word" }}>
+                  Thank you for your business! We appreciate your continued trust in {settings.storeName}.
+                  For any queries regarding this invoice, please reach us at {settings.storeEmail}.
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {/* ── Footer ── */}
@@ -623,17 +709,24 @@ function OrderInvoice({
         margin: "28px 48px 0",
         paddingTop: "14px",
         borderTop: "1px solid #e5e5e5",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
         paddingBottom: "28px",
       }}>
-        <div style={{ fontSize: "11px", color: "#aaaaaa" }}>
-          This is a computer-generated invoice and does not require a physical signature.
-        </div>
-        <div style={{ fontSize: "11px", color: "#aaaaaa" }}>
-          © {new Date().getFullYear()} {settings.storeName} · All rights reserved
-        </div>
+        <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "50%" }} />
+            <col style={{ width: "50%" }} />
+          </colgroup>
+          <tbody>
+            <tr>
+              <td style={{ fontSize: "11px", color: "#aaaaaa", textAlign: "left", verticalAlign: "middle" }}>
+                This is a computer-generated invoice and does not require a physical signature.
+              </td>
+              <td style={{ fontSize: "11px", color: "#aaaaaa", textAlign: "right", verticalAlign: "middle", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                © {new Date().getFullYear()} {settings.storeName} · All rights reserved
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {/* ── Bottom accent bar ── */}
@@ -805,6 +898,7 @@ export default function Orders() {
   const [paymentReference, setPaymentReference] = useState("");
   const [rejectReason, setRejectReason] = useState("");
   const [invoiceScale, setInvoiceScale] = useState<number>(1);
+  const [invoiceNaturalHeight, setInvoiceNaturalHeight] = useState<number>(0);
   const invoiceWrapRef = useRef<HTMLDivElement | null>(null);
   
   const invoiceRef = useRef<HTMLDivElement>(null);
@@ -832,14 +926,26 @@ export default function Orders() {
       const A4_WIDTH = 794;
       if (availWidth <= 0) return;
       setInvoiceScale(Math.min(1, availWidth / A4_WIDTH));
+      // Transform: scale() only changes what's painted, not the element's
+      // layout box — without this, a scaled-down invoice on mobile still
+      // reserves its full unscaled height, leaving a large blank gap below
+      // it. Measure the real rendered height so the wrapper can be sized
+      // to match what's actually visible.
+      if (invoiceRef.current) {
+        setInvoiceNaturalHeight(invoiceRef.current.scrollHeight);
+      }
     };
     queueMicrotask(compute);
+    // Content (order totals, address length, etc.) can change the invoice's
+    // natural height after the first paint, so measure again shortly after.
+    const t = setTimeout(compute, 150);
     window.addEventListener('resize', compute);
     const ro = typeof ResizeObserver !== 'undefined' && invoiceWrapRef.current
       ? new ResizeObserver(compute)
       : null;
     if (ro && invoiceWrapRef.current) ro.observe(invoiceWrapRef.current);
     return () => {
+      clearTimeout(t);
       window.removeEventListener('resize', compute);
       if (ro) ro.disconnect();
     };
@@ -882,17 +988,22 @@ export default function Orders() {
   const handleBulkUpdate = async () => {
     if (selectedOrderIds.length === 0) return;
     let succeeded = 0;
+    let failed = 0;
     for (const id of selectedOrderIds) {
       try {
         await api.patch(`/admin/orders/${id}/status`, { status: bulkStatus });
         succeeded++;
       } catch (e: any) {
+        failed++;
         console.error(`Bulk update failed for ${id}:`, e);
-        alert((e instanceof ApiError ? e.message : 'Failed to update order ' + id));
+        toast.error(e instanceof ApiError ? e.message : 'Failed to update order ' + id);
       }
     }
     setSelectedOrderIds([]);
-    if (succeeded > 0) await refreshOrders();
+    if (succeeded > 0) {
+      toast.success(`Updated ${succeeded} order${succeeded > 1 ? 's' : ''}${failed > 0 ? ` (${failed} failed)` : ''}`);
+      await refreshOrders();
+    }
   };
 
   // Handle adding internal note
@@ -903,9 +1014,10 @@ export default function Orders() {
       const refreshed = await refreshOne(selectedOrder.id);
       if (refreshed) setSelectedOrder(refreshed);
       setNewInternalNote("");
+      toast.success("Note added successfully.");
     } catch (e: any) {
       console.error('Failed to add note:', e);
-      alert(e instanceof ApiError ? e.message : 'Could not add note.');
+      toast.error(e instanceof ApiError ? e.message : 'Could not add note.');
     }
   };
 
@@ -924,9 +1036,10 @@ export default function Orders() {
       const refreshed = res?.success ? adaptOrder(res.data) : await refreshOne(selectedOrder.id) || selectedOrder;
       setSelectedOrder(refreshed);
       await refreshOrders();
+      toast.success("Tracking information updated successfully.");
     } catch (e: any) {
       console.error('Failed to update tracking:', e);
-      alert(e instanceof ApiError ? e.message : 'Could not update tracking info.');
+      toast.error(e instanceof ApiError ? e.message : 'Could not update tracking info.');
     }
   };
 
@@ -942,9 +1055,10 @@ export default function Orders() {
       const refreshed = await refreshOne(order.id);
       if (refreshed && selectedOrder?.id === order.id) setSelectedOrder(refreshed);
       await refreshOrders();
+      toast.success("Refund processed successfully.");
     } catch (e: any) {
       console.error('Failed to refund order:', e);
-      alert(e instanceof ApiError ? e.message : 'Could not process refund.');
+      toast.error(e instanceof ApiError ? e.message : 'Could not process refund.');
     }
   };
 
@@ -956,9 +1070,10 @@ export default function Orders() {
       const refreshed = res?.success ? adaptOrder(res.data) : await refreshOne(order.id) || order;
       setOrders((prev) => prev.map((o) => (o.id === order.id ? refreshed : o)));
       if (selectedOrder?.id === order.id) setSelectedOrder(refreshed);
+      toast.success(`Order status updated to ${nextStatus}.`);
     } catch (e: any) {
       console.error('Failed to update order status:', e);
-      alert(e instanceof ApiError ? e.message : 'Could not update order status.');
+      toast.error(e instanceof ApiError ? e.message : 'Could not update order status.');
     }
   };
 
@@ -975,9 +1090,10 @@ export default function Orders() {
       setPaymentReference("");
       setRejectReason("");
       await refreshOrders();
+      toast.success(decision === 'PAID' ? 'Payment verified successfully.' : 'Payment rejected and order cancelled.');
     } catch (e: any) {
       console.error('Failed to update payment:', e);
-      alert(e instanceof ApiError ? e.message : 'Could not update payment.');
+      toast.error(e instanceof ApiError ? e.message : 'Could not update payment.');
     }
   };
 
@@ -1062,17 +1178,17 @@ export default function Orders() {
     try {
       const customerId = parseInt(createCustomerId);
       if (isNaN(customerId) || customerId <= 0) {
-        alert("Please select a customer.");
+        toast.error("Please select a customer.");
         return;
       }
-      if (!createCustomerName.trim()) { alert("Customer name is required."); return; }
-      if (!createCustomerEmail.trim()) { alert("Customer email is required."); return; }
-      if (!createCustomerPhone.trim()) { alert("Customer phone is required."); return; }
-      if (!createShippingAddress.trim()) { alert("Shipping address is required."); return; }
-      if (createItems.length === 0) { alert("Add at least one item."); return; }
+      if (!createCustomerName.trim()) { toast.error("Customer name is required."); return; }
+      if (!createCustomerEmail.trim()) { toast.error("Customer email is required."); return; }
+      if (!createCustomerPhone.trim()) { toast.error("Customer phone is required."); return; }
+      if (!createShippingAddress.trim()) { toast.error("Shipping address is required."); return; }
+      if (createItems.length === 0) { toast.error("Add at least one item."); return; }
       for (const it of createItems) {
-        if (!it.productId || it.productId <= 0) { alert("Each item must have a product selected."); return; }
-        if (!it.quantity || it.quantity < 1) { alert("Item quantity must be at least 1."); return; }
+        if (!it.productId || it.productId <= 0) { toast.error("Each item must have a product selected."); return; }
+        if (!it.quantity || it.quantity < 1) { toast.error("Item quantity must be at least 1."); return; }
       }
 
       setCreateSubmitting(true);
@@ -1096,6 +1212,7 @@ export default function Orders() {
       const res: any = await api.post("/orders", payload);
       const createdOrder = res?.success ? res.data : res;
       setIsCreateModalOpen(false);
+      toast.success("Order created successfully.");
       await refreshOrders();
       if (createdOrder?.id) {
         const raw: any = await api.get(`/orders/${createdOrder.id}`);
@@ -1109,7 +1226,7 @@ export default function Orders() {
       }
     } catch (e: any) {
       console.error("Create order failed:", e);
-      alert(e instanceof ApiError ? e.message : "Could not create order.");
+      toast.error(e instanceof ApiError ? e.message : "Could not create order.");
     } finally {
       setCreateSubmitting(false);
     }
@@ -1147,44 +1264,134 @@ export default function Orders() {
 
   const handleDownloadInvoice = async () => {
     if (!invoiceRef.current || !selectedOrder) return;
+    const orderId = selectedOrder.orderNumber || selectedOrder.id;
+    const A4_WIDTH_MM = 210;
+    const A4_HEIGHT_MM = 297;
+    const INVOICE_NATURAL_W = 794;
+
+    let captureHost: HTMLDivElement | null = null;
     try {
-      console.log("Starting PDF export...");
-      
-      // Ensure all styles are loaded
-      const canvas = await html2canvas(invoiceRef.current, {
+      const srcEl = invoiceRef.current;
+
+      // ── 1. Deep-clone invoice into an off-screen host at NATURAL (1x) size ──
+      //    This ISOLATES the capture from the modal's `transform: scale(x)` wrapper,
+      //    which was the root cause of shifted pixels, cropped edges, and overlap.
+      captureHost = document.createElement("div");
+      captureHost.style.position = "fixed";
+      captureHost.style.left = "-100000px";
+      captureHost.style.top = "0";
+      captureHost.style.width = `${INVOICE_NATURAL_W}px`;
+      captureHost.style.height = "auto";
+      captureHost.style.background = "#ffffff";
+      captureHost.style.overflow = "visible";
+      captureHost.style.zIndex = "-1";
+      captureHost.setAttribute("aria-hidden", "true");
+      document.body.appendChild(captureHost);
+
+      const cloned = srcEl.cloneNode(true) as HTMLElement;
+      cloned.style.position = "relative";
+      cloned.style.top = "0";
+      cloned.style.left = "0";
+      cloned.style.margin = "0";
+      cloned.style.transform = "none";
+      cloned.style.zoom = "1";
+      cloned.style.width = `${INVOICE_NATURAL_W}px`;
+      cloned.style.maxWidth = `${INVOICE_NATURAL_W}px`;
+      cloned.style.minWidth = `${INVOICE_NATURAL_W}px`;
+      cloned.style.boxShadow = "none";
+      cloned.style.border = "none";
+      cloned.style.borderRadius = "0";
+      // Force pixel-perfect vertical bounds so nothing is cut off
+      cloned.style.minHeight = "0";
+      cloned.style.height = "auto";
+      captureHost.appendChild(cloned);
+
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+      const captureWidth = INVOICE_NATURAL_W;
+      const captureHeight =
+        Math.max(cloned.offsetHeight, cloned.scrollHeight, 1123) + 4; // 4px guard
+
+      // ── 2. Capture the ISOLATED, UN-SCALED clone ────────────────────────────
+      const canvas = await html2canvas(cloned, {
+        backgroundColor: "#ffffff",
         scale: 3,
         useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: true,
         allowTaint: true,
-        windowWidth: 800,
-        windowHeight: invoiceRef.current.scrollHeight,
+        logging: false,
+        imageTimeout: 5000,
+        removeContainer: true,
+        windowWidth: captureWidth,
+        windowHeight: captureHeight,
         scrollX: 0,
         scrollY: 0,
+        x: 0,
+        y: 0,
+        width: captureWidth,
+        height: captureHeight,
       });
-      
-      console.log("Canvas created successfully, dimensions:", canvas.width, canvas.height);
 
+      // ── 3. Slice canvas by A4 rows → write each slice to its own PDF page ──
+      //    Physical slicing GUARANTEES zero cross-page bleed / overlap because
+      //    every page contains only the exact pixels for its own vertical window
+      //    (no jsPDF addImage offset trick, which bleeds ~1mm on some viewers).
       const pdf = new jsPDF({
         orientation: "p",
         unit: "mm",
         format: "a4",
+        compress: true,
       });
-      
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const pageHeight = 297;
-      
-      console.log("Adding image to PDF...");
-      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, imgWidth, imgHeight);
-      
-      console.log("Saving PDF...");
-      pdf.save(`invoice-${selectedOrder.orderNumber || selectedOrder.id}.pdf`);
-      
-      console.log("PDF saved successfully!");
+
+      const totalW = canvas.width;           // px (scale3 × 794 ≈ 2382)
+      const totalH = canvas.height;          // px
+      // Pixels per A4 mm at the capture DPI (totalW / 210):
+      const pxPerMm = totalW / A4_WIDTH_MM;
+      const a4RowPx = Math.round(pxPerMm * A4_HEIGHT_MM);
+      const totalRows = Math.max(1, Math.ceil(totalH / a4RowPx));
+
+      const tmpCanvas = document.createElement("canvas");
+      tmpCanvas.width = totalW;
+      tmpCanvas.height = a4RowPx;
+      const tmpCtx = tmpCanvas.getContext("2d");
+      if (!tmpCtx) throw new Error("PDF export: no 2D context");
+
+      for (let row = 0; row < totalRows; row++) {
+        if (row > 0) pdf.addPage();
+
+        const srcY = row * a4RowPx;
+        const rowHeight = Math.min(a4RowPx, totalH - srcY);
+
+        // Paint a single A4-tall slice from the master canvas → temp canvas
+        tmpCtx.clearRect(0, 0, totalW, a4RowPx);
+        tmpCtx.fillStyle = "#ffffff";
+        tmpCtx.fillRect(0, 0, totalW, a4RowPx);
+        tmpCtx.drawImage(
+          canvas,
+          0, srcY, totalW, rowHeight,   // source rect (A4 slice)
+          0, 0,    totalW, rowHeight,   // dest rect in temp canvas
+        );
+
+        const sliceDataUrl = tmpCanvas.toDataURL("image/png");
+        const sliceHeightMm = (rowHeight * A4_WIDTH_MM) / totalW;
+        pdf.addImage(
+          sliceDataUrl,
+          "PNG",
+          0, 0,
+          A4_WIDTH_MM, sliceHeightMm,
+          undefined,
+          "FAST",
+        );
+      }
+
+      pdf.save(`invoice-${orderId}.pdf`);
+      toast.success("Invoice downloaded successfully.");
     } catch (err) {
       console.error("PDF export failed:", err);
-      alert("Failed to download invoice. Please try again or use the Print option.");
+      toast.error("Failed to download invoice. Please try again or use the Print option.");
+    } finally {
+      if (captureHost && captureHost.parentNode) {
+        captureHost.parentNode.removeChild(captureHost);
+      }
     }
   };
 
@@ -1522,9 +1729,9 @@ export default function Orders() {
           {selectedOrder && (
             <>
               {/* Modal toolbar */}
-              <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-6 py-4 flex items-start justify-between gap-4">
-                <div>
-                  <DialogTitle className="text-xl font-bold text-[#1c1917]">
+              <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="min-w-0">
+                  <DialogTitle className="text-lg sm:text-xl font-bold text-[#1c1917] break-words">
                     {t("dashboard.orders.orderDetailsTitle")} {selectedOrder.orderNumber || selectedOrder.id}
                   </DialogTitle>
                   <DialogDescription className="text-sm text-[#78746e] mt-0.5">
@@ -1532,11 +1739,11 @@ export default function Orders() {
                   </DialogDescription>
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  <Button variant="outline" size="sm" onClick={handlePrintInvoice}>
+                  <Button variant="outline" size="sm" onClick={handlePrintInvoice} className="flex-1 sm:flex-initial">
                     <Printer className="h-4 w-4 mr-1.5" />
                     {t("dashboard.orders.printInvoice")}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleDownloadInvoice}>
+                  <Button variant="outline" size="sm" onClick={handleDownloadInvoice} className="flex-1 sm:flex-initial">
                     <Download className="h-4 w-4 mr-1.5" />
                     {t("dashboard.orders.download")}
                   </Button>
@@ -1544,7 +1751,7 @@ export default function Orders() {
               </div>
 
               {/* Status editor */}
-              <div className="px-6 pt-4 pb-5 bg-[#f9f7f4] border-b border-gray-100">
+              <div className="px-4 sm:px-6 pt-4 pb-5 bg-[#f9f7f4] border-b border-gray-100">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-xs font-semibold text-[#78746e] uppercase tracking-wide mb-1.5 block">
@@ -1573,10 +1780,10 @@ export default function Orders() {
                     </Label>
                     {selectedOrder.payment?.status === 'PENDING' ? (
                       <div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <Button
                             size="sm"
-                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                            className="flex-1 min-w-[140px] bg-emerald-600 hover:bg-emerald-700 text-white"
                             onClick={() => handlePaymentDecision(selectedOrder, 'PAID')}
                           >
                             <CheckCircle className="h-4 w-4 mr-1.5" />
@@ -1585,7 +1792,7 @@ export default function Orders() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            className="flex-1"
+                            className="flex-1 min-w-[140px]"
                             onClick={() => handlePaymentDecision(selectedOrder, 'FAILED')}
                           >
                             <XCircle className="h-4 w-4 mr-1.5" />
@@ -1609,7 +1816,7 @@ export default function Orders() {
                         />
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <Badge className={PAYMENT_PILL[selectedOrder.paymentStatus] ?? "bg-gray-100 text-gray-700"}>
                           {selectedOrder.payment?.status || selectedOrder.paymentStatus}
                         </Badge>
@@ -1625,7 +1832,7 @@ export default function Orders() {
               </div>
 
               {/* Tracking Info */}
-              <div className="px-6 py-4 border-b border-gray-100">
+              <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
                 <h3 className="text-lg font-bold text-[#1c1917] mb-4">{t('dashboard.orders.trackingInformation')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -1668,7 +1875,7 @@ export default function Orders() {
               </div>
 
               {/* Internal Notes */}
-              <div className="px-6 py-4 border-b border-gray-100">
+              <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
                 <h3 className="text-lg font-bold text-[#1c1917] mb-4">{t('dashboard.orders.internalNotes')}</h3>
                 <div className="flex gap-3 mb-4">
                   <Input
@@ -1716,18 +1923,29 @@ export default function Orders() {
                 className="p-3 sm:p-6 bg-[#f0f0f0] overflow-x-auto"
               >
                 <div
-                  className="shadow-xl rounded mx-auto origin-top"
+                  className="mx-auto"
                   style={{
-                    width: 794,
-                    transform: `scale(${invoiceScale})`,
-                    transformOrigin: 'top center',
+                    width: 794 * invoiceScale,
+                    // Collapse the wrapper to the scaled-down visual height —
+                    // scale() alone leaves the full unscaled height reserved,
+                    // which shows up as empty space below the invoice on
+                    // phones/tablets.
+                    height: invoiceNaturalHeight ? invoiceNaturalHeight * invoiceScale : undefined,
                   }}
                 >
-                  <OrderInvoice
-                    order={selectedOrder}
-                    invoiceRef={invoiceRef}
-                    settings={settings}
-                  />
+                  <div
+                    className="shadow-xl rounded origin-top-left"
+                    style={{
+                      width: 794,
+                      transform: `scale(${invoiceScale})`,
+                    }}
+                  >
+                    <OrderInvoice
+                      order={selectedOrder}
+                      invoiceRef={invoiceRef}
+                      settings={settings}
+                    />
+                  </div>
                 </div>
               </div>
             </>

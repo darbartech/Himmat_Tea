@@ -215,7 +215,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       }
 
       throw new Error('Unhandled decision')
-    }, { timeout: 15_000, maxWait: 15_000 })
+    }, { timeout: 120_000, maxWait: 30_000 })
 
     if (decision === 'PAID' && updated) {
       const updAny = updated as any

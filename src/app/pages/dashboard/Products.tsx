@@ -468,7 +468,7 @@ export default function Products() {
                     placeholder={t('dashboard.products.namePlaceholder')}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="productLine">{t('dashboard.products.productLine')}</Label>
                     <Select
@@ -505,7 +505,7 @@ export default function Products() {
                     </Select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="price">{t('dashboard.products.priceRs')}</Label>
                     <Input
@@ -527,7 +527,7 @@ export default function Products() {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="sku">{t('dashboard.products.sku')}</Label>
                     <Input

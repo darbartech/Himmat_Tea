@@ -185,9 +185,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setIsLoggedIn(true);
     setUserType(type);
 
+    let minimalCookieUser: Record<string, any>;
+    if (type === "admin") {
+      minimalCookieUser = {
+        id: user.id,
+        username: (user as AdminUser).username,
+        role: (user as AdminUser).role,
+        type: "admin",
+      };
+    } else {
+      minimalCookieUser = {
+        id: user.id,
+        name: (user as CustomerUser).name,
+        type: "customer",
+      };
+    }
+
     writeCookie("himmat_isLoggedIn", "true");
     writeCookie("himmat_userType", type);
-    writeCookie("himmat_currentUser", JSON.stringify(userWithType));
+    writeCookie("himmat_currentUser", JSON.stringify(minimalCookieUser));
 
     if (process.env.NODE_ENV === "development") {
       console.log(

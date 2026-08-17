@@ -205,7 +205,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       })
 
       return orderUpd
-    }, { timeout: 15_000, maxWait: 15_000 })
+    }, { timeout: 120_000, maxWait: 30_000 })
 
     if (updated) {
       const updAny = updated as any

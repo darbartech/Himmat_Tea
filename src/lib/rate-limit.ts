@@ -1,5 +1,26 @@
 import type { NextRequest } from 'next/server'
 
+/**
+ * IMPORTANT DEPLOYMENT NOTE:
+ *
+ * This rate limiter uses an IN-MEMORY Map per Node.js process.
+ *
+ * LIMITATIONS:
+ *  - On horizontally-scaled / serverless deployments (multiple Lambda/Edge
+ *    instances, Vercel, etc.), each instance maintains its OWN counter.
+ *    The configured caps are therefore trivially bypassed by distributing
+ *    requests across different instances.
+ *  - Every cold start / redeploy / process restart resets all counters.
+ *  - Keys are derived from `x-forwarded-for`, which is trustworthy only if
+ *    your hosting platform strips/overwrites the header (Vercel does;
+ *    confirm this for your deployment target if you rely on these limits
+ *    as a primary defense).
+ *
+ * RECOMMENDATION for production multi-instance deployments:
+ *  - Replace the in-memory backing store with Redis / Upstash / Vercel Edge
+ *    Config / KV / the platform's built-in edge rate-limiting primitive
+ *    so counters are shared across replicas.
+ */
 interface Bucket {
   tokens: number
   lastRefill: number

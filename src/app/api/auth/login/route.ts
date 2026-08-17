@@ -25,23 +25,20 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    if (!adminUser) {
+    const dummyHash = '$2a$12$C9AYYmcLVGYlGoO4vSZTPud9ArJwbGRsJ6TUsNULzR48z8fOnTXbS'
+    let passwordMatch = false
+    try {
+      passwordMatch = await bcrypt.compare(password, adminUser?.passwordHash ?? dummyHash)
+    } catch {
+      passwordMatch = false
+    }
+
+    if (!adminUser || !passwordMatch) {
       return createErrorResponse(USER_ERRORS.AUTH.INVALID_CREDENTIALS, 401)
     }
 
     if (!adminUser.isActive) {
       return createErrorResponse(USER_ERRORS.AUTH.ACCOUNT_INACTIVE, 403)
-    }
-
-    let passwordMatch = false
-    try {
-      passwordMatch = await bcrypt.compare(password, adminUser.passwordHash ?? '')
-    } catch {
-      return createErrorResponse(USER_ERRORS.AUTH.INVALID_CREDENTIALS, 401)
-    }
-
-    if (!passwordMatch) {
-      return createErrorResponse(USER_ERRORS.AUTH.PASSWORD_MISMATCH, 401)
     }
 
     const { passwordHash, ...userWithoutPassword } = adminUser
@@ -54,10 +51,7 @@ export async function POST(request: NextRequest) {
       currentUserCookieValue: JSON.stringify({
         id: adminUser.id,
         username: adminUser.username,
-        email: adminUser.email,
         role: adminUser.role,
-        isActive: adminUser.isActive,
-        createdAt: adminUser.createdAt,
         type: 'admin'
       }),
       userTypeCookieValue: 'admin'

@@ -128,16 +128,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({
       reset();
 
       if (onSuccess) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(
-            `[AUTH] SignupForm success → delegating redirect to onSuccess callback, redirectTo=${redirectTo}`
-          );
-        }
         onSuccess();
       } else if (redirectTo && typeof window !== 'undefined') {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`[AUTH] SignupForm → self-redirecting to ${redirectTo}`);
-        }
         router.replace(redirectTo);
         router.refresh();
       }
