@@ -1,8 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowRight, Instagram, Facebook, Youtube } from "lucide-react";
+import { Instagram, Facebook, Youtube } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { BRAND } from "@/config/brand";
 import Image from "next/image";
@@ -11,8 +10,6 @@ import { useStore } from "@/context/StoreContext";
 export default function Footer() {
   const { t } = useTranslation();
   const { productLines } = useStore();
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
 
   const links = {
     [t("footer.shop")]: [
@@ -42,59 +39,6 @@ export default function Footer() {
       className="bg-[#1c1917] text-white"
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
-      {/* Newsletter strip */}
-      <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-14">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            <div>
-              <h3
-                className="text-2xl font-semibold mb-2"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                {t("footer.newsletter.headline")}
-              </h3>
-              <p className="text-white/60 text-[15px]">
-                {t("footer.newsletter.sub")}
-              </p>
-            </div>
-
-            {subscribed ? (
-              <div className="shrink-0 flex items-center gap-2 text-[#c8a96e] font-medium">
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {t("footer.newsletter.success")}
-              </div>
-            ) : (
-              <div className="flex gap-3 shrink-0 w-full lg:w-auto max-w-md">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t("footer.newsletter.placeholder")}
-                  className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-[#c8a96e] transition-colors"
-                />
-                <button
-                  onClick={() => email && setSubscribed(true)}
-                  className="px-5 py-3 bg-[#c8a96e] text-[#1c1917] text-sm font-medium rounded-lg hover:bg-[#b89558] transition-colors flex items-center gap-2 shrink-0"
-                >
-                  {t("footer.newsletter.button")}
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Main footer */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-12">
