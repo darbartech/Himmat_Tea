@@ -54,8 +54,95 @@ function verifyCustomerToken(req: NextRequest): boolean {
   return decoded?.type === 'customer' && typeof decoded.id === 'number'
 }
 
+function stripTrailingSlash(p: string): string {
+  return p.endsWith('/') && p.length > 1 ? p.slice(0, -1) : p
+}
+
+type PublicRouteSpec = {
+  path: (pathname: string) => boolean
+  methods: string[] | '*'
+}
+
+function pathPrefix(prefix: string): (p: string) => boolean {
+  return (p) => p === prefix || p.startsWith(prefix + '/')
+}
+
+function pathExact(exact: string): (p: string) => boolean {
+  return (p) => p === exact
+}
+
+function pathMatch(matcher: (p: string) => boolean): (p: string) => boolean {
+  return matcher
+}
+
+const PUBLIC_API_ROUTES: PublicRouteSpec[] = [
+  // ===== Contact / partnership (public writes) =====
+  { path: pathExact('/api/contact'), methods: ['POST'] },
+  { path: pathExact('/api/partnership'), methods: ['POST'] },
+
+  // ===== Auth endpoints (public: login, signup, pw reset) =====
+  { path: pathExact('/api/auth/login'), methods: ['POST'] },
+  { path: pathExact('/api/auth/logout'), methods: ['POST', 'GET'] },
+  { path: pathExact('/api/auth/me'), methods: ['GET'] },
+  { path: pathExact('/api/auth/forgot-password'), methods: ['POST'] },
+  { path: pathExact('/api/auth/reset-password'), methods: ['POST'] },
+  { path: pathExact('/api/auth/verify-reset-otp'), methods: ['POST'] },
+  { path: pathExact('/api/auth/resend-reset-otp'), methods: ['POST'] },
+  { path: pathPrefix('/api/auth'), methods: '*' },
+
+  // ===== Customer auth endpoints (public: signup + login) =====
+  { path: pathExact('/api/customer/signup'), methods: ['POST'] },
+  { path: pathExact('/api/customer/signup/verify'), methods: ['POST'] },
+  { path: pathExact('/api/customer/signup/resend'), methods: ['POST'] },
+  { path: pathExact('/api/customer/login'), methods: ['POST'] },
+
+  // ===== Customer-scoped routes (per-route auth enforces customer session) =====
+  { path: pathPrefix('/api/customer/notifications'), methods: '*' },
+
+  // ===== Storefront: public GETs (content reads) =====
+  { path: pathExact('/api/products'), methods: ['GET'] },
+  { path: pathMatch((p) => /^\/api\/products\/[^/]+$/.test(p)), methods: ['GET'] },
+  { path: pathExact('/api/collections'), methods: ['GET'] },
+  { path: pathMatch((p) => /^\/api\/collections\/[^/]+$/.test(p)), methods: ['GET'] },
+  { path: pathExact('/api/faqs'), methods: ['GET'] },
+  { path: pathMatch((p) => /^\/api\/faqs\/[^/]+$/.test(p)), methods: ['GET'] },
+  { path: pathExact('/api/blog'), methods: ['GET'] },
+  { path: pathMatch((p) => /^\/api\/blog\/[^/]+$/.test(p)), methods: ['GET'] },
+  { path: pathExact('/api/brewing-guides'), methods: ['GET'] },
+  { path: pathMatch((p) => /^\/api\/brewing-guides\/[^/]+$/.test(p)), methods: ['GET'] },
+  { path: pathExact('/api/product-lines'), methods: ['GET'] },
+  { path: pathMatch((p) => /^\/api\/product-lines\/[^/]+$/.test(p)), methods: ['GET'] },
+  { path: pathMatch((p) => /^\/api\/reviews\/[^/]+$/.test(p)), methods: ['GET'] },
+
+  // ===== Settings (GET public, PUT admin — already per-route guarded) =====
+  { path: pathExact('/api/settings'), methods: ['GET'] },
+
+  // ===== Exchange rates (public read) =====
+  { path: pathExact('/api/exchange-rates'), methods: ['GET'] },
+
+  // ===== Coupons (public GET ?public=true for validation) =====
+  { path: pathExact('/api/coupons'), methods: ['GET'] },
+
+  // ===== Orders (public POST for checkout; GET is customer/admin scoped per-route) =====
+  { path: pathExact('/api/orders'), methods: ['GET', 'POST'] },
+  { path: pathMatch((p) => /^\/api\/orders\/[^/]+$/.test(p)), methods: ['GET', 'PUT', 'POST'] },
+]
+
+function isPublicApiRoute(pathname: string, method: string): boolean {
+  const p = stripTrailingSlash(pathname)
+  for (const spec of PUBLIC_API_ROUTES) {
+    if (spec.path(p)) {
+      if (spec.methods === '*' || spec.methods.includes(method)) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
+  const method = req.method
 
   const res = NextResponse.next()
 
@@ -90,29 +177,22 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  if (
-    pathname.startsWith('/api/admin-users') ||
-    pathname.startsWith('/api/customers') ||
-    pathname.startsWith('/api/coupons') ||
-    pathname.startsWith('/api/admin') ||
-    pathname.startsWith('/api/analytics') ||
-    pathname.startsWith('/api/upload') ||
-    pathname.startsWith('/api/batches') ||
-    pathname.startsWith('/api/purchase-orders') ||
-    pathname.startsWith('/api/inventory/transactions') ||
-    pathname.startsWith('/api/hero-visuals') ||
-    pathname.startsWith('/api/product-lines') ||
-    pathname.startsWith('/api/reviews') ||
-    (pathname.startsWith('/api/settings') && req.method !== 'GET')
-  ) {
-    if (!verifyAdminToken(req)) {
-      return NextResponse.json({ error: 'Unauthorized', success: false }, { status: 401 })
-    }
-  }
+  // ===== Deny-by-default for /api/* =====
+  if (pathname.startsWith('/api/')) {
+    const p = stripTrailingSlash(pathname)
 
-  if (pathname.startsWith('/api/seed')) {
-    if (process.env.NODE_ENV === 'production') {
+    // Seed endpoint: prod block regardless of auth
+    if (p.startsWith('/api/seed') && process.env.NODE_ENV === 'production') {
       return NextResponse.json({ error: 'Not found', success: false }, { status: 404 })
+    }
+
+    if (!isPublicApiRoute(p, method)) {
+      if (!verifyAdminToken(req)) {
+        return NextResponse.json(
+          { error: 'Unauthorized', success: false },
+          { status: 401, headers: { 'WWW-Authenticate': 'Bearer realm="admin"' } }
+        )
+      }
     }
   }
 
@@ -126,14 +206,6 @@ export const config = {
     '/himmat_admin_8526/dashboard/:path*',
     '/account/:path*',
     '/account',
-    '/api/admin-users/:path*',
-    '/api/customers/:path*',
-    '/api/orders/:path*',
-    '/api/coupons/:path*',
-    '/api/seed/:path*',
-    '/api/admin/:path*',
-    '/api/settings/:path*',
-    '/api/exchange-rates/:path*',
-    '/api/analytics/:path*'
+    '/api/:path*',
   ]
 }

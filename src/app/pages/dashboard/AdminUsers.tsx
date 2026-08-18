@@ -3,7 +3,7 @@ import { Plus, Search, Mail, Edit, Trash2, User, Shield, Lock } from "lucide-rea
 import { useAuth } from "../../../context/AuthContext";
 import { useTranslation } from "../../../hooks/useTranslation";
 import { api } from "../../../lib/api-client";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import {
   Dialog,
   DialogContent,
@@ -60,7 +60,7 @@ export default function AdminUsers() {
       setAdminUsers(users);
     } catch (error) {
       console.error('Failed to fetch admin users:', error);
-      toast.error('Failed to load admin users');
+      notify.error('Failed to load admin users');
     }
   };
   
@@ -75,20 +75,20 @@ export default function AdminUsers() {
 
   const handleSaveUser = async () => {
     if (!newUser.username || !newUser.email) {
-      toast.error("Please fill in username and email");
+      notify.error("Please fill in username and email");
       return;
     }
     if (!editingUser && !newUser.password) {
-      toast.error("Please enter a password for the new user");
+      notify.error("Please enter a password for the new user");
       return;
     }
     try {
       if (editingUser) {
         await api.put(`/admin-users/${editingUser.id}`, newUser);
-        toast.success("Admin user updated successfully!");
+        notify.success("Admin user updated successfully!");
       } else {
         await api.post('/admin-users', newUser);
-        toast.success("Admin user created successfully!");
+        notify.success("Admin user created successfully!");
       }
       // Refresh the admin users list
       await fetchAdminUsers();
@@ -103,7 +103,7 @@ export default function AdminUsers() {
       });
     } catch (error) {
       console.error('Failed to save admin user:', error);
-      toast.error("Failed to save admin user. Please try again.");
+      notify.error("Failed to save admin user. Please try again.");
     }
   };
   
@@ -111,10 +111,10 @@ export default function AdminUsers() {
     try {
       await api.delete(`/admin-users/${id}`);
       await fetchAdminUsers();
-      toast.success("Admin user deleted successfully!");
+      notify.success("Admin user deleted successfully!");
     } catch (error) {
       console.error('Failed to delete admin user:', error);
-      toast.error("Failed to delete admin user. Please try again.");
+      notify.error("Failed to delete admin user. Please try again.");
     }
   };
 

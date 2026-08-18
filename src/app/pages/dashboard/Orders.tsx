@@ -3,9 +3,9 @@ import {
   Plus, Search, Eye, CheckCircle, Truck, Clock,
   Package, XCircle, RefreshCw, Download, Printer, Undo2,
   CheckSquare, Square, ChevronLeft, ChevronRight, AlertTriangle,
-  Trash2, MinusCircle
+  Trash2, MinusCircle, Loader2
 } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { useStore } from "../../../context/StoreContext";
 import { useTranslation } from "@/hooks/useTranslation";
 import { api, ApiError } from "../../../lib/api-client";
@@ -915,6 +915,11 @@ export default function Orders() {
     { productId: 0, productName: "", quantity: 1, price: 0, weight: "" }
   ]);
   const [createSubmitting, setCreateSubmitting] = useState(false);
+  const [bulkUpdating, setBulkUpdating] = useState(false);
+  const [trackingSaving, setTrackingSaving] = useState(false);
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [paymentDecisionPending, setPaymentDecisionPending] = useState(false);
+  const [refundPending, setRefundPending] = useState(false);
   const [allCustomers, setAllCustomers] = useState<any[]>([]);
   const [allProducts, setAllProducts] = useState<any[]>([]);
 
@@ -987,22 +992,27 @@ export default function Orders() {
   // Handle bulk status update
   const handleBulkUpdate = async () => {
     if (selectedOrderIds.length === 0) return;
-    let succeeded = 0;
-    let failed = 0;
-    for (const id of selectedOrderIds) {
-      try {
-        await api.patch(`/admin/orders/${id}/status`, { status: bulkStatus });
-        succeeded++;
-      } catch (e: any) {
-        failed++;
-        console.error(`Bulk update failed for ${id}:`, e);
-        toast.error(e instanceof ApiError ? e.message : 'Failed to update order ' + id);
+    try {
+      setBulkUpdating(true);
+      let succeeded = 0;
+      let failed = 0;
+      for (const id of selectedOrderIds) {
+        try {
+          await api.patch(`/admin/orders/${id}/status`, { status: bulkStatus });
+          succeeded++;
+        } catch (e: any) {
+          failed++;
+          console.error(`Bulk update failed for ${id}:`, e);
+          notify.error(e instanceof ApiError ? e.message : 'Failed to update order ' + id);
+        }
       }
-    }
-    setSelectedOrderIds([]);
-    if (succeeded > 0) {
-      toast.success(`Updated ${succeeded} order${succeeded > 1 ? 's' : ''}${failed > 0 ? ` (${failed} failed)` : ''}`);
-      await refreshOrders();
+      setSelectedOrderIds([]);
+      if (succeeded > 0) {
+        notify.success(`Updated ${succeeded} order${succeeded > 1 ? 's' : ''}${failed > 0 ? ` (${failed} failed)` : ''}`);
+        await refreshOrders();
+      }
+    } finally {
+      setBulkUpdating(false);
     }
   };
 
@@ -1010,14 +1020,17 @@ export default function Orders() {
   const handleAddInternalNote = async () => {
     if (!selectedOrder || !newInternalNote.trim()) return;
     try {
+      setNoteSaving(true);
       await api.post(`/admin/orders/${selectedOrder.id}/notes`, { text: newInternalNote.trim() });
       const refreshed = await refreshOne(selectedOrder.id);
       if (refreshed) setSelectedOrder(refreshed);
       setNewInternalNote("");
-      toast.success("Note added successfully.");
+      notify.success("Note added successfully.");
     } catch (e: any) {
       console.error('Failed to add note:', e);
-      toast.error(e instanceof ApiError ? e.message : 'Could not add note.');
+      notify.error(e instanceof ApiError ? e.message : 'Could not add note.');
+    } finally {
+      setNoteSaving(false);
     }
   };
 
@@ -1025,6 +1038,7 @@ export default function Orders() {
   const handleUpdateTracking = async () => {
     if (!selectedOrder) return;
     try {
+      setTrackingSaving(true);
       const payload: any = {
         trackingNumber: trackingNumber || null,
         courierPartner: courierPartner || null,
@@ -1036,16 +1050,19 @@ export default function Orders() {
       const refreshed = res?.success ? adaptOrder(res.data) : await refreshOne(selectedOrder.id) || selectedOrder;
       setSelectedOrder(refreshed);
       await refreshOrders();
-      toast.success("Tracking information updated successfully.");
+      notify.success("Tracking information updated successfully.");
     } catch (e: any) {
       console.error('Failed to update tracking:', e);
-      toast.error(e instanceof ApiError ? e.message : 'Could not update tracking info.');
+      notify.error(e instanceof ApiError ? e.message : 'Could not update tracking info.');
+    } finally {
+      setTrackingSaving(false);
     }
   };
 
   // Handle refund
   const handleRefund = async (order: Order) => {
     try {
+      setRefundPending(true);
       const amount = refundAmount ? parseFloat(refundAmount) : undefined;
       const payload: any = { status: 'REFUNDED', refundReason: refundReason || 'Admin-initiated refund' };
       if (amount !== undefined && !isNaN(amount)) payload.refundAmount = amount;
@@ -1055,10 +1072,12 @@ export default function Orders() {
       const refreshed = await refreshOne(order.id);
       if (refreshed && selectedOrder?.id === order.id) setSelectedOrder(refreshed);
       await refreshOrders();
-      toast.success("Refund processed successfully.");
+      notify.success("Refund processed successfully.");
     } catch (e: any) {
       console.error('Failed to refund order:', e);
-      toast.error(e instanceof ApiError ? e.message : 'Could not process refund.');
+      notify.error(e instanceof ApiError ? e.message : 'Could not process refund.');
+    } finally {
+      setRefundPending(false);
     }
   };
 
@@ -1070,16 +1089,17 @@ export default function Orders() {
       const refreshed = res?.success ? adaptOrder(res.data) : await refreshOne(order.id) || order;
       setOrders((prev) => prev.map((o) => (o.id === order.id ? refreshed : o)));
       if (selectedOrder?.id === order.id) setSelectedOrder(refreshed);
-      toast.success(`Order status updated to ${nextStatus}.`);
+      notify.success(`Order status updated to ${nextStatus}.`);
     } catch (e: any) {
       console.error('Failed to update order status:', e);
-      toast.error(e instanceof ApiError ? e.message : 'Could not update order status.');
+      notify.error(e instanceof ApiError ? e.message : 'Could not update order status.');
     }
   };
 
   // Handle payment verification / rejection (real admin payment actions)
   const handlePaymentDecision = async (order: Order, decision: 'PAID' | 'FAILED') => {
     try {
+      setPaymentDecisionPending(true);
       const payload: any = { decision };
       if (paymentReference.trim()) payload.transactionReference = paymentReference.trim();
       if (decision === 'FAILED' && rejectReason.trim()) payload.rejectReason = rejectReason.trim();
@@ -1090,10 +1110,12 @@ export default function Orders() {
       setPaymentReference("");
       setRejectReason("");
       await refreshOrders();
-      toast.success(decision === 'PAID' ? 'Payment verified successfully.' : 'Payment rejected and order cancelled.');
+      notify.success(decision === 'PAID' ? 'Payment verified successfully.' : 'Payment rejected and order cancelled.');
     } catch (e: any) {
       console.error('Failed to update payment:', e);
-      toast.error(e instanceof ApiError ? e.message : 'Could not update payment.');
+      notify.error(e instanceof ApiError ? e.message : 'Could not update payment.');
+    } finally {
+      setPaymentDecisionPending(false);
     }
   };
 
@@ -1178,17 +1200,17 @@ export default function Orders() {
     try {
       const customerId = parseInt(createCustomerId);
       if (isNaN(customerId) || customerId <= 0) {
-        toast.error("Please select a customer.");
+        notify.error("Please select a customer.");
         return;
       }
-      if (!createCustomerName.trim()) { toast.error("Customer name is required."); return; }
-      if (!createCustomerEmail.trim()) { toast.error("Customer email is required."); return; }
-      if (!createCustomerPhone.trim()) { toast.error("Customer phone is required."); return; }
-      if (!createShippingAddress.trim()) { toast.error("Shipping address is required."); return; }
-      if (createItems.length === 0) { toast.error("Add at least one item."); return; }
+      if (!createCustomerName.trim()) { notify.error("Customer name is required."); return; }
+      if (!createCustomerEmail.trim()) { notify.error("Customer email is required."); return; }
+      if (!createCustomerPhone.trim()) { notify.error("Customer phone is required."); return; }
+      if (!createShippingAddress.trim()) { notify.error("Shipping address is required."); return; }
+      if (createItems.length === 0) { notify.error("Add at least one item."); return; }
       for (const it of createItems) {
-        if (!it.productId || it.productId <= 0) { toast.error("Each item must have a product selected."); return; }
-        if (!it.quantity || it.quantity < 1) { toast.error("Item quantity must be at least 1."); return; }
+        if (!it.productId || it.productId <= 0) { notify.error("Each item must have a product selected."); return; }
+        if (!it.quantity || it.quantity < 1) { notify.error("Item quantity must be at least 1."); return; }
       }
 
       setCreateSubmitting(true);
@@ -1212,7 +1234,7 @@ export default function Orders() {
       const res: any = await api.post("/orders", payload);
       const createdOrder = res?.success ? res.data : res;
       setIsCreateModalOpen(false);
-      toast.success("Order created successfully.");
+      notify.success("Order created successfully.");
       await refreshOrders();
       if (createdOrder?.id) {
         const raw: any = await api.get(`/orders/${createdOrder.id}`);
@@ -1226,7 +1248,7 @@ export default function Orders() {
       }
     } catch (e: any) {
       console.error("Create order failed:", e);
-      toast.error(e instanceof ApiError ? e.message : "Could not create order.");
+      notify.error(e instanceof ApiError ? e.message : "Could not create order.");
     } finally {
       setCreateSubmitting(false);
     }
@@ -1384,10 +1406,10 @@ export default function Orders() {
       }
 
       pdf.save(`invoice-${orderId}.pdf`);
-      toast.success("Invoice downloaded successfully.");
+      notify.success("Invoice downloaded successfully.");
     } catch (err) {
       console.error("PDF export failed:", err);
-      toast.error("Failed to download invoice. Please try again or use the Print option.");
+      notify.error("Failed to download invoice. Please try again or use the Print option.");
     } finally {
       if (captureHost && captureHost.parentNode) {
         captureHost.parentNode.removeChild(captureHost);
@@ -1492,8 +1514,16 @@ export default function Orders() {
             <Button
               className="bg-[#2d5a3d] hover:bg-[#234832] text-white w-full sm:w-auto"
               onClick={handleBulkUpdate}
+              disabled={bulkUpdating}
             >
-              Update Status
+              {bulkUpdating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Updating…
+                </>
+              ) : (
+                'Update Status'
+              )}
             </Button>
           </div>
           <Button
@@ -1508,7 +1538,7 @@ export default function Orders() {
 
       {/* Orders table */}
       <div className="bg-white rounded-2xl shadow-sm border border-[#2d5a3d]/5 overflow-hidden">
-        <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+        <div className="overflow-x-auto max-h-[600px] overflow-y-auto shadow-[inset_-12px_0_16px_-12px_rgba(45,90,61,0.18)]">
           <table className="w-full min-w-[1000px]">
             <thead className="sticky top-0 bg-[#f9f7f4] z-10">
               <tr className="text-left text-sm text-[#78746e] border-b border-[#2d5a3d]/5">
@@ -1650,18 +1680,28 @@ export default function Orders() {
                                 </div>
                               </div>
                               <AlertDialogFooter>
-                                <AlertDialogCancel onClick={() => {
-                                  setRefundReason("");
-                                  setRefundAmount("");
-                                }}>
+                                <AlertDialogCancel 
+                                  onClick={() => {
+                                    setRefundReason("");
+                                    setRefundAmount("");
+                                  }}
+                                  disabled={refundPending}
+                                >
                                   {t("dashboard.products.cancel")}
                                 </AlertDialogCancel>
                                 <AlertDialogAction
-                                  disabled={!refundReason.trim()}
+                                  disabled={refundPending || !refundReason.trim()}
                                   className="bg-red-600 hover:bg-red-700"
                                   onClick={() => handleRefund(order)}
                                 >
-                                  {t("dashboard.orders.refundOrder")}
+                                  {refundPending ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                      Processing…
+                                    </>
+                                  ) : (
+                                    t("dashboard.orders.refundOrder")
+                                  )}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -1785,18 +1825,38 @@ export default function Orders() {
                             size="sm"
                             className="flex-1 min-w-[140px] bg-emerald-600 hover:bg-emerald-700 text-white"
                             onClick={() => handlePaymentDecision(selectedOrder, 'PAID')}
+                            disabled={paymentDecisionPending}
                           >
-                            <CheckCircle className="h-4 w-4 mr-1.5" />
-                            Verify Payment
+                            {paymentDecisionPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                                Verifying…
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="h-4 w-4 mr-1.5" />
+                                Verify Payment
+                              </>
+                            )}
                           </Button>
                           <Button
                             size="sm"
                             variant="destructive"
                             className="flex-1 min-w-[140px]"
                             onClick={() => handlePaymentDecision(selectedOrder, 'FAILED')}
+                            disabled={paymentDecisionPending}
                           >
-                            <XCircle className="h-4 w-4 mr-1.5" />
-                            Reject Payment
+                            {paymentDecisionPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                                Rejecting…
+                              </>
+                            ) : (
+                              <>
+                                <XCircle className="h-4 w-4 mr-1.5" />
+                                Reject Payment
+                              </>
+                            )}
                           </Button>
                         </div>
                         <Input
@@ -1859,8 +1919,16 @@ export default function Orders() {
                 <Button
                   className="mt-4 bg-[#2d5a3d] hover:bg-[#234832] text-white"
                   onClick={handleUpdateTracking}
+                  disabled={trackingSaving}
                 >
-                  Update Tracking
+                  {trackingSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving…
+                    </>
+                  ) : (
+                    'Update Tracking'
+                  )}
                 </Button>
                 {selectedOrder.trackingNumber && (
                   <div className="mt-4 p-3 bg-[#f0f9f4] rounded-lg">
@@ -1886,9 +1954,16 @@ export default function Orders() {
                   <Button
                     className="bg-[#2d5a3d] hover:bg-[#234832] text-white"
                     onClick={handleAddInternalNote}
-                    disabled={!newInternalNote.trim()}
+                    disabled={noteSaving || !newInternalNote.trim()}
                   >
-                    Add Note
+                    {noteSaving ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Adding…
+                      </>
+                    ) : (
+                      'Add Note'
+                    )}
                   </Button>
                 </div>
                 <div className="space-y-3">
@@ -1920,7 +1995,7 @@ export default function Orders() {
               {/* Invoice preview */}
               <div
                 ref={invoiceWrapRef}
-                className="p-3 sm:p-6 bg-[#f0f0f0] overflow-x-auto"
+                className="p-3 sm:p-6 bg-[#f0f0f0] overflow-x-auto shadow-[inset_-12px_0_16px_-12px_rgba(45,90,61,0.18)]"
               >
                 <div
                   className="mx-auto"
@@ -2066,7 +2141,7 @@ export default function Orders() {
                   Add Item
                 </Button>
               </div>
-              <div className="rounded-xl border border-[#e7e4df] overflow-x-auto">
+              <div className="rounded-xl border border-[#e7e4df] overflow-x-auto shadow-[inset_-12px_0_16px_-12px_rgba(45,90,61,0.18)]">
                 <table className="w-full min-w-[640px]">
                   <thead className="bg-[#f9f7f4] text-[#78746e] text-xs uppercase tracking-wide">
                     <tr>

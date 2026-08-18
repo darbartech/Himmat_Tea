@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Search, Edit, Trash2, CheckCircle, Truck, Clock, Package, XCircle, Loader2 } from "lucide-react";
 import { api, ApiError } from "../../../lib/api-client";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import {
   Dialog,
   DialogContent,
@@ -125,7 +125,7 @@ export default function PurchaseOrders() {
       setPurchaseOrders(posData);
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to load purchase orders";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -184,7 +184,7 @@ export default function PurchaseOrders() {
   const addItemToPO = () => {
     const product = products.find((p) => p.id === Number(selectedProduct));
     if (!product || itemQuantity <= 0 || itemUnitPrice <= 0) {
-      toast.error("Please select a product and enter valid quantity and price");
+      notify.error("Please select a product and enter valid quantity and price");
       return;
     }
 
@@ -223,11 +223,11 @@ export default function PurchaseOrders() {
 
   const handleSavePO = async () => {
     if (!newPO.poNumber || !newPO.supplier) {
-      toast.error("Please fill in PO Number and Supplier");
+      notify.error("Please fill in PO Number and Supplier");
       return;
     }
     if (newPO.items.length === 0) {
-      toast.error("Please add at least one item to the purchase order");
+      notify.error("Please add at least one item to the purchase order");
       return;
     }
     try {
@@ -255,12 +255,12 @@ export default function PurchaseOrders() {
         setPurchaseOrders((prev) =>
           prev.map((p) => (p.id === resolved.id ? resolved : p))
         );
-        toast.success("Purchase order updated successfully!");
+        notify.success("Purchase order updated successfully!");
       } else {
         saved = await api.post<PurchaseOrder>("/purchase-orders", payload);
         const resolved: PurchaseOrder = (saved as any)?.data ?? saved;
         setPurchaseOrders((prev) => [resolved, ...prev]);
-        toast.success("Purchase order created successfully!");
+        notify.success("Purchase order created successfully!");
       }
 
       setIsAddDialogOpen(false);
@@ -275,7 +275,7 @@ export default function PurchaseOrders() {
       });
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to save purchase order";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsSaving(false);
     }
@@ -312,10 +312,10 @@ export default function PurchaseOrders() {
       setPurchaseOrders((prev) =>
         prev.map((p) => (p.id === resolved.id ? resolved : p))
       );
-      toast.success(`PO #${po.poNumber} marked as Received! Stock updated.`);
+      notify.success(`PO #${po.poNumber} marked as Received! Stock updated.`);
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to receive purchase order";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setReceivingId(null);
     }
@@ -332,10 +332,10 @@ export default function PurchaseOrders() {
       setDeletingId(deleteTarget.id);
       await api.delete(`/purchase-orders/${deleteTarget.id}`);
       setPurchaseOrders((prev) => prev.filter((p) => p.id !== deleteTarget.id));
-      toast.success("Purchase order deleted successfully!");
+      notify.success("Purchase order deleted successfully!");
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to delete purchase order";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setDeletingId(null);
       setIsDeleteDialogOpen(false);

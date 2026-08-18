@@ -2,7 +2,7 @@
 
 import { useRef, useState, ChangeEvent } from 'react';
 import { Upload, Image as ImageIcon, Loader2, Edit, X } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify } from "@/lib/notify";
 import { Button } from './button';
 import { Input } from './input';
 import { Label } from './label';
@@ -56,7 +56,7 @@ export function ImageUploadField({
 
     for (const file of files) {
       if (!file.type.startsWith('image/')) {
-        toast.error(`"${file.name}" is not a valid image file`);
+        notify.error(`"${file.name}" is not a valid image file`);
         if (fileInputRef.current) fileInputRef.current.value = '';
         return;
       }
@@ -90,11 +90,11 @@ export function ImageUploadField({
           const first = uploaded[0];
           onChange(first.url, first);
         }
-        toast.success(`Uploaded ${uploaded.length} image(s) successfully!`);
+        notify.success(`Uploaded ${uploaded.length} image(s) successfully!`);
       } else {
         const data: UploadedImageData = result.data;
         onChange(data.url, data);
-        toast.success('Image uploaded successfully!');
+        notify.success('Image uploaded successfully!');
       }
     } catch (err: any) {
       const rawMsg: string = (err?.message || 'Failed to upload image. Please try again.').toString();
@@ -108,7 +108,7 @@ export function ImageUploadField({
       } else if (rawMsg.toLowerCase().includes('size') || rawMsg.toLowerCase().includes('exceeds')) {
         displayMsg = rawMsg;
       }
-      toast.error(displayMsg);
+      notify.error(displayMsg);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

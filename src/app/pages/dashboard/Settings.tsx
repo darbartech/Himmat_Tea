@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { Save, Bell, User, Lock, Globe, Palette, Upload, Image as ImageIcon, CreditCard, Loader2, Edit, X, Package } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { Button } from "../../components/ui/button";
+import { LoadingButton } from "../../components/ui/loading-button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Switch } from "../../components/ui/switch";
@@ -82,7 +83,7 @@ export default function Settings() {
       }
     } catch (e) {
       console.error("Failed to load settings", e);
-      toast.error("Failed to load settings");
+      notify.error("Failed to load settings");
     } finally {
       setLoading(false);
     }
@@ -97,18 +98,24 @@ export default function Settings() {
   const handleSave = async () => {
     try {
       setSaving(true);
-      const res = await fetch("/api/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(localSettings)
-      });
-      if (!res.ok) throw new Error("Failed to save settings");
-      const data = await res.json();
-      setSettings(data.data);
-      toast.success("Settings saved successfully!");
-    } catch (e) {
-      console.error("Error saving settings", e);
-      toast.error("Failed to save settings");
+      await notify.promise(
+        (async () => {
+          const res = await fetch("/api/settings", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(localSettings)
+          });
+          if (!res.ok) throw new Error("Failed to save settings");
+          const data = await res.json();
+          setSettings(data.data);
+          return data.data;
+        })(),
+        {
+          loading: "Saving settings…",
+          success: "Settings saved successfully!",
+          error: (err) => (err as Error)?.message || "Failed to save settings",
+        },
+      );
     } finally {
       setSaving(false);
     }
@@ -119,7 +126,7 @@ export default function Settings() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file");
+      notify.error("Please select a valid image file");
       return;
     }
 
@@ -129,20 +136,26 @@ export default function Settings() {
       formData.append("file", file);
       formData.append("folder", "settings");
 
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      await notify.promise(
+        (async () => {
+          const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
 
-      const result = await response.json();
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || result.message || "Upload failed");
-      }
-
-      setLocalSettings((prev) => ({ ...prev, qrImageUrl: result.data.url }));
-      toast.success("QR Image uploaded successfully!");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to upload image. Please try again.");
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || result.message || "Upload failed");
+          }
+          setLocalSettings((prev) => ({ ...prev, qrImageUrl: result.data.url }));
+          return result.data;
+        })(),
+        {
+          loading: "Uploading QR image…",
+          success: "QR Image uploaded successfully!",
+          error: (err) => (err as Error)?.message || "Failed to upload image. Please try again.",
+        },
+      );
     } finally {
       setUploadingQR(false);
       if (qrFileInputRef.current) {
@@ -169,14 +182,15 @@ export default function Settings() {
           </h1>
           <p className="text-[#78746e] mt-1">{t('dashboard.settings.manageDesc')}</p>
         </div>
-        <Button className="bg-[#2d5a3d] hover:bg-[#234832]" onClick={handleSave} disabled={saving}>
-          {saving ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4 mr-2" />
-          )}
-          {saving ? "Saving..." : "Save Changes"}
-        </Button>
+        <LoadingButton
+          className="bg-[#2d5a3d] hover:bg-[#234832]"
+          onClick={handleSave}
+          isLoading={saving}
+          loadingLabel="Saving..."
+        >
+          <Save className="h-4 w-4" />
+          Save Changes
+        </LoadingButton>
       </div>
 
       <div className="grid lg:grid-cols-12 gap-6">

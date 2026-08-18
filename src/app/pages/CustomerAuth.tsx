@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { LoginForm, SignupForm } from '@/modules/auth';
 import { useTranslation } from '@/hooks/useTranslation';
+import { LoadingButton } from '@/app/components/ui/loading-button';
 
 function getSafeRedirect(value: string | null): string {
   if (!value) return '/account';
@@ -65,16 +66,15 @@ const SocialButton: React.FC<{
   };
 
   return (
-    <button
+    <LoadingButton
       type="button"
       onClick={onClick}
-      disabled={disabled || loading}
+      isLoading={!!loading}
+      disabled={disabled}
       className="group relative flex items-center justify-center gap-3 w-full h-[54px] rounded-2xl bg-white border border-border/70 hover:border-primary/30 hover:bg-primary/[0.02] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none active:scale-[0.98]"
       aria-label={`Continue with ${labels[provider]}`}
     >
-      {loading ? (
-        <span className="animate-spin rounded-full h-5 w-5 border-2 border-foreground border-t-transparent" />
-      ) : (
+      {!loading && (
         <>
           <Icon />
           <span className="text-sm font-medium text-foreground/90 group-hover:text-foreground transition-colors">
@@ -82,7 +82,7 @@ const SocialButton: React.FC<{
           </span>
         </>
       )}
-    </button>
+    </LoadingButton>
   );
 };
 

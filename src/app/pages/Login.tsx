@@ -9,7 +9,7 @@ import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { Alert, AlertDescription } from "@/app/components/ui/alert";
 import { Eye, EyeOff, AlertCircle, ArrowLeft, ChevronRight } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import Image from "next/image";
 
 import { useTranslation } from '../../context/TranslationContext';
@@ -53,7 +53,7 @@ export default function Login() {
     
     const result = await login(username, password);
     if (result.success) {
-      toast.success("Welcome back!");
+      notify.success("Welcome back!");
       navigate.push("/himmat_admin_8526/dashboard");
     } else {
       setError(result.error || "Invalid credentials. Please try again.");

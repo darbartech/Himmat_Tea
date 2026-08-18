@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Loader2, HelpCircle, ArrowUp, ArrowDown } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import {
   Dialog,
   DialogContent,
@@ -82,7 +82,7 @@ export default function FAQs() {
       setFaqs(data.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to load FAQs";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +94,7 @@ export default function FAQs() {
 
   const handleSaveFAQ = async () => {
     if (!newFAQ.question || !newFAQ.answer) {
-      toast.error("Please fill in question and answer");
+      notify.error("Please fill in question and answer");
       return;
     }
     try {
@@ -114,12 +114,12 @@ export default function FAQs() {
         setFaqs((prev) =>
           prev.map((f) => (f.id === resolved.id ? resolved : f)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
         );
-        toast.success("FAQ updated successfully!");
+        notify.success("FAQ updated successfully!");
       } else {
         createdOrUpdated = await api.post<FAQ>("/faqs", payload);
         const resolved: FAQ = (createdOrUpdated as any)?.data ?? createdOrUpdated;
         setFaqs((prev) => [...prev, resolved].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
-        toast.success("FAQ created successfully!");
+        notify.success("FAQ created successfully!");
       }
 
       setIsAddDialogOpen(false);
@@ -127,7 +127,7 @@ export default function FAQs() {
       setNewFAQ({ ...EmptyFAQ, order: faqs.length });
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to save FAQ";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsSaving(false);
     }
@@ -150,10 +150,10 @@ export default function FAQs() {
       setDeletingId(deleteTarget.id);
       await api.delete(`/faqs/${deleteTarget.id}`);
       setFaqs((prev) => prev.filter((f) => f.id !== deleteTarget.id));
-      toast.success("FAQ deleted successfully!");
+      notify.success("FAQ deleted successfully!");
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to delete FAQ";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setDeletingId(null);
       setIsDeleteDialogOpen(false);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { Button } from "../../components/ui/button";
 import {
   TrendingUp,
@@ -310,10 +310,10 @@ export default function DashboardHome() {
             onClick={() => {
               try {
                 downloadReport(orders);
-                toast.success(t("dashboard.home.reportDownloaded"));
+                notify.success(t("dashboard.home.reportDownloaded"));
               } catch (error) {
                 console.error("Download failed:", error);
-                toast.error("Failed to download report. Please try again.");
+                notify.error("Failed to download report. Please try again.");
               }
             }}
             className="px-4 py-3 rounded-2xl border border-[#e8e9e5] bg-white text-[#1c1917] font-medium hover:bg-[#fafaf8] hover:border-[#d4d6cf] transition-all duration-200 flex items-center gap-2 shadow-sm"

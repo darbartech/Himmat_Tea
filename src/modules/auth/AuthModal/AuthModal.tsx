@@ -8,6 +8,8 @@ import { SignupForm } from '../SignupForm';
 import { useAuth } from '@/context/AuthContext';
 
 import { useTranslation } from '@/hooks/useTranslation';
+import { notify } from '@/lib/notify';
+import { LoadingButton } from '@/app/components/ui/loading-button';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -167,31 +169,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="px-7 pb-7">
             {/* Social login buttons */}
             <div className="space-y-2.5 mb-5">
-              <button
+              <LoadingButton
                 onClick={() => handleSocialLogin('google')}
+                isLoading={socialLoading === 'google'}
                 disabled={!!socialLoading}
+                spinnerClassName="border-[#1c1917] border-t-transparent"
                 className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white border border-[#e8e9e5] rounded-xl hover:bg-[#fafaf8] hover:border-[#d4d6cf] transition-all duration-200 text-sm font-medium text-[#1c1917] disabled:opacity-50 active:scale-[0.98]"
               >
-                {socialLoading === 'google' ? (
-                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-[#1c1917] border-t-transparent" />
-                ) : (
-                  <Chrome className="h-5 w-5 text-red-500" />
-                )}
+                {socialLoading !== 'google' && <Chrome className="h-5 w-5 text-red-500" />}
                 Continue with Google
-              </button>
+              </LoadingButton>
 
-              <button
+              <LoadingButton
                 onClick={() => handleSocialLogin('github')}
+                isLoading={socialLoading === 'github'}
                 disabled={!!socialLoading}
                 className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-[#1c1917] text-white border border-[#1c1917] rounded-xl hover:bg-[#111] transition-all duration-200 text-sm font-medium disabled:opacity-50 active:scale-[0.98]"
               >
-                {socialLoading === 'github' ? (
-                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                ) : (
-                  <Github className="h-5 w-5" />
-                )}
+                {socialLoading !== 'github' && <Github className="h-5 w-5" />}
                 Continue with GitHub
-              </button>
+              </LoadingButton>
             </div>
 
             {/* Divider */}

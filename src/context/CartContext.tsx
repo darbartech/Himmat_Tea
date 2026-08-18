@@ -9,6 +9,7 @@ import {
   useMemo,
   ReactNode,
 } from "react";
+import { notify } from "@/lib/notify";
 
 export interface CartItem {
   id: string;
@@ -22,6 +23,16 @@ export interface CartItem {
   stock?: number;
 }
 
+export interface AppliedCoupon {
+  id: string;
+  code: string;
+  discountType: 'percent' | 'fixed';
+  discountValue: number;
+  minOrderAmount: number;
+  maxDiscount: number;
+  discountAmount: number;
+}
+
 interface CartContextType {
   cart: CartItem[];
   addToCart: (item: Omit<CartItem, "quantity">) => void;
@@ -30,11 +41,14 @@ interface CartContextType {
   clearCart: () => void;
   cartCount: number;
   cartTotal: number;
+  appliedCoupon: AppliedCoupon | null;
+  setAppliedCoupon: (coupon: AppliedCoupon | null) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "himmat-tea-cart";
+const COUPON_STORAGE_KEY = "himmat-tea-coupon";
 
 /**
  * IMPORTANT:
@@ -52,6 +66,7 @@ export function CartProvider({
   children: ReactNode;
 }) {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [appliedCoupon, setAppliedCouponState] = useState<AppliedCoupon | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
   /**
@@ -63,25 +78,57 @@ export function CartProvider({
 
       if (!saved) {
         setIsHydrated(true);
-        return;
+      } else {
+        const parsed: unknown = JSON.parse(saved);
+
+        if (Array.isArray(parsed)) {
+          let droppedInvalid = false;
+          const validCart = parsed.filter((item): item is CartItem => {
+            const isValid =
+              item &&
+              typeof item === "object" &&
+              typeof (item as CartItem).id === "string" &&
+              typeof (item as CartItem).name === "string" &&
+              typeof (item as CartItem).price === "number" &&
+              typeof (item as CartItem).quantity === "number" &&
+              typeof (item as CartItem).productId === "number" &&
+              !Number.isNaN((item as CartItem).productId);
+
+            if (!isValid) droppedInvalid = true;
+            return isValid;
+          });
+
+          setCart(validCart);
+
+          if (droppedInvalid) {
+            // Items saved before productId was required (or corrupted data)
+            // would otherwise silently survive hydration and only fail at
+            // checkout. Drop them here and let the user know instead.
+            notify.error(
+              "Some items in your saved cart were out of date and have been removed. Please re-add them."
+            );
+          }
+        }
       }
 
-      const parsed: unknown = JSON.parse(saved);
-
-      if (Array.isArray(parsed)) {
-        const validCart = parsed.filter((item): item is CartItem => {
-          return (
-            item &&
-            typeof item === "object" &&
-            typeof (item as CartItem).id === "string" &&
-            typeof (item as CartItem).name === "string" &&
-            typeof (item as CartItem).price === "number" &&
-            typeof (item as CartItem).quantity === "number"
-          );
-        });
-
-        setCart(validCart);
+      try {
+        const savedCoupon = localStorage.getItem(COUPON_STORAGE_KEY);
+        if (savedCoupon) {
+          const parsedCoupon: unknown = JSON.parse(savedCoupon);
+          if (
+            parsedCoupon &&
+            typeof parsedCoupon === "object" &&
+            typeof (parsedCoupon as AppliedCoupon).code === "string" &&
+            typeof (parsedCoupon as AppliedCoupon).discountAmount === "number"
+          ) {
+            setAppliedCouponState(parsedCoupon as AppliedCoupon);
+          }
+        }
+      } catch (_couponErr) {
+        /* noop */
       }
+
+      setIsHydrated(true);
     } catch (error) {
       console.error(
         "Failed to read cart from localStorage:",
@@ -89,7 +136,6 @@ export function CartProvider({
       );
 
       setCart([]);
-    } finally {
       setIsHydrated(true);
     }
   }, []);
@@ -119,11 +165,36 @@ export function CartProvider({
     }
   }, [cart, isHydrated]);
 
+  useEffect(() => {
+    if (!isHydrated) return;
+    try {
+      if (appliedCoupon) {
+        localStorage.setItem(
+          COUPON_STORAGE_KEY,
+          JSON.stringify(appliedCoupon)
+        );
+      } else {
+        localStorage.removeItem(COUPON_STORAGE_KEY);
+      }
+    } catch (_err) {
+      /* noop */
+    }
+  }, [appliedCoupon, isHydrated]);
+
   /**
    * Add product to cart.
    */
   const addToCart = useCallback(
     (item: Omit<CartItem, "quantity">) => {
+      if (
+        process.env.NODE_ENV !== "production" &&
+        (typeof item.productId !== "number" || Number.isNaN(item.productId))
+      ) {
+        console.warn(
+          `[CartContext] addToCart called without a valid numeric productId for item "${item.name}" (id: ${item.id}). ` +
+            "This item will be rejected at checkout — check the addToCart() call site."
+        );
+      }
       setCart((prev) => {
         const existing = prev.find(
           (i) =>
@@ -209,6 +280,14 @@ export function CartProvider({
    */
   const clearCart = useCallback(() => {
     setCart([]);
+    setAppliedCouponState(null);
+  }, []);
+
+  /**
+   * Apply or clear applied coupon.
+   */
+  const setAppliedCoupon = useCallback((coupon: AppliedCoupon | null) => {
+    setAppliedCouponState(coupon);
   }, []);
 
   /**
@@ -244,6 +323,8 @@ export function CartProvider({
       clearCart,
       cartCount,
       cartTotal,
+      appliedCoupon,
+      setAppliedCoupon,
     }),
     [
       cart,
@@ -253,6 +334,8 @@ export function CartProvider({
       clearCart,
       cartCount,
       cartTotal,
+      appliedCoupon,
+      setAppliedCoupon,
     ]
   );
 

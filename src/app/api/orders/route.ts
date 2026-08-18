@@ -3,8 +3,9 @@ import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { createResponse, createErrorResponse, handleApiError, SAFE_CUSTOMER_SELECT } from '@/lib/api-utils'
 import { getCurrentUser, getCurrentAdmin } from '@/lib/auth'
-import { rateLimitOrderCreate } from '@/lib/rate-limit'
+import { rateLimit } from '@/lib/rate-limit'
 import { sendAdminOrderAlertEmail } from '@/lib/email'
+import { getWeightAdjustedPrice, VALID_WEIGHTS } from '@/lib/pricing'
 import { z } from 'zod'
 
 const ORDER_STATUSES = ['AWAITING_PAYMENT', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'] as const
@@ -16,7 +17,7 @@ const orderItemSchema = z.object({
   variantId: z.number().int().positive().optional().nullable(),
   productName: z.string().min(1).optional(),
   quantity: z.number().int().min(1, 'Quantity must be at least 1'),
-  weight: z.string().optional(),
+  weight: z.enum(VALID_WEIGHTS as [string, ...string[]]).optional(),
 })
 
 const createOrderSchema = z.object({
@@ -29,7 +30,56 @@ const createOrderSchema = z.object({
   idempotencyKey: z.string().min(1, 'Idempotency key is required'),
   orderNumber: z.string().min(1).optional(),
   status: z.enum(ORDER_STATUSES).optional(),
+  couponCode: z.string().max(50).optional().nullable(),
 }).strip()
+
+function round2(n: number): number {
+  return Number((Math.round(n * 100) / 100).toFixed(2))
+}
+
+async function validateCouponForOrder(
+  tx: Prisma.TransactionClient | typeof prisma,
+  code: string,
+  subtotal: number
+): Promise<{ ok: true; couponId: string; couponCode: string; discountAmount: number } | { ok: false; error: string }> {
+  const coupon = await tx.coupon.findUnique({ where: { code } })
+  if (!coupon || !coupon.isActive) {
+    return { ok: false, error: 'Coupon code is invalid or no longer active.' }
+  }
+  try {
+    const validFrom = new Date(coupon.validFrom)
+    const validTo = new Date(coupon.validTo)
+    const startOk = isNaN(validFrom.getTime()) || validFrom.getTime() <= Date.now()
+    const endOk = isNaN(validTo.getTime()) || validTo.getTime() + 24 * 60 * 60 * 1000 >= Date.now()
+    if (!startOk || !endOk) {
+      return { ok: false, error: 'This coupon has expired or is not yet valid.' }
+    }
+  } catch {
+    return { ok: false, error: 'This coupon has expired or is not yet valid.' }
+  }
+  if (coupon.usedCount >= coupon.usageLimit) {
+    return { ok: false, error: 'This coupon has reached its usage limit.' }
+  }
+  if (coupon.minOrderAmount > 0 && subtotal < coupon.minOrderAmount) {
+    return { ok: false, error: `Minimum order amount of ${coupon.minOrderAmount.toFixed(2)} required for this coupon.` }
+  }
+  const dt = String(coupon.discountType).toLowerCase()
+  let raw = 0
+  if (dt === 'percent' || dt === 'percentage') {
+    raw = Math.max(0, (subtotal * coupon.discountValue) / 100)
+    if (coupon.maxDiscount > 0 && raw > coupon.maxDiscount) raw = coupon.maxDiscount
+  } else {
+    raw = Math.max(0, coupon.discountValue)
+  }
+  if (raw > subtotal) raw = subtotal
+  const discountAmount = round2(raw)
+  return {
+    ok: true,
+    couponId: coupon.id,
+    couponCode: coupon.code,
+    discountAmount,
+  }
+}
 
 async function generateOrderNumber(date: Date): Promise<string> {
   const y = date.getFullYear()
@@ -215,7 +265,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const rl = rateLimitOrderCreate(request)
+    const rl = await rateLimit.orderCreate(request)
     if (!rl.allowed) {
       return createErrorResponse(rl.error || 'Too many requests. Please try again later.', 429)
     }
@@ -291,6 +341,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Re-price every line item server-side using the same weight multiplier
+    // the client used to compute the price it displayed and had the customer
+    // confirm at checkout (see src/lib/pricing.ts). Previously this always
+    // charged the flat, weight-blind product.price — silently undercharging
+    // 100g orders and, worse, charging 25g orders MORE than what checkout
+    // showed the customer. Never trust a client-supplied price.
     const lineItems = data.items.map(item => {
       const product = productMap.get(item.productId)!
       return {
@@ -298,21 +354,37 @@ export async function POST(request: NextRequest) {
         variantId: item.variantId,
         name: item.productName || product.name,
         quantity: item.quantity,
-        price: product.price,
+        price: getWeightAdjustedPrice(product.price, item.weight),
         weight: item.weight,
       }
     })
 
-    const subtotal = lineItems.reduce((s, i) => s + i.price * i.quantity, 0)
+    const subtotal = round2(lineItems.reduce((s, i) => s + i.price * i.quantity, 0))
+
+    // --- Server-side coupon re-validation (never trust client-calculated discount) ---
+    let appliedCouponCode: string | null = null
+    let discountAmount = 0
+    let couponToIncrement: string | null = null
+
+    if (data.couponCode) {
+      const couponValidation = await validateCouponForOrder(prisma, data.couponCode, subtotal)
+      if (!couponValidation.ok) {
+        return createErrorResponse(`Coupon: ${couponValidation.error}`, 400)
+      }
+      discountAmount = couponValidation.discountAmount
+      appliedCouponCode = couponValidation.couponCode
+      couponToIncrement = couponValidation.couponId
+    }
 
     const settings = await prisma.settings.findFirst({
       select: { taxRate: true, shippingFlatRate: true }
     })
     const taxRate = settings?.taxRate ?? 0
     const shippingCost = settings?.shippingFlatRate ?? 0
-    const tax = Number((subtotal * (taxRate / 100)).toFixed(2))
+    const taxable = Math.max(0, round2(subtotal - discountAmount))
+    const tax = round2(taxable * (taxRate / 100))
     const total = subtotal
-    const grandTotal = Number((total + shippingCost + tax).toFixed(2))
+    const grandTotal = round2(taxable + tax + shippingCost)
 
     const now = new Date()
     let orderNumber = data.orderNumber || await generateOrderNumber(now)
@@ -334,6 +406,24 @@ export async function POST(request: NextRequest) {
 
     try {
       await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        // --- Atomically increment coupon.usedCount BEFORE order.create so
+        // --- if transaction rolls back, the count is also rolled back.
+        if (couponToIncrement) {
+          const coupon = await tx.coupon.findUnique({
+            where: { id: couponToIncrement },
+            select: { usedCount: true, usageLimit: true },
+          })
+          if (!coupon || coupon.usedCount >= coupon.usageLimit) {
+            throw new Error(
+              `COUPON_RACE:This coupon has reached its usage limit since you applied it.`
+            )
+          }
+          await tx.coupon.update({
+            where: { id: couponToIncrement },
+            data: { usedCount: { increment: 1 } },
+          })
+        }
+
         for (const item of lineItems) {
           const updated = await tx.product.updateMany({
             where: {
@@ -352,30 +442,36 @@ export async function POST(request: NextRequest) {
           }
         }
 
+        const orderData: Record<string, any> = {
+          orderNumber,
+          customerId,
+          customerName: data.customerName,
+          customerEmail: data.customerEmail,
+          customerPhone: data.customerPhone,
+          shippingAddress: data.shippingAddress,
+          total: subtotal,
+          shippingCost,
+          tax,
+          discountAmount,
+          grandTotal,
+          status: initialStatus,
+          idempotencyKey: data.idempotencyKey,
+          items: {
+            create: lineItems.map(li => ({
+              productId: li.productId,
+              name: li.name,
+              quantity: li.quantity,
+              price: li.price,
+              weight: li.weight,
+            }))
+          }
+        }
+        if (appliedCouponCode) {
+          orderData.couponCode = appliedCouponCode
+        }
+
         const order = await tx.order.create({
-          data: {
-            orderNumber,
-            customerId,
-            customerName: data.customerName,
-            customerEmail: data.customerEmail,
-            customerPhone: data.customerPhone,
-            shippingAddress: data.shippingAddress,
-            total: subtotal,
-            shippingCost,
-            tax,
-            grandTotal,
-            status: initialStatus,
-            idempotencyKey: data.idempotencyKey,
-            items: {
-              create: lineItems.map(li => ({
-                productId: li.productId,
-                name: li.name,
-                quantity: li.quantity,
-                price: li.price,
-                weight: li.weight,
-              }))
-            }
-          },
+          data: orderData as any,
           select: { id: true, items: { select: { productId: true, quantity: true, name: true } } }
         })
 

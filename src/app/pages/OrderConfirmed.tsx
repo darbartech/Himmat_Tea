@@ -549,7 +549,7 @@ export default function OrderConfirmed() {
           </Link>
 
           <Link
-            href="/customer/orders"
+            href="/account"
             className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-[rgba(28,25,23,0.12)] text-[#1c1917] font-semibold hover:bg-white transition-colors"
           >
             View My Orders

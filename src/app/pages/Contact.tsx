@@ -4,11 +4,14 @@ import { useState } from "react";
 import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
 import { useTranslation } from "@/hooks/useTranslation";
-import { ArrowRight, Mail, Phone, MapPin, MessageSquare } from "lucide-react";
+import { ArrowRight, Mail, Phone, MapPin, MessageSquare, AlertCircle } from "lucide-react";
+import { LoadingButton } from "@/app/components/ui/loading-button";
 
 export default function Contact() {
   const { t } = useTranslation();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   return (
@@ -74,9 +77,26 @@ export default function Contact() {
                 </div>
               ) : (
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
-                    setSubmitted(true);
+                    setError(null);
+                    setSubmitting(true);
+                    try {
+                      const res = await fetch('/api/contact', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(form),
+                      });
+                      const data = await res.json();
+                      if (!res.ok) {
+                        throw new Error(data.error || 'Failed to send message. Please try again.');
+                      }
+                      setSubmitted(true);
+                    } catch (err: unknown) {
+                      setError(err instanceof Error ? err.message : 'Failed to send message. Please try again.');
+                    } finally {
+                      setSubmitting(false);
+                    }
                   }}
                   className="space-y-6"
                 >
@@ -125,13 +145,21 @@ export default function Contact() {
                       className="w-full px-4 py-3 rounded-xl border border-[rgba(28,25,23,0.1)] bg-[#f9f7f4] focus:outline-none focus:border-[#2d5a3d]"
                     />
                   </div>
-                  <button
+                  {error && (
+                    <div className="flex items-start gap-2 p-4 rounded-xl bg-red-50 border border-red-100 text-red-700 text-sm">
+                      <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+                  <LoadingButton
                     type="submit"
-                    className="w-full py-3 bg-[#2d5a3d] text-white font-medium rounded-xl hover:bg-[#234832] transition-colors flex items-center justify-center gap-2"
+                    isLoading={submitting}
+                    loadingLabel="Sending..."
+                    className="w-full py-3 bg-[#2d5a3d] text-white font-medium rounded-xl hover:bg-[#234832] transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     Send Message
                     <ArrowRight className="h-4 w-4" />
-                  </button>
+                  </LoadingButton>
                 </form>
               )}
             </div>

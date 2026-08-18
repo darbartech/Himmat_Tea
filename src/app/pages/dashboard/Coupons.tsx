@@ -23,7 +23,7 @@ import { Trash2, Edit2, Plus, Copy, CheckCircle2, XCircle, Calendar, Tag, Loader
 import { Switch } from "../../components/ui/switch";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../../lib/api-client";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 
 import { useTranslation } from '../../../context/TranslationContext';
 type Coupon = {
@@ -76,10 +76,10 @@ const Coupons = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["coupons"] });
-      toast.success("Coupon created successfully!");
+      notify.success("Coupon created successfully!");
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to create coupon");
+      notify.error(error?.message || "Failed to create coupon");
     },
   });
 
@@ -90,10 +90,10 @@ const Coupons = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["coupons"] });
-      toast.success("Coupon updated successfully!");
+      notify.success("Coupon updated successfully!");
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to update coupon");
+      notify.error(error?.message || "Failed to update coupon");
     },
   });
 
@@ -103,10 +103,10 @@ const Coupons = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["coupons"] });
-      toast.success("Coupon deleted successfully!");
+      notify.success("Coupon deleted successfully!");
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to delete coupon");
+      notify.error(error?.message || "Failed to delete coupon");
     },
   });
 
@@ -171,7 +171,7 @@ const Coupons = () => {
 
   const copyToClipboard = (code: string) => {
     navigator.clipboard.writeText(code);
-    toast.success("Coupon code copied to clipboard!");
+    notify.success("Coupon code copied to clipboard!");
   };
 
   const getStatusBadge = (coupon: Coupon) => {

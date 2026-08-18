@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/app/components/ui/input-otp';
 import { useTranslation } from '@/hooks/useTranslation';
+import { notify } from '@/lib/notify';
+import { LoadingButton } from '@/app/components/ui/loading-button';
 
 interface VerifyResetFormProps {
   email: string;
@@ -134,21 +136,16 @@ export const VerifyResetForm: React.FC<VerifyResetFormProps> = ({
           </div>
         )}
 
-        <button
+        <LoadingButton
           type="submit"
-          disabled={isLoading || otp.length !== 6}
+          isLoading={isLoading}
+          loadingLabel={t('auth.verifyReset.submitting')}
+          disabled={otp.length !== 6}
           aria-disabled={isLoading || otp.length !== 6}
           className="w-full py-4 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? (
-            <>
-              <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
-              {t('auth.verifyReset.submitting')}
-            </>
-          ) : (
-            t('auth.verifyReset.submit')
-          )}
-        </button>
+          {t('auth.verifyReset.submit')}
+        </LoadingButton>
 
         <div className="text-center text-sm text-[#6d6a63]">
           {resendIn > 0 ? (

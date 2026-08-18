@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import {
   Dialog,
   DialogContent,
@@ -72,7 +72,7 @@ export default function HeroVisuals() {
       setHeroVisuals(data.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)));
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to load hero visuals";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +84,7 @@ export default function HeroVisuals() {
 
   const handleSaveHeroVisual = async () => {
     if (!newHeroVisual.imageUrl) {
-      toast.error("Please provide an image");
+      notify.error("Please provide an image");
       return;
     }
     try {
@@ -107,12 +107,12 @@ export default function HeroVisuals() {
         setHeroVisuals((prev) =>
           prev.map((h) => (h.id === resolved.id ? resolved : h)).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
         );
-        toast.success("Hero visual updated successfully!");
+        notify.success("Hero visual updated successfully!");
       } else {
         createdOrUpdated = await api.post<HeroVisual>("/hero-visuals", payload);
         const resolved: HeroVisual = (createdOrUpdated as any)?.data ?? createdOrUpdated;
         setHeroVisuals((prev) => [...prev, resolved].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)));
-        toast.success("Hero visual created successfully!");
+        notify.success("Hero visual created successfully!");
       }
 
       setIsAddDialogOpen(false);
@@ -120,7 +120,7 @@ export default function HeroVisuals() {
       setNewHeroVisual({ ...EmptyHV, sortOrder: heroVisuals.length + 1 });
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to save hero visual";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsSaving(false);
     }
@@ -143,10 +143,10 @@ export default function HeroVisuals() {
       setDeletingId(deleteTarget.id);
       await api.delete(`/hero-visuals/${deleteTarget.id}`);
       setHeroVisuals((prev) => prev.filter((h) => h.id !== deleteTarget.id));
-      toast.success("Hero visual deleted successfully!");
+      notify.success("Hero visual deleted successfully!");
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to delete hero visual";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setDeletingId(null);
       setIsDeleteDialogOpen(false);
@@ -263,7 +263,7 @@ export default function HeroVisuals() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-[#2d5a3d]/5 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto shadow-[inset_-12px_0_16px_-12px_rgba(45,90,61,0.18)]">
           <table className="w-full min-w-[520px]">
             <thead>
               <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">

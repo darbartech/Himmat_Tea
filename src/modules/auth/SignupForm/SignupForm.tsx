@@ -10,6 +10,8 @@ import { createSignupFormSchema, SignupFormData } from './validation';
 import { useAuth } from '@/context/AuthContext';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/app/components/ui/input-otp';
 import { useTranslation } from '@/hooks/useTranslation';
+import { notify } from '@/lib/notify';
+import { LoadingButton } from '@/app/components/ui/loading-button';
 
 interface SignupFormProps {
   onSuccess?: () => void;
@@ -223,24 +225,17 @@ export const SignupForm: React.FC<SignupFormProps> = ({
             </div>
           )}
 
-          <button
+          <LoadingButton
             type="submit"
-            disabled={isLoading || otp.length !== 6}
+            isLoading={isLoading}
+            loadingLabel={<span>{t('auth.signup.otpVerifying')}</span>}
+            disabled={otp.length !== 6}
             aria-disabled={isLoading || otp.length !== 6}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2d5a3d] px-5 py-4 text-[15px] font-semibold text-white shadow-lg shadow-[#2d5a3d]/20 transition-all duration-200 hover:bg-[#234832] hover:shadow-xl hover:shadow-[#2d5a3d]/30 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98]"
           >
-            {isLoading ? (
-              <>
-                <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                <span>{t('auth.signup.otpVerifying')}</span>
-              </>
-            ) : (
-              <>
-                <span>{t('auth.signup.otpVerifyButton')}</span>
-                <ArrowRight className="h-5 w-5" />
-              </>
-            )}
-          </button>
+            <span>{t('auth.signup.otpVerifyButton')}</span>
+            <ArrowRight className="h-5 w-5" />
+          </LoadingButton>
 
           <div className="text-center text-sm text-[#6d6a63]">
             {resendIn > 0 ? (
@@ -499,24 +494,16 @@ export const SignupForm: React.FC<SignupFormProps> = ({
           </div>
         )}
 
-        <button
+        <LoadingButton
           type="submit"
-          disabled={isLoading}
+          isLoading={isLoading}
+          loadingLabel={<span>{t('auth.signup.submitting')}</span>}
           aria-disabled={isLoading}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2d5a3d] px-5 py-4 text-[15px] font-semibold text-white shadow-lg shadow-[#2d5a3d]/20 transition-all duration-200 hover:bg-[#234832] hover:shadow-xl hover:shadow-[#2d5a3d]/30 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98]"
         >
-          {isLoading ? (
-            <>
-              <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              <span>{t('auth.signup.submitting')}</span>
-            </>
-          ) : (
-            <>
-              <span>{t('auth.signup.submit')}</span>
-              <ArrowRight className="h-5 w-5" />
-            </>
-          )}
-        </button>
+          <span>{t('auth.signup.submit')}</span>
+          <ArrowRight className="h-5 w-5" />
+        </LoadingButton>
       </form>
     </div>
   );

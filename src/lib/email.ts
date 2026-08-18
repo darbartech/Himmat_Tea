@@ -383,6 +383,73 @@ If you are having trouble entering the code, reply to this email or contact supp
   }
 }
 
+export async function sendContactFormAlertEmail(form: {
+  name: string
+  email: string
+  subject: string
+  message: string
+}): Promise<void> {
+  const cfg = getSmtpConfig()
+  const v = validateSmtpConfig(cfg)
+  if (!v.ok) {
+    console.log(
+      `[email:dev] Skipping contact form email — ${v.reason}${v.hint ? ` ${v.hint}` : ''}. ` +
+        `Contact form from ${form.name} (${form.email}) re: ${form.subject}.`
+    )
+    return
+  }
+
+  const transporter = getOrCreateTransporter(cfg)
+  const to = process.env.ADMIN_ALERT_EMAIL || BRAND.supportEmail
+  const headers = buildDeliverabilityHeaders(cfg, to, 'order')
+  const subjectLabels: Record<string, string> = {
+    general: 'General Inquiry',
+    order: 'Order Support',
+    'himmat-tea': 'Himmat Tea Inquiry',
+    'godgifted-dal': 'Godgifted Dal Inquiry',
+    wholesale: 'Wholesale Inquiry',
+  }
+  const subjectLabel = subjectLabels[form.subject] || form.subject || 'Contact Form'
+
+  const subject = `New ${subjectLabel} — ${form.name}`
+  const text =
+    `A new contact form submission has been received.\n\n` +
+    `Name: ${form.name}\n` +
+    `Email: ${form.email}\n` +
+    `Topic: ${subjectLabel}\n\n` +
+    `Message:\n${form.message}\n\n` +
+    `Please review and respond to the customer in a timely manner.`
+
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#1c1917;line-height:1.55;font-size:15px;">
+      <div style="border-bottom:1px solid #e7e5e0;padding-bottom:16px;margin-bottom:20px;">
+        <span style="font-size:18px;font-weight:700;color:#2d5a3d;letter-spacing:0.02em;">${BRAND.companyName}</span>
+      </div>
+      <div style="margin:24px 0 28px 0;padding:22px;background:#f8f5ef;border-radius:12px;border:1px solid #e7e5e0;">
+        <div style="font-size:12px;color:#8a6a2d;text-transform:uppercase;letter-spacing:0.14em;">Contact Form</div>
+        <div style="font-size:28px;font-weight:700;color:#2d5a3d;margin-top:10px;">${subjectLabel}</div>
+      </div>
+      <p style="margin:0 0 12px 0;">A new contact form submission has been received.</p>
+      <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;width:42%;">Name</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${form.name}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Email</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${form.email}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;color:#78716c;">Topic</td><td style="padding:10px 0;border-bottom:1px solid #e7e5e0;font-weight:600;">${subjectLabel}</td></tr>
+      </table>
+      <p style="margin:0 0 8px 0;color:#57534e;font-weight:600;">Message</p>
+      <p style="margin:0 0 20px 0;color:#44403c;white-space:pre-wrap;padding:16px;background:#f9f7f4;border-radius:10px;border:1px solid #e7e5e0;">${form.message}</p>
+      <p style="margin:0 0 22px 0;font-size:14px;color:#57534e;">Please review the message in the admin dashboard and respond to the customer in a timely manner.</p>
+      <div style="border-top:1px solid #e7e5e0;padding-top:16px;color:#78716c;font-size:12px;line-height:1.55;">
+        <p style="margin:0;">&copy; ${new Date().getFullYear()} ${BRAND.companyName}. All rights reserved.</p>
+      </div>
+    </div>`
+
+  try {
+    await transporter.sendMail({ from: cfg.from, to, replyTo: form.email, subject, text, html, headers })
+  } catch (err) {
+    throw formatSendError(cfg, err)
+  }
+}
+
 export async function sendPartnershipEnquiryAlertEmail(form: {
   business: string
   contact: string

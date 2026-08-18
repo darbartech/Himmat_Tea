@@ -9,7 +9,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { Search, ShoppingBag, Star, ArrowRight, Heart } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { BRAND } from "@/config/brand";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
@@ -130,10 +130,10 @@ export default function ProductsCatalog() {
     };
     if (isInWishlist(product.id.toString())) {
       removeFromWishlist(product.id.toString());
-      toast.success(`${product.name} removed from wishlist!`);
+      notify.success(`${product.name} removed from wishlist!`);
     } else {
       addToWishlist(productData);
-      toast.success(`${product.name} added to wishlist!`);
+      notify.success(`${product.name} added to wishlist!`);
     }
   }
 
@@ -177,7 +177,7 @@ export default function ProductsCatalog() {
       image: product.imageUrl,
       weight: "50g",
     });
-    toast.success("Added to cart!");
+    notify.success("Added to cart!");
   }
 
   const getAverageRating = (product: Product) => {

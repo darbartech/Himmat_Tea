@@ -196,6 +196,8 @@ model Order {
   total           Float
   shippingCost    Float          @default(0)
   tax             Float
+  discountAmount  Float          @default(0)
+  couponCode      String?
   grandTotal      Float
   status          String         @default("AWAITING_PAYMENT")
   idempotencyKey  String
@@ -213,6 +215,7 @@ model Order {
 
   @@unique([customerId, idempotencyKey])
   @@index([customerId, status])
+  @@index([couponCode])
 }
 
 model OrderItem {

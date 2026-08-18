@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Search, Edit, Trash2, Eye, Save } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import {
   Dialog,
   DialogContent,
@@ -89,7 +89,7 @@ export default function Blog() {
       if (data.data) setBlogPosts(data.data);
     } catch (e) {
       console.error("Failed to fetch blog posts", e);
-      toast.error("Failed to load blog posts");
+      notify.error("Failed to load blog posts");
     } finally {
       setLoading(false);
     }
@@ -119,7 +119,7 @@ export default function Blog() {
 
   const handleSavePost = async () => {
     if (!newPost.title || !newPost.excerpt) {
-      toast.error("Please fill all required fields");
+      notify.error("Please fill all required fields");
       return;
     }
 
@@ -128,7 +128,7 @@ export default function Blog() {
       try {
         body = JSON.parse(newPost.body);
       } catch (e) {
-        toast.error("Invalid JSON in content");
+        notify.error("Invalid JSON in content");
         return;
       }
 
@@ -140,7 +140,7 @@ export default function Blog() {
           body: JSON.stringify({ ...newPost, body }),
         });
         if (!res.ok) throw new Error("Failed to update blog post");
-        toast.success("Blog post updated!");
+        notify.success("Blog post updated!");
       } else {
         // Add new
         const finalSlug = newPost.slug || generateSlug(newPost.title);
@@ -150,7 +150,7 @@ export default function Blog() {
           body: JSON.stringify({ ...newPost, slug: finalSlug, body }),
         });
         if (!res.ok) throw new Error("Failed to create blog post");
-        toast.success("Blog post added!");
+        notify.success("Blog post added!");
       }
 
       await fetchBlogPosts();
@@ -159,7 +159,7 @@ export default function Blog() {
       resetForm();
     } catch (e) {
       console.error(e);
-      toast.error("Failed to save blog post");
+      notify.error("Failed to save blog post");
     }
   };
 
@@ -193,11 +193,11 @@ export default function Blog() {
     try {
       const res = await fetch(`/api/blog/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete post");
-      toast.success("Blog post deleted!");
+      notify.success("Blog post deleted!");
       await fetchBlogPosts();
     } catch (e) {
       console.error(e);
-      toast.error("Failed to delete blog post");
+      notify.error("Failed to delete blog post");
     }
   };
 

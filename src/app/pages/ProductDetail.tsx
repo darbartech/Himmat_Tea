@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
@@ -33,14 +34,16 @@ import {
   Instagram,
   Check,
 } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/app/components/ui/tabs";
+import { Badge } from "@/app/components/ui/badge";
 import { BRAND } from "@/config/brand";
+import { WEIGHT_MULTIPLIERS as weightMultipliers } from "@/lib/pricing";
 
 // ─── Brew guide by tea type ───────────────────────────────────────────────────
 const brewGuideByType: Record<
@@ -78,12 +81,6 @@ const brewGuideByType: Record<
     ratio: "1:70",
     notes: "Lower temperature preserves the delicate floral and honey notes",
   },
-};
-
-const weightMultipliers: Record<string, number> = {
-  "25g": 0.5,
-  "50g": 1.0,
-  "100g": 1.85,
 };
 
 function StarRating({
@@ -222,7 +219,7 @@ export default function ProductDetail() {
         if (typeof navigator !== 'undefined' && typeof navigator.clipboard !== 'undefined') {
           await navigator.clipboard.writeText(currentProductUrl);
           setCopied(true);
-          toast.success("Link copied to clipboard!");
+          notify.success("Link copied to clipboard!");
           setTimeout(() => setCopied(false), 2000);
         }
         break;
@@ -244,7 +241,16 @@ export default function ProductDetail() {
 
   function handleAddToCart() {
     if (!product) return;
-    const cappedQty = Math.max(1, Math.min(quantity, product.stock || quantity));
+    const stock = typeof product.stock === "number" ? product.stock : 0;
+    if (stock <= 0) {
+      notify.error(`${product.name} is out of stock.`);
+      return;
+    }
+    const cappedQty = Math.max(0, Math.min(quantity, stock));
+    if (cappedQty <= 0) {
+      notify.error(`${product.name} is out of stock.`);
+      return;
+    }
     for (let i = 0; i < cappedQty; i++) {
       addToCart({
         id: product.id.toString(),
@@ -256,7 +262,11 @@ export default function ProductDetail() {
         stock: product.stock,
       });
     }
-    toast.success(`${product.name} added to cart!`);
+    notify.success(
+      cappedQty === 1
+        ? `${product.name} added to cart!`
+        : `${cappedQty} × ${product.name} added to cart!`
+    );
   }
 
   function handleWishlistClick() {
@@ -270,10 +280,10 @@ export default function ProductDetail() {
     };
     if (isInWishlist(product.id.toString())) {
       removeFromWishlist(product.id.toString());
-      toast.success(`${product.name} removed from wishlist!`);
+      notify.success(`${product.name} removed from wishlist!`);
     } else {
       addToWishlist(productData);
-      toast.success(`${product.name} added to wishlist!`);
+      notify.success(`${product.name} added to wishlist!`);
     }
   }
 
@@ -337,12 +347,14 @@ export default function ProductDetail() {
   const adjustedPrice = Math.round(product.price * weightMultipliers[selectedWeight]);
   const shareDescription = product.description.substring(0, 150) + (product.description.length > 150 ? "..." : "");
   const images = [product.imageUrl];
-  
-  // Calculate average rating from reviews
-  const averageRating = product.reviews.length > 0 
-    ? product.reviews.reduce((sum: number, review: ProductReview) => sum + review.rating, 0) / product.reviews.length 
+  const stock = typeof product.stock === "number" ? product.stock : 0;
+  const isOutOfStock = stock <= 0;
+  const isLowStock = stock > 0 && stock <= 5;
+
+  const averageRating = product.reviews.length > 0
+    ? product.reviews.reduce((sum: number, review: ProductReview) => sum + review.rating, 0) / product.reviews.length
     : 4.8;
-  
+
   const brewGuide = brewGuideByType[product.category] ?? brewGuideByType["green"];
 
   return (
@@ -375,11 +387,14 @@ export default function ProductDetail() {
           <div className="grid lg:grid-cols-2 gap-10 mb-20 items-start">
             {/* LEFT — Gallery */}
             <div className="sticky top-[130px] self-start space-y-3">
-              <div className="aspect-square rounded-2xl overflow-hidden bg-[#f0ede8]">
-                <img
+              <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#f0ede8]">
+                <Image
                   src={images[activeImage]}
                   alt={product.name}
-                  className="w-full h-full object-cover transition-all duration-300"
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover transition-all duration-300"
                 />
               </div>
               {/* Thumbnails (only if we have multiple) */}
@@ -389,16 +404,18 @@ export default function ProductDetail() {
                     <button
                       key={i}
                       onClick={() => setActiveImage(i + 1)}
-                      className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                      className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${
                         activeImage === i + 1
                           ? "border-[#2d5a3d] shadow-md"
                           : "border-transparent hover:border-[#c8a96e]"
                       }`}
                     >
-                      <img
+                      <Image
                         src={img}
                         alt={`${product.name} view ${i + 2}`}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="150px"
+                        className="object-cover"
                       />
                     </button>
                   ))}
@@ -413,7 +430,17 @@ export default function ProductDetail() {
                 <span className="px-3 py-1 bg-[#c8a96e]/20 text-[#c8a96e] text-xs font-semibold rounded-full uppercase tracking-wide small-caps">
                   {product.category}
                 </span>
-                {product.status !== "In Stock" && (
+                {isOutOfStock && (
+                  <Badge variant="destructive" size="sm">
+                    Out of Stock
+                  </Badge>
+                )}
+                {!isOutOfStock && isLowStock && (
+                  <Badge variant="warning" size="sm">
+                    Only {stock} left
+                  </Badge>
+                )}
+                {!isOutOfStock && !isLowStock && product.status !== "In Stock" && (
                   <span className="px-3 py-1 bg-red-100 text-red-600 text-xs font-semibold rounded-full">
                     {product.status}
                   </span>
@@ -449,7 +476,7 @@ export default function ProductDetail() {
                 <p className="text-sm font-semibold text-[#1c1917] mb-3">
                   Weight
                 </p>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3 gap-y-2">
                   {Object.entries(weightMultipliers).map(([w, mult]) => (
                     <button
                       key={w}
@@ -472,37 +499,51 @@ export default function ProductDetail() {
               </div>
 
               {/* Quantity stepper */}
-              <div className="mb-4">
-                <p className="text-sm font-semibold text-[#1c1917] mb-3">
-                  Quantity
-                </p>
-                <div className="flex items-center border-2 border-[rgba(28,25,23,0.1)] rounded-xl overflow-hidden w-fit">
-                  <button
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="w-12 h-12 flex items-center justify-center text-xl text-[#78746e] hover:bg-[#f0ede8] transition-colors"
-                  >
-                    −
-                  </button>
-                  <span className="w-12 text-center font-semibold text-[#1c1917] text-lg select-none">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity((q) => q + 1)}
-                    className="w-12 h-12 flex items-center justify-center text-xl text-[#78746e] hover:bg-[#f0ede8] transition-colors"
-                  >
-                    +
-                  </button>
+              {!isOutOfStock && (
+                <div className="mb-4">
+                  <p className="text-sm font-semibold text-[#1c1917] mb-3">
+                    Quantity
+                    {isLowStock && (
+                      <span className="ml-2 text-xs font-normal text-[#d97706]">
+                        (max {stock} available)
+                      </span>
+                    )}
+                  </p>
+                  <div className="flex items-center border-2 border-[rgba(28,25,23,0.1)] rounded-xl overflow-hidden w-fit">
+                    <button
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      disabled={quantity <= 1}
+                      className="w-12 h-12 flex items-center justify-center text-xl text-[#78746e] hover:bg-[#f0ede8] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      −
+                    </button>
+                    <span className="w-12 text-center font-semibold text-[#1c1917] text-lg select-none">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
+                      disabled={quantity >= stock}
+                      className="w-12 h-12 flex items-center justify-center text-xl text-[#78746e] hover:bg-[#f0ede8] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Add to Cart + Wishlist */}
               <div className="flex gap-3 mb-4">
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 py-3.5 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] transition-colors flex items-center justify-center gap-2"
+                  disabled={isOutOfStock}
+                  className={`flex-1 py-3.5 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 ${
+                    isOutOfStock
+                      ? "bg-[#e8e4de] text-[#78746e] cursor-not-allowed"
+                      : "bg-[#2d5a3d] text-white hover:bg-[#234832]"
+                  }`}
                 >
                   <ShoppingBag className="h-5 w-5" />
-                  Add to Cart
+                  {isOutOfStock ? "Out of Stock" : "Add to Cart"}
                 </button>
                 <button
                   onClick={handleWishlistClick}
@@ -788,11 +829,13 @@ export default function ProductDetail() {
                     href={`/products/${relatedProduct.id}`}
                     className="bg-white rounded-2xl border border-[rgba(28,25,23,0.06)] overflow-hidden group hover:shadow-md transition-shadow"
                   >
-                    <div className="aspect-square overflow-hidden">
-                      <img
+                    <div className="relative aspect-square overflow-hidden">
+                      <Image
                         src={relatedProduct.imageUrl}
                         alt={relatedProduct.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        fill
+                        sizes="(max-width: 640px) 100vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>
                     <div className="p-4">

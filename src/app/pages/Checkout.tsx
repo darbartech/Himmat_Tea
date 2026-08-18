@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
 import { useTranslation } from "@/hooks/useTranslation";
-import { ArrowRight, Check, Lock, User, AlertTriangle, RefreshCw, ShoppingBag, QrCode } from "lucide-react";
-import { useCart } from "@/context/CartContext";
+import { ArrowRight, Check, Lock, User, AlertTriangle, RefreshCw, ShoppingBag, QrCode, Tag, X } from "lucide-react";
+import { useCart, AppliedCoupon } from "@/context/CartContext";
 import { useStore } from "@/context/StoreContext";
 import { useAuth } from "@/context/AuthContext";
 import { api, ApiError } from "@/lib/api-client";
+import { notify } from "@/lib/notify";
+import { LoadingButton } from "@/app/components/ui/loading-button";
 import Link from "next/link";
 
 type SettingsType = {
@@ -78,7 +80,7 @@ function generateIdempotencyKey(): string {
 export default function Checkout() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { cart, cartTotal, clearCart } = useCart();
+  const { cart, cartTotal, clearCart, appliedCoupon, setAppliedCoupon } = useCart();
   const { settings: fallbackSettings } = useStore();
   const { isLoggedIn, userType, currentUser } = useAuth();
   const [step, setStep] = useState(1);
@@ -88,14 +90,18 @@ export default function Checkout() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const idempotencyKeyRef = useRef<string | null>(null);
   const [liveSettings, setLiveSettings] = useState<SettingsType | null>(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
   const taxRate = liveSettings?.taxRate ?? fallbackSettings.taxRate ?? 18;
   const shippingFlatRate = liveSettings?.shippingFlatRate ?? fallbackSettings.shippingFlatRate ?? 0;
   const currency = liveSettings?.currency ?? fallbackSettings.currency ?? "Rs.";
 
   const subtotal = cartTotal;
-  const taxAmount = Math.round(subtotal * (taxRate / 100));
-  const grandTotal = subtotal + taxAmount + shippingFlatRate;
+  const discountAmount = appliedCoupon?.discountAmount ?? 0;
+  const taxable = Math.max(0, subtotal - discountAmount);
+  const taxAmount = Math.round(taxable * (taxRate / 100));
+  const grandTotal = taxable + taxAmount + shippingFlatRate;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -232,6 +238,52 @@ export default function Checkout() {
     }
   };
 
+  async function handleApplyCoupon(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    const code = couponInput.trim();
+    if (!code) {
+      notify.error("Please enter a coupon code.");
+      return;
+    }
+    if (subtotal <= 0) {
+      notify.error("Add items to your cart before applying a coupon.");
+      return;
+    }
+    setIsApplyingCoupon(true);
+    try {
+      const res: any = await notify.promise(
+        api.get(`/coupons?code=${encodeURIComponent(code)}&subtotal=${subtotal}`),
+        {
+          loading: "Applying coupon…",
+          success: (data: any) => {
+            if (data?.valid && data?.data) {
+              const couponData: AppliedCoupon = data.data;
+              return `Coupon "${couponData.code}" applied — ${currency} ${couponData.discountAmount.toLocaleString()} off!`;
+            }
+            throw new Error(data?.error || "Invalid coupon code.");
+          },
+          error: (err: any) => err?.message || "Could not validate coupon. Please try again.",
+        }
+      );
+      if (res?.valid && res?.data) {
+        const couponData: AppliedCoupon = res.data;
+        setAppliedCoupon(couponData);
+        setCouponInput("");
+      }
+    } catch (_) {
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  }
+
+  function handleRemoveCoupon() {
+    const code = appliedCoupon?.code;
+    setAppliedCoupon(null);
+    if (code) {
+      notify.info(`Coupon "${code}" removed.`);
+    }
+  }
+
   async function handlePlaceOrder() {
     setSubmitError(null);
 
@@ -267,9 +319,17 @@ export default function Checkout() {
         })),
         shippingAddress: fullAddress,
         idempotencyKey: idempotencyKeyRef.current,
+        couponCode: appliedCoupon?.code ?? null,
       };
 
-      const response: any = await api.post('/orders', orderData);
+      const response: any = await notify.promise(
+        api.post('/orders', orderData),
+        {
+          loading: "Placing your order…",
+          success: "Order placed successfully!",
+          error: (err: any) => err?.message || "Could not place your order.",
+        }
+      );
       const createdOrder = response?.data || response;
       clearCart();
       idempotencyKeyRef.current = null;
@@ -607,23 +667,16 @@ export default function Checkout() {
                     </div>
                   </div>
 
-                  <button
+                  <LoadingButton
                     onClick={handlePlaceOrder}
-                    disabled={isSubmitting || cart.length === 0}
+                    isLoading={isSubmitting}
+                    loadingLabel="Placing Order…"
+                    disabled={cart.length === 0}
                     className="w-full py-4 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                   >
-                    {isSubmitting ? (
-                      <>
-                        <RefreshCw className="h-5 w-5 animate-spin" />
-                        Placing Order…
-                      </>
-                    ) : (
-                      <>
-                        Place Order — {currency}&nbsp;{grandTotal.toLocaleString()}
-                        <ArrowRight className="h-5 w-5" />
-                      </>
-                    )}
-                  </button>
+                    Place Order — {currency}&nbsp;{grandTotal.toLocaleString()}
+                    <ArrowRight className="h-5 w-5" />
+                  </LoadingButton>
 
                   <p className="text-xs text-center text-[#78746e] mt-4 flex items-center justify-center gap-1">
                     <span>🔒</span>
@@ -683,11 +736,80 @@ export default function Checkout() {
 
                     <div className="h-px bg-[rgba(28,25,23,0.08)] mb-4" />
 
+                    {!appliedCoupon ? (
+                      <form onSubmit={handleApplyCoupon} className="mb-5">
+                        <label className="block text-xs font-semibold text-[#78746e] uppercase tracking-wider mb-2">
+                          Coupon Code
+                        </label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]/60" />
+                            <input
+                              type="text"
+                              value={couponInput}
+                              onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                              placeholder="ENTER CODE"
+                              disabled={isApplyingCoupon || cart.length === 0}
+                              className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] text-[#1c1917] placeholder:text-[#78746e]/40 focus:outline-none focus:border-[#2d5a3d] text-sm font-medium tracking-wider disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            />
+                          </div>
+                          <button
+                            type="submit"
+                            disabled={isApplyingCoupon || cart.length === 0 || !couponInput.trim()}
+                            className="px-4 py-2.5 rounded-xl bg-[#2d5a3d] text-white text-sm font-semibold hover:bg-[#234832] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+                          >
+                            {isApplyingCoupon ? (
+                              <>
+                                <RefreshCw className="h-4 w-4 animate-spin" />
+                                Applying…
+                              </>
+                            ) : (
+                              'Apply'
+                            )}
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <div className="mb-5 p-3 rounded-xl border border-[#2d5a3d]/20 bg-[#2d5a3d]/5">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <Tag className="h-4 w-4 text-[#2d5a3d]" />
+                            <span className="text-sm font-bold text-[#2d5a3d] tracking-wider">
+                              {appliedCoupon.code}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleRemoveCoupon}
+                            className="p-1 rounded-md text-[#78746e] hover:text-red-600 hover:bg-red-50 transition-colors"
+                            aria-label="Remove coupon"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <p className="text-xs text-[#78746e]">
+                          {appliedCoupon.discountType === 'percent'
+                            ? `${appliedCoupon.discountValue}% off${appliedCoupon.maxDiscount > 0 ? ` (max ${currency} ${appliedCoupon.maxDiscount.toLocaleString()})` : ''}`
+                            : `${currency} ${appliedCoupon.discountValue.toLocaleString()} off`}
+                          {appliedCoupon.minOrderAmount > 0 && ` · Min ${currency} ${appliedCoupon.minOrderAmount.toLocaleString()}`}
+                        </p>
+                      </div>
+                    )}
+
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between text-sm text-[#78746e]">
                         <span>{t('dashboard.invoice.subtotal')}</span>
                         <span>{currency}&nbsp;{subtotal.toLocaleString()}</span>
                       </div>
+                      {appliedCoupon && discountAmount > 0 && (
+                        <div className="flex justify-between text-sm text-[#2d5a3d] font-medium">
+                          <span className="flex items-center gap-1">
+                            Discount
+                            <span className="text-[10px] uppercase tracking-wider text-[#2d5a3d]/70">({appliedCoupon.code})</span>
+                          </span>
+                          <span>− {currency}&nbsp;{discountAmount.toLocaleString()}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between text-sm text-[#78746e]">
                         <span>Tax ({taxRate}%)</span>
                         <span>{currency}&nbsp;{taxAmount.toLocaleString()}</span>

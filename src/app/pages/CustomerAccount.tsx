@@ -8,6 +8,14 @@ import Footer from "@/app/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api-client";
 import { useTranslation } from "@/hooks/useTranslation";
+import { LoadingButton } from "@/app/components/ui/loading-button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/app/components/ui/dropdown-menu";
 import { 
   LogOut, 
   ShoppingBag, 
@@ -23,8 +31,18 @@ import {
   PackageCheck,
   RefreshCw,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Bell
 } from "lucide-react";
+
+interface CustomerNotification {
+  id: number;
+  title: string;
+  message: string;
+  orderId: string | null;
+  timestamp: string;
+  read: boolean;
+}
 
 interface OrderItem {
   id: number;
@@ -70,12 +88,69 @@ export default function CustomerAccount() {
   const ordersPerPage = 5;
   const { t } = useTranslation();
 
+  const [notifications, setNotifications] = useState<CustomerNotification[]>([]);
+  const [seenNotificationIds, setSeenNotificationIds] = useState<Set<number>>(new Set());
+
   useEffect(() => {
     if (authLoading) return;
     if (!isLoggedIn || !currentUser || userType !== 'customer') {
       router.replace('/customer-auth?redirect=/account');
     }
   }, [isLoggedIn, currentUser, userType, authLoading, router]);
+
+  // Notification "seen" state is tracked client-side only, scoped per
+  // customer, so it never mutates the shared record admins rely on for
+  // their own unread badge.
+  const seenStorageKey = currentUser && 'id' in currentUser
+    ? `himmat-customer-${(currentUser as any).id}-seen-notifications`
+    : null;
+
+  useEffect(() => {
+    if (!seenStorageKey) return;
+    try {
+      const raw = localStorage.getItem(seenStorageKey);
+      if (raw) {
+        setSeenNotificationIds(new Set(JSON.parse(raw)));
+      }
+    } catch {
+      /* noop */
+    }
+  }, [seenStorageKey]);
+
+  const markAllNotificationsSeen = () => {
+    if (!seenStorageKey) return;
+    const allIds = new Set(notifications.map(n => n.id));
+    setSeenNotificationIds(allIds);
+    try {
+      localStorage.setItem(seenStorageKey, JSON.stringify(Array.from(allIds)));
+    } catch {
+      /* noop */
+    }
+  };
+
+  useEffect(() => {
+    if (authLoading || !isLoggedIn || !currentUser || userType !== 'customer') return;
+
+    let cancelled = false;
+    const fetchNotifications = async () => {
+      try {
+        const result = await api.get<{ success: boolean; data: CustomerNotification[] }>('/customer/notifications');
+        if (!cancelled && result?.success && Array.isArray(result.data)) {
+          setNotifications(result.data);
+        }
+      } catch (_err) {
+        // silent — transient errors, will retry on next interval
+      }
+    };
+    fetchNotifications();
+    const id = setInterval(fetchNotifications, 25_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [authLoading, isLoggedIn, currentUser, userType]);
+
+  const unseenNotificationsCount = notifications.filter(n => !seenNotificationIds.has(n.id)).length;
 
   const fetchOrders = async () => {
     try {
@@ -147,16 +222,69 @@ export default function CustomerAccount() {
       <main className="pt-[180px] pb-24">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           {/* Page Header */}
-          <div className="mb-10">
-            <p className="text-xs uppercase tracking-widest text-[#c8a96e] font-semibold mb-3">
-              My Account
-            </p>
-            <h1 
-              className="text-[clamp(2rem,4vw,3rem)] leading-[1.1] font-semibold text-[#1c1917]"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              Hello, {customer.name}!
-            </h1>
+          <div className="mb-10 flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-[#c8a96e] font-semibold mb-3">
+                My Account
+              </p>
+              <h1 
+                className="text-[clamp(2rem,4vw,3rem)] leading-[1.1] font-semibold text-[#1c1917]"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Hello, {customer.name}!
+              </h1>
+            </div>
+
+            {/* Notifications */}
+            <DropdownMenu onOpenChange={(open) => { if (open) markAllNotificationsSeen(); }}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="relative p-3 rounded-xl bg-white border border-[rgba(28,25,23,0.06)] hover:bg-[#f9f7f4] transition-colors text-[#1c1917] shrink-0"
+                  aria-label="Notifications"
+                >
+                  <Bell className="h-5 w-5" />
+                  {unseenNotificationsCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 h-5 w-5 bg-[#c8a96e] rounded-full border border-white flex items-center justify-center text-xs font-bold text-[#1c1917]">
+                      {unseenNotificationsCount}
+                    </span>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-96">
+                <div className="p-4">
+                  <DropdownMenuLabel className="font-semibold text-[#1c1917] p-0 m-0">
+                    Notifications
+                  </DropdownMenuLabel>
+                </div>
+                <DropdownMenuSeparator />
+                <div className="max-h-[400px] overflow-y-auto p-2">
+                  {notifications.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-[#78746e]">No notifications yet.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-3 rounded-lg text-sm ${
+                            seenNotificationIds.has(notification.id)
+                              ? "hover:bg-[#f9f7f4]"
+                              : "bg-[#f0f9f4] hover:bg-[#e8f5ed]"
+                          }`}
+                        >
+                          <p className="font-medium text-[#1c1917]">{notification.title}</p>
+                          <p className="text-[#78746e] text-xs mt-0.5">{notification.message}</p>
+                          <p className="text-[#78746e] text-xs mt-1">
+                            {new Date(notification.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className="grid lg:grid-cols-[280px_1fr] gap-10">
@@ -232,14 +360,17 @@ export default function CustomerAccount() {
                       <h2 className="text-xl font-semibold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
                         Order History
                       </h2>
-                      <button
+                      <LoadingButton
                         onClick={fetchOrders}
-                        disabled={ordersLoading}
+                        isLoading={ordersLoading}
+                        loadingLabel="Refresh"
+                        spinnerClassName="text-[#2d5a3d]"
+                        variant="ghost"
                         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#2d5a3d] hover:bg-[#2d5a3d]/5 rounded-lg transition-colors disabled:opacity-50"
                       >
-                        <RefreshCw className={`h-4 w-4 ${ordersLoading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className="h-4 w-4" />
                         Refresh
-                      </button>
+                      </LoadingButton>
                     </div>
 
                     {ordersLoading ? (

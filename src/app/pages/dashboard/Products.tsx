@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, ChangeEvent } from "react";
 import { Plus, Search, Edit, Trash2, MoreHorizontal, X, Save, Package, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import {
   Dialog,
   DialogContent,
@@ -193,10 +193,10 @@ export default function Products() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success("Product added successfully!");
+      notify.success("Product added successfully!");
     },
     onError: () => {
-      toast.error("Failed to add product");
+      notify.error("Failed to add product");
     },
   });
 
@@ -212,10 +212,10 @@ export default function Products() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success("Product updated successfully!");
+      notify.success("Product updated successfully!");
     },
     onError: () => {
-      toast.error("Failed to update product");
+      notify.error("Failed to update product");
     },
   });
 
@@ -225,10 +225,10 @@ export default function Products() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success("Product deleted successfully!");
+      notify.success("Product deleted successfully!");
     },
     onError: () => {
-      toast.error("Failed to delete product");
+      notify.error("Failed to delete product");
     },
   });
 
@@ -289,7 +289,7 @@ export default function Products() {
 
   const handleSaveProduct = async () => {
     if (!newProduct.name || !newProduct.description || !newProduct.imageUrl || newProduct.price <= 0) {
-      toast.error("Please fill in all required fields (Name, Description, Image URL, Price)");
+      notify.error("Please fill in all required fields (Name, Description, Image URL, Price)");
       return;
     }
     const status = newProduct.stock === 0 ? "Out of Stock" : newProduct.stock <= 30 ? "Low Stock" : "In Stock";
@@ -326,7 +326,7 @@ export default function Products() {
 
   const handleAdjustStock = async () => {
     if (!selectedStockProduct || stockAdjustment.quantity === 0 || !stockAdjustment.reason) {
-      toast.error("Please fill all fields");
+      notify.error("Please fill all fields");
       return;
     }
     try {
@@ -386,7 +386,7 @@ export default function Products() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file");
+      notify.error("Please select a valid image file");
       return;
     }
 
@@ -408,7 +408,7 @@ export default function Products() {
         }
 
         setNewProduct((prev) => ({ ...prev, imageUrl: result.data.url }));
-        toast.success("Image uploaded successfully!");
+        notify.success("Image uploaded successfully!");
       } catch (err: any) {
         const rawMsg: string = (err?.message || "Failed to upload image. Please try again.").toString();
         let displayMsg = rawMsg;
@@ -418,7 +418,7 @@ export default function Products() {
         } else if (rawMsg.toLowerCase().includes("exceeds") || rawMsg.toLowerCase().includes("size limit")) {
           displayMsg = rawMsg;
         }
-        toast.error(displayMsg);
+        notify.error(displayMsg);
       } finally {
         setUploadingImage(false);
         if (fileInputRef.current) {
@@ -884,9 +884,20 @@ export default function Products() {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>{t('dashboard.products.cancel')}</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteProduct(product.id)} className="bg-red-600">
-                              Delete
+                            <AlertDialogCancel disabled={deleteProductMutation.isPending}>{t('dashboard.products.cancel')}</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => handleDeleteProduct(product.id)} 
+                              className="bg-red-600"
+                              disabled={deleteProductMutation.isPending}
+                            >
+                              {deleteProductMutation.isPending ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Deleting…
+                                </>
+                              ) : (
+                                'Delete'
+                              )}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Loader2, Coffee, ChefHat } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import {
   Dialog,
   DialogContent,
@@ -95,7 +95,7 @@ export default function BrewingGuidesAdmin() {
       setGuides(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to load brewing guides";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -107,7 +107,7 @@ export default function BrewingGuidesAdmin() {
 
   const handleSaveGuide = async () => {
     if (!newGuide.title || !newGuide.slug || !newGuide.description) {
-      toast.error("Please fill in title, slug, and description");
+      notify.error("Please fill in title, slug, and description");
       return;
     }
     try {
@@ -131,12 +131,12 @@ export default function BrewingGuidesAdmin() {
         setGuides((prev) =>
           prev.map((g) => (g.id === resolved.id ? resolved : g))
         );
-        toast.success("Brewing guide updated successfully!");
+        notify.success("Brewing guide updated successfully!");
       } else {
         createdOrUpdated = await api.post<BrewingGuide>("/brewing-guides", payload);
         const resolved: BrewingGuide = (createdOrUpdated as any)?.data ?? createdOrUpdated;
         setGuides((prev) => [resolved, ...prev]);
-        toast.success("Brewing guide created successfully!");
+        notify.success("Brewing guide created successfully!");
       }
 
       setIsAddDialogOpen(false);
@@ -144,7 +144,7 @@ export default function BrewingGuidesAdmin() {
       setNewGuide({ ...EmptyGuide });
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to save brewing guide";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsSaving(false);
     }
@@ -167,10 +167,10 @@ export default function BrewingGuidesAdmin() {
       setDeletingId(deleteTarget.id);
       await api.delete(`/brewing-guides/${deleteTarget.id}`);
       setGuides((prev) => prev.filter((g) => g.id !== deleteTarget.id));
-      toast.success("Brewing guide deleted successfully!");
+      notify.success("Brewing guide deleted successfully!");
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to delete brewing guide";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setDeletingId(null);
       setIsDeleteDialogOpen(false);

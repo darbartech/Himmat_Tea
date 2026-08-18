@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Edit, Trash2, Loader2, Layers, Package, Search as SearchIcon, Check, X } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import {
   Dialog,
   DialogContent,
@@ -106,7 +106,7 @@ export default function CollectionsAdmin() {
       setProducts(prodData);
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to load collections";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -143,7 +143,7 @@ export default function CollectionsAdmin() {
 
   const handleSave = async () => {
     if (!newCollection.title || !newCollection.slug || !newCollection.description) {
-      toast.error("Please fill in title, slug, and description");
+      notify.error("Please fill in title, slug, and description");
       return;
     }
     try {
@@ -165,13 +165,13 @@ export default function CollectionsAdmin() {
       }
       const resolved: any = (createdOrUpdated as any)?.data ?? createdOrUpdated;
       await fetchAll();
-      toast.success(editingCollection ? "Collection updated!" : "Collection created!");
+      notify.success(editingCollection ? "Collection updated!" : "Collection created!");
       setIsAddDialogOpen(false);
       setEditingCollection(null);
       setNewCollection({ ...EmptyColl, selectedProductIds: [] });
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to save collection";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsSaving(false);
     }
@@ -201,10 +201,10 @@ export default function CollectionsAdmin() {
       setDeletingId(deleteTarget.id);
       await api.delete(`/collections/${deleteTarget.id}`);
       setCollections((prev) => prev.filter((c) => c.id !== deleteTarget.id));
-      toast.success("Collection deleted successfully!");
+      notify.success("Collection deleted successfully!");
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to delete collection";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setDeletingId(null);
       setIsDeleteDialogOpen(false);

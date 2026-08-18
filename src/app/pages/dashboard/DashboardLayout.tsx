@@ -11,6 +11,7 @@ import {
   BarChart3,
   Settings,
   Bell,
+  BellOff,
   Sun,
   Moon,
   Menu,
@@ -48,6 +49,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import Images from "next/image";
+import {
+  isNotificationSoundMuted,
+  setNotificationSoundMuted,
+  playNotificationSound,
+} from "@/lib/sound";
 
 interface LiveNotification {
   id: number;
@@ -67,7 +73,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { logout, currentUser, userType } = useAuth();
   const { orders, addOrder, products } = useStore();
   const [liveNotifications, setLiveNotifications] = useState<LiveNotification[]>([]);
+  const [soundMuted, setSoundMuted] = useState(true);
+  const lastSeenTimestampRef = useRef<number>(0);
+  const isFirstPollRef = useRef(true);
   const router = useRouter();
+
+  // Load persisted mute preference on mount (defaults to muted until explicitly enabled)
+  useEffect(() => {
+    setSoundMuted(isNotificationSoundMuted());
+  }, []);
+
+  const toggleSoundMuted = () => {
+    setSoundMuted((prev) => {
+      const next = !prev;
+      setNotificationSoundMuted(next);
+      return next;
+    });
+  };
 
   const newOrdersCount = useMemo(() => {
     if (!Array.isArray(orders)) return 0;
@@ -85,7 +107,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       try {
         const result = await api.get<{ success: boolean; data: LiveNotification[] }>('/admin/notifications');
         if (!cancelled && result?.success && Array.isArray(result.data)) {
-          setLiveNotifications(result.data);
+          const incoming = result.data;
+
+          if (isFirstPollRef.current) {
+            // Establish the baseline on the initial load without playing a sound.
+            isFirstPollRef.current = false;
+            const latest = incoming.reduce(
+              (max, n) => Math.max(max, new Date(n.timestamp).getTime() || 0),
+              0,
+            );
+            lastSeenTimestampRef.current = latest;
+          } else {
+            const newestInBatch = incoming.reduce(
+              (max, n) => Math.max(max, new Date(n.timestamp).getTime() || 0),
+              0,
+            );
+            const hasNewNotifications = incoming.some(
+              (n) => (new Date(n.timestamp).getTime() || 0) > lastSeenTimestampRef.current,
+            );
+            if (hasNewNotifications) {
+              // Play once per poll batch, regardless of how many notifications arrived.
+              playNotificationSound();
+            }
+            if (newestInBatch > lastSeenTimestampRef.current) {
+              lastSeenTimestampRef.current = newestInBatch;
+            }
+          }
+
+          setLiveNotifications(incoming);
         }
       } catch (_err) {
         // silent — transient errors, will retry on next interval
@@ -361,6 +410,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
               )}
             </div>
+
+            {/* Sound mute toggle */}
+            <button
+              type="button"
+              onClick={toggleSoundMuted}
+              className="p-2 rounded-lg hover:bg-[#f0ede8] transition-colors text-[#1c1917]"
+              aria-label={soundMuted ? "Unmute notification sound" : "Mute notification sound"}
+              aria-pressed={!soundMuted}
+              title={soundMuted ? "Notification sound muted" : "Notification sound on"}
+            >
+              {soundMuted ? (
+                <BellOff className="h-5 w-5 text-[#78746e]" />
+              ) : (
+                <Bell className="h-5 w-5 text-[#2d5a3d]" />
+              )}
+            </button>
 
             {/* Notifications */}
             <DropdownMenu>

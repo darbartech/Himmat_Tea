@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { api, ApiError } from "../../../lib/api-client";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import {
   Plus,
   Search,
@@ -233,8 +233,8 @@ export default function Inventory() {
 
   const handleAdjustStock = async () => {
     if (!selectedProduct || stockAdjustment.quantity === 0 || !stockAdjustment.reason) {
-      if (stockAdjustment.quantity === 0) toast.error("Quantity cannot be zero");
-      if (!stockAdjustment.reason) toast.error("Please enter a reason");
+      if (stockAdjustment.quantity === 0) notify.error("Quantity cannot be zero");
+      if (!stockAdjustment.reason) notify.error("Please enter a reason");
       return;
     }
     try {
@@ -247,7 +247,7 @@ export default function Inventory() {
         quantity: Math.abs(qty),
         reason: stockAdjustment.reason,
       });
-      toast.success(
+      notify.success(
         `Stock adjusted for ${selectedProduct.name}: ${qty > 0 ? "+" : ""}${qty} units`
       );
       setSelectedProduct(null);
@@ -255,7 +255,7 @@ export default function Inventory() {
       await loadAll();
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to adjust stock";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsAdjusting(false);
     }
@@ -264,7 +264,7 @@ export default function Inventory() {
   const handleSaveBatch = async () => {
     if (!selectedProductForBatch) return;
     if (!batchForm.batchNumber || !batchForm.quantity || !batchForm.receivedDate) {
-      toast.error("Batch Number, Quantity, and Received Date are required");
+      notify.error("Batch Number, Quantity, and Received Date are required");
       return;
     }
     try {
@@ -280,10 +280,10 @@ export default function Inventory() {
       };
       if (editBatchId) {
         await api.put(`/batches/${editBatchId}`, payload);
-        toast.success("Batch updated successfully!");
+        notify.success("Batch updated successfully!");
       } else {
         await api.post("/batches", payload);
-        toast.success("Batch added successfully! Stock updated.");
+        notify.success("Batch added successfully! Stock updated.");
       }
       setBatchModalOpen(false);
       setSelectedProductForBatch(null);
@@ -291,7 +291,7 @@ export default function Inventory() {
       await loadAll();
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to save batch";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsBatchSaving(false);
     }
@@ -301,11 +301,11 @@ export default function Inventory() {
     try {
       setBatchDeletingId(batch.id);
       await api.delete(`/batches/${batch.id}`);
-      toast.success(`Batch ${batch.batchNumber} deleted`);
+      notify.success(`Batch ${batch.batchNumber} deleted`);
       await loadAll();
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to delete batch";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setBatchDeletingId(null);
     }
@@ -551,8 +551,8 @@ export default function Inventory() {
                   <h2 className="text-lg font-semibold text-[#1c1917]">{t('dashboard.inventory.stockStatusOverview')}</h2>
                   <p className="text-sm text-[#78746e]">{t('dashboard.inventory.currentStockLevels')}</p>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+                <div className="overflow-x-auto shadow-[inset_-12px_0_16px_-12px_rgba(45,90,61,0.18)]">
+                  <table className="w-full min-w-[700px]">
                     <thead>
                       <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
                         <th className="px-6 py-4 font-medium">{t('dashboard.inventory.product')}</th>
@@ -739,8 +739,8 @@ export default function Inventory() {
             <SkeletonTable />
           ) : (
             <div className="bg-white rounded-2xl shadow-sm border border-[#2d5a3d]/5 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto shadow-[inset_-12px_0_16px_-12px_rgba(45,90,61,0.18)]">
+                <table className="w-full min-w-[900px]">
                   <thead>
                     <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
                       <th className="px-6 py-4 font-medium">{t('dashboard.inventory.product')}</th>
@@ -920,8 +920,8 @@ export default function Inventory() {
             <SkeletonTable />
           ) : (
             <div className="bg-white rounded-2xl shadow-sm border border-[#2d5a3d]/5 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto shadow-[inset_-12px_0_16px_-12px_rgba(45,90,61,0.18)]">
+                <table className="w-full min-w-[1050px]">
                   <thead>
                     <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
                       <th className="px-6 py-4 font-medium">{t('dashboard.inventory.product')}</th>
@@ -1158,8 +1158,8 @@ export default function Inventory() {
             <SkeletonTable />
           ) : (
             <div className="bg-white rounded-2xl shadow-sm border border-[#2d5a3d]/5 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto shadow-[inset_-12px_0_16px_-12px_rgba(45,90,61,0.18)]">
+                <table className="w-full min-w-[950px]">
                   <thead>
                     <tr className="text-left text-sm text-[#78746e] bg-[#f9f7f4] border-b border-[#2d5a3d]/5">
                       <th className="px-6 py-4 font-medium">{t('dashboard.inventory.product')}</th>

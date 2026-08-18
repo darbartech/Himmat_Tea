@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import {
   Dialog,
   DialogContent,
@@ -119,7 +119,7 @@ export default function ProductLines() {
       setProductLines(data.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)));
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to load product lines";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +135,7 @@ export default function ProductLines() {
 
   const handleSaveProductLine = async () => {
     if (!newProductLine.name || !newProductLine.slug || !newProductLine.description) {
-      toast.error("Please fill in all required fields (Name, Slug, Description)");
+      notify.error("Please fill in all required fields (Name, Slug, Description)");
       return;
     }
     try {
@@ -152,12 +152,12 @@ export default function ProductLines() {
         setProductLines((prev) =>
           prev.map((p) => (p.id === resolved.id ? resolved : p))
         );
-        toast.success("Product line updated successfully!");
+        notify.success("Product line updated successfully!");
       } else {
         createdOrUpdated = await api.post<ProductLine>("/product-lines", payload);
         const resolved: ProductLine = (createdOrUpdated as any)?.data ?? createdOrUpdated;
         setProductLines((prev) => [...prev, resolved].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)));
-        toast.success("Product line created successfully!");
+        notify.success("Product line created successfully!");
       }
 
       setIsAddDialogOpen(false);
@@ -165,7 +165,7 @@ export default function ProductLines() {
       setNewProductLine({ ...EmptyPL, sortOrder: productLines.length });
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to save product line";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setIsSaving(false);
     }
@@ -191,10 +191,10 @@ export default function ProductLines() {
       setDeletingId(deleteTarget.id);
       await api.delete(`/product-lines/${deleteTarget.id}`);
       setProductLines((prev) => prev.filter((p) => p.id !== deleteTarget.id));
-      toast.success("Product line deleted successfully!");
+      notify.success("Product line deleted successfully!");
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to delete product line";
-      toast.error(msg);
+      notify.error(msg);
     } finally {
       setDeletingId(null);
       setIsDeleteDialogOpen(false);
