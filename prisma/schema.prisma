@@ -507,6 +507,10 @@ model CareerApplication {
   updatedAt   DateTime @updatedAt
   careerJob   CareerJob @relation(fields: [careerJobId], references: [id], onDelete: Cascade)
 
+  // One application per email, per job. `email` is normalized to lowercase
+  // before every write (see /api/career-applications POST), so this also
+  // catches "Jane@x.com" vs "jane@x.com" as the same applicant.
+  @@unique([careerJobId, email])
   @@index([careerJobId])
   @@index([status])
 }

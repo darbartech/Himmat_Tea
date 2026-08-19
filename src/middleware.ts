@@ -80,6 +80,9 @@ const PUBLIC_API_ROUTES: PublicRouteSpec[] = [
   { path: pathExact('/api/contact'), methods: ['POST'] },
   { path: pathExact('/api/partnership'), methods: ['POST'] },
 
+  // ===== Career applications (public write — no visitor login required) =====
+  { path: pathExact('/api/career-applications'), methods: ['POST'] },
+
   // ===== Auth endpoints (public: login, signup, pw reset) =====
   { path: pathExact('/api/auth/login'), methods: ['POST'] },
   { path: pathExact('/api/auth/logout'), methods: ['POST', 'GET'] },
@@ -100,6 +103,12 @@ const PUBLIC_API_ROUTES: PublicRouteSpec[] = [
   { path: pathPrefix('/api/customer/notifications'), methods: '*' },
 
   // ===== Storefront: public GETs (content reads) =====
+  // Career listings: public so visitors don't need to be logged in (as a
+  // customer OR admin) to see open roles. The route itself still gates the
+  // ?admin=true param behind getCurrentAdmin() server-side (see
+  // /api/careers/route.ts), so this only exposes the same active-jobs-only
+  // view every visitor is meant to see.
+  { path: pathExact('/api/careers'), methods: ['GET'] },
   { path: pathExact('/api/products'), methods: ['GET'] },
   { path: pathMatch((p) => /^\/api\/products\/[^/]+$/.test(p)), methods: ['GET'] },
   { path: pathExact('/api/collections'), methods: ['GET'] },

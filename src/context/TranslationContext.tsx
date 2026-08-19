@@ -12,7 +12,7 @@ interface TranslationCtx {
   isLoading: boolean;
 }
 
-const TRANSLATION_VERSION = 'v7';
+const TRANSLATION_VERSION = 'v9';
 
 const TranslationContext = createContext<TranslationCtx>({
   t: (k) => k,

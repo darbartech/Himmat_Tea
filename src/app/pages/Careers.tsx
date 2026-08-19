@@ -25,6 +25,7 @@ import {
   X,
   Star,
   Building2,
+  Share2,
 } from "lucide-react";
 import {
   Dialog,
@@ -32,17 +33,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../components/ui/dialog";
+import ShareBar from "@/app/components/ShareBar";
+import { BRAND } from "@/config/brand";
 
 /* ─────────────────────────────────────────────
    DATA
 ───────────────────────────────────────────── */
-
-const stats = [
-  { value: "32", label: "Team Members" },
-  { value: "0", label: "Open Roles" },
-  { value: "12", label: "Countries We Reach" },
-  { value: "2018", label: "Founded" },
-];
 
 const values = [
   {
@@ -68,14 +64,46 @@ const values = [
 ];
 
 const benefits = [
-  { icon: Heart, title: "Health Coverage", desc: "Full medical and dental insurance for you and your dependents." },
-  { icon: Laptop, title: "Remote Flexibility", desc: "Hybrid and fully remote roles available. Work where you do your best." },
-  { icon: Coffee, title: "Unlimited Tea Allowance", desc: "Monthly tea box — explore our entire catalogue on us." },
-  { icon: TrendingUp, title: "Equity Programme", desc: "All full-time employees share in the company's growth through equity." },
-  { icon: Zap, title: "Learning Budget", desc: "Rs. 50,000/year for courses, books, conferences, and workshops." },
-  { icon: Shield, title: "Paid Parental Leave", desc: "16 weeks fully paid for primary caregivers, 8 weeks secondary." },
-  { icon: Globe, title: "Sourcing Trips", desc: "Eligible team members join our annual farm tours in Nepal & Asia." },
-  { icon: Users, title: "Team Retreats", desc: "Annual full-team gathering in Kathmandu — our home and heartland." },
+  {
+    icon: Heart,
+    title: "Health Coverage",
+    desc: "Full medical and dental insurance for you and your dependents.",
+  },
+  {
+    icon: Laptop,
+    title: "Remote Flexibility",
+    desc: "Hybrid and fully remote roles available. Work where you do your best.",
+  },
+  {
+    icon: Coffee,
+    title: "Unlimited Tea Allowance",
+    desc: "Monthly tea box — explore our entire catalogue on us.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Equity Programme",
+    desc: "All full-time employees share in the company's growth through equity.",
+  },
+  {
+    icon: Zap,
+    title: "Learning Budget",
+    desc: "Rs. 50,000/year for courses, books, conferences, and workshops.",
+  },
+  {
+    icon: Shield,
+    title: "Paid Parental Leave",
+    desc: "16 weeks fully paid for primary caregivers, 8 weeks secondary.",
+  },
+  {
+    icon: Globe,
+    title: "Sourcing Trips",
+    desc: "Eligible team members join our annual farm tours in Nepal & Asia.",
+  },
+  {
+    icon: Users,
+    title: "Team Retreats",
+    desc: "Annual full-team gathering in Kathmandu — our home and heartland.",
+  },
 ];
 
 type Job = {
@@ -116,10 +144,12 @@ function ApplyDialog({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -138,7 +168,13 @@ function ApplyDialog({
     setError(null);
     setSubmitting(false);
     setResumeFile(null);
-    setForm({ name: "", email: "", phone: "", address: "", cover: "" });
+    setForm({
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      cover: "",
+    });
     onClose();
   };
 
@@ -148,10 +184,16 @@ function ApplyDialog({
     e.preventDefault();
     setError(null);
 
-    if (!form.name.trim() || !form.email.trim() || !form.phone.trim() || !form.address.trim()) {
+    if (
+      !form.name.trim() ||
+      !form.email.trim() ||
+      !form.phone.trim() ||
+      !form.address.trim()
+    ) {
       setError("Please fill in all required fields.");
       return;
     }
+
     if (!resumeFile) {
       setError("Please attach your resume/CV.");
       return;
@@ -159,7 +201,9 @@ function ApplyDialog({
 
     try {
       setSubmitting(true);
+
       const payload = new FormData();
+
       payload.append("careerJobId", job.id);
       payload.append("fullName", form.name.trim());
       payload.append("email", form.email.trim());
@@ -174,13 +218,20 @@ function ApplyDialog({
       });
 
       const result = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error(result?.error || "Failed to submit application. Please try again.");
+        throw new Error(
+          result?.error ||
+            "Failed to submit application. Please try again."
+        );
       }
 
       setDone(true);
     } catch (err: any) {
-      setError(err?.message || "Failed to submit application. Please try again.");
+      setError(
+        err?.message ||
+          "Failed to submit application. Please try again."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -194,7 +245,9 @@ function ApplyDialog({
             className="text-xl font-semibold text-[#1c1917]"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            {done ? "Application Received!" : `Apply — ${job.title}`}
+            {done
+              ? "Application Received!"
+              : `Apply — ${job.title}`}
           </DialogTitle>
         </DialogHeader>
 
@@ -202,12 +255,21 @@ function ApplyDialog({
           /* ── Success state ── */
           <div className="flex flex-col items-center text-center py-8">
             <div className="w-16 h-16 rounded-full bg-[#f0f9f4] border-2 border-[#2d5a3d]/20 flex items-center justify-center mb-5">
-              <Check className="h-8 w-8 text-[#2d5a3d]" strokeWidth={2.5} />
+              <Check
+                className="h-8 w-8 text-[#2d5a3d]"
+                strokeWidth={2.5}
+              />
             </div>
+
             <p className="text-[#78746e] leading-relaxed max-w-xs">
-              Thank you! We'll review your application and reach out within{" "}
-              <strong className="text-[#1c1917]">5 business days</strong>.
+              Thank you! We'll review your application and reach out
+              within{" "}
+              <strong className="text-[#1c1917]">
+                5 business days
+              </strong>
+              .
             </p>
+
             <button
               onClick={reset}
               className="mt-6 px-6 py-2.5 bg-[#2d5a3d] text-white text-sm font-semibold rounded-lg hover:bg-[#244a33] transition-colors"
@@ -217,19 +279,27 @@ function ApplyDialog({
           </div>
         ) : (
           /* ── Application form ── */
-          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4 pt-2"
+          >
             {/* Role badge */}
             <div className="flex flex-wrap gap-2 pb-2 border-b border-[rgba(28,25,23,0.07)]">
               <span className="inline-flex items-center gap-1.5 text-xs text-[#78746e] bg-[#f9f7f4] px-3 py-1.5 rounded-full border border-[rgba(28,25,23,0.08)]">
                 <Briefcase className="h-3 w-3" />
                 {job.department}
               </span>
+
               <span className="inline-flex items-center gap-1.5 text-xs text-[#78746e] bg-[#f9f7f4] px-3 py-1.5 rounded-full border border-[rgba(28,25,23,0.08)]">
                 <MapPin className="h-3 w-3" />
                 {job.location}
               </span>
+
               <span
-                className={`inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full ${typeColor[job.type] ?? "bg-gray-100 text-gray-700"}`}
+                className={`inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full ${
+                  typeColor[job.type] ??
+                  "bg-gray-100 text-gray-700"
+                }`}
               >
                 {job.type}
               </span>
@@ -242,37 +312,50 @@ function ApplyDialog({
               </div>
             )}
 
+            {/* Full Name */}
             <div>
               <label className="block text-xs font-semibold text-[#1c1917] uppercase tracking-wider mb-1.5">
-                Full Name <span className="text-[#c8a96e]">*</span>
+                Full Name{" "}
+                <span className="text-[#c8a96e]">*</span>
               </label>
+
               <input
                 value={form.name}
                 onChange={set("name")}
-                placeholder={t('careers.fullNamePlaceholder')}
+                placeholder={t(
+                  "careers.fullNamePlaceholder"
+                )}
                 className={inputCls}
                 required
               />
             </div>
 
+            {/* Email + Phone */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-[#1c1917] uppercase tracking-wider mb-1.5">
-                  Email <span className="text-[#c8a96e]">*</span>
+                  Email{" "}
+                  <span className="text-[#c8a96e]">*</span>
                 </label>
+
                 <input
                   value={form.email}
                   onChange={set("email")}
                   type="email"
-                  placeholder={t('careers.emailPlaceholder')}
+                  placeholder={t(
+                    "careers.emailPlaceholder"
+                  )}
                   className={inputCls}
                   required
                 />
               </div>
+
               <div>
                 <label className="block text-xs font-semibold text-[#1c1917] uppercase tracking-wider mb-1.5">
-                  Phone <span className="text-[#c8a96e]">*</span>
+                  Phone{" "}
+                  <span className="text-[#c8a96e]">*</span>
                 </label>
+
                 <input
                   value={form.phone}
                   onChange={set("phone")}
@@ -284,10 +367,13 @@ function ApplyDialog({
               </div>
             </div>
 
+            {/* Address */}
             <div>
               <label className="block text-xs font-semibold text-[#1c1917] uppercase tracking-wider mb-1.5">
-                Address <span className="text-[#c8a96e]">*</span>
+                Address{" "}
+                <span className="text-[#c8a96e]">*</span>
               </label>
+
               <input
                 value={form.address}
                 onChange={set("address")}
@@ -300,38 +386,51 @@ function ApplyDialog({
             {/* Resume upload */}
             <div>
               <label className="block text-xs font-semibold text-[#1c1917] uppercase tracking-wider mb-1.5">
-                Resume / CV <span className="text-[#c8a96e]">*</span>
+                Resume / CV{" "}
+                <span className="text-[#c8a96e]">*</span>
               </label>
+
               <label className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border-2 border-dashed border-[rgba(28,25,23,0.15)] bg-[#f9f7f4] text-sm text-[#78746e] cursor-pointer hover:border-[#2d5a3d]/40 hover:bg-[#f0f9f4] transition-all">
                 <span className="w-8 h-8 rounded-lg bg-[#f0ede8] flex items-center justify-center shrink-0">
                   <ArrowRight className="h-4 w-4 text-[#2d5a3d] rotate-[-90deg]" />
                 </span>
+
                 <span className="truncate">
                   {resumeFile ? (
-                    <span className="font-medium text-[#1c1917]">{resumeFile.name}</span>
+                    <span className="font-medium text-[#1c1917]">
+                      {resumeFile.name}
+                    </span>
                   ) : (
                     <>
                       <span className="font-medium text-[#1c1917]">
                         Click to upload
                       </span>{" "}
-                      or drag and drop &nbsp;·&nbsp; PDF, DOC up to 5 MB
+                      or drag and drop &nbsp;·&nbsp; PDF, DOC up
+                      to 5 MB
                     </>
                   )}
                 </span>
+
                 <input
                   type="file"
                   className="hidden"
                   accept=".pdf,.doc,.docx"
-                  onChange={(e) => setResumeFile(e.target.files?.[0] ?? null)}
+                  onChange={(e) =>
+                    setResumeFile(
+                      e.target.files?.[0] ?? null
+                    )
+                  }
                   required
                 />
               </label>
             </div>
 
+            {/* Cover Letter */}
             <div>
               <label className="block text-xs font-semibold text-[#1c1917] uppercase tracking-wider mb-1.5">
                 Cover Letter
               </label>
+
               <textarea
                 value={form.cover}
                 onChange={set("cover")}
@@ -345,21 +444,27 @@ function ApplyDialog({
               type="submit"
               disabled={submitting}
               className="w-full flex items-center justify-center gap-2 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#244a33] transition-all py-3.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-              style={{ boxShadow: "0 4px 16px rgba(45,90,61,0.2)" }}
+              style={{
+                boxShadow:
+                  "0 4px 16px rgba(45,90,61,0.2)",
+              }}
             >
               {submitting ? (
                 "Submitting..."
               ) : (
                 <>
                   Submit Application
-                  <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                  <ArrowRight
+                    className="h-4 w-4"
+                    strokeWidth={2.5}
+                  />
                 </>
               )}
             </button>
 
             <p className="text-center text-xs text-[#78746e]">
-              We read every application personally. Expect to hear back within 5
-              business days.
+              We read every application personally. Expect to hear
+              back within 5 business days.
             </p>
           </form>
         )}
@@ -372,12 +477,19 @@ function ApplyDialog({
    JOB CARD
 ───────────────────────────────────────────── */
 
-function JobCard({ job, onApply }: { job: Job; onApply: (job: Job) => void }) {
+function JobCard({
+  job,
+  onApply,
+}: {
+  job: Job;
+  onApply: (job: Job) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <div className="bg-white rounded-2xl border border-[rgba(28,25,23,0.06)] overflow-hidden hover:border-[#2d5a3d]/20 hover:shadow-md transition-all duration-300">
-      {/* ── Card header ── */}
+      {/* Card header */}
       <div className="p-6 lg:p-7">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           {/* Left info */}
@@ -388,11 +500,16 @@ function JobCard({ job, onApply }: { job: Job; onApply: (job: Job) => void }) {
                 <Building2 className="h-3 w-3" />
                 {job.department}
               </span>
+
               <span
-                className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${typeColor[job.type] ?? "bg-gray-100 text-gray-700"}`}
+                className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${
+                  typeColor[job.type] ??
+                  "bg-gray-100 text-gray-700"
+                }`}
               >
                 {job.type}
               </span>
+
               <span className="inline-flex items-center text-xs text-[#78746e] bg-[#f9f7f4] px-2.5 py-1 rounded-full border border-[rgba(28,25,23,0.08)] font-medium">
                 {job.level}
               </span>
@@ -415,6 +532,7 @@ function JobCard({ job, onApply }: { job: Job; onApply: (job: Job) => void }) {
                 <MapPin className="h-3.5 w-3.5 text-[#c8a96e]" />
                 {job.location}
               </span>
+
               <span className="flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-[#c8a96e]" />
                 Posted {job.posted}
@@ -427,35 +545,41 @@ function JobCard({ job, onApply }: { job: Job; onApply: (job: Job) => void }) {
             <button
               onClick={() => onApply(job)}
               className="flex items-center gap-2 px-5 py-2.5 bg-[#2d5a3d] text-white text-sm font-semibold rounded-lg hover:bg-[#244a33] transition-colors whitespace-nowrap"
-              style={{ boxShadow: "0 2px 10px rgba(45,90,61,0.18)" }}
+              style={{
+                boxShadow:
+                  "0 2px 10px rgba(45,90,61,0.18)",
+              }}
             >
               Apply Now
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
+
             <button
               onClick={() => setExpanded(!expanded)}
               className="flex items-center justify-center gap-1.5 px-5 py-2.5 border border-[rgba(28,25,23,0.14)] text-[#1c1917] text-sm font-semibold rounded-lg hover:bg-[#f0ede8] transition-colors"
             >
               {expanded ? (
                 <>
-                  Less <ChevronUp className="h-3.5 w-3.5" />
+                  Less
+                  <ChevronUp className="h-3.5 w-3.5" />
                 </>
               ) : (
                 <>
-                  View Role <ChevronDown className="h-3.5 w-3.5" />
+                  View Role
+                  <ChevronDown className="h-3.5 w-3.5" />
                 </>
               )}
             </button>
           </div>
         </div>
 
-        {/* Brief description — always visible */}
+        {/* Brief description */}
         <p className="text-[#78746e] text-sm leading-relaxed mt-4 max-w-2xl">
           {job.description}
         </p>
       </div>
 
-      {/* ── Expandable details ── */}
+      {/* Expandable details */}
       {expanded && (
         <div className="border-t border-[rgba(28,25,23,0.07)] bg-[#fafaf8] px-6 lg:px-7 py-6">
           <div className="grid md:grid-cols-2 gap-8">
@@ -467,6 +591,7 @@ function JobCard({ job, onApply }: { job: Job; onApply: (job: Job) => void }) {
               >
                 What You'll Do
               </h4>
+
               <ul className="space-y-2.5">
                 {job.responsibilities.map((r, i) => (
                   <li
@@ -479,6 +604,7 @@ function JobCard({ job, onApply }: { job: Job; onApply: (job: Job) => void }) {
                         strokeWidth={3}
                       />
                     </div>
+
                     {r}
                   </li>
                 ))}
@@ -493,6 +619,7 @@ function JobCard({ job, onApply }: { job: Job; onApply: (job: Job) => void }) {
               >
                 What We're Looking For
               </h4>
+
               <ul className="space-y-2.5">
                 {job.requirements.map((r, i) => (
                   <li
@@ -500,8 +627,11 @@ function JobCard({ job, onApply }: { job: Job; onApply: (job: Job) => void }) {
                     className="flex items-start gap-2.5 text-sm text-[#444] leading-relaxed"
                   >
                     <div className="w-4 h-4 rounded-full bg-[#fdf6ec] border border-[#c8a96e]/30 flex items-center justify-center shrink-0 mt-0.5">
-                      <Star className="h-2.5 w-2.5 text-[#c8a96e] fill-[#c8a96e]" />
+                      <Star
+                        className="h-2.5 w-2.5 text-[#c8a96e] fill-[#c8a96e]"
+                      />
                     </div>
+
                     {r}
                   </li>
                 ))}
@@ -509,16 +639,51 @@ function JobCard({ job, onApply }: { job: Job; onApply: (job: Job) => void }) {
             </div>
           </div>
 
-          {/* Apply CTA at bottom of expanded section */}
-          <div className="mt-6 pt-5 border-t border-[rgba(28,25,23,0.07)] flex flex-col sm:flex-row sm:items-center gap-4">
+          {/* Apply CTA + Share */}
+          <div className="mt-6 pt-5 border-t border-[rgba(28,25,23,0.07)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium text-[#78746e] flex items-center gap-2">
+                <Share2 className="h-4 w-4" />
+                {t("careers.jobShare.title")}
+              </p>
+
+              <ShareBar
+                url={`https://${BRAND.domain}/careers?job=${encodeURIComponent(
+                  job.id
+                )}`}
+                title={`${job.title} — ${BRAND.companyName}`}
+                text={`${job.department} · ${job.location} · ${job.type} — We're hiring for ${job.title} at ${BRAND.companyName}.`}
+                labelPrefix="careers.jobShare"
+                variant="icons"
+              />
+            </div>
+
             <button
               onClick={() => onApply(job)}
-              className="inline-flex items-center gap-2 px-7 py-3 bg-[#2d5a3d] text-white text-sm font-semibold rounded-lg hover:bg-[#244a33] transition-colors"
-              style={{ boxShadow: "0 4px 14px rgba(45,90,61,0.2)" }}
+              className="inline-flex items-center gap-2 px-7 py-3 bg-[#2d5a3d] text-white text-sm font-semibold rounded-lg hover:bg-[#244a33] transition-colors shrink-0"
+              style={{
+                boxShadow:
+                  "0 4px 14px rgba(45,90,61,0.2)",
+              }}
             >
               Apply for This Role
               <ArrowRight className="h-4 w-4" />
             </button>
+          </div>
+
+          <div className="hidden mt-2 pt-2 sm:block">
+            <span className="text-xs text-[#78746e]">
+              Questions? Email{" "}
+              <a
+                href="mailto:careers@godgifted.com"
+                className="text-[#2d5a3d] font-medium hover:underline"
+              >
+                careers@godgifted.com
+              </a>
+            </span>
+          </div>
+
+          <div className="sm:hidden mt-3">
             <span className="text-xs text-[#78746e]">
               Questions? Email{" "}
               <a
@@ -541,6 +706,7 @@ function JobCard({ job, onApply }: { job: Job; onApply: (job: Job) => void }) {
 
 export default function Careers() {
   const { t } = useTranslation();
+
   const [activeTab, setActiveTab] = useState("All");
   const [applyJob, setApplyJob] = useState<Job | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -549,30 +715,60 @@ export default function Careers() {
 
   useEffect(() => {
     let cancelled = false;
+
     fetch("/api/careers")
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to load careers");
+        if (!res.ok) {
+          throw new Error("Failed to load careers");
+        }
+
         return res.json();
       })
       .then((result) => {
-        if (!cancelled) setJobs(Array.isArray(result) ? result : result?.data ?? []);
+        if (!cancelled) {
+          setJobs(
+            Array.isArray(result)
+              ? result
+              : result?.data ?? []
+          );
+        }
       })
       .catch(() => {
-        if (!cancelled) setJobs([]);
+        if (!cancelled) {
+          setJobs([]);
+        }
       })
       .finally(() => {
-        if (!cancelled) setLoadingJobs(false);
+        if (!cancelled) {
+          setLoadingJobs(false);
+        }
       });
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const departments = useMemo(
-    () => ["All", ...Array.from(new Set(jobs.map((job) => job.department).filter(Boolean)))],
+    () => [
+      "All",
+      ...Array.from(
+        new Set(
+          jobs
+            .map((job) => job.department)
+            .filter(Boolean)
+        )
+      ),
+    ],
     [jobs]
   );
 
   const filtered =
-    activeTab === "All" ? jobs : jobs.filter((j) => j.department === activeTab);
+    activeTab === "All"
+      ? jobs
+      : jobs.filter(
+          (j) => j.department === activeTab
+        );
 
   const handleApply = (job: Job) => {
     setApplyJob(job);
@@ -587,35 +783,44 @@ export default function Careers() {
       <Navigation />
 
       {/* ═══════════════════════════════════════════
-          HERO  —  Collections-style white header
+          HERO
       ═══════════════════════════════════════════ */}
       <section className="bg-[#f9f7f4] pt-[180px] pb-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          {/* Centered header */}
-          <div className="text-center mb-12">
+          <div className="text-center">
             <p className="text-xs uppercase tracking-widest text-[#c8a96e] font-medium mb-4">
               Join Our Team
             </p>
+
             <h1
               className="text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold text-[#1c1917] mb-6"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              style={{
+                fontFamily: "'Playfair Display', serif",
+              }}
             >
               Build the Future of Premium Food
             </h1>
+
             <p className="text-xl text-[#78746e] max-w-2xl mx-auto mb-10">
-              We're a small, passionate team on a mission to connect the world's
-              finest Himalayan products with the people who love them. Come grow
-              with us across both Himmat Tea and Godgifted Dal.
+              We're a small, passionate team on a mission to
+              connect the world's finest Himalayan products with
+              the people who love them. Come grow with us across
+              both Himmat Tea and Godgifted Dal.
             </p>
+
             <div className="flex flex-wrap items-center justify-center gap-4">
               <a
                 href="#open-roles"
                 className="inline-flex items-center gap-2 bg-[#2d5a3d] text-white font-semibold rounded-lg hover:bg-[#244a33] transition-colors px-7 py-3.5 text-[0.9rem]"
-                style={{ boxShadow: "0 4px 16px rgba(45,90,61,0.18)" }}
+                style={{
+                  boxShadow:
+                    "0 4px 16px rgba(45,90,61,0.18)",
+                }}
               >
                 See Open Roles
                 <ArrowRight className="h-4 w-4" />
               </a>
+
               <Link
                 href="/about"
                 className="inline-flex items-center gap-2 border border-[rgba(28,25,23,0.18)] text-[#1c1917] font-semibold rounded-lg hover:bg-[#f0ede8] transition-colors px-7 py-3.5 text-[0.9rem]"
@@ -623,42 +828,6 @@ export default function Careers() {
                 About Godgifted
               </Link>
             </div>
-          </div>
-
-          {/* Stats strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-[rgba(28,25,23,0.08)] rounded-2xl overflow-hidden">
-            {stats.map((s) => (
-              <div key={s.label} className="bg-white px-8 py-7 text-center">
-                <div
-                  className="text-[#1c1917] font-bold leading-none mb-2"
-                  style={{
-                    fontFamily: "'Playfair Display', serif",
-                    fontSize: "clamp(1.8rem,2.8vw,2.25rem)",
-                  }}
-                >
-                  {s.value}
-                </div>
-                <div
-                  className="text-[#78746e] font-medium"
-                  style={{
-                    fontSize: "11px",
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {s.label}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Hero image */}
-          <div className="mt-8 rounded-2xl overflow-hidden h-[260px] lg:h-[360px]">
-            <img
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1400&h=500&fit=crop"
-              alt={t('careers.teamImageAlt')}
-              className="w-full h-full object-cover"
-            />
           </div>
         </div>
       </section>
@@ -672,6 +841,7 @@ export default function Careers() {
             <div>
               <div className="flex items-center gap-3 mb-5">
                 <div className="h-px w-7 bg-[#c8a96e]" />
+
                 <span
                   className="text-[#c8a96e] font-semibold"
                   style={{
@@ -683,6 +853,7 @@ export default function Careers() {
                   Our Culture
                 </span>
               </div>
+
               <h2
                 className="font-bold text-[#1c1917] leading-[1.1]"
                 style={{
@@ -693,19 +864,21 @@ export default function Careers() {
                 What We Believe In
               </h2>
             </div>
+
             <p
               className="text-[#78746e] leading-relaxed"
               style={{ fontSize: "1.0625rem" }}
             >
-              We're building a company that's good for farmers, customers, and
-              the people who work here. These four values guide every decision
-              we make.
+              We're building a company that's good for farmers,
+              customers, and the people who work here. These four
+              values guide every decision we make.
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {values.map((v, i) => {
               const Icon = v.icon;
+
               return (
                 <div
                   key={i}
@@ -714,15 +887,18 @@ export default function Careers() {
                   <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center mb-5 group-hover:bg-[#2d5a3d] transition-colors duration-300 shadow-sm">
                     <Icon className="h-5 w-5 text-[#2d5a3d] group-hover:text-white transition-colors duration-300" />
                   </div>
+
                   <h3
                     className="font-semibold text-[#1c1917] mb-2"
                     style={{
-                      fontFamily: "'Playfair Display', serif",
+                      fontFamily:
+                        "'Playfair Display', serif",
                       fontSize: "1.0625rem",
                     }}
                   >
                     {v.title}
                   </h3>
+
                   <p className="text-[#78746e] text-sm leading-relaxed">
                     {v.desc}
                   </p>
@@ -741,6 +917,7 @@ export default function Careers() {
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-3 mb-5">
               <div className="h-px w-7 bg-[#c8a96e]" />
+
               <span
                 className="text-[#c8a96e] font-semibold"
                 style={{
@@ -751,8 +928,10 @@ export default function Careers() {
               >
                 Perks & Benefits
               </span>
+
               <div className="h-px w-7 bg-[#c8a96e]" />
             </div>
+
             <h2
               className="font-bold text-[#1c1917] leading-[1.1] mb-4"
               style={{
@@ -762,18 +941,20 @@ export default function Careers() {
             >
               We Take Care of Our People
             </h2>
+
             <p
               className="text-[#78746e] max-w-xl mx-auto"
               style={{ fontSize: "1.0625rem" }}
             >
-              Beyond a competitive salary, here's what comes with being part of
-              the Godgifted family.
+              Beyond a competitive salary, here's what comes with
+              being part of the Godgifted family.
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {benefits.map((b, i) => {
               const Icon = b.icon;
+
               return (
                 <div
                   key={i}
@@ -782,9 +963,11 @@ export default function Careers() {
                   <div className="w-10 h-10 rounded-xl bg-[#f0f9f4] flex items-center justify-center mb-4">
                     <Icon className="h-5 w-5 text-[#2d5a3d]" />
                   </div>
+
                   <h3 className="font-semibold text-[#1c1917] mb-1.5 text-[0.9375rem]">
                     {b.title}
                   </h3>
+
                   <p className="text-[#78746e] text-sm leading-relaxed">
                     {b.desc}
                   </p>
@@ -798,13 +981,17 @@ export default function Careers() {
       {/* ═══════════════════════════════════════════
           OPEN ROLES
       ═══════════════════════════════════════════ */}
-      <section id="open-roles" className="py-20 bg-white">
+      <section
+        id="open-roles"
+        className="py-20 bg-white"
+      >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-10">
             <div>
               <div className="flex items-center gap-3 mb-5">
                 <div className="h-px w-7 bg-[#c8a96e]" />
+
                 <span
                   className="text-[#c8a96e] font-semibold"
                   style={{
@@ -816,6 +1003,7 @@ export default function Careers() {
                   Open Positions
                 </span>
               </div>
+
               <h2
                 className="font-bold text-[#1c1917] leading-[1.1]"
                 style={{
@@ -823,8 +1011,8 @@ export default function Careers() {
                   fontSize: "clamp(1.8rem,3vw,2.5rem)",
                 }}
               >
-                {filtered.length} Role{filtered.length !== 1 ? "s" : ""}{" "}
-                Available
+                {filtered.length} Role
+                {filtered.length !== 1 ? "s" : ""} Available
               </h2>
             </div>
 
@@ -841,9 +1029,14 @@ export default function Careers() {
                   }`}
                 >
                   {dep}
+
                   {dep === "All" && (
                     <span
-                      className={`ml-1.5 text-xs font-semibold px-1.5 py-0.5 rounded-full ${activeTab === "All" ? "bg-white/20" : "bg-[#f0ede8]"}`}
+                      className={`ml-1.5 text-xs font-semibold px-1.5 py-0.5 rounded-full ${
+                        activeTab === "All"
+                          ? "bg-white/20"
+                          : "bg-[#f0ede8]"
+                      }`}
                     >
                       {jobs.length}
                     </span>
@@ -857,7 +1050,11 @@ export default function Careers() {
           {filtered.length > 0 ? (
             <div className="space-y-4">
               {filtered.map((job) => (
-                <JobCard key={job.id} job={job} onApply={handleApply} />
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onApply={handleApply}
+                />
               ))}
             </div>
           ) : (
@@ -865,13 +1062,16 @@ export default function Careers() {
               <div className="w-14 h-14 rounded-full bg-[#f0ede8] flex items-center justify-center mx-auto mb-4">
                 <Briefcase className="h-6 w-6 text-[#78746e]" />
               </div>
+
               <h3 className="font-semibold text-[#1c1917] mb-2">
                 No open roles in this department right now
               </h3>
+
               <p className="text-[#78746e] text-sm mb-6">
-                We're always looking for exceptional people. Send us your
-                details and we'll be in touch.
+                We're always looking for exceptional people. Send
+                us your details and we'll be in touch.
               </p>
+
               <button
                 onClick={() => setActiveTab("All")}
                 className="text-sm text-[#2d5a3d] font-semibold hover:underline"
@@ -880,33 +1080,6 @@ export default function Careers() {
               </button>
             </div>
           )}
-
-          {/* Speculative application */}
-          <div className="mt-10 rounded-2xl bg-[#f9f7f4] border border-[rgba(28,25,23,0.07)] p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div>
-              <h3
-                className="font-semibold text-[#1c1917] mb-1.5"
-                style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: "1.1rem",
-                }}
-              >
-                Don't see the right role?
-              </h3>
-              <p className="text-[#78746e] text-sm leading-relaxed max-w-lg">
-                We occasionally hire for roles we haven't listed yet. Send us
-                your CV and a brief note about what you'd love to work on — we
-                read every message.
-              </p>
-            </div>
-            <a
-              href="mailto:careers@godgifted.com"
-              className="shrink-0 inline-flex items-center gap-2 px-6 py-3 border-2 border-[#2d5a3d] text-[#2d5a3d] text-sm font-semibold rounded-lg hover:bg-[#2d5a3d] hover:text-white transition-all duration-200 whitespace-nowrap"
-            >
-              Send Speculative CV
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
         </div>
       </section>
 
@@ -924,10 +1097,12 @@ export default function Careers() {
                 backgroundSize: "cover",
               }}
             />
+
             <div className="relative z-10">
               <p className="text-xs uppercase tracking-widest text-[#c8a96e] font-medium mb-3">
                 Life at Godgifted
               </p>
+
               <h2
                 className="font-semibold text-white leading-[1.1] mb-3"
                 style={{
@@ -937,11 +1112,13 @@ export default function Careers() {
               >
                 Questions About Working Here?
               </h2>
+
               <p className="text-white/70 text-lg max-w-lg">
-                Reach out to our People team — we're happy to chat about
-                culture, roles, or anything else.
+                Reach out to our People team — we're happy to chat
+                about culture, roles, or anything else.
               </p>
             </div>
+
             <a
               href="mailto:careers@godgifted.com"
               className="relative z-10 shrink-0 inline-flex items-center gap-2 px-8 py-4 bg-[#c8a96e] text-[#1c1917] font-semibold rounded-xl hover:bg-[#b8995e] transition-colors whitespace-nowrap"

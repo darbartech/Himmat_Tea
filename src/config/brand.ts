@@ -6,6 +6,11 @@ export const BRAND = {
   supportEmail: "info@darbartech.com",
   supportPhone: "+977-98XXXXXXXX",
   tagline: "Pure, Traceable, God-Gifted.",
+  socialLinks: {
+    instagram: "https://instagram.com/himmattea",
+    facebook: "https://facebook.com/himmattea",
+    youtube: "https://youtube.com/@himmattea",
+  },
   productLines: [
     {
       slug: "himmat-tea",

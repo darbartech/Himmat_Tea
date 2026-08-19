@@ -13,10 +13,9 @@ import {
   Clock,
   Calendar,
   Share2,
-  Twitter,
-  Facebook,
-  Link2,
 } from "lucide-react";
+import ShareBar from "@/app/components/ShareBar";
+import { BRAND } from "@/config/brand";
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
@@ -24,15 +23,9 @@ export default function BlogPost() {
   const { blogPosts } = useStore();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const post = blogPosts.find((p) => p.slug === slug);
   const related = blogPosts.filter((p) => p.slug !== slug).slice(0, 3);
-
-  const handleCopyLink = () => {
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   if (!post) {
     return (
@@ -159,23 +152,15 @@ export default function BlogPost() {
               <div className="mt-12 pt-8 border-t border-[rgba(28,25,23,0.08)]">
                 <p className="text-sm font-medium text-[#78746e] mb-4 flex items-center gap-2">
                   <Share2 className="h-4 w-4" />
-                  Share this article
+                  {t('blog.share.title')}
                 </p>
-                <div className="flex gap-3">
-                  <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[rgba(28,25,23,0.1)] text-sm text-[#78746e] hover:bg-[#f0ede8] transition-colors">
-                    <Twitter className="h-4 w-4" /> Twitter
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[rgba(28,25,23,0.1)] text-sm text-[#78746e] hover:bg-[#f0ede8] transition-colors">
-                    <Facebook className="h-4 w-4" /> Facebook
-                  </button>
-                  <button
-                    onClick={handleCopyLink}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[rgba(28,25,23,0.1)] text-sm text-[#78746e] hover:bg-[#f0ede8] transition-colors"
-                  >
-                    <Link2 className="h-4 w-4" />
-                    {copied ? "Copied!" : "Copy link"}
-                  </button>
-                </div>
+                <ShareBar
+                  url={typeof window !== 'undefined' ? window.location.href : `https://${BRAND.domain}/blog/${slug}`}
+                  title={post.title}
+                  text={post.excerpt ?? post.title}
+                  labelPrefix="blog.share"
+                  variant="icons"
+                />
               </div>
 
               {/* Back to Blog */}

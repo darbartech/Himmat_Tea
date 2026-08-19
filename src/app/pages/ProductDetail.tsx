@@ -24,14 +24,6 @@ import {
   Leaf,
   Truck,
   RotateCcw,
-  Share2,
-  Facebook,
-  Twitter,
-  MessageCircle,
-  Copy,
-  Linkedin,
-  Instagram,
-  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -42,6 +34,7 @@ import {
 } from "@/app/components/ui/tabs";
 import { Badge } from "@/app/components/ui/badge";
 import { BRAND } from "@/config/brand";
+import ShareBar from "@/app/components/ShareBar";
 
 // ─── Brew guide by tea type ───────────────────────────────────────────────────
 const brewGuideByType: Record<
@@ -161,8 +154,6 @@ export default function ProductDetail() {
   const [activeImage, setActiveImage] = useState(0);
   const [selectedWeight, setSelectedWeight] = useState("50g");
   const [quantity, setQuantity] = useState(1);
-  const [copied, setCopied] = useState(false);
-  const [shareAnalytics, setShareAnalytics] = useState<Record<string, number>>({});
 
   const { data: allProducts = [], isLoading: loading } = useQuery({
     queryKey: ['products'],
@@ -176,72 +167,6 @@ export default function ProductDetail() {
   const productId = parseInt(id as string);
   const product = allProducts.find((p: Product) => p.id === productId) || null;
   const relatedProducts = allProducts.filter((p: Product) => p.id !== productId).slice(0, 3);
-
-  function trackShare(platform: string) {
-    setShareAnalytics(prev => ({
-      ...prev,
-      [platform]: (prev[platform] || 0) + 1
-    }));
-  }
-
-  async function handleShare(platform: string) {
-    trackShare(platform);
-    const currentProductUrl = typeof window !== 'undefined' ? window.location.href : '';
-    const shareText = `Check out ${product?.name} from ${BRAND.companyName}!`;
-    let shareUrl = "";
-
-    switch (platform) {
-      case "facebook":
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentProductUrl)}`;
-        if (typeof window !== 'undefined') {
-          window.open(shareUrl, "_blank", "noopener,noreferrer");
-        }
-        break;
-
-      case "twitter":
-        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentProductUrl)}`;
-        if (typeof window !== 'undefined') {
-          window.open(shareUrl, "_blank", "width=600,height=400,noopener,noreferrer");
-        }
-        break;
-
-      case "linkedin":
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentProductUrl)}`;
-        if (typeof window !== 'undefined') {
-          window.open(shareUrl, "_blank", "width=600,height=400,noopener,noreferrer");
-        }
-        break;
-
-      case "whatsapp":
-        shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText + " " + currentProductUrl)}`;
-        if (typeof window !== 'undefined') {
-          window.open(shareUrl, "_blank", "noopener,noreferrer");
-        }
-        break;
-
-      case "copy":
-        if (typeof navigator !== 'undefined' && typeof navigator.clipboard !== 'undefined') {
-          await navigator.clipboard.writeText(currentProductUrl);
-          setCopied(true);
-          toast.success("Link copied to clipboard!");
-          setTimeout(() => setCopied(false), 2000);
-        }
-        break;
-
-      case "native":
-        if (typeof navigator !== 'undefined' && navigator.share && product) {
-          try {
-            await navigator.share({
-              title: product.name,
-              text: shareText,
-              url: currentProductUrl,
-            });
-          } catch {
-          }
-        }
-        break;
-    }
-  }
 
   function handleAddToCart() {
     if (!product) return;
@@ -560,59 +485,13 @@ export default function ProductDetail() {
               {/* Share Buttons */}
               <div className="mb-4">
                 <p className="text-sm font-semibold text-[#1c1917] mb-3">{t('productDetail.share.title')}</p>
-                <div className="flex flex-wrap gap-2">
-                  {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
-                    <button
-                      onClick={() => handleShare("native")}
-                      className="flex items-center gap-2 px-3 py-2.5 bg-[#2d5a3d] text-white rounded-xl hover:bg-[#234832] transition-colors"
-                      aria-label={t('productDetail.share.native')}
-                      title={t('productDetail.share.button')}
-                    >
-                      <Share2 className="h-5 w-5" />
-                      <span className="text-sm font-medium hidden sm:inline">{t('productDetail.share.button')}</span>
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleShare("facebook")}
-                    className="p-2.5 bg-[#1877f2] text-white rounded-xl hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1877f2]"
-                    aria-label={t('productDetail.share.facebook')}
-                    title={t('productDetail.share.facebook')}
-                  >
-                    <Facebook className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => handleShare("twitter")}
-                    className="p-2.5 bg-black text-white rounded-xl hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
-                    aria-label={t('productDetail.share.twitter')}
-                    title={t('productDetail.share.twitter')}
-                  >
-                    <Twitter className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => handleShare("whatsapp")}
-                    className="p-2.5 bg-[#25d366] text-white rounded-xl hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#25d366]"
-                    aria-label={t('productDetail.share.whatsapp')}
-                    title={t('productDetail.share.whatsapp')}
-                  >
-                    <MessageCircle className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => handleShare("linkedin")}
-                    className="p-2.5 bg-[#0077b5] text-white rounded-xl hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0077b5]"
-                    aria-label={t('productDetail.share.linkedin')}
-                    title={t('productDetail.share.linkedin')}
-                  >
-                    <Linkedin className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => handleShare("copy")}
-                    className={`p-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${copied ? "bg-[#2d5a3d] text-white focus:ring-[#2d5a3d]" : "bg-[#78746e] text-white hover:opacity-90 focus:ring-[#78746e]"}`}
-                    aria-label={t('productDetail.share.copyLink')}
-                    title={copied ? "Copied!" : "Copy Link"}
-                  >
-                    {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
-                  </button>
-                </div>
+                <ShareBar
+                  url={typeof window !== 'undefined' ? window.location.href : `https://${BRAND.domain}/products/${id}`}
+                  title={product.name}
+                  text={`Check out ${product.name} from ${BRAND.companyName}!`}
+                  labelPrefix="productDetail.share"
+                  variant="icons"
+                />
               </div>
 
               {/* Trust badges */}

@@ -17,7 +17,11 @@ const normalize = (value: unknown) =>
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const isAdminView = searchParams.get('admin') === 'true'
+    // `?admin=true` must not be trusted on its own — anyone (not just an
+    // admin) could append it and see inactive/unpublished jobs. Only honor
+    // it when the request actually carries a valid admin session.
+    const requestedAdminView = searchParams.get('admin') === 'true'
+    const isAdminView = requestedAdminView && !!(await getCurrentAdmin())
 
     const jobs = await prisma.careerJob.findMany({
       where: isAdminView ? {} : { isActive: true },

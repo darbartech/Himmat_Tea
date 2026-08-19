@@ -139,6 +139,26 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('This role is no longer accepting applications', 404)
     }
 
+    // One application per email, per job. Emails are normalized to lowercase
+    // so "Jane@x.com" and "jane@x.com" are treated as the same applicant.
+    const normalizedEmail = data.email.toLowerCase()
+
+    const existing = await prisma.careerApplication.findUnique({
+      where: {
+        careerJobId_email: {
+          careerJobId: data.careerJobId,
+          email: normalizedEmail,
+        },
+      },
+      select: { id: true },
+    })
+    if (existing) {
+      return createErrorResponse(
+        'An application from this email already exists for this role. Each email may apply to a given role once.',
+        409
+      )
+    }
+
     let resumeUrl: string
     try {
       resumeUrl = await uploadResume(resumeFile as File)
@@ -146,18 +166,29 @@ export async function POST(request: NextRequest) {
       return createErrorResponse(err?.message || 'Failed to upload resume', 400)
     }
 
-    const application = await prisma.careerApplication.create({
-      data: {
-        careerJobId: data.careerJobId,
-        fullName: data.fullName,
-        email: data.email,
-        phone: data.phone,
-        address: data.address,
-        coverLetter: data.coverLetter,
-        resumeUrl,
-        status: 'New',
-      },
-    })
+    let application
+    try {
+      application = await prisma.careerApplication.create({
+        data: {
+          careerJobId: data.careerJobId,
+          fullName: data.fullName,
+          email: normalizedEmail,
+          phone: data.phone,
+          address: data.address,
+          coverLetter: data.coverLetter,
+          resumeUrl,
+          status: 'New',
+        },
+      })
+    } catch (err: any) {
+      if (err?.code === 'P2002') {
+        return createErrorResponse(
+          'An application from this email already exists for this role. Each email may apply to a given role once.',
+          409
+        )
+      }
+      throw err
+    }
 
     return createResponse(
       { message: 'Application submitted successfully', id: application.id },
