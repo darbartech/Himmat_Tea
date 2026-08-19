@@ -2,12 +2,11 @@
 
 import { ShoppingBag, Star } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import type { Product } from "@/context/StoreContext";
 import { Badge } from "@/app/components/ui/badge";
-import { notify } from "@/lib/notify";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: Product;
@@ -27,7 +26,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault();
     if (isOutOfStock) {
-      notify.error(`${product.name} is out of stock.`);
+      toast.error(`${product.name} is out of stock.`);
       return;
     }
     addToCart({
@@ -46,12 +45,10 @@ export default function ProductCard({ product }: ProductCardProps) {
         href={`/products/${product.id}`}
         className="relative overflow-hidden bg-[#f8f6f2] block aspect-[4/3] md:aspect-[1/1]"
       >
-        <Image
+        <img
           src={product.imageUrl}
           alt={product.name}
-          fill
-          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-          className={`object-cover object-center transition-transform duration-700 group-hover:scale-105 ${isOutOfStock ? "opacity-60 grayscale" : ""}`}
+          className={`w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 ${isOutOfStock ? "opacity-60 grayscale" : ""}`}
         />
         {product.isBestseller && (
           <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-[#2d5a3d] text-white shadow-sm">

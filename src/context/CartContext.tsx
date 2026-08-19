@@ -9,7 +9,7 @@ import {
   useMemo,
   ReactNode,
 } from "react";
-import { notify } from "@/lib/notify";
+import { toast } from "sonner";
 
 export interface CartItem {
   id: string;
@@ -104,7 +104,7 @@ export function CartProvider({
             // Items saved before productId was required (or corrupted data)
             // would otherwise silently survive hydration and only fail at
             // checkout. Drop them here and let the user know instead.
-            notify.error(
+            toast.error(
               "Some items in your saved cart were out of date and have been removed. Please re-add them."
             );
           }

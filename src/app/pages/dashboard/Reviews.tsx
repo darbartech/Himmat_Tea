@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { api, ApiError } from "../../../lib/api-client";
-import { notify } from "@/lib/notify";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
@@ -23,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
-import { notify } from "@/lib/notify";
+import { toast } from "sonner";
 
 import { useTranslation } from '../../../context/TranslationContext';
 type Review = {
@@ -62,7 +61,7 @@ const Reviews = () => {
       setReviews(data);
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to load reviews";
-      notify.error(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -125,10 +124,10 @@ const Reviews = () => {
       });
       const resolved: Review = (updated as any)?.data ?? updated;
       setReviews((prev) => prev.map((r) => (r.id === resolved.id ? { ...r, ...resolved } : r)));
-      notify.success(`Review ${newStatus.toLowerCase()} successfully!`);
+      toast.success(`Review ${newStatus.toLowerCase()} successfully!`);
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || `Failed to ${newStatus.toLowerCase()} review`;
-      notify.error(msg);
+      toast.error(msg);
     } finally {
       setUpdatingId(null);
     }
@@ -145,10 +144,10 @@ const Reviews = () => {
       setDeletingId(deleteTarget.id);
       await api.delete(`/reviews/${deleteTarget.id}`);
       setReviews((prev) => prev.filter((r) => r.id !== deleteTarget.id));
-      notify.success("Review deleted successfully!");
+      toast.success("Review deleted successfully!");
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to delete review";
-      notify.error(msg);
+      toast.error(msg);
     } finally {
       setDeletingId(null);
       setIsDeleteDialogOpen(false);

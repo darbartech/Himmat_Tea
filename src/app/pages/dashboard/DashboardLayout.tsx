@@ -32,6 +32,8 @@ import {
   HelpCircle,
   ChefHat,
   Layers,
+  BriefcaseBusiness,
+  ClipboardList,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar";
 import {
@@ -228,16 +230,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       href: "/himmat_admin_8526/dashboard/faqs", 
       icon: HelpCircle 
     },
-    { 
-      name: t("dashboard.nav.brewingGuides"), 
-      href: "/himmat_admin_8526/dashboard/brewing-guides", 
-      icon: ChefHat 
-    },
-    { 
-      name: t("dashboard.nav.collections"), 
-      href: "/himmat_admin_8526/dashboard/collections", 
-      icon: LayoutDashboard 
-    },
+ { 
+  name: t("dashboard.nav.brewingGuides"), 
+  href: "/himmat_admin_8526/dashboard/brewing-guides", 
+  icon: ChefHat 
+},
+{ 
+  name: t("dashboard.nav.careers"), 
+  href: "/himmat_admin_8526/dashboard/careers", 
+  icon: BriefcaseBusiness 
+},
+{ 
+  name: t("dashboard.nav.careerApplications"), 
+  href: "/himmat_admin_8526/dashboard/career-applications", 
+  icon: ClipboardList 
+},
+{ 
+  name: t("dashboard.nav.collections"), 
+  href: "/himmat_admin_8526/dashboard/collections", 
+  icon: LayoutDashboard 
+},
     { 
       name: t("dashboard.nav.orders"), 
       href: "/himmat_admin_8526/dashboard/orders", 

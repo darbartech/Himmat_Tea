@@ -9,8 +9,6 @@ import { Eye, EyeOff } from 'lucide-react';
 import { createLoginFormSchema, LoginFormData } from './validation';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/hooks/useTranslation';
-import { notify } from '@/lib/notify';
-import { LoadingButton } from '@/app/components/ui/loading-button';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -199,15 +197,21 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           </div>
         )}
 
-        <LoadingButton
+        <button
           type="submit"
-          isLoading={isLoading}
-          loadingLabel={<span>{t('auth.login.submitting')}</span>}
+          disabled={isLoading}
           aria-disabled={isLoading}
           className="w-full py-4 mt-2 bg-[#2d5a3d] text-white font-semibold rounded-2xl hover:bg-[#234832] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100 shadow-lg shadow-[#2d5a3d]/20 hover:shadow-xl hover:shadow-[#2d5a3d]/30 text-[15px]"
         >
-          <span>{t('auth.login.submit')}</span>
-        </LoadingButton>
+          {isLoading ? (
+            <>
+              <span className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></span>
+              <span>{t('auth.login.submitting')}</span>
+            </>
+          ) : (
+            <span>{t('auth.login.submit')}</span>
+          )}
+        </button>
       </form>
     </div>
   );

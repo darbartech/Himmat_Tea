@@ -7,8 +7,6 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, Lock, Eye, EyeOff } from 'lucide-react';
 import { createResetPasswordSchema, ResetPasswordData } from './validation';
 import { useTranslation } from '@/hooks/useTranslation';
-import { notify } from '@/lib/notify';
-import { LoadingButton } from '@/app/components/ui/loading-button';
 
 interface ResetPasswordFormProps {
   className?: string;
@@ -62,30 +60,20 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
     setApiError(null);
 
     try {
-      const fetchPromise = (async () => {
-        const response = await fetch('/api/auth/reset-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            newPassword: data.newPassword,
-            confirmPassword: data.confirmPassword
-          })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || result.message || t('auth.resetPassword.genericError'));
-        }
-
-        return result;
-      })();
-
-      await notify.promise(fetchPromise, {
-        loading: 'Resetting password…',
-        success: 'Password reset successful!',
-        error: (e) => e instanceof Error ? e.message : t('auth.resetPassword.genericError')
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          newPassword: data.newPassword,
+          confirmPassword: data.confirmPassword
+        })
       });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || result.message || t('auth.resetPassword.genericError'));
+      }
 
       setSuccess(true);
       setTimeout(() => {
@@ -235,16 +223,24 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
           </div>
         )}
 
-        <LoadingButton
+        <button
           type="submit"
-          isLoading={isLoading}
-          loadingLabel={t('auth.resetPassword.submitting')}
+          disabled={isLoading}
           aria-disabled={isLoading}
           className="w-full py-4 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {t('auth.resetPassword.submit')}
-          <ArrowRight className="h-5 w-5" />
-        </LoadingButton>
+          {isLoading ? (
+            <>
+              <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+              {t('auth.resetPassword.submitting')}
+            </>
+          ) : (
+            <>
+              {t('auth.resetPassword.submit')}
+              <ArrowRight className="h-5 w-5" />
+            </>
+          )}
+        </button>
       </form>
     </div>
   );

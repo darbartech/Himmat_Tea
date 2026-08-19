@@ -5,7 +5,7 @@ import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
 import { useWishlist } from "@/context/WishlistContext";
 import { Heart, ShoppingBag, ArrowRight } from "lucide-react";
-import { notify } from "@/lib/notify";
+import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 
@@ -26,7 +26,7 @@ export default function Wishlist() {
       image: product.image,
       weight: "50g",
     });
-    notify.success(`${product.name} added to cart!`);
+    toast.success(`${product.name} added to cart!`);
   }
 
   return (
@@ -126,7 +126,7 @@ export default function Wishlist() {
                       <button
                         onClick={() => {
                           removeFromWishlist(product.id);
-                          notify.success(`${product.name} removed from wishlist!`);
+                          toast.success(`${product.name} removed from wishlist!`);
                         }}
                         className="p-2.5 border-2 border-[rgba(28,25,23,0.12)] rounded-xl text-[#78746e] hover:border-red-400 hover:text-red-500 transition-all"
                         title={t('wishlist.removeItem')}

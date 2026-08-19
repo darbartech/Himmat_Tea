@@ -10,8 +10,7 @@ import { useCart, AppliedCoupon } from "@/context/CartContext";
 import { useStore } from "@/context/StoreContext";
 import { useAuth } from "@/context/AuthContext";
 import { api, ApiError } from "@/lib/api-client";
-import { notify } from "@/lib/notify";
-import { LoadingButton } from "@/app/components/ui/loading-button";
+import { toast } from "sonner";
 import Link from "next/link";
 
 type SettingsType = {
@@ -242,35 +241,26 @@ export default function Checkout() {
     if (e) e.preventDefault();
     const code = couponInput.trim();
     if (!code) {
-      notify.error("Please enter a coupon code.");
+      toast.error("Please enter a coupon code.");
       return;
     }
     if (subtotal <= 0) {
-      notify.error("Add items to your cart before applying a coupon.");
+      toast.error("Add items to your cart before applying a coupon.");
       return;
     }
     setIsApplyingCoupon(true);
     try {
-      const res: any = await notify.promise(
-        api.get(`/coupons?code=${encodeURIComponent(code)}&subtotal=${subtotal}`),
-        {
-          loading: "Applying coupon…",
-          success: (data: any) => {
-            if (data?.valid && data?.data) {
-              const couponData: AppliedCoupon = data.data;
-              return `Coupon "${couponData.code}" applied — ${currency} ${couponData.discountAmount.toLocaleString()} off!`;
-            }
-            throw new Error(data?.error || "Invalid coupon code.");
-          },
-          error: (err: any) => err?.message || "Could not validate coupon. Please try again.",
-        }
-      );
+      const res: any = await api.get(`/coupons?code=${encodeURIComponent(code)}&subtotal=${subtotal}`);
       if (res?.valid && res?.data) {
         const couponData: AppliedCoupon = res.data;
         setAppliedCoupon(couponData);
         setCouponInput("");
+        toast.success(`Coupon "${couponData.code}" applied — ${currency} ${couponData.discountAmount.toLocaleString()} off!`);
+      } else {
+        toast.error(res?.error || "Invalid coupon code.");
       }
-    } catch (_) {
+    } catch (err: any) {
+      toast.error(err?.message || "Could not validate coupon. Please try again.");
     } finally {
       setIsApplyingCoupon(false);
     }
@@ -280,7 +270,7 @@ export default function Checkout() {
     const code = appliedCoupon?.code;
     setAppliedCoupon(null);
     if (code) {
-      notify.info(`Coupon "${code}" removed.`);
+      toast.info(`Coupon "${code}" removed.`);
     }
   }
 
@@ -322,14 +312,7 @@ export default function Checkout() {
         couponCode: appliedCoupon?.code ?? null,
       };
 
-      const response: any = await notify.promise(
-        api.post('/orders', orderData),
-        {
-          loading: "Placing your order…",
-          success: "Order placed successfully!",
-          error: (err: any) => err?.message || "Could not place your order.",
-        }
-      );
+      const response: any = await api.post('/orders', orderData);
       const createdOrder = response?.data || response;
       clearCart();
       idempotencyKeyRef.current = null;
@@ -667,16 +650,23 @@ export default function Checkout() {
                     </div>
                   </div>
 
-                  <LoadingButton
+                  <button
                     onClick={handlePlaceOrder}
-                    isLoading={isSubmitting}
-                    loadingLabel="Placing Order…"
-                    disabled={cart.length === 0}
+                    disabled={isSubmitting || cart.length === 0}
                     className="w-full py-4 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                   >
-                    Place Order — {currency}&nbsp;{grandTotal.toLocaleString()}
-                    <ArrowRight className="h-5 w-5" />
-                  </LoadingButton>
+                    {isSubmitting ? (
+                      <>
+                        <RefreshCw className="h-5 w-5 animate-spin" />
+                        Placing Order…
+                      </>
+                    ) : (
+                      <>
+                        Place Order — {currency}&nbsp;{grandTotal.toLocaleString()}
+                        <ArrowRight className="h-5 w-5" />
+                      </>
+                    )}
+                  </button>
 
                   <p className="text-xs text-center text-[#78746e] mt-4 flex items-center justify-center gap-1">
                     <span>🔒</span>

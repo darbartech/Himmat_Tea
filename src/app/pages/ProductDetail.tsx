@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
@@ -34,7 +33,7 @@ import {
   Instagram,
   Check,
 } from "lucide-react";
-import { notify } from "@/lib/notify";
+import { toast } from "sonner";
 import {
   Tabs,
   TabsContent,
@@ -43,7 +42,6 @@ import {
 } from "@/app/components/ui/tabs";
 import { Badge } from "@/app/components/ui/badge";
 import { BRAND } from "@/config/brand";
-import { WEIGHT_MULTIPLIERS as weightMultipliers } from "@/lib/pricing";
 
 // ─── Brew guide by tea type ───────────────────────────────────────────────────
 const brewGuideByType: Record<
@@ -81,6 +79,12 @@ const brewGuideByType: Record<
     ratio: "1:70",
     notes: "Lower temperature preserves the delicate floral and honey notes",
   },
+};
+
+const weightMultipliers: Record<string, number> = {
+  "25g": 0.5,
+  "50g": 1.0,
+  "100g": 1.85,
 };
 
 function StarRating({
@@ -219,7 +223,7 @@ export default function ProductDetail() {
         if (typeof navigator !== 'undefined' && typeof navigator.clipboard !== 'undefined') {
           await navigator.clipboard.writeText(currentProductUrl);
           setCopied(true);
-          notify.success("Link copied to clipboard!");
+          toast.success("Link copied to clipboard!");
           setTimeout(() => setCopied(false), 2000);
         }
         break;
@@ -243,12 +247,12 @@ export default function ProductDetail() {
     if (!product) return;
     const stock = typeof product.stock === "number" ? product.stock : 0;
     if (stock <= 0) {
-      notify.error(`${product.name} is out of stock.`);
+      toast.error(`${product.name} is out of stock.`);
       return;
     }
     const cappedQty = Math.max(0, Math.min(quantity, stock));
     if (cappedQty <= 0) {
-      notify.error(`${product.name} is out of stock.`);
+      toast.error(`${product.name} is out of stock.`);
       return;
     }
     for (let i = 0; i < cappedQty; i++) {
@@ -262,7 +266,7 @@ export default function ProductDetail() {
         stock: product.stock,
       });
     }
-    notify.success(
+    toast.success(
       cappedQty === 1
         ? `${product.name} added to cart!`
         : `${cappedQty} × ${product.name} added to cart!`
@@ -280,10 +284,10 @@ export default function ProductDetail() {
     };
     if (isInWishlist(product.id.toString())) {
       removeFromWishlist(product.id.toString());
-      notify.success(`${product.name} removed from wishlist!`);
+      toast.success(`${product.name} removed from wishlist!`);
     } else {
       addToWishlist(productData);
-      notify.success(`${product.name} added to wishlist!`);
+      toast.success(`${product.name} added to wishlist!`);
     }
   }
 
@@ -387,14 +391,11 @@ export default function ProductDetail() {
           <div className="grid lg:grid-cols-2 gap-10 mb-20 items-start">
             {/* LEFT — Gallery */}
             <div className="sticky top-[130px] self-start space-y-3">
-              <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#f0ede8]">
-                <Image
+              <div className="aspect-square rounded-2xl overflow-hidden bg-[#f0ede8]">
+                <img
                   src={images[activeImage]}
                   alt={product.name}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover transition-all duration-300"
+                  className="w-full h-full object-cover transition-all duration-300"
                 />
               </div>
               {/* Thumbnails (only if we have multiple) */}
@@ -404,18 +405,16 @@ export default function ProductDetail() {
                     <button
                       key={i}
                       onClick={() => setActiveImage(i + 1)}
-                      className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                      className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
                         activeImage === i + 1
                           ? "border-[#2d5a3d] shadow-md"
                           : "border-transparent hover:border-[#c8a96e]"
                       }`}
                     >
-                      <Image
+                      <img
                         src={img}
                         alt={`${product.name} view ${i + 2}`}
-                        fill
-                        sizes="150px"
-                        className="object-cover"
+                        className="w-full h-full object-cover"
                       />
                     </button>
                   ))}
@@ -476,7 +475,7 @@ export default function ProductDetail() {
                 <p className="text-sm font-semibold text-[#1c1917] mb-3">
                   Weight
                 </p>
-                <div className="flex flex-wrap gap-3 gap-y-2">
+                <div className="flex gap-3">
                   {Object.entries(weightMultipliers).map(([w, mult]) => (
                     <button
                       key={w}
@@ -829,13 +828,11 @@ export default function ProductDetail() {
                     href={`/products/${relatedProduct.id}`}
                     className="bg-white rounded-2xl border border-[rgba(28,25,23,0.06)] overflow-hidden group hover:shadow-md transition-shadow"
                   >
-                    <div className="relative aspect-square overflow-hidden">
-                      <Image
+                    <div className="aspect-square overflow-hidden">
+                      <img
                         src={relatedProduct.imageUrl}
                         alt={relatedProduct.name}
-                        fill
-                        sizes="(max-width: 640px) 100vw, 33vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>
                     <div className="p-4">

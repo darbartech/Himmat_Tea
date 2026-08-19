@@ -7,8 +7,6 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, Mail } from 'lucide-react';
 import { createForgotPasswordSchema, ForgotPasswordData } from './validation';
 import { useTranslation } from '@/hooks/useTranslation';
-import { notify } from '@/lib/notify';
-import { LoadingButton } from '@/app/components/ui/loading-button';
 
 interface ForgotPasswordFormProps {
   className?: string;
@@ -119,16 +117,24 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
           </div>
         )}
 
-        <LoadingButton
+        <button
           type="submit"
-          isLoading={isLoading}
-          loadingLabel={t('auth.forgotPassword.submitting')}
+          disabled={isLoading}
           aria-disabled={isLoading}
           className="w-full py-4 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {t('auth.forgotPassword.submit')}
-          <ArrowRight className="h-5 w-5" />
-        </LoadingButton>
+          {isLoading ? (
+            <>
+              <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+              {t('auth.forgotPassword.submitting')}
+            </>
+          ) : (
+            <>
+              {t('auth.forgotPassword.submit')}
+              <ArrowRight className="h-5 w-5" />
+            </>
+          )}
+        </button>
       </form>
     </div>
   );

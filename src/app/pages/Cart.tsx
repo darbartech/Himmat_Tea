@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { notify } from "@/lib/notify";
+import { toast } from "sonner";
 
 export default function Cart() {
   const { t } = useTranslation();
@@ -30,7 +30,7 @@ export default function Cart() {
   function applyPromo() {
     if (promo.trim() === "") return;
     setPromoApplied(true);
-    notify.success("Promo code applied!");
+    toast.success("Promo code applied!");
   }
 
   return (

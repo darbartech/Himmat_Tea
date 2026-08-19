@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Navigation from "@/app/components/Navigation";
 import Footer from "@/app/components/Footer";
 import Link from "next/link";
@@ -39,7 +39,7 @@ import {
 
 const stats = [
   { value: "32", label: "Team Members" },
-  { value: "6", label: "Open Roles" },
+  { value: "0", label: "Open Roles" },
   { value: "12", label: "Countries We Reach" },
   { value: "2018", label: "Founded" },
 ];
@@ -68,50 +68,18 @@ const values = [
 ];
 
 const benefits = [
-  {
-    icon: Heart,
-    title: "Health Coverage",
-    desc: "Full medical and dental insurance for you and your dependents.",
-  },
-  {
-    icon: Laptop,
-    title: "Remote Flexibility",
-    desc: "Hybrid and fully remote roles available. Work where you do your best.",
-  },
-  {
-    icon: Coffee,
-    title: "Unlimited Tea Allowance",
-    desc: "Monthly tea box — explore our entire catalogue on us.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Equity Programme",
-    desc: "All full-time employees share in the company's growth through equity.",
-  },
-  {
-    icon: Zap,
-    title: "Learning Budget",
-    desc: "Rs. 50,000/year for courses, books, conferences, and workshops.",
-  },
-  {
-    icon: Shield,
-    title: "Paid Parental Leave",
-    desc: "16 weeks fully paid for primary caregivers, 8 weeks secondary.",
-  },
-  {
-    icon: Globe,
-    title: "Sourcing Trips",
-    desc: "Eligible team members join our annual farm tours in Nepal & Asia.",
-  },
-  {
-    icon: Users,
-    title: "Team Retreats",
-    desc: "Annual full-team gathering in Kathmandu — our home and heartland.",
-  },
+  { icon: Heart, title: "Health Coverage", desc: "Full medical and dental insurance for you and your dependents." },
+  { icon: Laptop, title: "Remote Flexibility", desc: "Hybrid and fully remote roles available. Work where you do your best." },
+  { icon: Coffee, title: "Unlimited Tea Allowance", desc: "Monthly tea box — explore our entire catalogue on us." },
+  { icon: TrendingUp, title: "Equity Programme", desc: "All full-time employees share in the company's growth through equity." },
+  { icon: Zap, title: "Learning Budget", desc: "Rs. 50,000/year for courses, books, conferences, and workshops." },
+  { icon: Shield, title: "Paid Parental Leave", desc: "16 weeks fully paid for primary caregivers, 8 weeks secondary." },
+  { icon: Globe, title: "Sourcing Trips", desc: "Eligible team members join our annual farm tours in Nepal & Asia." },
+  { icon: Users, title: "Team Retreats", desc: "Annual full-team gathering in Kathmandu — our home and heartland." },
 ];
 
 type Job = {
-  id: number;
+  id: string;
   title: string;
   department: string;
   location: string;
@@ -121,168 +89,9 @@ type Job = {
   description: string;
   responsibilities: string[];
   requirements: string[];
+  isActive: boolean;
+  sortOrder: number;
 };
-
-const jobs: Job[] = [
-  {
-    id: 1,
-    title: "Head of Tea Sourcing",
-    department: "Sourcing",
-    location: "Kathmandu, Nepal",
-    type: "Full-time",
-    level: "Senior",
-    posted: "June 10, 2026",
-    description:
-      "Lead our sourcing strategy across Nepal, India, and China. Build direct relationships with estate owners, develop quality benchmarks, and ensure our supply chain stays ethical and traceable.",
-    responsibilities: [
-      "Develop and maintain relationships with 20+ tea estates across Asia",
-      "Lead seasonal buying trips to Ilam, Darjeeling, and Fujian",
-      "Establish quality standards and cupping protocols",
-      "Work closely with the product team to develop new offerings",
-      "Ensure all sourcing practices meet our Fair Trade and organic commitments",
-    ],
-    requirements: [
-      "5+ years in tea procurement or specialty beverage sourcing",
-      "Deep knowledge of Asian tea-growing regions and varieties",
-      "Proven relationships with estate owners or co-ops",
-      "Fluent in English; Nepali or Mandarin a strong plus",
-      "Willingness to travel 30–40% of the year",
-    ],
-  },
-  {
-    id: 2,
-    title: "Digital Marketing Specialist",
-    department: "Marketing",
-    location: "Remote",
-    type: "Full-time",
-    level: "Mid-level",
-    posted: "June 14, 2026",
-    description:
-      "Own our digital channels — from paid social to SEO — and grow the Godgifted brand to a global audience of premium food enthusiasts.",
-    responsibilities: [
-      "Manage and optimise paid campaigns across Meta, Google, and Pinterest",
-      "Develop and execute SEO content strategy with the content team",
-      "Drive email marketing with a focus on lifecycle automation",
-      "Analyse performance data and report monthly to leadership",
-      "Collaborate with design on creative assets for campaigns",
-    ],
-    requirements: [
-      "3+ years in digital marketing, ideally for a DTC brand",
-      "Hands-on experience with Meta Ads Manager and Google Ads",
-      "Proficiency in email marketing platforms (Klaviyo preferred)",
-      "Strong analytical skills — comfortable with GA4 and Looker",
-      "Passion for premium food, beverage, or wellness brands",
-    ],
-  },
-  {
-    id: 3,
-    title: "E-commerce & Operations Manager",
-    department: "Operations",
-    location: "Kathmandu, Nepal",
-    type: "Full-time",
-    level: "Mid-level",
-    posted: "June 16, 2026",
-    description:
-      "Oversee our online store operations, fulfilment logistics, and wholesale order management. You're the connective tissue between our web presence and the physical reality of getting exceptional tea to customers.",
-    responsibilities: [
-      "Own day-to-day operations of the web store and product catalogue",
-      "Manage fulfilment partners and monitor delivery KPIs",
-      "Coordinate wholesale order processing and B2B invoicing",
-      "Optimise returns and customer service workflows",
-      "Liaise with our 3PL in Kathmandu and international logistics providers",
-    ],
-    requirements: [
-      "3+ years in e-commerce operations or supply chain management",
-      "Experience with Shopify or a comparable platform",
-      "Strong organisational skills and exceptional attention to detail",
-      "Familiarity with Nepal customs and international shipping a plus",
-      "Comfortable with spreadsheets and inventory management tools",
-    ],
-  },
-  {
-    id: 4,
-    title: "Tea Quality Analyst",
-    department: "Sourcing",
-    location: "Ilam, Nepal",
-    type: "Full-time",
-    level: "Junior / Mid",
-    posted: "June 18, 2026",
-    description:
-      "Based in our Ilam facility, you'll be our frontline quality guardian — cupping every incoming lot, maintaining detailed tasting records, and working with partner estates to improve harvest outcomes.",
-    responsibilities: [
-      "Cup and grade incoming tea lots against our quality benchmarks",
-      "Maintain detailed tasting notes and batch records in our QA system",
-      "Coordinate with estate managers on harvest and processing feedback",
-      "Support development of new blends alongside the Head of Sourcing",
-      "Conduct annual farm audits for organic and Fair Trade compliance",
-    ],
-    requirements: [
-      "Formal training in tea cupping or sensory evaluation",
-      "1–3 years in a tea, coffee, or specialty food QA role",
-      "Based in or willing to relocate to Ilam, Nepal",
-      "Meticulous record-keeping and reporting skills",
-      "Passion for Himalayan tea heritage and regional terroir",
-    ],
-  },
-  {
-    id: 5,
-    title: "Customer Experience Lead",
-    department: "Customer Success",
-    location: "Remote",
-    type: "Full-time",
-    level: "Mid-level",
-    posted: "June 20, 2026",
-    description:
-      "Be the voice of Godgifted to our customers. Manage support across email and chat, build loyalty initiatives, and use customer insights to improve our product and experience.",
-    responsibilities: [
-      "Handle customer enquiries via email and live chat (Gorgias / Zendesk)",
-      "Own subscription management and retention strategy",
-      "Develop and run loyalty and referral programmes",
-      "Surface customer feedback to product and marketing teams",
-      "Maintain a 95%+ CSAT score month-over-month",
-    ],
-    requirements: [
-      "2+ years in customer support, ideally for a DTC or subscription brand",
-      "Empathetic communicator with excellent written English",
-      "Experience with helpdesk software (Gorgias, Zendesk, or Freshdesk)",
-      "Data-oriented: comfortable tracking and reporting support metrics",
-      "Genuine enthusiasm for tea or premium consumer goods",
-    ],
-  },
-  {
-    id: 6,
-    title: "Brand & Visual Designer",
-    department: "Marketing",
-    location: "Remote",
-    type: "Contract",
-    level: "Mid / Senior",
-    posted: "June 22, 2026",
-    description:
-      "Shape the visual identity of Godgifted across digital and physical touchpoints. From packaging to social content to email templates — bring our brand to life in every pixel.",
-    responsibilities: [
-      "Create compelling visual content for social, email, and web",
-      "Design and iterate on packaging concepts with the product team",
-      "Maintain and evolve the Godgifted brand guidelines",
-      "Collaborate with marketing on campaign creative",
-      "Produce motion graphics for Instagram Reels and product videos",
-    ],
-    requirements: [
-      "4+ years in brand or graphic design for consumer products",
-      "Expert-level proficiency in Figma and Adobe Creative Suite",
-      "Portfolio showing both digital and print/packaging work",
-      "Strong typographic sensibility for premium aesthetics",
-      "Motion design skills (After Effects / Lottie) are a strong plus",
-    ],
-  },
-];
-
-const departments = [
-  "All",
-  "Sourcing",
-  "Marketing",
-  "Operations",
-  "Customer Success",
-];
 
 const typeColor: Record<string, string> = {
   "Full-time": "bg-[#f0f9f4] text-[#2d5a3d]",
@@ -308,11 +117,14 @@ function ApplyDialog({
 }) {
   const { t } = useTranslation();
   const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
-    linkedin: "",
+    address: "",
     cover: "",
   });
 
@@ -323,11 +135,56 @@ function ApplyDialog({
 
   const reset = () => {
     setDone(false);
-    setForm({ name: "", email: "", phone: "", linkedin: "", cover: "" });
+    setError(null);
+    setSubmitting(false);
+    setResumeFile(null);
+    setForm({ name: "", email: "", phone: "", address: "", cover: "" });
     onClose();
   };
 
   if (!job) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!form.name.trim() || !form.email.trim() || !form.phone.trim() || !form.address.trim()) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+    if (!resumeFile) {
+      setError("Please attach your resume/CV.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const payload = new FormData();
+      payload.append("careerJobId", job.id);
+      payload.append("fullName", form.name.trim());
+      payload.append("email", form.email.trim());
+      payload.append("phone", form.phone.trim());
+      payload.append("address", form.address.trim());
+      payload.append("coverLetter", form.cover.trim());
+      payload.append("resume", resumeFile);
+
+      const response = await fetch("/api/career-applications", {
+        method: "POST",
+        body: payload,
+      });
+
+      const result = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to submit application. Please try again.");
+      }
+
+      setDone(true);
+    } catch (err: any) {
+      setError(err?.message || "Failed to submit application. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && reset()}>
@@ -360,13 +217,7 @@ function ApplyDialog({
           </div>
         ) : (
           /* ── Application form ── */
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setDone(true);
-            }}
-            className="space-y-4 pt-2"
-          >
+          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             {/* Role badge */}
             <div className="flex flex-wrap gap-2 pb-2 border-b border-[rgba(28,25,23,0.07)]">
               <span className="inline-flex items-center gap-1.5 text-xs text-[#78746e] bg-[#f9f7f4] px-3 py-1.5 rounded-full border border-[rgba(28,25,23,0.08)]">
@@ -383,6 +234,13 @@ function ApplyDialog({
                 {job.type}
               </span>
             </div>
+
+            {error && (
+              <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">
+                <X className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
 
             <div>
               <label className="block text-xs font-semibold text-[#1c1917] uppercase tracking-wider mb-1.5">
@@ -413,7 +271,7 @@ function ApplyDialog({
               </div>
               <div>
                 <label className="block text-xs font-semibold text-[#1c1917] uppercase tracking-wider mb-1.5">
-                  Phone
+                  Phone <span className="text-[#c8a96e]">*</span>
                 </label>
                 <input
                   value={form.phone}
@@ -421,20 +279,21 @@ function ApplyDialog({
                   type="tel"
                   placeholder="+977 000 0000"
                   className={inputCls}
+                  required
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-[#1c1917] uppercase tracking-wider mb-1.5">
-                LinkedIn / Portfolio URL
+                Address <span className="text-[#c8a96e]">*</span>
               </label>
               <input
-                value={form.linkedin}
-                onChange={set("linkedin")}
-                type="url"
-                placeholder={t('careers.linkedinPlaceholder')}
+                value={form.address}
+                onChange={set("address")}
+                placeholder="Street, City, Country"
                 className={inputCls}
+                required
               />
             </div>
 
@@ -447,16 +306,24 @@ function ApplyDialog({
                 <span className="w-8 h-8 rounded-lg bg-[#f0ede8] flex items-center justify-center shrink-0">
                   <ArrowRight className="h-4 w-4 text-[#2d5a3d] rotate-[-90deg]" />
                 </span>
-                <span>
-                  <span className="font-medium text-[#1c1917]">
-                    Click to upload
-                  </span>{" "}
-                  or drag and drop &nbsp;·&nbsp; PDF, DOC up to 5 MB
+                <span className="truncate">
+                  {resumeFile ? (
+                    <span className="font-medium text-[#1c1917]">{resumeFile.name}</span>
+                  ) : (
+                    <>
+                      <span className="font-medium text-[#1c1917]">
+                        Click to upload
+                      </span>{" "}
+                      or drag and drop &nbsp;·&nbsp; PDF, DOC up to 5 MB
+                    </>
+                  )}
                 </span>
                 <input
                   type="file"
                   className="hidden"
                   accept=".pdf,.doc,.docx"
+                  onChange={(e) => setResumeFile(e.target.files?.[0] ?? null)}
+                  required
                 />
               </label>
             </div>
@@ -476,11 +343,18 @@ function ApplyDialog({
 
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#244a33] transition-all py-3.5 text-sm"
+              disabled={submitting}
+              className="w-full flex items-center justify-center gap-2 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#244a33] transition-all py-3.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
               style={{ boxShadow: "0 4px 16px rgba(45,90,61,0.2)" }}
             >
-              Submit Application
-              <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+              {submitting ? (
+                "Submitting..."
+              ) : (
+                <>
+                  Submit Application
+                  <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                </>
+              )}
             </button>
 
             <p className="text-center text-xs text-[#78746e]">
@@ -670,6 +544,32 @@ export default function Careers() {
   const [activeTab, setActiveTab] = useState("All");
   const [applyJob, setApplyJob] = useState<Job | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/careers")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load careers");
+        return res.json();
+      })
+      .then((result) => {
+        if (!cancelled) setJobs(Array.isArray(result) ? result : result?.data ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setJobs([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingJobs(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const departments = useMemo(
+    () => ["All", ...Array.from(new Set(jobs.map((job) => job.department).filter(Boolean)))],
+    [jobs]
+  );
 
   const filtered =
     activeTab === "All" ? jobs : jobs.filter((j) => j.department === activeTab);
