@@ -79,6 +79,7 @@ interface Order {
   total: number;
   shippingCost?: number;
   tax: number;
+  discountAmount?: number;
   grandTotal: number;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
@@ -351,13 +352,14 @@ function OrderInvoice({
             and frequently miscalculates row height → next block overlaps. */}
         <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
           <colgroup>
-            <col style={{ width: "265px" }} />
-            <col style={{ width: "264px" }} />
-            <col style={{ width: "265px" }} />
+            <col style={{ width: "397px" }} />
+            <col style={{ width: "397px" }} />
           </colgroup>
           <tbody>
             <tr>
-              {/* Bill To */}
+              {/* Bill To / Ship To — this store only records one shipping
+                  address per order, so a separate "Ship To" block would
+                  just repeat the same name/address with no new information. */}
               <td
                 style={{
                   padding: "24px 32px",
@@ -367,7 +369,7 @@ function OrderInvoice({
                 }}
               >
                 <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", marginBottom: "10px", textTransform: "uppercase" }}>
-                  Bill To
+                  Bill To / Ship To
                 </div>
                 <div style={{ fontSize: "14px", fontWeight: 700, color: "#1a1a1a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.customerName}</div>
                 {order.customerEmail && (
@@ -376,26 +378,6 @@ function OrderInvoice({
                 {order.customerPhone && (
                   <div style={{ fontSize: "12px", color: "#555555", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.customerPhone}</div>
                 )}
-                {order.shippingAddress && (
-                  <div style={{ fontSize: "12px", color: "#555555", marginTop: "6px", lineHeight: "1.6", whiteSpace: "pre-line", wordBreak: "break-word" }}>
-                    {order.shippingAddress}
-                  </div>
-                )}
-              </td>
-
-              {/* Ship To */}
-              <td
-                style={{
-                  padding: "24px 32px",
-                  borderRight: "1px solid #e5e5e5",
-                  verticalAlign: "top",
-                  boxSizing: "border-box",
-                }}
-              >
-                <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", marginBottom: "10px", textTransform: "uppercase" }}>
-                  Ship To
-                </div>
-                <div style={{ fontSize: "14px", fontWeight: 700, color: "#1a1a1a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.customerName}</div>
                 {order.shippingAddress && (
                   <div style={{ fontSize: "12px", color: "#555555", marginTop: "6px", lineHeight: "1.6", whiteSpace: "pre-line", wordBreak: "break-word" }}>
                     {order.shippingAddress}
@@ -448,8 +430,7 @@ function OrderInvoice({
         <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
           <colgroup>
             <col style={{ width: "36px" }} />
-            <col style={{ width: "212px" }} />
-            <col style={{ width: "90px" }} />
+            <col style={{ width: "302px" }} />
             <col style={{ width: "60px" }} />
             <col style={{ width: "100px" }} />
             <col style={{ width: "90px" }} />
@@ -460,7 +441,6 @@ function OrderInvoice({
               {[
                 { label: "#",           align: "left" },
                 { label: "Description", align: "left" },
-                { label: "HSN/SAC",     align: "center" },
                 { label: t('dashboard.orders.qty'),         align: "center" },
                 { label: t('dashboard.orders.unitPrice'),  align: "right" },
                 { label: t('dashboard.orders.discount'),    align: "right" },
@@ -505,9 +485,6 @@ function OrderInvoice({
                   <div style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a1a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "normal", wordBreak: "break-word", lineHeight: "1.4" }}>{itemName(item)}</div>
                   <div style={{ fontSize: "11px", color: "#999999", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>SKU: {String(item.productId || item.id || "")}</div>
                 </td>
-                <td style={{ textAlign: "center", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", paddingRight: "8px", fontSize: "12px", color: "#666666", verticalAlign: "top", whiteSpace: "nowrap" }}>
-                  0902
-                </td>
                 <td style={{ textAlign: "center", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", paddingRight: "8px", fontSize: "13px", fontWeight: 600, color: "#1a1a1a", verticalAlign: "top", whiteSpace: "nowrap" }}>
                   {item.quantity}
                 </td>
@@ -526,7 +503,7 @@ function OrderInvoice({
         </table>
       </div>
 
-      {/* ── Totals + bank details ── */}
+      {/* ── Totals + amount in words ── */}
       {/* Outer table: 2 columns. 48px outer padding → 794 - 96 = 698 px available.
           gap: 32px → left=406 right=260  */}
       <div style={{ padding: "28px 48px 0" }}>
@@ -538,38 +515,10 @@ function OrderInvoice({
           </colgroup>
           <tbody>
             <tr>
-              {/* Left column — bank + amount in words */}
+              {/* Left column — amount in words */}
               <td style={{ verticalAlign: "top" }}>
-                <div style={{ fontSize: "10px", fontWeight: 700, color: "#888888", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "8px" }}>
-                  Payment Details
-                </div>
-                <table style={{ borderCollapse: "collapse", tableLayout: "fixed", width: "100%" }}>
-                  <colgroup>
-                    <col style={{ width: "120px" }} />
-                    <col style={{ width: "286px" }} />
-                  </colgroup>
-                  <tbody>
-                    {[
-                      ["Bank Name", "State Bank of India"],
-                      ["Account No.", "XXXX XXXX XXXX 4521"],
-                      ["IFSC Code", "SBIN0001234"],
-                      ["Branch", "New Delhi Main"],
-                    ].map(([label, val]) => (
-                      <tr key={label}>
-                        <td style={{ fontSize: "11px", color: "#888888", paddingBottom: "4px", paddingRight: "16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {label}
-                        </td>
-                        <td style={{ fontSize: "12px", color: "#333333", fontWeight: 500, paddingBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {val}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
                 {/* Amount in words */}
                 <div style={{
-                  marginTop: "20px",
                   padding: "12px 16px",
                   background: "#f0fdf4",
                   border: "1px solid #bbf7d0",
@@ -602,7 +551,9 @@ function OrderInvoice({
                     </tr>
                     <tr>
                       <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t('common.discount')}</td>
-                      <td style={{ fontSize: "13px", textAlign: "right", color: "#16a34a", paddingBottom: "8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>— ₹0.00</td>
+                      <td style={{ fontSize: "13px", textAlign: "right", color: (order.discountAmount ?? 0) > 0 ? "#16a34a" : "#1a1a1a", paddingBottom: "8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                        {(order.discountAmount ?? 0) > 0 ? `− ₹${fmt(order.discountAmount ?? 0)}` : `₹${fmt(0)}`}
+                      </td>
                     </tr>
                     {settings.gstNumber ? (
                       <>
@@ -917,6 +868,7 @@ export default function Orders() {
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [bulkUpdating, setBulkUpdating] = useState(false);
   const [trackingSaving, setTrackingSaving] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [noteSaving, setNoteSaving] = useState(false);
   const [paymentDecisionPending, setPaymentDecisionPending] = useState(false);
   const [refundPending, setRefundPending] = useState(false);
@@ -1286,6 +1238,12 @@ export default function Orders() {
 
   const handleDownloadInvoice = async () => {
     if (!invoiceRef.current || !selectedOrder) return;
+    // Guard against a second export starting while one is already in flight —
+    // overlapping calls each append/remove their own off-screen captureHost,
+    // which can reflow the document mid-capture and visibly disturb the
+    // tracking/notes section above the invoice preview.
+    if (downloadingInvoice) return;
+    setDownloadingInvoice(true);
     const orderId = selectedOrder.orderNumber || selectedOrder.id;
     const A4_WIDTH_MM = 210;
     const A4_HEIGHT_MM = 297;
@@ -1414,6 +1372,7 @@ export default function Orders() {
       if (captureHost && captureHost.parentNode) {
         captureHost.parentNode.removeChild(captureHost);
       }
+      setDownloadingInvoice(false);
     }
   };
 
@@ -1783,8 +1742,18 @@ export default function Orders() {
                     <Printer className="h-4 w-4 mr-1.5" />
                     {t("dashboard.orders.printInvoice")}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleDownloadInvoice} className="flex-1 sm:flex-initial">
-                    <Download className="h-4 w-4 mr-1.5" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadInvoice}
+                    disabled={downloadingInvoice}
+                    className="flex-1 sm:flex-initial"
+                  >
+                    {downloadingInvoice ? (
+                      <RefreshCw className="h-4 w-4 mr-1.5 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4 mr-1.5" />
+                    )}
                     {t("dashboard.orders.download")}
                   </Button>
                 </div>

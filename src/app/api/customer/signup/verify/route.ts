@@ -6,6 +6,7 @@ import { rateLimitAuth } from '@/lib/rate-limit'
 import { OTP_LENGTH } from '@/lib/password-reset'
 import { MAX_SIGNUP_OTP_ATTEMPTS } from '@/lib/signup-verification'
 import { normalizeEmail, isEmailRegistered } from '@/lib/email-validation'
+import { sendCustomerWelcomeEmail } from '@/lib/email'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
@@ -99,6 +100,23 @@ export async function POST(request: NextRequest) {
       where: { id: verification.id },
       data: { usedAt: new Date() }
     })
+
+    try {
+      await prisma.notification.create({
+        data: {
+          title: 'New customer registered',
+          message: `${customer.name} (${customer.email}) just created an account.`
+        }
+      })
+    } catch (notifyErr) {
+      console.error('Error creating signup notification:', notifyErr)
+    }
+
+    try {
+      await sendCustomerWelcomeEmail({ name: customer.name, email: customer.email })
+    } catch (emailErr) {
+      console.error('Error sending welcome email:', emailErr)
+    }
 
     await setAuthCookie({
       id: customer.id,

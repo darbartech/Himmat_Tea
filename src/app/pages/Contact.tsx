@@ -6,9 +6,11 @@ import Footer from "@/app/components/Footer";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ArrowRight, Mail, Phone, MapPin, MessageSquare, AlertCircle } from "lucide-react";
 import { LoadingButton } from "@/app/components/ui/loading-button";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function Contact() {
   const { t } = useTranslation();
+  const { settings } = useSettings();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +35,8 @@ export default function Contact() {
 
               <div className="space-y-6 mb-12">
                 {[
-                  { icon: Mail, title: t('contact.fields.email'), value: "support@godgifted.com" },
-                  { icon: Phone, title: "Phone", value: "+977 1 234 567" },
+                  { icon: Mail, title: t('contact.fields.email'), value: settings.storeEmail },
+                  { icon: Phone, title: "Phone", value: settings.storePhone },
                   { icon: MapPin, title: "Address", value: "Kathmandu, Nepal" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-4">

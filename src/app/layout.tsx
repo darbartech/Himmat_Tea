@@ -7,6 +7,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { StoreProvider } from '@/context/StoreContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { CurrencyProvider } from '@/context/CurrencyContext';
+import { SettingsProvider } from '@/context/SettingsContext';
 import { BRAND } from '@/config/brand';
 import ReactQueryProvider from '@/providers/ReactQueryProvider';
 import NextAuthProvider from '@/providers/NextAuthProvider';
@@ -48,18 +49,20 @@ export default function RootLayout({
         <ReactQueryProvider>
           <NextAuthProvider>
             <CurrencyProvider>
-              <TranslationProvider>
-                <StoreProvider>
-                  <CartProvider>
-                    <WishlistProvider>
-                      <AuthProvider>
-                        {children}
-                        <Toaster />
-                      </AuthProvider>
-                    </WishlistProvider>
-                  </CartProvider>
-                </StoreProvider>
-              </TranslationProvider>
+              <SettingsProvider>
+                <TranslationProvider>
+                  <StoreProvider>
+                    <CartProvider>
+                      <WishlistProvider>
+                        <AuthProvider>
+                          {children}
+                          <Toaster />
+                        </AuthProvider>
+                      </WishlistProvider>
+                    </CartProvider>
+                  </StoreProvider>
+                </TranslationProvider>
+              </SettingsProvider>
             </CurrencyProvider>
           </NextAuthProvider>
         </ReactQueryProvider>

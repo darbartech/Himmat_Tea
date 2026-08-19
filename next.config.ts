@@ -29,11 +29,6 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   images: {
-    // Product photography, hero visuals, blog images, etc. are all served
-    // from Cloudinary. Without this, next/image either fails to load them
-    // or silently falls back to unoptimized passthrough — required for the
-    // <Image> swap in ProductCard.tsx / ProductDetail.tsx (audit item #3)
-    // to actually deliver the responsive srcset / WebP / AVIF benefits.
     remotePatterns: [
       {
         protocol: "https",
@@ -43,6 +38,12 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+    ],
+  },
+  experimental: {
+    serverComponentsExternalPackages: [
+      "@upstash/redis",
+      "@upstash/ratelimit",
     ],
   },
   async headers() {

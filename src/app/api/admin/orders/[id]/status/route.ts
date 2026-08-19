@@ -23,7 +23,7 @@ const ORDER_STATUS_TRANSITIONS: Record<string, string[]> = {
 }
 
 const statusUpdateSchema = z.object({
-  status: z.enum(['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED']),
+  status: z.enum(['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED']).optional(),
   trackingNumber: z.string().optional().nullable(),
   courierPartner: z.string().optional().nullable(),
   cancelReason: z.string().optional(),
@@ -64,7 +64,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       )
     }
 
-    const { status, trackingNumber, courierPartner, cancelReason, refundReason, refundAmount } = parsed.data
+    const { status: requestedStatus, trackingNumber, courierPartner, cancelReason, refundReason, refundAmount } = parsed.data
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -79,13 +79,20 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
 
     const currentStatus = order.status
-    const allowed = ORDER_STATUS_TRANSITIONS[currentStatus] || []
+    // `status` is optional in the request — tracking/courier-only updates
+    // (e.g. saving tracking info without changing status) omit it entirely.
+    // Fall back to the order's current status in that case, and only
+    // enforce the transition table when a real status change was requested.
+    const status = requestedStatus ?? currentStatus
 
-    if (!allowed.includes(status)) {
-      return createErrorResponse(
-        `Invalid order transition: ${currentStatus} → ${status}`,
-        409
-      )
+    if (requestedStatus && requestedStatus !== currentStatus) {
+      const allowed = ORDER_STATUS_TRANSITIONS[currentStatus] || []
+      if (!allowed.includes(requestedStatus)) {
+        return createErrorResponse(
+          `Invalid order transition: ${currentStatus} → ${requestedStatus}`,
+          409
+        )
+      }
     }
 
     const now = new Date()
@@ -187,7 +194,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         include: { items: true, payment: true, customer: { select: SAFE_CUSTOMER_SELECT }, internalNotes: true },
       })
 
-      const changeParts: string[] = [`${currentStatus} → ${status}`]
+      const changeParts: string[] = requestedStatus && requestedStatus !== currentStatus
+        ? [`${currentStatus} → ${status}`]
+        : []
       if (trackingNumber) changeParts.push(`tracking: ${trackingNumber}`)
       if (courierPartner) changeParts.push(`courier: ${courierPartner}`)
       if (cancelReason) changeParts.push(`reason: ${cancelReason}`)
@@ -198,7 +207,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       await tx.internalNote.create({
         data: {
           orderId,
-          text: `Admin ${adminUser.username} updated order: ${changeParts.join(', ')}`,
+          text: `Admin ${adminUser.username} updated order: ${changeParts.join(', ') || 'no changes'}`,
           adminId: String(adminUser.id),
           adminName: adminUser.username,
         },
@@ -207,7 +216,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return orderUpd
     }, { timeout: 120_000, maxWait: 30_000 })
 
-    if (updated) {
+    const statusActuallyChanged = Boolean(requestedStatus && requestedStatus !== currentStatus)
+
+    if (updated && statusActuallyChanged) {
       const updAny = updated as any
       const orderNum = updAny.orderNumber || ('orderNumber' in order ? (order as any).orderNumber : String(orderId))
       const custName = (updAny.customerName as string) || order.customerName

@@ -1,31 +1,60 @@
-// src/app/components/ui/loading-button.tsx
+"use client";
+
 import * as React from "react";
 import { Loader2 } from "lucide-react";
+import { Button, type ButtonProps } from "./button";
 import { cn } from "./utils";
 
-interface LoadingButtonProps extends React.ComponentProps<"button"> {
+interface LoadingButtonProps extends ButtonProps {
   isLoading?: boolean;
+  loadingLabel?: string;
   spinnerClassName?: string;
 }
 
-function LoadingButton({ className, isLoading = false, disabled, children, spinnerClassName, ...props }: LoadingButtonProps) {
-  return (
-    <button
-      data-slot="loading-button"
-      className={cn("relative", className)}
-      disabled={disabled || isLoading}
-      aria-busy={isLoading}
-      {...props}
-    >
-      {isLoading && (
-        <span className="absolute inset-0 flex items-center justify-center">
-          <Loader2 className={cn("h-5 w-5 animate-spin", spinnerClassName)} />
-        </span>
-      )}
-      <span className={cn("contents", isLoading && "invisible")}>{children}</span>
-    </button>
-  );
-}
+const LoadingButton = React.forwardRef<
+  HTMLButtonElement,
+  LoadingButtonProps
+>(
+  (
+    {
+      isLoading = false,
+      loadingLabel,
+      spinnerClassName,
+      className,
+      children,
+      disabled,
+      ...props
+    },
+    ref,
+  ) => {
+    return (
+      <Button
+        disabled={isLoading || disabled}
+        className={cn("relative", className)}
+        {...props}
+      >
+        {isLoading ? (
+          <>
+            <Loader2
+              className={cn(
+                "size-4 shrink-0 animate-spin",
+                spinnerClassName,
+              )}
+              aria-hidden="true"
+            />
+            {loadingLabel && (
+              <span className="truncate">{loadingLabel}</span>
+            )}
+          </>
+        ) : (
+          children
+        )}
+      </Button>
+    );
+  },
+);
+
+LoadingButton.displayName = "LoadingButton";
 
 export { LoadingButton };
 export type { LoadingButtonProps };

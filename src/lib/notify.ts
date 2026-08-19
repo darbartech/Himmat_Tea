@@ -1,6 +1,8 @@
 "use client";
 
-import { toast as sonnerToast, type ToastT, type PromiseData } from "sonner";
+import { toast as sonnerToast, type ToastT } from "sonner";
+
+type SonnerPromiseData<TData = unknown> = Parameters<typeof sonnerToast.promise>[1];
 
 const DEFAULT_DURATION = 3200;
 const LOADING_DURATION = 120_000;
@@ -94,7 +96,7 @@ export const notify = {
   promise<TData, TErr = unknown>(
     promise: Promise<TData> | (() => Promise<TData>),
     states: PromiseToastStates<TData>,
-    opts?: Partial<PromiseData<TData, TErr>> & NotifyToastOptions,
+    opts?: Partial<SonnerPromiseData<TData>> & NotifyToastOptions,
   ) {
     // Normalize to a real Promise up front so the same instance can be
     // handed to sonner (for the loading/success/error toast UI) AND
@@ -105,7 +107,7 @@ export const notify = {
     const settledPromise: Promise<TData> =
       typeof promise === "function" ? promise() : promise;
 
-    sonnerToast.promise<TData, TErr>(settledPromise, {
+    (sonnerToast.promise as any)(settledPromise, {
       loading: states.loading,
       success: states.success as any,
       error: states.error as any,

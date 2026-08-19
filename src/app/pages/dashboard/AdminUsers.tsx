@@ -311,7 +311,7 @@ export default function AdminUsers() {
                             <AlertDialogFooter>
                               <AlertDialogCancel>{t('dashboard.products.cancel')}</AlertDialogCancel>
                               <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-red-600">
-                                Delete
+                                Delete User
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

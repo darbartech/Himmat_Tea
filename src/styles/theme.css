@@ -493,11 +493,19 @@
     font-family: 'DM Sans', sans-serif;
   }
 
-  button {
+  button,
+  [role="button"] {
     font-size: 0.875rem;
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
     font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"]:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
   }
 
   input, textarea, select {
@@ -507,10 +515,44 @@
     font-family: 'DM Sans', sans-serif;
   }
 
-  a {
+  select,
+  [type="checkbox"],
+  [type="radio"],
+  [type="range"],
+  [type="color"],
+  [type="file"],
+  [type="submit"],
+  [type="reset"],
+  [type="button"] {
+    cursor: pointer;
+  }
+
+  input:disabled,
+  textarea:disabled,
+  select:disabled,
+  [type="checkbox"]:disabled,
+  [type="radio"]:disabled,
+  [type="range"]:disabled,
+  [type="file"]:disabled {
+    cursor: not-allowed;
+  }
+
+  a,
+  [role="link"] {
     color: inherit;
     text-decoration: none;
+    cursor: pointer;
     transition: color var(--duration-fast) var(--ease-out-expo);
+  }
+
+  label {
+    cursor: default;
+  }
+
+  label:has(input:not(:disabled)),
+  label:has(select:not(:disabled)),
+  label:has(textarea:not(:disabled)) {
+    cursor: pointer;
   }
 
   img {

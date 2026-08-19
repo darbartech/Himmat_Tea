@@ -782,7 +782,7 @@ export default function Products() {
                     <span className="text-[#1c1917]">{product.stock} units</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyles(product.status)}`}>
+                    <span className={`inline-block whitespace-nowrap px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyles(product.status)}`}>
                       {product.status}
                     </span>
                   </td>

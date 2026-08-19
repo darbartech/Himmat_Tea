@@ -79,7 +79,7 @@ const authOptions: NextAuthOptions = {
               }
             } catch {}
 
-            await prisma.customer.create({
+            const newCustomer = await prisma.customer.create({
               data: {
                 name: user.name || email.split("@")[0] || "User",
                 email,
@@ -92,6 +92,24 @@ const authOptions: NextAuthOptions = {
                 githubId: account.provider === "github" ? account.providerAccountId : null,
               } as any,
             });
+
+            try {
+              await prisma.notification.create({
+                data: {
+                  title: "New customer registered",
+                  message: `${newCustomer.name} (${newCustomer.email}) just created an account.`,
+                },
+              });
+            } catch (notifyErr) {
+              console.error("Error creating signup notification:", notifyErr);
+            }
+
+            try {
+              const { sendCustomerWelcomeEmail } = await import("../../../../lib/email");
+              await sendCustomerWelcomeEmail({ name: newCustomer.name, email: newCustomer.email });
+            } catch (emailErr) {
+              console.error("Error sending welcome email:", emailErr);
+            }
           }
         } catch (err) {
           console.error("Error syncing customer during signIn:", err);

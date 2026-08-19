@@ -6,10 +6,12 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { BRAND } from "@/config/brand";
 import Image from "next/image";
 import { useStore } from "@/context/StoreContext";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function Footer() {
   const { t } = useTranslation();
   const { productLines } = useStore();
+  const { settings } = useSettings();
 
   const links = {
     [t("footer.shop")]: [
@@ -82,16 +84,16 @@ export default function Footer() {
               <p>{t("footer.addressLine1")}</p>
               <p>{t("footer.addressLine2")}</p>
               <a
-                href={`mailto:${BRAND.supportEmail}`}
+                href={`mailto:${settings.storeEmail}`}
                 className="block hover:text-[#c8a96e] transition-colors"
               >
-                {BRAND.supportEmail}
+                {settings.storeEmail}
               </a>
               <a
-                href={`tel:${BRAND.supportPhone}`}
+                href={`tel:${settings.storePhone}`}
                 className="block hover:text-[#c8a96e] transition-colors"
               >
-                {BRAND.supportPhone}
+                {settings.storePhone}
               </a>
             </div>
           </div>
