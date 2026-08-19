@@ -217,9 +217,9 @@ export default function DashboardHome() {
       change: revenueChange,
       trend: revenueChange.startsWith("+") ? "up" : "down",
       icon: DollarSign,
-      gradient: "from-emerald-500 to-green-600",
-      gradientSoft: "from-emerald-50 to-green-50",
       iconBg: "bg-emerald-500",
+      iconBgSoft: "bg-emerald-50",
+      iconColor: "text-emerald-500",
       badge: t("dashboard.home.thisMonth"),
     },
     {
@@ -228,9 +228,9 @@ export default function DashboardHome() {
       change: ordersChange,
       trend: ordersChange.startsWith("+") ? "up" : "down",
       icon: ShoppingBag,
-      gradient: "from-amber-500 to-yellow-600",
-      gradientSoft: "from-amber-50 to-yellow-50",
       iconBg: "bg-amber-500",
+      iconBgSoft: "bg-amber-50",
+      iconColor: "text-amber-500",
       badge: `${pendingOrders} ${t("dashboard.home.pending")}`,
     },
     {
@@ -239,9 +239,9 @@ export default function DashboardHome() {
       change: customersChange,
       trend: customersChange.startsWith("+") ? "up" : "down",
       icon: Users,
-      gradient: "from-sky-500 to-blue-600",
-      gradientSoft: "from-sky-50 to-blue-50",
       iconBg: "bg-sky-500",
+      iconBgSoft: "bg-sky-50",
+      iconColor: "text-sky-500",
       badge: t("dashboard.home.active"),
     },
     {
@@ -250,9 +250,9 @@ export default function DashboardHome() {
       change: productsChange,
       trend: "up",
       icon: Package,
-      gradient: "from-violet-500 to-purple-600",
-      gradientSoft: "from-violet-50 to-purple-50",
       iconBg: "bg-violet-500",
+      iconBgSoft: "bg-violet-50",
+      iconColor: "text-violet-500",
       badge: `${lowStockProducts.length} ${t("dashboard.home.lowStock")}`,
     },
   ];
@@ -316,14 +316,14 @@ export default function DashboardHome() {
                 notify.error("Failed to download report. Please try again.");
               }
             }}
-            className="px-4 py-3 rounded-2xl border border-[#e8e9e5] bg-white text-[#1c1917] font-medium hover:bg-[#fafaf8] hover:border-[#d4d6cf] transition-all duration-200 flex items-center gap-2 shadow-sm"
+            className="px-4 py-3 rounded-2xl border border-[#e8e9e5] bg-white text-[#1c1917] font-medium hover:bg-[#fafaf8] hover:border-[#d4d6cf] transition-all duration-200 flex items-center gap-2"
           >
             <Download className="h-4 w-4" />
             {t("dashboard.home.downloadReport")}
           </button>
           <button
             onClick={() => router.push("/himmat_admin_8526/dashboard/orders")}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-[#2d5a3d] to-[#0b7c33] text-white font-medium hover:from-[#234832] hover:to-[#0a6b2b] transition-all duration-200 shadow-lg shadow-[#2d5a3d]/20 hover:shadow-xl hover:shadow-[#2d5a3d]/30 active:scale-[0.98]"
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#2d5a3d] text-white font-medium hover:bg-[#234832] transition-colors duration-200 active:scale-[0.98]"
           >
             <Plus className="h-4 w-4" />
             {t("dashboard.home.newOrder")}
@@ -335,7 +335,7 @@ export default function DashboardHome() {
         <div className={`rounded-3xl p-5 flex items-start gap-4 border ${
           error
             ? 'bg-red-50 border-red-200'
-            : 'bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-100'
+            : 'bg-emerald-50 border-emerald-100'
         }`}>
           {error ? (
             <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
@@ -363,9 +363,9 @@ export default function DashboardHome() {
       )}
 
       {!loading && !error && lowStockProducts.length > 0 && (
-        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-3xl p-6 shadow-sm">
+        <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6">
           <div className="flex items-start gap-4 flex-col sm:flex-row">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
+            <div className="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center shrink-0">
               <AlertTriangle className="h-7 w-7 text-white shrink-0" />
             </div>
             <div className="flex-1">
@@ -381,13 +381,13 @@ export default function DashboardHome() {
                 {lowStockProducts.slice(0, 5).map((product) => (
                   <span
                     key={product.id}
-                    className="px-3.5 py-2 bg-white rounded-xl text-sm font-medium text-amber-900 border border-amber-200 shadow-sm"
+                    className="px-3.5 py-2 bg-white rounded-xl text-sm font-medium text-amber-900 border border-amber-200"
                   >
                     {product.name} <span className="text-amber-700 font-semibold">({product.stock})</span>
                   </span>
                 ))}
                 {lowStockProducts.length > 5 && (
-                  <span className="px-3.5 py-2 bg-white rounded-xl text-sm font-semibold text-amber-800 border border-amber-200 shadow-sm">
+                  <span className="px-3.5 py-2 bg-white rounded-xl text-sm font-semibold text-amber-800 border border-amber-200">
                     +{lowStockProducts.length - 5} {t("dashboard.common.more")}
                   </span>
                 )}
@@ -395,7 +395,7 @@ export default function DashboardHome() {
             </div>
             <Button
               onClick={() => router.push("/himmat_admin_8526/dashboard/inventory")}
-              className="rounded-2xl bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/20 px-5 py-3 font-medium"
+              className="rounded-2xl bg-amber-600 hover:bg-amber-700 text-white px-5 py-3 font-medium"
             >
               {t("dashboard.home.manageInventory")}
               <ChevronRight className="h-4 w-4 ml-1" />
@@ -414,13 +414,12 @@ export default function DashboardHome() {
               return (
                 <div
                   key={stat.title}
-                  className="group relative bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-transparent overflow-hidden"
+                  className="bg-white rounded-3xl p-6 border border-gray-100"
                 >
-                  <div className={`absolute -top-16 -right-16 w-40 h-40 rounded-full bg-gradient-to-br ${stat.gradientSoft} opacity-60 group-hover:opacity-100 transition-opacity duration-500`} />
-                  <div className="relative">
+                  <div>
                     <div className="flex items-start justify-between mb-6">
-                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300`}>
-                        <Icon className="h-7 w-7 text-white" />
+                      <div className={`w-14 h-14 rounded-2xl ${stat.iconBgSoft} ${stat.iconColor} flex items-center justify-center`}>
+                        <Icon className="h-7 w-7" />
                       </div>
                       <span className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-gray-50 text-[#5e5b53] border border-gray-100">
                         {stat.badge}
@@ -443,7 +442,7 @@ export default function DashboardHome() {
             })}
           </div>
 
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
             <div className="px-7 py-6 border-b border-gray-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold text-[#1c1917]">{t("dashboard.home.orderStatus")}</h3>
@@ -465,16 +464,16 @@ export default function DashboardHome() {
                     <button
                       key={status.label}
                       onClick={() => router.push("/himmat_admin_8526/dashboard/orders")}
-                      className={`group relative flex items-center gap-4 p-5 rounded-2xl ${status.bgSoft} hover:shadow-lg transition-all duration-300 border border-transparent hover:border-gray-100 text-left`}
+                      className={`flex items-center gap-4 p-5 rounded-2xl ${status.bgSoft} transition-colors duration-200 border border-transparent hover:border-gray-100 text-left`}
                     >
-                      <div className={`w-14 h-14 rounded-2xl ${status.bg} ${status.color} flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-300`}>
+                      <div className={`w-14 h-14 rounded-2xl ${status.bg} ${status.color} flex items-center justify-center`}>
                         <Icon className="h-7 w-7" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold uppercase tracking-wider text-[#5e5b53]">{status.label}</p>
                         <div className="flex items-end gap-2 mt-1">
                           <p className={`text-3xl font-bold ${status.color} tracking-tight`}>{status.count}</p>
-                          <ArrowUpRight className={`h-4 w-4 mb-2 ${status.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                          <ArrowUpRight className={`h-4 w-4 mb-2 ${status.color} opacity-0 hover:opacity-100 transition-opacity duration-200`} />
                         </div>
                       </div>
                     </button>
@@ -485,7 +484,7 @@ export default function DashboardHome() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 overflow-hidden">
               <div className="px-7 py-6 border-b border-gray-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-bold text-[#1c1917]">{t("dashboard.home.recentOrders")}</h2>
@@ -519,7 +518,7 @@ export default function DashboardHome() {
                         </td>
                         <td className="px-7 py-5">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2d5a3d] to-[#0b7c33] flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                            <div className="w-10 h-10 rounded-xl bg-[#2d5a3d] flex items-center justify-center text-white text-sm font-bold">
                               {(order.customerName || "C").charAt(0).toUpperCase()}
                             </div>
                             <div>
@@ -541,7 +540,7 @@ export default function DashboardHome() {
                           </span>
                         </td>
                         <td className="px-7 py-5 text-right">
-                          <button className="inline-flex items-center justify-center p-2.5 rounded-xl hover:bg-[#2d5a3d]/10 transition-colors text-[#5e5b53] hover:text-[#2d5a3d] group-hover:bg-[#2d5a3d]/10">
+                          <button className="inline-flex items-center justify-center p-2.5 rounded-xl hover:bg-[#2d5a3d]/10 transition-colors text-[#5e5b53] hover:text-[#2d5a3d]">
                             <Eye className="h-4.5 w-4.5" />
                           </button>
                         </td>
@@ -553,7 +552,7 @@ export default function DashboardHome() {
             </div>
 
             <div className="space-y-6">
-              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
                 <div className="px-7 py-6 border-b border-gray-50 flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-bold text-[#1c1917]">{t("dashboard.home.topProducts")}</h2>
@@ -570,16 +569,16 @@ export default function DashboardHome() {
                     topProducts.map((product, index) => (
                       <div key={product.id} className="group flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 transition-colors duration-200">
                         <div className="flex items-center gap-4">
-                          <div className={`relative w-12 h-12 rounded-2xl bg-gradient-to-br ${
-                            index === 0 ? "from-amber-400 to-amber-600" :
-                            index === 1 ? "from-gray-400 to-gray-600" :
-                            index === 2 ? "from-orange-400 to-orange-600" :
-                            index === 3 ? "from-sky-400 to-sky-600" :
-                            "from-violet-400 to-violet-600"
-                          } flex items-center justify-center text-white font-bold shadow-md`}>
+                          <div className={`relative w-12 h-12 rounded-2xl ${
+                            index === 0 ? "bg-amber-500" :
+                            index === 1 ? "bg-gray-500" :
+                            index === 2 ? "bg-orange-500" :
+                            index === 3 ? "bg-sky-500" :
+                            "bg-violet-500"
+                          } flex items-center justify-center text-white font-bold`}>
                             {index + 1}
                             {index < 3 && (
-                              <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-300 drop-shadow" />
+                              <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-300" />
                             )}
                           </div>
                           <div>
@@ -609,7 +608,7 @@ export default function DashboardHome() {
                   <div className="px-7 pb-7">
                     <button
                       onClick={() => router.push("/himmat_admin_8526/dashboard/products")}
-                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-green-50 text-[#2d5a3d] font-semibold hover:from-emerald-100 hover:to-green-100 transition-all duration-200 flex items-center justify-center gap-2 border border-emerald-100"
+                      className="w-full py-3.5 rounded-2xl bg-emerald-50 text-[#2d5a3d] font-semibold hover:bg-emerald-100 transition-colors duration-200 flex items-center justify-center gap-2 border border-emerald-100"
                     >
                       {t("dashboard.home.viewAllProducts")}
                       <ArrowRight className="h-4 w-4" />
@@ -618,12 +617,10 @@ export default function DashboardHome() {
                 )}
               </div>
 
-              <div className="bg-gradient-to-br from-[#2d5a3d] via-[#2a573a] to-[#0b7c33] rounded-3xl shadow-xl p-7 text-white relative overflow-hidden">
-                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-3xl" />
-                <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-[#c8a96e]/20 blur-3xl" />
-                <div className="relative">
+              <div className="bg-[#2d5a3d] rounded-3xl p-7 text-white">
+                <div>
                   <div className="flex items-center gap-4 mb-7">
-                    <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center backdrop-blur-sm border border-white/10">
+                    <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10">
                       <Coffee className="h-7 w-7 text-white" />
                     </div>
                     <div>
@@ -634,39 +631,39 @@ export default function DashboardHome() {
                   <div className="space-y-3">
                     <button
                       onClick={() => router.push("/himmat_admin_8526/dashboard/products")}
-                      className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 border border-white/10 hover:border-white/20 group"
+                      className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition-colors duration-200 border border-white/10 hover:border-white/20 group"
                     >
                       <span className="font-semibold flex items-center gap-3 text-white">
-                        <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
                           <Plus className="h-4 w-4" />
                         </div>
                         {t("dashboard.home.addNewProduct")}
                       </span>
-                      <ArrowUpRight className="h-5 w-5 text-white/70 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
+                      <ArrowUpRight className="h-5 w-5 text-white/70 group-hover:text-white transition-colors" />
                     </button>
                     <button
                       onClick={() => router.push("/himmat_admin_8526/dashboard/orders")}
-                      className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 border border-white/10 hover:border-white/20 group"
+                      className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition-colors duration-200 border border-white/10 hover:border-white/20 group"
                     >
                       <span className="font-semibold flex items-center gap-3 text-white">
-                        <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
                           <ShoppingBag className="h-4 w-4" />
                         </div>
                         {t("dashboard.home.processOrders")}
                       </span>
-                      <ArrowUpRight className="h-5 w-5 text-white/70 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
+                      <ArrowUpRight className="h-5 w-5 text-white/70 group-hover:text-white transition-colors" />
                     </button>
                     <button
                       onClick={() => router.push("/himmat_admin_8526/dashboard/customers")}
-                      className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 border border-white/10 hover:border-white/20 group"
+                      className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition-colors duration-200 border border-white/10 hover:border-white/20 group"
                     >
                       <span className="font-semibold flex items-center gap-3 text-white">
-                        <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
                           <Users className="h-4 w-4" />
                         </div>
                         View customers
                       </span>
-                      <ArrowUpRight className="h-5 w-5 text-white/70 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
+                      <ArrowUpRight className="h-5 w-5 text-white/70 group-hover:text-white transition-colors" />
                     </button>
                   </div>
                 </div>

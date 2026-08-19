@@ -56,13 +56,13 @@ async function tryCreateUpstashRedisStore(): Promise<KvStore | null> {
     const token = process.env.UPSTASH_REDIS_REST_TOKEN
     if (!url || !token) return null
 
-    const mod = await import('@upstash/redis')
+    const mod: any = await import('@upstash/redis')
     const redis = new mod.Redis({ url, token })
     return {
       async get<T = unknown>(key: string): Promise<T | null> {
         try {
-          const res = await redis.get<T>(key)
-          return res ?? null
+          const res = await (redis.get as any)(key)
+          return (res ?? null) as T | null
         } catch {
           return null
         }
@@ -71,9 +71,9 @@ async function tryCreateUpstashRedisStore(): Promise<KvStore | null> {
         try {
           if (typeof ttlMs === 'number') {
             const seconds = Math.max(1, Math.ceil(ttlMs / 1000))
-            await redis.set(key, value, { ex: seconds })
+            await (redis.set as any)(key, value, { ex: seconds })
           } else {
-            await redis.set(key, value)
+            await (redis.set as any)(key, value)
           }
         } catch {
           // Swallow — fallback layer will cover
@@ -81,7 +81,7 @@ async function tryCreateUpstashRedisStore(): Promise<KvStore | null> {
       },
       async del(key: string): Promise<void> {
         try {
-          await redis.del(key)
+          await (redis.del as any)(key)
         } catch {
           // noop
         }

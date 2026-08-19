@@ -48,7 +48,7 @@ interface RateLimitResult {
 }
 
 interface RateLimiterBackend {
-  check(key: string, maxTokens: number, refillMs: number): Promise<RateLimitResult>
+  check(key: string, maxTokens: number, refillMs: number): Promise<RateLimitResult> | RateLimitResult
 }
 
 // ---------------------------------------------------------------------------
@@ -161,17 +161,19 @@ class UpstashRateLimiterBackend implements RateLimiterBackend {
     return { allowed: false, retryAfterMs }
   }
 }
-
 // ---------------------------------------------------------------------------
 // Backend selector (singleton, lazy)
 // ---------------------------------------------------------------------------
 let cachedBackend: RateLimiterBackend | null = null
-let backendInit: Promise<RateLimiterBackend> | null = null
+let backendInit: Promise<RateLimiterBackend | null> | null = null
 
 async function getBackend(): Promise<RateLimiterBackend> {
   if (cachedBackend) return cachedBackend
-  if (backendInit) return backendInit
-  backendInit = (async () => {
+  if (backendInit) {
+    const resolved = await backendInit
+    if (resolved) return resolved
+  }
+  backendInit = (async (): Promise<RateLimiterBackend | null> => {
     const hasCreds = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
     if (hasCreds) {
       try {
@@ -184,10 +186,18 @@ async function getBackend(): Promise<RateLimiterBackend> {
         // fallthrough to in-memory
       }
     }
-    cachedBackend = new InMemoryRateLimiterBackend()
-    return cachedBackend
+    const fallback = new InMemoryRateLimiterBackend()
+    cachedBackend = fallback
+    return fallback
   })()
-  return backendInit
+  const resolved = await backendInit
+  if (!resolved) {
+    // Should not happen — fallback is always returned — but guard anyway
+    const fb = new InMemoryRateLimiterBackend()
+    cachedBackend = fb
+    return fb
+  }
+  return resolved
 }
 
 // ---------------------------------------------------------------------------

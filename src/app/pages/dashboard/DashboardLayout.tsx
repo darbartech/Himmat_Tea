@@ -18,6 +18,7 @@ import {
   X,
   LogOut,
   ChevronDown,
+  ChevronRight,
   Home,
   Trash2,
   Eye,
@@ -34,6 +35,8 @@ import {
   Layers,
   BriefcaseBusiness,
   ClipboardList,
+  Briefcase,
+  MessagesSquare,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar";
 import {
@@ -68,6 +71,10 @@ interface LiveNotification {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [crmOpen, setCrmOpen] = useState(true);
+  const [usersOpen, setUsersOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [vacancyOpen, setVacancyOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -200,105 +207,166 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const navigation = [
-    { 
-      name: t("dashboard.nav.dashboard"), 
-      href: "/himmat_admin_8526/dashboard", 
-      icon: LayoutDashboard 
+    {
+      name: t("dashboard.nav.dashboard"),
+      href: "/himmat_admin_8526/dashboard",
+      icon: LayoutDashboard,
     },
-    { 
-      name: t("dashboard.nav.inventory"), 
-      href: "/himmat_admin_8526/dashboard/inventory", 
-      icon: Warehouse 
+    {
+      name: t("dashboard.nav.inventory"),
+      href: "/himmat_admin_8526/dashboard/inventory",
+      icon: Warehouse,
     },
-    { 
-      name: t("dashboard.nav.products"), 
-      href: "/himmat_admin_8526/dashboard/products", 
-      icon: Package 
+    {
+      type: "group" as const,
+      name: "CRM",
+      icon: Briefcase,
+      toggle: () => setCrmOpen((v) => !v),
+      open: crmOpen,
+      children: [
+        {
+          name: t("dashboard.nav.products"),
+          href: "/himmat_admin_8526/dashboard/products",
+          icon: Package,
+        },
+        {
+          name: t("dashboard.nav.productLines"),
+          href: "/himmat_admin_8526/dashboard/product-lines",
+          icon: Layers,
+        },
+        {
+          name: t("dashboard.nav.heroVisuals"),
+          href: "/himmat_admin_8526/dashboard/hero-visuals",
+          icon: Image,
+        },
+        {
+          name: t("dashboard.nav.faqs"),
+          href: "/himmat_admin_8526/dashboard/faqs",
+          icon: HelpCircle,
+        },
+        {
+          name: t("dashboard.nav.brewingGuides"),
+          href: "/himmat_admin_8526/dashboard/brewing-guides",
+          icon: ChefHat,
+        },
+        {
+          name: t("dashboard.nav.collections"),
+          href: "/himmat_admin_8526/dashboard/collections",
+          icon: MessagesSquare,
+        },
+        {
+          name: t("dashboard.nav.reviews"),
+          href: "/himmat_admin_8526/dashboard/reviews",
+          icon: Star,
+        },
+        {
+          name: t("dashboard.nav.blog"),
+          href: "/himmat_admin_8526/dashboard/blog",
+          icon: BookOpen,
+        },
+      ],
     },
-    { 
-      name: t("dashboard.nav.productLines"), 
-      href: "/himmat_admin_8526/dashboard/product-lines", 
-      icon: Layers 
+    {
+      type: "group" as const,
+      name: "Vacancy",
+      icon: Briefcase,
+      toggle: () => setVacancyOpen((v) => !v),
+      open: vacancyOpen,
+      children: [
+        {
+          name: "Careers",
+          href: "/himmat_admin_8526/dashboard/careers",
+          icon: BriefcaseBusiness,
+        },
+        {
+          name: "Career Applications",
+          href: "/himmat_admin_8526/dashboard/career-applications",
+          icon: ClipboardList,
+        },
+      ],
     },
-    { 
-      name: t("dashboard.nav.heroVisuals"), 
-      href: "/himmat_admin_8526/dashboard/hero-visuals", 
-      icon: Image 
-    },
-    { 
-      name: t("dashboard.nav.faqs"), 
-      href: "/himmat_admin_8526/dashboard/faqs", 
-      icon: HelpCircle 
-    },
- { 
-  name: t("dashboard.nav.brewingGuides"), 
-  href: "/himmat_admin_8526/dashboard/brewing-guides", 
-  icon: ChefHat 
-},
-{ 
-  name: t("dashboard.nav.careers"), 
-  href: "/himmat_admin_8526/dashboard/careers", 
-  icon: BriefcaseBusiness 
-},
-{ 
-  name: t("dashboard.nav.careerApplications"), 
-  href: "/himmat_admin_8526/dashboard/career-applications", 
-  icon: ClipboardList 
-},
-{ 
-  name: t("dashboard.nav.collections"), 
-  href: "/himmat_admin_8526/dashboard/collections", 
-  icon: LayoutDashboard 
-},
-    { 
-      name: t("dashboard.nav.orders"), 
-      href: "/himmat_admin_8526/dashboard/orders", 
+    {
+      name: t("dashboard.nav.orders"),
+      href: "/himmat_admin_8526/dashboard/orders",
       icon: ShoppingBag,
-      badge: newOrdersCount > 0 ? newOrdersCount : undefined
+      badge: newOrdersCount > 0 ? newOrdersCount : undefined,
     },
-    { 
-      name: t("dashboard.nav.purchaseOrders"), 
-      href: "/himmat_admin_8526/dashboard/purchase-orders", 
-      icon: FileText 
+    {
+      name: t("dashboard.nav.purchaseOrders"),
+      href: "/himmat_admin_8526/dashboard/purchase-orders",
+      icon: FileText,
     },
-    { 
-      name: t("dashboard.nav.customers"), 
-      href: "/himmat_admin_8526/dashboard/customers", 
-      icon: Users 
+    {
+      type: "group" as const,
+      name: "Users",
+      icon: Users,
+      toggle: () => setUsersOpen((v) => !v),
+      open: usersOpen,
+      children: [
+        {
+          name: t("dashboard.nav.customers"),
+          href: "/himmat_admin_8526/dashboard/customers",
+          icon: Users,
+        },
+        ...(userType === "admin" && (currentUser as any)?.role === "superadmin"
+          ? [
+              {
+                name: t("dashboard.nav.adminUsers"),
+                href: "/himmat_admin_8526/dashboard/admin-users",
+                icon: Shield,
+              },
+            ]
+          : []),
+      ],
     },
-    { 
-      name: t("dashboard.nav.coupons"), 
-      href: "/himmat_admin_8526/dashboard/coupons", 
-      icon: Tag 
+    {
+      name: t("dashboard.nav.analytics"),
+      href: "/himmat_admin_8526/dashboard/analytics",
+      icon: BarChart3,
     },
-    { 
-      name: t("dashboard.nav.reviews"), 
-      href: "/himmat_admin_8526/dashboard/reviews", 
-      icon: Star 
+    {
+      type: "group" as const,
+      name: "Settings",
+      icon: Settings,
+      toggle: () => setSettingsOpen((v) => !v),
+      open: settingsOpen,
+      children: [
+        {
+          name: "General Settings",
+          href: "/himmat_admin_8526/dashboard/settings",
+          icon: Settings,
+        },
+        {
+          name: t("dashboard.nav.coupons"),
+          href: "/himmat_admin_8526/dashboard/coupons",
+          icon: Tag,
+        },
+      ],
     },
-    { 
-      name: t("dashboard.nav.blog"), 
-      href: "/himmat_admin_8526/dashboard/blog", 
-      icon: BookOpen 
-    },
-    { 
-      name: t("dashboard.nav.analytics"), 
-      href: "/himmat_admin_8526/dashboard/analytics", 
-      icon: BarChart3 
-    },
-    ...(userType === "admin" && (currentUser as any)?.role === "superadmin" ? [
-      { 
-        name: t("dashboard.nav.adminUsers"), 
-        href: "/himmat_admin_8526/dashboard/admin-users", 
-        icon: Shield 
+  ] as const;
+
+  type NavItem =
+    | {
+        type?: undefined;
+        name: string;
+        href: string;
+        icon: React.ComponentType<{ className?: string }>;
+        badge?: number | undefined;
       }
-    ] : []),
-    { 
-      name: t("dashboard.nav.settings"), 
-      href: "/himmat_admin_8526/dashboard/settings", 
-      icon: Settings 
-    },
-  ];
+    | {
+        type: "group";
+        name: string;
+        icon: React.ComponentType<{ className?: string }>;
+        toggle: () => void;
+        open: boolean;
+        children: Array<{
+          name: string;
+          href: string;
+          icon: React.ComponentType<{ className?: string }>;
+        }>;
+      };
+
+  const navItems = navigation as unknown as NavItem[];
 
   const isActive = (path: string) => {
     if (path === "/himmat_admin_8526/dashboard") {
@@ -573,31 +641,118 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div className="flex flex-col h-full p-4">
           <nav className="flex-1 space-y-2 overflow-y-auto py-4 dashboard-sidebar-scroll">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
-                    active
-                      ? "bg-gradient-to-r from-[#2d5a3d] to-[#0b7c33] text-white shadow-md shadow-[#2d5a3d]/20"
-                      : "text-[#78746e] hover:bg-[#f0f9f4] hover:text-[#1c1917]"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className={`h-5 w-5 ${active ? "text-white" : "text-[#78746e]"}`} />
-                    <span className="font-medium">{item.name}</span>
+            {navItems.map((item, idx) => {
+              if ("type" in item && item.type === "group") {
+                const GroupIcon = item.icon;
+                const hasActiveChild = item.children.some((child) =>
+                  isActive(child.href),
+                );
+                return (
+                  <div key={`group-${item.name}-${idx}`} className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={item.toggle}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
+                        hasActiveChild
+                          ? "bg-[#f0f9f4] text-[#2d5a3d] hover:bg-[#e8f5ed]"
+                          : "text-[#78746e] hover:bg-[#f0ede8] hover:text-[#1c1917]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <GroupIcon
+                          className={`h-5 w-5 ${
+                            hasActiveChild ? "text-[#2d5a3d]" : "text-[#78746e]"
+                          }`}
+                        />
+                        <span className="font-semibold tracking-tight">
+                          {item.name}
+                        </span>
+                      </div>
+                      {item.open ? (
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform duration-200 ${
+                            hasActiveChild ? "text-[#2d5a3d]" : "text-[#78746e]"
+                          }`}
+                        />
+                      ) : (
+                        <ChevronRight
+                          className={`h-4 w-4 transition-transform duration-200 ${
+                            hasActiveChild ? "text-[#2d5a3d]" : "text-[#78746e]"
+                          }`}
+                        />
+                      )}
+                    </button>
+                    {item.open && (
+                      <div className="ml-3 pl-2 space-y-1 border-l border-[#2d5a3d]/10">
+                        {item.children.map((child) => {
+                          const ChildIcon = child.icon;
+                          const childActive = isActive(child.href);
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              onClick={() => setSidebarOpen(false)}
+                              className={`flex items-center px-3.5 py-2.5 rounded-lg transition-all duration-200 ${
+                                childActive
+                                  ? "bg-gradient-to-r from-[#2d5a3d] to-[#0b7c33] text-white shadow-md shadow-[#2d5a3d]/20"
+                                  : "text-[#78746e] hover:bg-[#f0f9f4] hover:text-[#1c1917]"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <ChildIcon
+                                  className={`h-4 w-4 ${
+                                    childActive
+                                      ? "text-white"
+                                      : "text-[#78746e]"
+                                  }`}
+                                />
+                                <span className="text-sm font-medium">
+                                  {child.name}
+                                </span>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                  {item.badge && (
-                    <Badge className={active ? "bg-white text-[#2d5a3d]" : "bg-[#c8a96e] text-[#1c1917]"}>
-                      {item.badge}
-                    </Badge>
-                  )}
-                </Link>
-              );
+                );
+              } else {
+                const Icon = item.icon;
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.name + idx}
+                    href={item.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
+                      active
+                        ? "bg-gradient-to-r from-[#2d5a3d] to-[#0b7c33] text-white shadow-md shadow-[#2d5a3d]/20"
+                        : "text-[#78746e] hover:bg-[#f0f9f4] hover:text-[#1c1917]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon
+                        className={`h-5 w-5 ${
+                          active ? "text-white" : "text-[#78746e]"
+                        }`}
+                      />
+                      <span className="font-medium">{item.name}</span>
+                    </div>
+                    {item.badge && (
+                      <Badge
+                        className={
+                          active
+                            ? "bg-white text-[#2d5a3d]"
+                            : "bg-[#c8a96e] text-[#1c1917]"
+                        }
+                      >
+                        {item.badge}
+                      </Badge>
+                    )}
+                  </Link>
+                );
+              }
             })}
           </nav>
 

@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, ShoppingBag } from 'lucide-react';
-import { Carousel, CarouselContent, CarouselItem, useCarousel, type CarouselApi } from './ui/carousel';
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from './ui/carousel';
+import { useCarousel } from './ui/use-carousel';
 import { useCart } from '@/context/CartContext';
 
 import { useTranslation } from '@/hooks/useTranslation';
