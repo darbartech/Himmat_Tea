@@ -458,7 +458,6 @@ model LoyaltyProgram {
   tiers          String
   updatedAt      DateTime @updatedAt
 }
-
 model Career {
   id               String   @id @default(cuid())
   title            String
@@ -489,28 +488,30 @@ model CareerJob {
   sortOrder        Int      @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
   applications     CareerApplication[]
 }
-
 model CareerApplication {
   id          String   @id @default(cuid())
   careerJobId String
+
   fullName    String
   email       String
   phone       String
   address     String
-  coverLetter String
+  coverLetter String   @default("")
   resumeUrl   String
+
   status      String   @default("New")
   adminNotes  String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
   careerJob   CareerJob @relation(fields: [careerJobId], references: [id], onDelete: Cascade)
 
-  // One application per email, per job. `email` is normalized to lowercase
-  // before every write (see /api/career-applications POST), so this also
-  // catches "Jane@x.com" vs "jane@x.com" as the same applicant.
   @@unique([careerJobId, email])
   @@index([careerJobId])
   @@index([status])
+  @@index([email])
 }
