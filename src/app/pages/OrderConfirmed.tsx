@@ -81,7 +81,7 @@ export default function OrderConfirmed() {
 
     async function loadOrder() {
       if (!orderRef) {
-        setError("Order reference was not provided.");
+        setError(t('orderConfirmed.referenceMissing'));
         setLoading(false);
         return;
       }

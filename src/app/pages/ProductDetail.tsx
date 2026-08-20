@@ -172,12 +172,12 @@ export default function ProductDetail() {
     if (!product) return;
     const stock = typeof product.stock === "number" ? product.stock : 0;
     if (stock <= 0) {
-      toast.error(`${product.name} is out of stock.`);
+      toast.error(t('products.outOfStock', { name: product.name }));
       return;
     }
     const cappedQty = Math.max(0, Math.min(quantity, stock));
     if (cappedQty <= 0) {
-      toast.error(`${product.name} is out of stock.`);
+      toast.error(t('products.outOfStock', { name: product.name }));
       return;
     }
     for (let i = 0; i < cappedQty; i++) {
@@ -193,8 +193,8 @@ export default function ProductDetail() {
     }
     toast.success(
       cappedQty === 1
-        ? `${product.name} added to cart!`
-        : `${cappedQty} × ${product.name} added to cart!`
+        ? t('products.addedToCart', { name: product.name })
+        : t('products.addedToCartWithQty', { qty: cappedQty, name: product.name })
     );
   }
 
@@ -209,10 +209,10 @@ export default function ProductDetail() {
     };
     if (isInWishlist(product.id.toString())) {
       removeFromWishlist(product.id.toString());
-      toast.success(`${product.name} removed from wishlist!`);
+      toast.success(t('wishlist.removed', { name: product.name }));
     } else {
       addToWishlist(productData);
-      toast.success(`${product.name} added to wishlist!`);
+      toast.success(t('wishlist.added', { name: product.name }));
     }
   }
 

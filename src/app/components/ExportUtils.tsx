@@ -9,6 +9,7 @@ export interface ExportOptions {
 }
 
 export const exportToPDF = async (
+  t: (key: string, params?: any) => string,
   element: HTMLElement,
   options: ExportOptions = {}
 ) => {
@@ -48,11 +49,12 @@ export const exportToPDF = async (
     pdf.save(`${filename}-${Date.now()}.pdf`);
   } catch (error) {
     console.error('PDF export failed:', error);
-    alert('Failed to export PDF. Please try again.');
+    alert(t('dashboard.exports.pdfFailed'));
   }
 };
 
 export const exportToCSV = (
+  t: (key: string, params?: any) => string,
   data: any[],
   options: ExportOptions = {}
 ) => {
@@ -60,7 +62,7 @@ export const exportToCSV = (
     const { filename = 'data' } = options;
     
     if (!data.length) {
-      alert('No data to export');
+      alert(t('dashboard.exports.noData'));
       return;
     }
 
@@ -87,7 +89,7 @@ export const exportToCSV = (
     URL.revokeObjectURL(url);
   } catch (error) {
     console.error('CSV export failed:', error);
-    alert('Failed to export CSV. Please try again.');
+    alert(t('dashboard.exports.csvFailed'));
   }
 };
 

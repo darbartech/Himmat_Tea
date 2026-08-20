@@ -190,12 +190,12 @@ function ApplyDialog({
       !form.phone.trim() ||
       !form.address.trim()
     ) {
-      setError("Please fill in all required fields.");
+      setError(t('careers.public.requiredFieldsMissing'));
       return;
     }
 
     if (!resumeFile) {
-      setError("Please attach your resume/CV.");
+      setError(t('careers.public.resumeRequired'));
       return;
     }
 
@@ -360,7 +360,7 @@ function ApplyDialog({
                   value={form.phone}
                   onChange={set("phone")}
                   type="tel"
-                  placeholder="+977 000 0000"
+                  placeholder={t('careers.public.placeholders.phone')}
                   className={inputCls}
                   required
                 />
@@ -377,7 +377,7 @@ function ApplyDialog({
               <input
                 value={form.address}
                 onChange={set("address")}
-                placeholder="Street, City, Country"
+                placeholder={t('careers.public.placeholders.address')}
                 className={inputCls}
                 required
               />
@@ -435,7 +435,7 @@ function ApplyDialog({
                 value={form.cover}
                 onChange={set("cover")}
                 rows={4}
-                placeholder="Tell us why you're excited about this role and what makes you a great fit for Godgifted..."
+                placeholder={t('careers.public.placeholders.coverLetter')}
                 className={inputCls + " resize-none"}
               />
             </div>

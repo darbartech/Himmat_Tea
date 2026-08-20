@@ -40,11 +40,11 @@ export default function Login() {
     setError("");
 
     if (!username.trim()) {
-      setError("Please enter your username");
+      setError(t('login.client.usernameRequired'));
       return;
     }
     if (!password) {
-      setError("Please enter your password");
+      setError(t('login.client.passwordRequired'));
       return;
     }
 
@@ -53,7 +53,7 @@ export default function Login() {
     
     const result = await login(username, password);
     if (result.success) {
-      toast.success("Welcome back!");
+      toast.success(t('login.welcomeBack'));
       navigate.push("/himmat_admin_8526/dashboard");
     } else {
       setError(result.error || "Invalid credentials. Please try again.");

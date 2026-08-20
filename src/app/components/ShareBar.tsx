@@ -27,7 +27,7 @@ export default function ShareBar({ url, title, text, labelPrefix, variant = "ico
       setTimeout(() => setCopied(false), 2000);
     }
     if (result === "unsupported" && platform === "copy") {
-      toast.error("Copy isn't supported in this browser.");
+      toast.error(t('share.copyNotSupported'));
     }
   }
 

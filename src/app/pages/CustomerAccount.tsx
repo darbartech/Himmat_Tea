@@ -240,7 +240,7 @@ export default function CustomerAccount() {
               <DropdownMenuTrigger asChild>
                 <button
                   className="relative p-3 rounded-xl bg-white border border-[rgba(28,25,23,0.06)] hover:bg-[#f9f7f4] transition-colors text-[#1c1917] shrink-0"
-                  aria-label="Notifications"
+                  aria-label={t('customerAccount.a11y.notifications')}
                 >
                   <Bell className="h-5 w-5" />
                   {unseenNotificationsCount > 0 && (
@@ -253,14 +253,14 @@ export default function CustomerAccount() {
               <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-96">
                 <div className="p-4">
                   <DropdownMenuLabel className="font-semibold text-[#1c1917] p-0 m-0">
-                    Notifications
+                    {t('customerAccount.notifications.label')}
                   </DropdownMenuLabel>
                 </div>
                 <DropdownMenuSeparator />
                 <div className="max-h-[400px] overflow-y-auto p-2">
                   {notifications.length === 0 ? (
                     <div className="text-center py-8">
-                      <p className="text-[#78746e]">No notifications yet.</p>
+                      <p className="text-[#78746e]">{t('customerAccount.notifications.empty')}</p>
                     </div>
                   ) : (
                     <div className="space-y-1">

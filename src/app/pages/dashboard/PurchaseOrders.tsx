@@ -393,7 +393,7 @@ export default function PurchaseOrders() {
             <div className="grid gap-5 py-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="poNumber">PO Number *</Label>
+                  <Label htmlFor="poNumber">{t('dashboard.purchaseOrders.fields.poNumber')}</Label>
                   <Input
                     id="poNumber"
                     value={newPO.poNumber}
@@ -403,7 +403,7 @@ export default function PurchaseOrders() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="supplier">Supplier *</Label>
+                  <Label htmlFor="supplier">{t('dashboard.purchaseOrders.fields.supplier')}</Label>
                   <Input
                     id="supplier"
                     value={newPO.supplier}
@@ -494,7 +494,7 @@ export default function PurchaseOrders() {
                     />
                   </div>
                   <div className="sm:col-span-2 lg:col-span-3 grid gap-2">
-                    <Label htmlFor="po-price">Unit Price (₹)</Label>
+                    <Label htmlFor="po-price">{t('dashboard.purchaseOrders.fields.unitPrice')}</Label>
                     <Input
                       id="po-price"
                       type="number"

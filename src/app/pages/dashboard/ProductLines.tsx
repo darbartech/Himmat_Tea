@@ -255,7 +255,7 @@ export default function ProductLines() {
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="pl-name">Name *</Label>
+                    <Label htmlFor="pl-name">{t('dashboard.productLines.fields.name')}</Label>
                     <Input
                       id="pl-name"
                       value={newProductLine.name || ""}
@@ -271,7 +271,7 @@ export default function ProductLines() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="pl-slug">Slug *</Label>
+                    <Label htmlFor="pl-slug">{t('dashboard.productLines.fields.slug')}</Label>
                     <Input
                       id="pl-slug"
                       value={newProductLine.slug || ""}
@@ -284,7 +284,7 @@ export default function ProductLines() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="pl-description">Description *</Label>
+                  <Label htmlFor="pl-description">{t('dashboard.productLines.fields.description')}</Label>
                   <Textarea
                     id="pl-description"
                     rows={3}
@@ -297,7 +297,7 @@ export default function ProductLines() {
                 </div>
 
                 <ImageUploadField
-                  label="Hero Image"
+                  label={t('dashboard.productLines.fields.heroImage')}
                   value={newProductLine.heroImage || ""}
                   onChange={(v) => setNewProductLine({ ...newProductLine, heroImage: v })}
                   folder="product-lines"

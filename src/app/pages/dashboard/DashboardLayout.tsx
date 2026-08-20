@@ -219,7 +219,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     },
     {
       type: "group" as const,
-      name: "CRM",
+      name: t("dashboard.nav.groups.crm"),
       icon: Briefcase,
       toggle: () => setCrmOpen((v) => !v),
       open: crmOpen,
@@ -268,18 +268,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     },
     {
       type: "group" as const,
-      name: "Vacancy",
+      name: t("dashboard.nav.groups.vacancy"),
       icon: Briefcase,
       toggle: () => setVacancyOpen((v) => !v),
       open: vacancyOpen,
       children: [
         {
-          name: "Careers",
+          name: t("dashboard.nav.careers"),
           href: "/himmat_admin_8526/dashboard/careers",
           icon: BriefcaseBusiness,
         },
         {
-          name: "Career Applications",
+          name: t("dashboard.nav.careerApplications"),
           href: "/himmat_admin_8526/dashboard/career-applications",
           icon: ClipboardList,
         },
@@ -298,7 +298,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     },
     {
       type: "group" as const,
-      name: "Users",
+      name: t("dashboard.nav.groups.users"),
       icon: Users,
       toggle: () => setUsersOpen((v) => !v),
       open: usersOpen,
@@ -326,13 +326,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     },
     {
       type: "group" as const,
-      name: "Settings",
+      name: t("dashboard.nav.groups.settings"),
       icon: Settings,
       toggle: () => setSettingsOpen((v) => !v),
       open: settingsOpen,
       children: [
         {
-          name: "General Settings",
+          name: t("dashboard.nav.generalSettings"),
           href: "/himmat_admin_8526/dashboard/settings",
           icon: Settings,
         },

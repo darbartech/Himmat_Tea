@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useTranslation } from '@/context/TranslationContext';
 import { toast } from "sonner";
 
 export interface Variant {
@@ -763,6 +764,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [settings, setSettings] = useState<StoreContextType["settings"]>(defaultSettings);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(samplePurchaseOrders);
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>(sampleAdminUsers);
+  const { t } = useTranslation();
 
   // Purge any stale StoreContext content that older versions of the app may have
   // left in localStorage. PII keys (orders, customers, admin_users, notifications,
@@ -878,7 +880,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
       return product;
     }));
-    toast.success("Product variant added!");
+    toast.success(t('notifications.admin.productVariantAdded'));
   };
 
   const updateProductVariant = (productId: number, variantId: number, variant: Partial<ProductVariant>) => {
@@ -893,7 +895,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
       return product;
     }));
-    toast.success("Product variant updated!");
+    toast.success(t('notifications.admin.productVariantUpdated'));
   };
 
   const deleteProductVariant = (productId: number, variantId: number) => {
@@ -906,7 +908,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
       return product;
     }));
-    toast.success("Product variant deleted!");
+    toast.success(t('notifications.admin.productVariantDeleted'));
   };
 
   // Loyalty program functions
@@ -922,7 +924,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
       return customer;
     }));
-    toast.success(`${points} loyalty points added!`);
+    toast.success(t('notifications.admin.loyaltyPointsAdded', { points }));
   };
 
   const redeemLoyaltyPoints = (customerId: number, points: number) => {
@@ -937,7 +939,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
       return customer;
     }));
-    toast.success(`${points} loyalty points redeemed!`);
+    toast.success(t('notifications.admin.loyaltyPointsRedeemed', { points }));
   };
 
   // Purchase order functions
@@ -947,14 +949,14 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       id: Date.now(),
     };
     setPurchaseOrders(prev => [...prev, newPO]);
-    toast.success("Purchase order created!");
+    toast.success(t('notifications.admin.purchaseOrderCreated'));
   };
 
   const updatePurchaseOrder = (id: number, po: Partial<PurchaseOrder>) => {
     setPurchaseOrders(prev => prev.map(order =>
       order.id === id ? { ...order, ...po } : order
     ));
-    toast.success("Purchase order updated!");
+    toast.success(t('notifications.admin.purchaseOrderUpdated'));
   };
 
   const receivePurchaseOrder = (id: number) => {
@@ -971,12 +973,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       order.id === id ? { ...order, status: "Received", receivedDate: new Date().toISOString() } : order
     ));
 
-    toast.success("Purchase order received!");
+    toast.success(t('notifications.admin.purchaseOrderReceived'));
   };
 
   const deletePurchaseOrder = (id: number) => {
     setPurchaseOrders(prev => prev.filter(order => order.id !== id));
-    toast.error("Purchase order deleted!");
+    toast.error(t('notifications.admin.purchaseOrderDeleted'));
   };
 
   // Admin user functions
@@ -992,7 +994,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       passwordHash,
     };
     setAdminUsers(prev => [...prev, newUser]);
-    toast.success("Admin user added successfully!");
+    toast.success(t('notifications.admin.adminUserAdded'));
   };
 
   const updateAdminUser = async (id: number, updates: Partial<AdminUser> & { password?: string }) => {
@@ -1008,7 +1010,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
       return user;
     }));
-    toast.success("Admin user updated!");
+    toast.success(t('notifications.admin.adminUserUpdated'));
   };
 
   const deleteAdminUser = (id: number) => {
@@ -1017,12 +1019,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (userToDelete?.role === "superadmin") {
       const superadminCount = adminUsers.filter(u => u.role === "superadmin").length;
       if (superadminCount <= 1) {
-        toast.error("Cannot delete the last superadmin!");
+        toast.error(t('notifications.admin.cannotDeleteLastSuperadmin'));
         return;
       }
     }
     setAdminUsers(prev => prev.filter(user => user.id !== id));
-    toast.error("Admin user deleted!");
+    toast.error(t('notifications.admin.adminUserDeleted'));
   };
 
   const verifyAdminCredentials = async (username: string, password: string): Promise<AdminUser | null> => {
@@ -1054,7 +1056,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       updatedAt: new Date().toISOString(),
     };
     setProducts((prev) => [...prev, newProduct]);
-    toast.success("Product added successfully!");
+    toast.success(t('notifications.admin.productAdded'));
   };
 
   const updateProduct = (id: number, updates: Partial<Product>) => {
@@ -1073,12 +1075,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         return product;
       })
     );
-    toast.success("Product updated!");
+    toast.success(t('notifications.admin.productUpdated'));
   };
 
   const deleteProduct = (id: number) => {
     setProducts((prev) => prev.filter((product) => product.id !== id));
-    toast.error("Product deleted!");
+    toast.error(t('notifications.admin.productDeleted'));
   };
 
   const addBatch = (productId: number, batch: Omit<Batch, "id">) => {
@@ -1098,7 +1100,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
       return product;
     }));
-    toast.success("Batch added successfully!");
+    toast.success(t('notifications.admin.batchAdded'));
   };
 
   const updateBatch = (productId: number, batchId: number, batch: Partial<Batch>) => {
@@ -1123,7 +1125,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
       return product;
     }));
-    toast.success("Batch updated successfully!");
+    toast.success(t('notifications.admin.batchUpdated'));
   };
 
   const deleteBatch = (productId: number, batchId: number) => {
@@ -1141,20 +1143,20 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
       return product;
     }));
-    toast.success("Batch deleted!");
+    toast.success(t('notifications.admin.batchDeleted'));
   };
 
   const adjustStock = (productId: number, quantity: number, reason: string, referenceId?: string) => {
     const product = products.find(p => p.id === productId);
     if (!product) {
-      toast.error("Product not found!");
+      toast.error(t('notifications.admin.productNotFound'));
       return;
     }
 
     const previousStock = product.stock;
     const newStock = previousStock + quantity;
     if (newStock < 0) {
-      toast.error("Insufficient stock!");
+      toast.error(t('notifications.admin.insufficientStock'));
       return;
     }
 
@@ -1201,7 +1203,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     };
 
     setInventoryTransactions((prev) => [transaction, ...prev]);
-    toast.success("Stock updated successfully!");
+    toast.success(t('notifications.admin.stockUpdated'));
   };
 
   const getExpiringBatches = (days: number = 30) => {
@@ -1228,7 +1230,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const refundOrder = (id: string, reason: string, amount?: number) => {
     const order = orders.find(o => o.id === id);
     if (!order) {
-      toast.error("Order not found!");
+      toast.error(t('notifications.admin.orderNotFound'));
       return;
     }
 
@@ -1261,7 +1263,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     };
     setNotifications((prev) => [newNotification, ...prev]);
 
-    toast.success(`Order ${id} refunded successfully!`);
+    toast.success(t('notifications.admin.orderRefunded', { id }));
   };
 
   const addInternalNote = (orderId: string, text: string, adminId: string, adminName: string) => {
@@ -1275,21 +1277,21 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setOrders((prev) => prev.map(o => 
       o.id === orderId ? { ...o, internalNotes: [...o.internalNotes, newNote] } : o
     ));
-    toast.success("Internal note added!");
+    toast.success(t('notifications.admin.internalNoteAdded'));
   };
 
   const updateTrackingInfo = (orderId: string, trackingNumber?: string, courierPartner?: string) => {
     setOrders((prev) => prev.map(o => 
       o.id === orderId ? { ...o, trackingNumber, courierPartner } : o
     ));
-    toast.success("Tracking info updated!");
+    toast.success(t('notifications.admin.trackingInfoUpdated'));
   };
 
   const bulkUpdateOrderStatus = (orderIds: string[], status: Order["status"]) => {
     setOrders((prev) => prev.map(o => 
       orderIds.includes(o.id) ? { ...o, status } : o
     ));
-    toast.success(`Updated ${orderIds.length} orders to ${status}!`);
+    toast.success(t('notifications.admin.ordersBulkStatusUpdated', { count: orderIds.length, status }));
   };
 
   const getProductInventoryTransactions = (productId: number) => {
@@ -1345,9 +1347,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     };
     setNotifications((prev) => [newNotification, ...prev]);
     
-    toast.success(`New order ${newOrder.id} received! ${pointsToAdd} loyalty points awarded.`);
+    toast.success(t('notifications.admin.newOrderReceived', { id: newOrder.id, points: pointsToAdd }));
     if (settings.notificationsEnabled) {
-      toast.info(`Order confirmation email sent to ${order.customerEmail} with order ID ${newOrder.id}`);
+      toast.info(t('notifications.admin.orderConfirmationEmailSent', { email: order.customerEmail, id: newOrder.id }));
     }
   };
 
@@ -1357,15 +1359,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         order.id === id ? { ...order, ...updates } : order
       )
     );
-    toast.success("Order updated!");
+    toast.success(t('notifications.admin.orderUpdated'));
     if (settings.notificationsEnabled) {
-      toast.info("Status update email would be sent to customer!");
+      toast.info(t('notifications.admin.statusUpdateEmailQueued'));
     }
   };
 
   const deleteOrder = (id: string) => {
     setOrders((prev) => prev.filter((order) => order.id !== id));
-    toast.error("Order deleted!");
+    toast.error(t('notifications.admin.orderDeleted'));
   };
 
   const addCustomer = (customer: Omit<Customer, "id" | "ordersCount" | "totalSpent" | "loyaltyPoints" | "tier" | "createdAt">) => {
@@ -1379,7 +1381,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       createdAt: new Date().toISOString(),
     };
     setCustomers((prev) => [...prev, newCustomer]);
-    toast.success("Customer added successfully!");
+    toast.success(t('notifications.admin.customerAdded'));
   };
 
   const updateCustomer = (id: number, updates: Partial<Customer>) => {
@@ -1388,12 +1390,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         customer.id === id ? { ...customer, ...updates } : customer
       )
     );
-    toast.success("Customer updated!");
+    toast.success(t('notifications.admin.customerUpdated'));
   };
 
   const deleteCustomer = (id: number) => {
     setCustomers((prev) => prev.filter((customer) => customer.id !== id));
-    toast.error("Customer deleted!");
+    toast.error(t('notifications.admin.customerDeleted'));
   };
 
   const getCustomerOrders = (customerId: number) => {
@@ -1406,7 +1408,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       id: Date.now().toString(),
     };
     setBlogPosts((prev) => [newPost, ...prev]);
-    toast.success("Blog post added successfully!");
+    toast.success(t('notifications.admin.blogPostAdded'));
   };
 
   const updateBlogPost = (id: string, updates: Partial<BlogPost>) => {
@@ -1415,12 +1417,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         post.id === id ? { ...post, ...updates } : post
       )
     );
-    toast.success("Blog post updated!");
+    toast.success(t('notifications.admin.blogPostUpdated'));
   };
 
   const deleteBlogPost = (id: string) => {
     setBlogPosts((prev) => prev.filter((post) => post.id !== id));
-    toast.error("Blog post deleted!");
+    toast.error(t('notifications.admin.blogPostDeleted'));
   };
 
   const addReview = (review: Omit<Review, "id">) => {
@@ -1429,7 +1431,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       id: Date.now(),
     };
     setReviews((prev) => [...prev, newReview]);
-    toast.success("Review added successfully!");
+    toast.success(t('notifications.admin.reviewAdded'));
   };
 
   const updateReview = (id: number, updates: Partial<Review>) => {
@@ -1438,12 +1440,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         review.id === id ? { ...review, ...updates } : review
       )
     );
-    toast.success("Review updated!");
+    toast.success(t('notifications.admin.reviewUpdated'));
   };
 
   const deleteReview = (id: number) => {
     setReviews((prev) => prev.filter((review) => review.id !== id));
-    toast.error("Review deleted!");
+    toast.error(t('notifications.admin.reviewDeleted'));
   };
   
   // Product Line functions
@@ -1455,7 +1457,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       updatedAt: new Date().toISOString(),
     };
     setProductLines((prev) => [...prev, newProductLine]);
-    toast.success("Product line added successfully!");
+    toast.success(t('notifications.admin.productLineAdded'));
   };
 
   const updateProductLine = (id: number | string, updates: Partial<ProductLine>) => {
@@ -1465,13 +1467,13 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         line.id === numericId ? { ...line, ...updates, updatedAt: new Date().toISOString() } : line
       )
     );
-    toast.success("Product line updated!");
+    toast.success(t('notifications.admin.productLineUpdated'));
   };
 
   const deleteProductLine = (id: number | string) => {
     const numericId = typeof id === 'string' ? parseInt(id) : id;
     setProductLines((prev) => prev.filter((line) => line.id !== numericId));
-    toast.error("Product line deleted!");
+    toast.error(t('notifications.admin.productLineDeleted'));
   };
 
   // Hero Visual functions
@@ -1483,7 +1485,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       updatedAt: new Date().toISOString(),
     };
     setHeroVisuals((prev) => [...prev, newHeroVisual]);
-    toast.success("Hero visual added successfully!");
+    toast.success(t('notifications.admin.heroVisualAdded'));
   };
 
   const updateHeroVisual = (id: string, updates: Partial<HeroVisual>) => {
@@ -1492,12 +1494,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         visual.id === id ? { ...visual, ...updates, updatedAt: new Date().toISOString() } : visual
       )
     );
-    toast.success("Hero visual updated!");
+    toast.success(t('notifications.admin.heroVisualUpdated'));
   };
 
   const deleteHeroVisual = (id: string) => {
     setHeroVisuals((prev) => prev.filter((visual) => visual.id !== id));
-    toast.error("Hero visual deleted!");
+    toast.error(t('notifications.admin.heroVisualDeleted'));
   };
 
   const getProductReviews = (productId: number) => {
@@ -1511,7 +1513,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       usedCount: 0,
     };
     setCoupons((prev) => [...prev, newCoupon]);
-    toast.success("Coupon added successfully!");
+    toast.success(t('notifications.admin.couponAdded'));
   };
 
   const updateCoupon = (id: string, updates: Partial<Coupon>) => {
@@ -1520,12 +1522,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         coupon.id === id ? { ...coupon, ...updates } : coupon
       )
     );
-    toast.success("Coupon updated!");
+    toast.success(t('notifications.admin.couponUpdated'));
   };
 
   const deleteCoupon = (id: string) => {
     setCoupons((prev) => prev.filter((coupon) => coupon.id !== id));
-    toast.error("Coupon deleted!");
+    toast.error(t('notifications.admin.couponDeleted'));
   };
 
   const addCollection = (collection: Omit<Collection, "id">) => {
@@ -1534,7 +1536,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       id: Date.now().toString(),
     };
     setCollections((prev) => [...prev, newCollection]);
-    toast.success("Collection added successfully!");
+    toast.success(t('notifications.admin.collectionAdded'));
   };
 
   const updateCollection = (id: string, updates: Partial<Collection>) => {
@@ -1543,12 +1545,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         collection.id === id ? { ...collection, ...updates } : collection
       )
     );
-    toast.success("Collection updated!");
+    toast.success(t('notifications.admin.collectionUpdated'));
   };
 
   const deleteCollection = (id: string) => {
     setCollections((prev) => prev.filter((collection) => collection.id !== id));
-    toast.error("Collection deleted!");
+    toast.error(t('notifications.admin.collectionDeleted'));
   };
 
   const addBrewingGuide = (guide: Omit<BrewingGuide, "id">) => {
@@ -1557,7 +1559,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       id: Date.now().toString(),
     };
     setBrewingGuides((prev) => [...prev, newGuide]);
-    toast.success("Brewing guide added successfully!");
+    toast.success(t('notifications.admin.brewingGuideAdded'));
   };
 
   const updateBrewingGuide = (id: string, updates: Partial<BrewingGuide>) => {
@@ -1566,12 +1568,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         guide.id === id ? { ...guide, ...updates } : guide
       )
     );
-    toast.success("Brewing guide updated!");
+    toast.success(t('notifications.admin.brewingGuideUpdated'));
   };
 
   const deleteBrewingGuide = (id: string) => {
     setBrewingGuides((prev) => prev.filter((guide) => guide.id !== id));
-    toast.error("Brewing guide deleted!");
+    toast.error(t('notifications.admin.brewingGuideDeleted'));
   };
 
   const addFAQ = (faq: Omit<FAQ, "id">) => {
@@ -1580,7 +1582,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       id: Date.now().toString(),
     };
     setFaqs((prev) => [...prev, newFAQ]);
-    toast.success("FAQ added successfully!");
+    toast.success(t('notifications.admin.faqAdded'));
   };
 
   const updateFAQ = (id: string, updates: Partial<FAQ>) => {
@@ -1589,17 +1591,17 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         faq.id === id ? { ...faq, ...updates } : faq
       )
     );
-    toast.success("FAQ updated!");
+    toast.success(t('notifications.admin.faqUpdated'));
   };
 
   const deleteFAQ = (id: string) => {
     setFaqs((prev) => prev.filter((faq) => faq.id !== id));
-    toast.error("FAQ deleted!");
+    toast.error(t('notifications.admin.faqDeleted'));
   };
 
   const updateAboutPage = (updates: Partial<AboutPage>) => {
     setAboutPage((prev) => ({ ...prev, ...updates }));
-    toast.success("About page updated!");
+    toast.success(t('notifications.admin.aboutPageUpdated'));
   };
 
   const markNotificationRead = (id: number) => {
@@ -1616,7 +1618,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const updateSettings = (newSettings: Partial<StoreContextType["settings"]>) => {
     setSettings((prev) => ({ ...prev, ...newSettings }));
-    toast.success("Settings saved!");
+    toast.success(t('notifications.admin.settingsSaved'));
   };
 
   return (

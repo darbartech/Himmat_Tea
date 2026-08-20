@@ -247,7 +247,7 @@ export default function Products() {
 
   const handleExportPDF = () => {
     if (tableRef.current) {
-      exportToPDF(tableRef.current, { filename: "products", title: "Products List" });
+      exportToPDF(t, tableRef.current, { filename: "products", title: "Products List" });
     }
   };
 
@@ -261,7 +261,7 @@ export default function Products() {
       "Status": product.status,
       [t('dashboard.products.descriptionLabel')]: product.description
     }));
-    exportToCSV(csvData, { filename: "products" });
+    exportToCSV(t, csvData, { filename: "products" });
   };
 
   const handlePrint = () => {

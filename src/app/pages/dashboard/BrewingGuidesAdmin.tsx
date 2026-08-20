@@ -234,7 +234,7 @@ export default function BrewingGuidesAdmin() {
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="bg-title">Title *</Label>
+                    <Label htmlFor="bg-title">{t('dashboard.brewingGuides.fields.title')}</Label>
                     <Input
                       id="bg-title"
                       value={newGuide.title || ""}
@@ -250,7 +250,7 @@ export default function BrewingGuidesAdmin() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="bg-slug">Slug *</Label>
+                    <Label htmlFor="bg-slug">{t('dashboard.brewingGuides.fields.slug')}</Label>
                     <Input
                       id="bg-slug"
                       value={newGuide.slug || ""}
@@ -261,7 +261,7 @@ export default function BrewingGuidesAdmin() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="bg-description">Description *</Label>
+                  <Label htmlFor="bg-description">{t('dashboard.brewingGuides.fields.description')}</Label>
                   <Textarea
                     id="bg-description"
                     rows={3}
@@ -272,7 +272,7 @@ export default function BrewingGuidesAdmin() {
                 </div>
 
                 <ImageUploadField
-                  label="Featured Image"
+                  label={t('dashboard.brewingGuides.fields.featuredImage')}
                   value={newGuide.image || ""}
                   onChange={(v) => setNewGuide({ ...newGuide, image: v })}
                   folder="brewing-guides"
@@ -303,7 +303,7 @@ export default function BrewingGuidesAdmin() {
                       id="bg-waterTemp"
                       value={newGuide.waterTemp || ""}
                       onChange={(e) => setNewGuide({ ...newGuide, waterTemp: e.target.value })}
-                      placeholder="80°C"
+                      placeholder={t('dashboard.brewingGuides.placeholders.waterTemp')}
                     />
                   </div>
                   <div className="grid gap-2">
@@ -312,7 +312,7 @@ export default function BrewingGuidesAdmin() {
                       id="bg-steepingTime"
                       value={newGuide.steepingTime || ""}
                       onChange={(e) => setNewGuide({ ...newGuide, steepingTime: e.target.value })}
-                      placeholder="3 min"
+                      placeholder={t('dashboard.brewingGuides.placeholders.steepingTime')}
                     />
                   </div>
                 </div>
@@ -324,7 +324,7 @@ export default function BrewingGuidesAdmin() {
                       id="bg-leafQuantity"
                       value={newGuide.leafQuantity || ""}
                       onChange={(e) => setNewGuide({ ...newGuide, leafQuantity: e.target.value })}
-                      placeholder="2g per 200ml"
+                      placeholder={t('dashboard.brewingGuides.placeholders.leafQuantity')}
                     />
                   </div>
                   <div className="flex items-center justify-between rounded-lg border border-[#2d5a3d]/10 p-3 bg-[#f9f7f4]">

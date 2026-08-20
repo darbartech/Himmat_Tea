@@ -563,7 +563,7 @@
   "dashboard.home.manageTeaBusiness": "अपना चाय व्यवसाय प्रबंधित करें",
   "dashboard.home.newOrder": "नया ऑर्डर",
   "dashboard.home.orderId": "ऑर्डर नंबर",
-  "dashboard.home.orderStatus": "ऑर्डर स्थिति",
+  "dashboard.home.orderStatus": "Order Status",
   "dashboard.home.pending": "लंबित",
   "dashboard.home.processOrders": "ऑर्डर प्रोसेस करें",
   "dashboard.home.products": "उत्पाद",
@@ -1202,7 +1202,6 @@
   "wholesale.fullNamePlaceholder": "आपका पूरा नाम",
   "wholesale.under1kg": "1 किलो से कम",
   "wishlist.removeItem": "विशलिस्ट से हटाएं",
-
   "nav.allProducts": "All Products",
   "nav.bestSellers": "Best Sellers",
   "nav.browseByCategory": "Browse by Category",
@@ -1216,13 +1215,11 @@
   "nav.signupLabel": "Sign up",
   "nav.myAccountLabel": "My Account",
   "nav.languageDropdown": "Language",
-
   "dashboard.nav.productLines": "Product Lines",
   "dashboard.nav.heroVisuals": "Hero Visuals",
   "dashboard.nav.faqs": "FAQs",
   "dashboard.nav.brewingGuides": "Brewing Guides",
   "dashboard.nav.collections": "Collections",
-  "dashboard.home.orderStatus": "Order Status",
   "dashboard.home.orderStatusDesc": "Track orders through fulfilment stages",
   "dashboard.home.status": "Status",
   "dashboard.home.noSalesData": "No sales data yet",
@@ -1230,7 +1227,6 @@
   "dashboard.home.failedToLoad": "Could not load dashboard data",
   "dashboard.home.retry": "Retry",
   "dashboard.language": "Language",
-
   "customerAuth.brandBadge": "Himmat Tea",
   "customerAuth.welcomeBackTitle": "Welcome back",
   "customerAuth.createAccountTitle": "Create your account",
@@ -1252,9 +1248,360 @@
   "customerAuth.switchToLogin": "Sign in",
   "customerAuth.socialContinueWith": "Continue with",
   "customerAuth.orDivider": "or",
-
   "announcements.freeShipping.text": "Free shipping on orders over Rs. 3,000 — Use code",
   "announcements.freeShipping.code": "GODGIFTED",
   "announcements.springHarvest.text": "Spring Harvest 2026 is here — Limited lots, shop before they're gone",
-  "announcements.wholesale.text": "Wholesale pricing for cafés, hotels & retailers — Apply today"
+  "announcements.wholesale.text": "Wholesale pricing for cafés, hotels & retailers — Apply today",
+  "dashboard": {
+    "nav": {
+      "groups": {
+        "crm": "CRM",
+        "vacancy": "Vacancy",
+        "users": "Users",
+        "settings": "Settings"
+      },
+      "careers": "Careers",
+      "careerApplications": "Career Applications",
+      "generalSettings": "General Settings"
+    },
+    "settings": {
+      "indianRupee": "Indian Rupee (₹)",
+      "usDollar": "US Dollar ($)",
+      "euro": "Euro (€)",
+      "britishPound": "British Pound (£)",
+      "localization": {
+        "timeZones": {
+          "nepal": "Nepal Standard Time (UTC+5:45)",
+          "india": "India Standard Time (UTC+5:30)"
+        }
+      },
+      "errors": {
+        "loadFailed": "Failed to load settings",
+        "saveFailed": "Failed to save settings",
+        "invalidImage": "Please select a valid image file"
+      },
+      "notifications": {
+        "saveSuccess": "Settings saved successfully!",
+        "qrUploaded": "QR Image uploaded successfully!"
+      }
+    },
+    "exports": {
+      "pdfFailed": "Failed to export PDF. Please try again.",
+      "noData": "No data to export",
+      "csvFailed": "Failed to export CSV. Please try again."
+    },
+    "home": {
+      "dailyShortcuts": "Your daily shortcuts"
+    },
+    "customers": {
+      "placeholders": {
+        "phone": "+91 9876543210",
+        "address": "123 Main Street, City"
+      }
+    },
+    "coupons": {
+      "placeholders": {
+        "discountValuePct": "10",
+        "discountValueAmt": "50",
+        "maxDiscount": "200",
+        "minOrderAmount": "500",
+        "usageLimit": "100"
+      }
+    },
+    "products": {
+      "placeholders": {
+        "price": "249",
+        "stock": "100",
+        "reorderPoint": "20"
+      },
+      "validation": {
+        "requiredFields": "Please fill in all required fields (Name, Description, Image URL, Price)"
+      }
+    },
+    "inventory": {
+      "placeholders": {
+        "batchQuantity": "0",
+        "unitPrice": "0.00"
+      }
+    },
+    "purchaseOrders": {
+      "validation": {
+        "poSupplierRequired": "Please fill in PO Number and Supplier"
+      }
+    },
+    "productLines": {
+      "validation": {
+        "requiredFields": "Please fill in all required fields (Name, Slug, Description)"
+      }
+    }
+  },
+  "notifications": {
+    "admin": {
+      "productVariantAdded": "Product variant added successfully!",
+      "productVariantUpdated": "Product variant updated!",
+      "productVariantDeleted": "Product variant deleted!",
+      "loyaltyPointsAdded": "{points} loyalty points added!",
+      "loyaltyPointsRedeemed": "{points} loyalty points redeemed!",
+      "purchaseOrderCreated": "Purchase order created!",
+      "purchaseOrderUpdated": "Purchase order updated!",
+      "purchaseOrderReceived": "Purchase order received!",
+      "purchaseOrderDeleted": "Purchase order deleted!",
+      "adminUserAdded": "Admin user added successfully!",
+      "adminUserUpdated": "Admin user updated!",
+      "cannotDeleteLastSuperadmin": "Cannot delete the last superadmin!",
+      "adminUserDeleted": "Admin user deleted!",
+      "productAdded": "Product added successfully!",
+      "productUpdated": "Product updated!",
+      "productDeleted": "Product deleted!",
+      "batchAdded": "Batch added successfully!",
+      "batchUpdated": "Batch updated successfully!",
+      "batchDeleted": "Batch deleted!",
+      "productNotFound": "Product not found!",
+      "insufficientStock": "Insufficient stock!",
+      "stockUpdated": "Stock updated successfully!",
+      "orderNotFound": "Order not found!",
+      "orderRefunded": "Order {id} refunded successfully!",
+      "internalNoteAdded": "Internal note added!",
+      "trackingInfoUpdated": "Tracking info updated!",
+      "ordersBulkStatusUpdated": "Updated {count} orders to {status}!",
+      "newOrderReceived": "New order {id} received! {points} loyalty points awarded.",
+      "orderConfirmationEmailSent": "Order confirmation email sent to {email} with order ID {id}",
+      "orderUpdated": "Order updated!",
+      "statusUpdateEmailQueued": "Status update email would be sent to customer!",
+      "orderDeleted": "Order deleted!",
+      "customerAdded": "Customer added successfully!",
+      "customerUpdated": "Customer updated!",
+      "customerDeleted": "Customer deleted!",
+      "blogPostAdded": "Blog post added successfully!",
+      "blogPostUpdated": "Blog post updated!",
+      "blogPostDeleted": "Blog post deleted!",
+      "reviewAdded": "Review added successfully!",
+      "reviewUpdated": "Review updated!",
+      "reviewDeleted": "Review deleted!",
+      "productLineAdded": "Product line added successfully!",
+      "productLineUpdated": "Product line updated!",
+      "productLineDeleted": "Product line deleted!",
+      "heroVisualAdded": "Hero visual added successfully!",
+      "heroVisualUpdated": "Hero visual updated!",
+      "heroVisualDeleted": "Hero visual deleted!",
+      "couponAdded": "Coupon added successfully!",
+      "couponUpdated": "Coupon updated!",
+      "couponDeleted": "Coupon deleted!",
+      "collectionAdded": "Collection added successfully!",
+      "collectionUpdated": "Collection updated!",
+      "collectionDeleted": "Collection deleted!",
+      "brewingGuideAdded": "Brewing guide added successfully!",
+      "brewingGuideUpdated": "Brewing guide updated!",
+      "brewingGuideDeleted": "Brewing guide deleted!",
+      "faqAdded": "FAQ added successfully!",
+      "faqUpdated": "FAQ updated!",
+      "faqDeleted": "FAQ deleted!",
+      "aboutPageUpdated": "About page updated!",
+      "settingsSaved": "Settings saved!"
+    }
+  },
+  "careersAdmin": {
+    "errors": {
+      "loadFailed": "Failed to load career roles",
+      "saveFailed": "Failed to save career role",
+      "deleteFailed": "Failed to delete career role",
+      "toggleFailed": "Failed to update publishing status"
+    },
+    "validation": {
+      "titleDescriptionRequired": "Please fill in all required fields (Job Title, Description)"
+    },
+    "notifications": {
+      "created": "Career role created successfully!",
+      "updated": "Career role updated successfully!",
+      "deleted": "Career role deleted successfully!",
+      "published": "Career role published!",
+      "unpublished": "Career role unpublished!"
+    },
+    "confirmDelete": {
+      "title": "Delete this career role?",
+      "description": "Are you sure you want to delete \"{title}\"? This cannot be undone."
+    },
+    "heading": "Careers",
+    "subtitle": "Manage the jobs displayed on the public Careers page.",
+    "addRole": "Add Role",
+    "empty": {
+      "heading": "No career roles yet.",
+      "subtitle": "Add your first opening to publish it on the website."
+    },
+    "status": {
+      "published": "Published",
+      "hidden": "Hidden"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "create": "Create Role"
+    },
+    "dialog": {
+      "addTitle": "Add New Career Role",
+      "editTitle": "Edit Career Role",
+      "helper": "Only published roles appear on the public Careers page."
+    },
+    "fields": {
+      "title": "Job Title *",
+      "department": "Department",
+      "location": "Location",
+      "employmentType": "Employment Type",
+      "level": "Level",
+      "postedDate": "Posted Date",
+      "sortOrder": "Sort Order",
+      "description": "Description *",
+      "responsibilities": "Responsibilities",
+      "requirements": "Requirements"
+    },
+    "toggle": {
+      "label": "Publish role",
+      "helper": "Visible to visitors when enabled."
+    },
+    "placeholders": {
+      "title": "Head of Tea Sourcing",
+      "postedDate": "August 18, 2026",
+      "responsibilities": "One responsibility per line...",
+      "requirements": "One requirement per line..."
+    }
+  },
+  "careerApplicationsAdmin": {
+    "errors": {
+      "loadFailed": "Failed to load applications",
+      "statusFailed": "Failed to update status",
+      "notesFailed": "Failed to save notes",
+      "deleteFailed": "Failed to delete application"
+    },
+    "notifications": {
+      "statusUpdated": "Application status updated!",
+      "notesSaved": "Admin notes saved!",
+      "deleted": "Application deleted successfully!"
+    },
+    "heading": "Career Applications",
+    "subtitle": "Review and manage applications submitted through the Careers page.",
+    "filters": {
+      "searchPlaceholder": "Search by name, email, or phone...",
+      "allStatuses": "All Statuses",
+      "allPositions": "All Positions"
+    },
+    "empty": {
+      "heading": "No applications found.",
+      "subtitle": "Try adjusting your search or filters."
+    },
+    "table": {
+      "applicant": "Applicant",
+      "position": "Position",
+      "email": "Email",
+      "phone": "Phone",
+      "applied": "Applied",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "confirmDelete": {
+      "title": "Delete this application?",
+      "description": "Are you sure you want to delete {name}'s application? This cannot be undone."
+    },
+    "actions": {
+      "view": "View",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "saveNotes": "Save Notes",
+      "close": "Close"
+    },
+    "view": {
+      "resumeAction": "View Resume",
+      "coverLetter": "Cover Letter",
+      "status": "Status",
+      "adminNotes": "Admin Notes",
+      "notesPlaceholder": "Internal notes about this candidate..."
+    }
+  },
+  "products": {
+    "sort": {
+      "priceAsc": "Price: Low → High",
+      "priceDesc": "Price: High → Low"
+    },
+    "addedToCart": "{name} added to cart!",
+    "addedToCartWithQty": "{qty} × {name} added to cart!",
+    "outOfStock": "{name} is out of stock."
+  },
+  "wishlist": {
+    "added": "{name} added to wishlist!",
+    "removed": "{name} removed from wishlist!"
+  },
+  "cart": {
+    "promoAppliedGeneric": "Promo code applied!"
+  },
+  "checkout": {
+    "coupon": {
+      "enterCodeRequired": "Please enter a coupon code.",
+      "cartEmptyForApply": "Add items to your cart before applying a coupon.",
+      "appliedWithDiscount": "Coupon \"{code}\" applied — {currency} {amount} off!",
+      "invalid": "Invalid coupon code.",
+      "validationError": "Could not validate coupon. Please try again.",
+      "removed": "Coupon \"{code}\" removed."
+    },
+    "submit": {
+      "cartEmpty": "Your cart is empty. Please add items before placing an order.",
+      "invalidItems": "One or more items in your cart are invalid. Please remove them and try again.",
+      "sessionExpired": "Your session has expired. Please sign in again.",
+      "unauthorized": "You are not authorized to place this order.",
+      "recordNotFound": "A product or customer record was not found."
+    },
+    "placeholders": {
+      "email": "aarav@example.com",
+      "phone": "+977 98XXXXXXXX",
+      "postalCode": "44600 (optional)",
+      "couponCode": "ENTER CODE"
+    },
+    "a11y": {
+      "removeCoupon": "Remove coupon"
+    }
+  },
+  "login": {
+    "client": {
+      "usernameRequired": "Please enter your username",
+      "passwordRequired": "Please enter your password"
+    },
+    "welcomeBack": "Welcome back!"
+  },
+  "sourcing": {
+    "aboutOurTeam": "About our team →"
+  },
+  "careers": {
+    "public": {
+      "requiredFieldsMissing": "Please fill in all required fields.",
+      "resumeRequired": "Please attach your resume/CV.",
+      "placeholders": {
+        "phone": "+977 000 0000",
+        "address": "Street, City, Country",
+        "coverLetter": "Tell us why you're excited about this role..."
+      }
+    }
+  },
+  "wholesale": {
+    "businessType": {
+      "cafe": "Café"
+    },
+    "placeholders": {
+      "phone": "+1 555 000 0000"
+    }
+  },
+  "orderConfirmed": {
+    "referenceMissing": "Order reference was not provided."
+  },
+  "customerAccount": {
+    "a11y": {
+      "notifications": "Notifications"
+    },
+    "notifications": {
+      "label": "Notifications",
+      "empty": "No notifications yet."
+    }
+  },
+  "share": {
+    "copyNotSupported": "Copy isn't supported in this browser."
+  }
 }

@@ -3,13 +3,25 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import en from '../locales/en.json';
 import { languageForCountry } from '../lib/locale';
 
-type Translations = Record<string, string>;
+type Translations = Record<string, any>;
 
 interface TranslationCtx {
   t: (key: string, params?: Record<string, string | number>) => string;
   lang: string;
   setLang: (lang: string) => void;
   isLoading: boolean;
+}
+
+function getNested(obj: any, path: string): string | undefined {
+  if (obj == null) return undefined;
+  if (obj[path] !== undefined && typeof obj[path] === 'string') return obj[path];
+  const parts = path.split('.');
+  let cur: any = obj;
+  for (const part of parts) {
+    if (cur == null) return undefined;
+    cur = cur[part];
+  }
+  return typeof cur === 'string' ? cur : undefined;
 }
 
 const TRANSLATION_VERSION = 'v9';
@@ -40,8 +52,14 @@ export const TranslationProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const isValidCache = (data: Translations): boolean => {
-    const allEnglishKeys = Object.keys(en);
-    return allEnglishKeys.every(key => data[key] !== undefined);
+    const sampleKeys = [
+      'a11y.close',
+      'dashboard.nav.dashboard',
+      'notifications.admin.productAdded',
+      'careersAdmin.heading',
+      'checkout.coupon.enterCodeRequired',
+    ];
+    return sampleKeys.every(key => getNested(data, key) !== undefined);
   };
 
   const setLang = useCallback(async (newLang: string) => {
@@ -95,7 +113,7 @@ export const TranslationProvider = ({ children }: { children: ReactNode }) => {
 
   const t = useCallback(
     (key: string, params?: Record<string, string | number>) => {
-      let text = translations[key] ?? en[key as keyof typeof en] ?? key;
+      let text = getNested(translations, key) ?? getNested(en, key) ?? key;
       if (params) {
         Object.entries(params).forEach(([paramKey, paramValue]) => {
           const regex = new RegExp(`{${paramKey}}`, 'g');

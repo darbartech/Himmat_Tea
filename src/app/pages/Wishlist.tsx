@@ -26,7 +26,7 @@ export default function Wishlist() {
       image: product.image,
       weight: "50g",
     });
-    toast.success(`${product.name} added to cart!`);
+    toast.success(t('products.addedToCart', { name: product.name }));
   }
 
   return (
@@ -126,7 +126,7 @@ export default function Wishlist() {
                       <button
                         onClick={() => {
                           removeFromWishlist(product.id);
-                          toast.success(`${product.name} removed from wishlist!`);
+                          toast.success(t('wishlist.removed', { name: product.name }));
                         }}
                         className="p-2.5 border-2 border-[rgba(28,25,23,0.12)] rounded-xl text-[#78746e] hover:border-red-400 hover:text-red-500 transition-all"
                         title={t('wishlist.removeItem')}

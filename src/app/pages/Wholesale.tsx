@@ -834,7 +834,7 @@ export default function Wholesale() {
                             <option value="" disabled>
                               Select type…
                             </option>
-                            <option>Café</option>
+                            <option>{t('wholesale.businessType.cafe')}</option>
                             <option>{t('wholesale.businessType.restaurant')}</option>
                             <option>{t('wholesale.businessType.retailer')}</option>
                             <option>{t('wholesale.businessType.hotel')}</option>
@@ -881,7 +881,7 @@ export default function Wholesale() {
                           value={form.phone}
                           onChange={set("phone")}
                           type="tel"
-                          placeholder="+1 555 000 0000"
+                          placeholder={t('wholesale.placeholders.phone')}
                           className={inputClass}
                         />
                       </div>

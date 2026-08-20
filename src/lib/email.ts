@@ -766,3 +766,62 @@ export async function sendCustomerOrderStatusEmail(params: {
     throw formatSendError(cfg, err)
   }
 }
+
+export async function sendCustomerWelcomeEmail(params: {
+  name: string
+  email: string
+}): Promise<void> {
+  const cfg = getSmtpConfig()
+  const v = validateSmtpConfig(cfg)
+  if (!v.ok) {
+    console.log(
+      `[email:dev] Skipping welcome email to ${params.email} — ${v.reason}${v.hint ? ` ${v.hint}` : ''}. ` +
+        `Welcome ${params.name} to ${BRAND.companyName}.`
+    )
+    return
+  }
+  const transporter = getOrCreateTransporter(cfg)
+  const headers = buildDeliverabilityHeaders(cfg, params.email, 'generic')
+  const subject = `Welcome to ${BRAND.companyName}, ${params.name}!`
+  const fromAddr = extractFromAddress(cfg.from)
+  const support = fromAddr
+
+  const text =
+    `Hi ${params.name},\n\n` +
+    `Welcome to ${BRAND.companyName}. Your account has been created and you're all set to explore our collection of premium teas.\n\n` +
+    `If you have any questions, need help placing an order, or want recommendations, our team is here for you. Reply to this email or contact us at ${support}.\n\n` +
+    `Thank you for joining us. We look forward to serving you a perfect cup.\n\n` +
+    `— The ${BRAND.companyName} Team`
+
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1c1917;line-height:1.55;font-size:15px;">
+      <div style="border-bottom:1px solid #e7e5e0;padding-bottom:16px;margin-bottom:20px;">
+        <span style="font-size:18px;font-weight:700;color:#2d5a3d;letter-spacing:0.02em;">${BRAND.companyName}</span>
+      </div>
+      <p style="margin:0 0 12px 0;">Hi ${params.name},</p>
+      <p style="margin:0 0 20px 0;">
+        Welcome to ${BRAND.companyName}. Your account has been created and you're all set to explore
+        our collection of premium teas.
+      </p>
+      <div style="margin:24px 0 28px 0;padding:22px;background:#f0fdf4;border-radius:12px;border:1px solid #bbf7d0;text-align:center;">
+        <div style="font-size:12px;color:#166534;text-transform:uppercase;letter-spacing:0.14em;">Your account is ready</div>
+        <div style="font-size:28px;font-weight:700;color:#166534;margin-top:10px;">Let's sip together</div>
+      </div>
+      <p style="margin:0 0 22px 0;font-size:14px;color:#57534e;">
+        If you have any questions, need help placing an order, or want recommendations, our team is here for you.
+        Contact us any time at <a href="mailto:${support}" style="color:#2d5a3d;text-decoration:underline;">${support}</a>.
+      </p>
+      <p style="margin:0 0 22px 0;">
+        Thank you for joining us. We look forward to serving you a perfect cup.
+      </p>
+      <div style="border-top:1px solid #e7e5e0;padding-top:16px;color:#78716c;font-size:12px;line-height:1.55;">
+        <p style="margin:0;">&copy; ${new Date().getFullYear()} ${BRAND.companyName}. All rights reserved.</p>
+      </div>
+    </div>`
+
+  try {
+    await transporter.sendMail({ from: cfg.from, to: params.email, replyTo: cfg.from, subject, text, html, headers })
+  } catch (err) {
+    throw formatSendError(cfg, err)
+  }
+}

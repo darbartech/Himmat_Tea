@@ -281,7 +281,7 @@ const Coupons = () => {
                   />
                 </div>
                 <div>
-                  <Label>Maximum Discount (₹)</Label>
+                  <Label>{t('dashboard.coupons.fields.maxDiscount')}</Label>
                   <Input
                     type="number"
                     value={formData.maxDiscount}
@@ -297,7 +297,7 @@ const Coupons = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label>Minimum Order Amount (₹)</Label>
+                  <Label>{t('dashboard.coupons.fields.minOrderAmount')}</Label>
                   <Input
                     type="number"
                     value={formData.minOrderAmount}

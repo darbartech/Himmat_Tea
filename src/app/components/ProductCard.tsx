@@ -7,12 +7,14 @@ import { useCurrency } from "@/context/CurrencyContext";
 import type { Product } from "@/context/StoreContext";
 import { Badge } from "@/app/components/ui/badge";
 import { toast } from "sonner";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const { t } = useTranslation();
   const { addToCart } = useCart();
   const { formatPrice } = useCurrency();
 
@@ -26,7 +28,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault();
     if (isOutOfStock) {
-      toast.error(`${product.name} is out of stock.`);
+      toast.error(t('products.outOfStock', { name: product.name }));
       return;
     }
     addToCart({

@@ -1091,7 +1091,7 @@ export default function Inventory() {
                     type="number"
                     value={batchForm.costPrice}
                     onChange={(e) => setBatchForm({ ...batchForm, costPrice: Number(e.target.value) })}
-                    placeholder="0.00"
+                    placeholder={t('dashboard.inventory.placeholders.amount')}
                   />
                 </div>
               </div>

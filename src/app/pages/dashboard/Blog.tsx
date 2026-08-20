@@ -139,7 +139,7 @@ export default function Blog() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...newPost, body }),
         });
-        if (!res.ok) throw new Error("Failed to update blog post");
+        if (!res.ok) throw new Error(t('dashboard.blog.errors.updateFailed'));
         notify.success("Blog post updated!");
       } else {
         // Add new
@@ -149,7 +149,7 @@ export default function Blog() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...newPost, slug: finalSlug, body }),
         });
-        if (!res.ok) throw new Error("Failed to create blog post");
+        if (!res.ok) throw new Error(t('dashboard.blog.errors.createFailed'));
         notify.success("Blog post added!");
       }
 
@@ -192,7 +192,7 @@ export default function Blog() {
   const handleDeletePost = async (id: number) => {
     try {
       const res = await fetch(`/api/blog/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete post");
+      if (!res.ok) throw new Error(t('dashboard.blog.errors.deleteFailed'));
       notify.success("Blog post deleted!");
       await fetchBlogPosts();
     } catch (e) {
@@ -244,7 +244,7 @@ export default function Blog() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
+                  <Label htmlFor="title">{t('dashboard.blog.fields.title')}</Label>
                   <Input
                     id="title"
                     value={newPost.title}
@@ -286,13 +286,13 @@ export default function Blog() {
                     id="readTime"
                     value={newPost.readTime}
                     onChange={(e) => setNewPost({ ...newPost, readTime: e.target.value })}
-                    placeholder="5 min read"
+                    placeholder={t('dashboard.blog.placeholders.readTime')}
                   />
                 </div>
               </div>
 
               <ImageUploadField
-                label="Post Image"
+                label={t('dashboard.blog.fields.postImage')}
                 value={newPost.image}
                 onChange={(v) => setNewPost({ ...newPost, image: v })}
                 folder="blog"
@@ -301,7 +301,7 @@ export default function Blog() {
               />
 
               <div className="space-y-2">
-                <Label htmlFor="excerpt">Excerpt *</Label>
+                <Label htmlFor="excerpt">{t('dashboard.blog.fields.excerpt')}</Label>
                 <Textarea
                   id="excerpt"
                   value={newPost.excerpt}

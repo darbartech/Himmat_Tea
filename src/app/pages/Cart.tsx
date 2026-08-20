@@ -30,7 +30,7 @@ export default function Cart() {
   function applyPromo() {
     if (promo.trim() === "") return;
     setPromoApplied(true);
-    toast.success("Promo code applied!");
+    toast.success(t('cart.promoAppliedGeneric'));
   }
 
   return (

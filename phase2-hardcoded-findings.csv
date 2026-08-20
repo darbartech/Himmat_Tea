@@ -1,0 +1,215 @@
+Area,File,Location,Hardcoded Text / Issue,Suggested Key / Fix,Priority
+Structural bug,src/modules/auth/LoginForm/validation.ts,lines 6-9,"createLoginFormSchema(t) accepts t but body still uses literal strings ('Please enter a valid email address', 'Email is required', 'Password is required') instead of calling t(...)",validation.email.invalid / validation.email.required / validation.password.required,P0
+Structural bug,src/modules/auth/SignupForm/validation.ts,lines 6-30,createSignupFormSchema(t) same bug — 15 literal messages (name/email/password/confirm/phone/address/terms/match) never call t(),validation.name.* / validation.email.* / validation.password.* / validation.phone.* / validation.address.* / validation.terms.required,P0
+Structural bug,src/modules/auth/ForgotPasswordForm/validation.ts,lines 6-8,createForgotPasswordSchema(t) same bug — email messages hardcoded,validation.email.invalid / validation.email.required,P0
+Structural bug,src/modules/auth/ResetPasswordForm/validation.ts,lines 6-16,createResetPasswordSchema(t) same bug — password rule + match messages hardcoded,validation.password.* / validation.password.mismatch,P0
+Structural bug,src/modules/auth/VerifyResetForm/validation.ts,lines 6-8,createVerifyOtpSchema(t) same bug — OTP length message hardcoded,validation.otp.length,P0
+Structural bug,src/app/pages/dashboard/DashboardLayout.tsx,line 222,"Sidebar group label ""CRM"" hardcoded (siblings/children use t())",dashboard.nav.groups.crm,P0
+Structural bug,src/app/pages/dashboard/DashboardLayout.tsx,line 271,"Sidebar group label ""Vacancy"" hardcoded",dashboard.nav.groups.vacancy,P0
+Structural bug,src/app/pages/dashboard/DashboardLayout.tsx,line 277,"Sidebar item ""Careers"" hardcoded",dashboard.nav.careers,P0
+Structural bug,src/app/pages/dashboard/DashboardLayout.tsx,line 282,"Sidebar item ""Career Applications"" hardcoded",dashboard.nav.careerApplications,P0
+Structural bug,src/app/pages/dashboard/DashboardLayout.tsx,line 301,"Sidebar group label ""Users"" hardcoded",dashboard.nav.groups.users,P0
+Structural bug,src/app/pages/dashboard/DashboardLayout.tsx,line 329,"Sidebar group label ""Settings"" hardcoded",dashboard.nav.groups.settings,P0
+Structural bug,src/app/pages/dashboard/DashboardLayout.tsx,line 335,"Sidebar item ""General Settings"" hardcoded",dashboard.nav.generalSettings,P0
+Structural bug,src/app/pages/dashboard/Settings.tsx,line 411,"Currency dropdown option ""Indian Rupee (₹)"" hardcoded (sibling option on line 412 IS translated)",dashboard.settings.indianRupee,P0
+Structural bug,src/app/pages/dashboard/Settings.tsx,line 413,"Currency dropdown option ""US Dollar ($)"" hardcoded",dashboard.settings.usDollar,P0
+Structural bug,src/app/pages/dashboard/Settings.tsx,line 414,"Currency dropdown option ""Euro (€)"" hardcoded",dashboard.settings.euro,P0
+Structural bug,src/app/pages/dashboard/Settings.tsx,line 415,"Currency dropdown option ""British Pound (£)"" hardcoded",dashboard.settings.britishPound,P0
+Structural bug,src/app/pages/dashboard/Settings.tsx,line 440,"Time zone option ""Nepal Standard Time (UTC+5:45)"" hardcoded (UTC option on line 442 IS translated)",dashboard.settings.localization.timeZones.nepal,P0
+Structural bug,src/app/pages/dashboard/Settings.tsx,line 441,"Time zone option ""India Standard Time (UTC+5:30)"" hardcoded",dashboard.settings.localization.timeZones.india,P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 881,"toast.success/error(""Product variant added!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 896,"toast.success/error(""Product variant updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 909,"toast.success/error(""Product variant deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 925,"toast.success/error(""{points} loyalty points added!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 940,"toast.success/error(""{points} loyalty points redeemed!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 950,"toast.success/error(""Purchase order created!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 957,"toast.success/error(""Purchase order updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 974,"toast.success/error(""Purchase order received!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 979,"toast.success/error(""Purchase order deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 995,"toast.success/error(""Admin user added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1011,"toast.success/error(""Admin user updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1020,"toast.success/error(""Cannot delete the last superadmin!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1025,"toast.success/error(""Admin user deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1057,"toast.success/error(""Product added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1076,"toast.success/error(""Product updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1081,"toast.success/error(""Product deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1101,"toast.success/error(""Batch added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1126,"toast.success/error(""Batch updated successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1144,"toast.success/error(""Batch deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1150,"toast.success/error(""Product not found!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1157,"toast.success/error(""Insufficient stock!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1204,"toast.success/error(""Stock updated successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1231,"toast.success/error(""Order not found!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1264,"toast.success/error(""Order {id} refunded successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1278,"toast.success/error(""Internal note added!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1285,"toast.success/error(""Tracking info updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1292,"toast.success/error(""Updated {count} orders to {status}!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1348,"toast.success/error(""New order {id} received! {points} loyalty points awarded."")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1350,"toast.success/error(""Order confirmation email sent to {email} with order ID {id}"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1360,"toast.success/error(""Order updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1362,"toast.success/error(""Status update email would be sent to customer!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1368,"toast.success/error(""Order deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1382,"toast.success/error(""Customer added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1391,"toast.success/error(""Customer updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1396,"toast.success/error(""Customer deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1409,"toast.success/error(""Blog post added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1418,"toast.success/error(""Blog post updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1423,"toast.success/error(""Blog post deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1432,"toast.success/error(""Review added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1441,"toast.success/error(""Review updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1446,"toast.success/error(""Review deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1458,"toast.success/error(""Product line added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1468,"toast.success/error(""Product line updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1474,"toast.success/error(""Product line deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1486,"toast.success/error(""Hero visual added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1495,"toast.success/error(""Hero visual updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1500,"toast.success/error(""Hero visual deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1514,"toast.success/error(""Coupon added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1523,"toast.success/error(""Coupon updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1528,"toast.success/error(""Coupon deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1537,"toast.success/error(""Collection added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1546,"toast.success/error(""Collection updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1551,"toast.success/error(""Collection deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1560,"toast.success/error(""Brewing guide added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1569,"toast.success/error(""Brewing guide updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1574,"toast.success/error(""Brewing guide deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1583,"toast.success/error(""FAQ added successfully!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1592,"toast.success/error(""FAQ updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1597,"toast.success/error(""FAQ deleted!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1602,"toast.success/error(""About page updated!"")",notifications.admin.<action> (see doc §2),P0
+Admin notifications (StoreContext.tsx),src/context/StoreContext.tsx,line 1619,"toast.success/error(""Settings saved!"")",notifications.admin.<action> (see doc §2),P0
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 107,"confirm: window.confirm(`Delete ""${job.title}""? This cannot be undone.`) — uses native browser confirm() instead of the app's AlertDialog pattern used elsewhere",careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 140,heading: Careers,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 141,subtitle: Manage the jobs displayed on the public Careers page.,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 152,empty state: No career roles yet.,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 153,empty state: Add your first opening to publish it on the website.,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 170,button: Edit,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 171,button: Delete,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 183,helper text: Only published roles appear on the public Careers page.,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 188,"field label + placeholder: Job Title * / ""Head of Tea Sourcing""",careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 189,field label: Department,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 192,field label: Location,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 193,field label: Employment Type,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 194,field label: Level,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 197,"field label + placeholder: Posted Date / ""August 18, 2026""",careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 198,field label: Sort Order,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 200,field label: Description *,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 202,field label: Responsibilities,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 206,field label: Requirements,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 210,toggle label + helper: Publish role / Visible to visitors when enabled.,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareersAdmin.tsx,line 214,button: Cancel,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 171,subtitle: Review and manage applications submitted through the Careers page.,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 180,"placeholder: Search by name, email, or phone...",careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 188,filter placeholder + option: All Statuses,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 199,filter placeholder + option: All Positions,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 215,empty state: No applications found.,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 216,empty state: Try adjusting your search or filters.,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 223,table header: Applicant,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 224,table header: Position,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 225,table header: Email,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 226,table header: Phone,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 227,table header: Applied,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 228,table header: Status,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 229,table header: Actions,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 260,dialog title: Delete this application?,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 266,button: Cancel,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 328,field label: Cover Letter,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 336,field label: Status,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 354,field label: Admin Notes,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — Careers module (unwired),src/app/pages/dashboard/CareerApplicationsAdmin.tsx,line 359,placeholder: Internal notes about this candidate...,careersAdmin.* / careerApplicationsAdmin.* (new namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/CollectionsAdmin.tsx,line 257,Title *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/CollectionsAdmin.tsx,line 273,Slug *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/CollectionsAdmin.tsx,line 284,Description *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/CollectionsAdmin.tsx,line 295,Collection Image (image upload label),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/HeroVisuals.tsx,line 194,Hero Image (image upload label),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/ProductLines.tsx,line 258,Name *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/ProductLines.tsx,line 274,Slug *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/ProductLines.tsx,line 287,Description *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/ProductLines.tsx,line 300,Hero Image (image upload label),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Blog.tsx,line 247,Title *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Blog.tsx,line 289,"placeholder ""5 min read""",dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Blog.tsx,line 295,Post Image (image upload label),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Blog.tsx,line 304,Excerpt *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/BrewingGuidesAdmin.tsx,line 237,Title *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/BrewingGuidesAdmin.tsx,line 253,Slug *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/BrewingGuidesAdmin.tsx,line 264,Description *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/BrewingGuidesAdmin.tsx,line 275,Featured Image (image upload label),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/BrewingGuidesAdmin.tsx,line 306,"placeholder ""80°C""",dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/BrewingGuidesAdmin.tsx,line 315,"placeholder ""3 min""",dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/BrewingGuidesAdmin.tsx,line 327,"placeholder ""2g per 200ml""",dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/FAQs.tsx,line 219,Question *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/FAQs.tsx,line 228,Answer *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/PurchaseOrders.tsx,line 396,PO Number *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/PurchaseOrders.tsx,line 406,Supplier *,dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/PurchaseOrders.tsx,line 497,Unit Price (₹),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Coupons.tsx,line 284,Maximum Discount (₹),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Coupons.tsx,line 300,Minimum Order Amount (₹),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Customers.tsx,line 221,"placeholder ""+91 9876543210""",dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Customers.tsx,line 230,"placeholder ""123 Main Street, City""",dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Settings.tsx,line 267,Shipping Flat Rate (₹),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Settings.tsx,line 85,toast.error('Failed to load settings'),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Settings.tsx,line 105,throw new Error('Failed to save settings'),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Settings.tsx,line 108,toast.success('Settings saved successfully!'),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Settings.tsx,line 111,toast.error('Failed to save settings'),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Settings.tsx,line 122,toast.error('Please select a valid image file'),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Settings.tsx,line 143,toast.success('QR Image uploaded successfully!'),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/DashboardHome.tsx,line 635,section heading 'Your daily shortcuts',dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Reviews.tsx,line 127,toast.success('Review ${{newStatus}} successfully!'),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Reviews.tsx,line 147,toast.success('Review deleted successfully!'),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Blog.tsx,line 142,throw new Error('Failed to update blog post'),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Blog.tsx,line 152,throw new Error('Failed to create blog post'),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Blog.tsx,line 195,throw new Error('Failed to delete post'),dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Inventory.tsx,line 1094,placeholder '0.00',dashboard.<page>.* (extend existing namespace),P1
+Admin panel — scattered gaps,src/app/pages/dashboard/Products.tsx (via ExportUtils.tsx),line 51/63/90,alert('Failed to export PDF...') / alert('No data to export') / alert('Failed to export CSV...'),dashboard.<page>.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/ProductCard.tsx,line 29,toast.error('${{name}} is out of stock.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/ProductDetail.tsx,line 175,toast.error('${{name}} is out of stock.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/ProductDetail.tsx,line 180,toast.error('${{name}} is out of stock.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/ProductDetail.tsx,line 212,toast('${{name}} removed from wishlist!'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/ProductDetail.tsx,line 215,toast('${{name}} added to wishlist!'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Wishlist.tsx,line 29,toast.success('${{name}} added to cart!'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Wishlist.tsx,line 129,toast('${{name}} removed from wishlist!'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/ProductsCatalog.tsx,line 133,toast('${{name}} removed from wishlist!'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/ProductsCatalog.tsx,line 136,toast('${{name}} added to wishlist!'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/ProductsCatalog.tsx,line 180,toast.success('Added to cart!'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/ProductsCatalog.tsx,line 271,sort option 'Price: Low → High',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/ProductsCatalog.tsx,line 272,sort option 'Price: High → Low',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Cart.tsx,line 33,toast.success('Promo code applied!'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 244,toast.error('Please enter a coupon code.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 248,toast.error('Add items to your cart before applying a coupon.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 258,"toast.success('Coupon ""${{code}}"" applied!')",<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 273,"toast.error('Coupon ""${{code}}"" ...')",<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 281,setError('Your cart is empty. Please add items before placing an order.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 287,setError('One or more items in your cart are invalid...'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 330,setError('Your session has expired. Please sign in again.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 333,setError('You are not authorized to place this order.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 339,setError('A product or customer record was not found.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 469,placeholder 'aarav@example.com',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 478,placeholder '+977 98XXXXXXXX',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 514,placeholder '44600 (optional)',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 741,placeholder 'ENTER CODE',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Checkout.tsx,line 775,aria-label 'Remove coupon',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Login.tsx,line 43,setError('Please enter your username'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Login.tsx,line 47,setError('Please enter your password'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Login.tsx,line 56,toast.success('Welcome back!'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Sourcing.tsx,line 130,link text 'About our team →',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Careers.tsx,line 193,setError('Please fill in all required fields.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Careers.tsx,line 198,setError('Please attach your resume/CV.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Careers.tsx,line 363,placeholder '+977 000 0000',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Careers.tsx,line 380,"placeholder 'Street, City, Country'",<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Careers.tsx,line 438,placeholder 'Tell us why you're excited about this role...',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Careers.tsx,line 722,throw new Error('Failed to load careers'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Wholesale.tsx,line 837,jsx text 'Café',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/Wholesale.tsx,line 884,placeholder '+1 555 000 0000',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/OrderConfirmed.tsx,line 84,setError('Order reference was not provided.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/OrderConfirmed.tsx,line 99,throw new Error('Order not found.'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/CustomerAccount.tsx,line 243,aria-label 'Notifications',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/CustomerAccount.tsx,line 263,empty state 'No notifications yet.',<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/pages/CollectionDetail.tsx,line 42,throw new Error('Failed to load collections'),<page>.* / notifications.* (extend existing namespace),P1
+Public pages — scattered gaps,src/app/components/ShareBar.tsx,line 31,"toast.error(""Copy isn't supported in this browser."")",<page>.* / notifications.* (extend existing namespace),P1
+"Shared UI (a11y, sr-only)",src/app/components/ui/dialog.tsx,line 68,"<span class=""sr-only"">Close</span> — screen-reader-only text, used across 16 modal dialogs app-wide",a11y.close (already exists — just needs wiring here),P2
+"Dead code (no fix needed, flagged for cleanup)",src/app/components/ui/sheet.tsx,line 77,sr-only 'Close' — component is not imported anywhere in the app,n/a — unused component,P3
+"Dead code (no fix needed, flagged for cleanup)",src/app/components/ui/sidebar.tsx,"lines 277,289,292",'Toggle Sidebar' x3 — component is not imported anywhere in the app,n/a — unused component,P3
+"Dead code (no fix needed, flagged for cleanup)",src/app/components/ui/pagination.tsx,lines 75-115,'Previous'/'Next'/'Go to previous/next page'/'More pages' — component is not imported anywhere in the app,n/a — unused component,P3
+"Dead code (no fix needed, flagged for cleanup)",src/app/components/ui/carousel.tsx,"lines 169,199",'Previous slide'/'Next slide' — the app's only carousel usage (ProductSlider.tsx) uses its own translated buttons instead of these,n/a — unused code path,P3
+Server-side error catalog (architectural),src/lib/error-messages.ts,all 101 lines / ~35 messages,"USER_ERRORS catalog + ERROR_CODE_MAP + resolveErrorMessage() bake final English strings into API JSON responses server-side, before any client t() can run","errors.<CODE> namespace + client-side resolveErrorMessage(t, code) (see doc §5)",P0 (architecture) / P2 (execution)
+Server-side transactional emails (out of UI scope),src/lib/email.ts,~25 strings across order/verification/wholesale/contact emails,"Email templates (order confirmation, OTP, payment status, wholesale enquiry, contact form) are always sent in English regardless of site language",separate server-side email-locale system (see doc §6),"P3 (flagged, not blocking)"

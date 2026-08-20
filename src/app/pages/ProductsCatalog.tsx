@@ -130,10 +130,10 @@ export default function ProductsCatalog() {
     };
     if (isInWishlist(product.id.toString())) {
       removeFromWishlist(product.id.toString());
-      toast.success(`${product.name} removed from wishlist!`);
+      toast.success(t('wishlist.removed', { name: product.name }));
     } else {
       addToWishlist(productData);
-      toast.success(`${product.name} added to wishlist!`);
+      toast.success(t('wishlist.added', { name: product.name }));
     }
   }
 
@@ -177,7 +177,7 @@ export default function ProductsCatalog() {
       image: product.imageUrl,
       weight: "50g",
     });
-    toast.success("Added to cart!");
+    toast.success(t('products.addedToCart', { name: product.name }));
   }
 
   const getAverageRating = (product: Product) => {
@@ -268,8 +268,8 @@ export default function ProductsCatalog() {
                 className="px-4 py-2.5 bg-white rounded-xl border border-[rgba(28,25,23,0.08)] text-sm focus:outline-none focus:border-[#2d5a3d] cursor-pointer"
               >
                 <option value="featured">{t('products.sort.featured')}</option>
-                <option value="price-asc">Price: Low → High</option>
-                <option value="price-desc">Price: High → Low</option>
+                <option value="price-asc">{t('products.sort.priceAsc')}</option>
+                <option value="price-desc">{t('products.sort.priceDesc')}</option>
                 <option value="rating">{t('products.sort.topRated')}</option>
               </select>
             </div>

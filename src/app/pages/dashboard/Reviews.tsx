@@ -124,7 +124,7 @@ const Reviews = () => {
       });
       const resolved: Review = (updated as any)?.data ?? updated;
       setReviews((prev) => prev.map((r) => (r.id === resolved.id ? { ...r, ...resolved } : r)));
-      toast.success(`Review ${newStatus.toLowerCase()} successfully!`);
+      toast.success(t('dashboard.reviews.notifications.statusUpdated', { status: newStatus }));
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || `Failed to ${newStatus.toLowerCase()} review`;
       toast.error(msg);
@@ -144,7 +144,7 @@ const Reviews = () => {
       setDeletingId(deleteTarget.id);
       await api.delete(`/reviews/${deleteTarget.id}`);
       setReviews((prev) => prev.filter((r) => r.id !== deleteTarget.id));
-      toast.success("Review deleted successfully!");
+      toast.success(t('dashboard.reviews.notifications.deleted'));
     } catch (err: any) {
       const msg = err instanceof ApiError ? err.message : err?.message || "Failed to delete review";
       toast.error(msg);

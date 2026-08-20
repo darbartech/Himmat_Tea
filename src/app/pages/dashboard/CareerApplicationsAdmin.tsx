@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { notify } from "@/lib/notify";
 import { api, ApiError } from "@/lib/api-client";
+import { useTranslation } from '@/context/TranslationContext';
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -57,6 +58,7 @@ type CareerApplication = {
 };
 
 export default function CareerApplicationsAdmin() {
+  const { t } = useTranslation();
   const [applications, setApplications] = useState<CareerApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,7 +78,7 @@ export default function CareerApplicationsAdmin() {
       const result: any = await api.get("/career-applications");
       setApplications(Array.isArray(result) ? result : result?.data ?? []);
     } catch (err: any) {
-      notify.error(err instanceof ApiError ? err.message : "Failed to load applications");
+      notify.error(err instanceof ApiError ? err.message : t('careerApplicationsAdmin.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -117,9 +119,9 @@ export default function CareerApplicationsAdmin() {
       const applied = updated?.data ?? updated;
       setApplications(prev => prev.map(a => a.id === selected.id ? { ...a, status: applied.status } : a));
       setSelected(prev => prev ? { ...prev, status: applied.status } : prev);
-      notify.success("Status updated");
+      notify.success(t('careerApplicationsAdmin.notifications.statusUpdated'));
     } catch (err: any) {
-      notify.error(err instanceof ApiError ? err.message : "Failed to update status");
+      notify.error(err instanceof ApiError ? err.message : t('careerApplicationsAdmin.errors.statusFailed'));
     } finally {
       setSavingStatus(false);
     }
@@ -133,9 +135,9 @@ export default function CareerApplicationsAdmin() {
       const applied = updated?.data ?? updated;
       setApplications(prev => prev.map(a => a.id === selected.id ? { ...a, adminNotes: applied.adminNotes } : a));
       setSelected(prev => prev ? { ...prev, adminNotes: applied.adminNotes } : prev);
-      notify.success("Notes saved");
+      notify.success(t('careerApplicationsAdmin.notifications.notesSaved'));
     } catch (err: any) {
-      notify.error(err instanceof ApiError ? err.message : "Failed to save notes");
+      notify.error(err instanceof ApiError ? err.message : t('careerApplicationsAdmin.errors.notesFailed'));
     } finally {
       setSavingNotes(false);
     }
@@ -150,9 +152,9 @@ export default function CareerApplicationsAdmin() {
         setViewOpen(false);
         setSelected(null);
       }
-      notify.success("Application deleted");
+      notify.success(t('careerApplicationsAdmin.notifications.deleted'));
     } catch (err: any) {
-      notify.error(err instanceof ApiError ? err.message : "Failed to delete application");
+      notify.error(err instanceof ApiError ? err.message : t('careerApplicationsAdmin.errors.deleteFailed'));
     } finally {
       setDeletingId(null);
     }
@@ -166,9 +168,9 @@ export default function CareerApplicationsAdmin() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Career Applications
+          {t('careerApplicationsAdmin.heading')}
         </h1>
-        <p className="mt-1 text-[#78746e]">Review and manage applications submitted through the Careers page.</p>
+        <p className="mt-1 text-[#78746e]">{t('careerApplicationsAdmin.subtitle')}</p>
       </div>
 
       {/* Search + filters */}
@@ -177,7 +179,7 @@ export default function CareerApplicationsAdmin() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78746e]" />
           <Input
             type="text"
-            placeholder="Search by name, email, or phone..."
+            placeholder={t('careerApplicationsAdmin.filters.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-11"
@@ -185,10 +187,10 @@ export default function CareerApplicationsAdmin() {
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="All Statuses" />
+            <SelectValue placeholder={t('careerApplicationsAdmin.filters.allStatuses')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="All">All Statuses</SelectItem>
+            <SelectItem value="All">{t('careerApplicationsAdmin.filters.allStatuses')}</SelectItem>
             {STATUSES.map((s) => (
               <SelectItem key={s} value={s}>{s}</SelectItem>
             ))}
@@ -196,10 +198,10 @@ export default function CareerApplicationsAdmin() {
         </Select>
         <Select value={positionFilter} onValueChange={setPositionFilter}>
           <SelectTrigger className="w-full md:w-[220px]">
-            <SelectValue placeholder="All Positions" />
+            <SelectValue placeholder={t('careerApplicationsAdmin.filters.allPositions')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="All">All Positions</SelectItem>
+            <SelectItem value="All">{t('careerApplicationsAdmin.filters.allPositions')}</SelectItem>
             {positions.map((p) => (
               <SelectItem key={p} value={p}>{p}</SelectItem>
             ))}
@@ -212,21 +214,21 @@ export default function CareerApplicationsAdmin() {
         {filtered.length === 0 ? (
           <div className="py-16 text-center">
             <Briefcase className="mx-auto mb-3 h-8 w-8 text-[#78746e]" />
-            <p className="font-medium text-[#1c1917]">No applications found.</p>
-            <p className="mt-1 text-sm text-[#78746e]">Try adjusting your search or filters.</p>
+            <p className="font-medium text-[#1c1917]">{t('careerApplicationsAdmin.empty.heading')}</p>
+            <p className="mt-1 text-sm text-[#78746e]">{t('careerApplicationsAdmin.empty.subtitle')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px]">
               <thead className="bg-[#f9f7f4]">
                 <tr className="text-left text-sm text-[#78746e] border-b border-[#2d5a3d]/5">
-                  <th className="px-6 py-4 font-medium whitespace-nowrap">Applicant</th>
-                  <th className="px-6 py-4 font-medium whitespace-nowrap">Position</th>
-                  <th className="px-6 py-4 font-medium whitespace-nowrap">Email</th>
-                  <th className="px-6 py-4 font-medium whitespace-nowrap">Phone</th>
-                  <th className="px-6 py-4 font-medium whitespace-nowrap">Applied</th>
-                  <th className="px-6 py-4 font-medium whitespace-nowrap">Status</th>
-                  <th className="px-6 py-4 font-medium whitespace-nowrap text-right">Actions</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">{t('careerApplicationsAdmin.table.applicant')}</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">{t('careerApplicationsAdmin.table.position')}</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">{t('careerApplicationsAdmin.table.email')}</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">{t('careerApplicationsAdmin.table.phone')}</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">{t('careerApplicationsAdmin.table.applied')}</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">{t('careerApplicationsAdmin.table.status')}</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap text-right">{t('careerApplicationsAdmin.table.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#2d5a3d]/5">
@@ -247,7 +249,7 @@ export default function CareerApplicationsAdmin() {
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         <Button variant="outline" size="sm" onClick={() => openView(a)}>
-                          <Eye className="mr-1.5 h-4 w-4" /> View
+                          <Eye className="mr-1.5 h-4 w-4" /> {t('careerApplicationsAdmin.actions.view')}
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
@@ -257,19 +259,19 @@ export default function CareerApplicationsAdmin() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete this application?</AlertDialogTitle>
+                              <AlertDialogTitle>{t('careerApplicationsAdmin.confirmDelete.title')}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This will permanently remove {a.fullName}'s application. This cannot be undone.
+                                {t('careerApplicationsAdmin.confirmDelete.description', { name: a.fullName })}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel>{t('careerApplicationsAdmin.actions.cancel')}</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => remove(a)}
                                 disabled={deletingId === a.id}
                                 className="bg-red-600 hover:bg-red-700"
                               >
-                                {deletingId === a.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Delete
+                                {deletingId === a.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {t('careerApplicationsAdmin.actions.delete')}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -319,13 +321,13 @@ export default function CareerApplicationsAdmin() {
                   className="inline-flex w-fit items-center gap-2 px-4 py-2.5 rounded-xl bg-[#f9f7f4] border border-[#2d5a3d]/10 text-sm font-medium text-[#2d5a3d] hover:bg-[#f0f9f4] transition-colors"
                 >
                   <FileText className="h-4 w-4" />
-                  View / Download Resume
+                  {t('careerApplicationsAdmin.view.resumeAction')}
                   <Download className="h-4 w-4" />
                 </a>
 
                 {selected.coverLetter && (
                   <div className="space-y-1.5">
-                    <Label>Cover Letter</Label>
+                    <Label>{t('careerApplicationsAdmin.view.coverLetter')}</Label>
                     <p className="text-sm text-[#1c1917] whitespace-pre-wrap rounded-xl border border-black/5 bg-[#f9f7f4] p-4">
                       {selected.coverLetter}
                     </p>
@@ -333,7 +335,7 @@ export default function CareerApplicationsAdmin() {
                 )}
 
                 <div className="space-y-1.5">
-                  <Label>Status</Label>
+                  <Label>{t('careerApplicationsAdmin.view.status')}</Label>
                   <Select
                     value={selected.status}
                     onValueChange={(v) => updateStatus(v as ApplicationStatus)}
@@ -351,12 +353,12 @@ export default function CareerApplicationsAdmin() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Admin Notes</Label>
+                  <Label>{t('careerApplicationsAdmin.view.adminNotes')}</Label>
                   <Textarea
                     rows={4}
                     value={notesDraft}
                     onChange={(e) => setNotesDraft(e.target.value)}
-                    placeholder="Internal notes about this candidate..."
+                    placeholder={t('careerApplicationsAdmin.view.notesPlaceholder')}
                   />
                   <div className="flex justify-end">
                     <Button
@@ -365,14 +367,14 @@ export default function CareerApplicationsAdmin() {
                       disabled={savingNotes || notesDraft === (selected.adminNotes || "")}
                       className="bg-[#2d5a3d] text-white hover:bg-[#234832]"
                     >
-                      {savingNotes && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save Notes
+                      {savingNotes && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {t('careerApplicationsAdmin.actions.saveNotes')}
                     </Button>
                   </div>
                 </div>
 
                 <div className="flex justify-end">
                   <Button variant="outline" onClick={() => setViewOpen(false)}>
-                    <X className="mr-1.5 h-4 w-4" /> Close
+                    <X className="mr-1.5 h-4 w-4" /> {t('careerApplicationsAdmin.actions.close')}
                   </Button>
                 </div>
               </div>

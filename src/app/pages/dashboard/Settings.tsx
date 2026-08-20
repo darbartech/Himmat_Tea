@@ -82,7 +82,7 @@ export default function Settings() {
       }
     } catch (e) {
       console.error("Failed to load settings", e);
-      toast.error("Failed to load settings");
+      toast.error(t('dashboard.settings.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -102,13 +102,13 @@ export default function Settings() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(localSettings)
       });
-      if (!res.ok) throw new Error("Failed to save settings");
+      if (!res.ok) throw new Error(t('dashboard.settings.errors.saveFailed'));
       const data = await res.json();
       setSettings(data.data);
-      toast.success("Settings saved successfully!");
+      toast.success(t('dashboard.settings.notifications.saveSuccess'));
     } catch (e) {
       console.error("Error saving settings", e);
-      toast.error("Failed to save settings");
+      toast.error(t('dashboard.settings.errors.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -119,7 +119,7 @@ export default function Settings() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file");
+      toast.error(t('dashboard.settings.errors.invalidImage'));
       return;
     }
 
@@ -140,7 +140,7 @@ export default function Settings() {
       }
 
       setLocalSettings((prev) => ({ ...prev, qrImageUrl: result.data.url }));
-      toast.success("QR Image uploaded successfully!");
+      toast.success(t('dashboard.settings.notifications.qrUploaded'));
     } catch (err: any) {
       toast.error(err.message || "Failed to upload image. Please try again.");
     } finally {
@@ -264,7 +264,7 @@ export default function Settings() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Shipping Flat Rate (₹)</Label>
+                          <Label>{t('dashboard.settings.shippingFlatRate')}</Label>
                           <Input
                             type="number"
                             step="0.01"
@@ -408,11 +408,11 @@ export default function Settings() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="₹">Indian Rupee (₹)</SelectItem>
+                          <SelectItem value="₹">{t('dashboard.settings.indianRupee')}</SelectItem>
                           <SelectItem value="Rs.">{t('dashboard.settings.nepaleseRupee')}</SelectItem>
-                          <SelectItem value="$">US Dollar ($)</SelectItem>
-                          <SelectItem value="€">Euro (€)</SelectItem>
-                          <SelectItem value="£">British Pound (£)</SelectItem>
+                          <SelectItem value="$">{t('dashboard.settings.usDollar')}</SelectItem>
+                          <SelectItem value="€">{t('dashboard.settings.euro')}</SelectItem>
+                          <SelectItem value="£">{t('dashboard.settings.britishPound')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -437,8 +437,8 @@ export default function Settings() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Asia/Kathmandu">Nepal Standard Time (UTC+5:45)</SelectItem>
-                          <SelectItem value="Asia/Kolkata">India Standard Time (UTC+5:30)</SelectItem>
+                          <SelectItem value="Asia/Kathmandu">{t('dashboard.settings.localization.timeZones.nepal')}</SelectItem>
+                          <SelectItem value="Asia/Kolkata">{t('dashboard.settings.localization.timeZones.india')}</SelectItem>
                           <SelectItem value="UTC">{t('dashboard.settings.localization.timeZones.utc')}</SelectItem>
                         </SelectContent>
                       </Select>

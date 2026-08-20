@@ -632,7 +632,7 @@ export default function DashboardHome() {
                     </div>
                     <div>
                       <h2 className="text-xl font-bold">{t("dashboard.home.quickActions")}</h2>
-                      <p className="text-sm text-white/80 mt-1">Your daily shortcuts</p>
+                      <p className="text-sm text-white/80 mt-1">{t('dashboard.home.shortcuts')}</p>
                     </div>
                   </div>
                   <div className="space-y-3">

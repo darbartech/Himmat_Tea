@@ -254,7 +254,7 @@ export default function CollectionsAdmin() {
             <div className="grid gap-5 py-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="col-title">Title *</Label>
+                  <Label htmlFor="col-title">{t('dashboard.collections.fields.title')}</Label>
                   <Input
                     id="col-title"
                     value={newCollection.title || ""}
@@ -270,7 +270,7 @@ export default function CollectionsAdmin() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="col-slug">Slug *</Label>
+                  <Label htmlFor="col-slug">{t('dashboard.collections.fields.slug')}</Label>
                   <Input
                     id="col-slug"
                     value={newCollection.slug || ""}
@@ -281,7 +281,7 @@ export default function CollectionsAdmin() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="col-description">Description *</Label>
+                <Label htmlFor="col-description">{t('dashboard.collections.fields.description')}</Label>
                 <Textarea
                   id="col-description"
                   rows={3}
@@ -292,7 +292,7 @@ export default function CollectionsAdmin() {
               </div>
 
               <ImageUploadField
-                label="Collection Image"
+                label={t('dashboard.collections.fields.collectionImage')}
                 value={newCollection.image || ""}
                 onChange={(v) => setNewCollection({ ...newCollection, image: v })}
                 folder="collections"

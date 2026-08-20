@@ -218,7 +218,7 @@ export default function Customers() {
                   id="phone"
                   value={newCustomer.phone}
                   onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
-                  placeholder="+91 9876543210"
+                  placeholder={t('dashboard.customers.placeholders.phone')}
                 />
               </div>
               <div className="grid gap-2">
@@ -227,7 +227,7 @@ export default function Customers() {
                   id="address"
                   value={newCustomer.address}
                   onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
-                  placeholder="123 Main Street, City"
+                  placeholder={t('dashboard.customers.placeholders.address')}
                 />
               </div>
             </div>

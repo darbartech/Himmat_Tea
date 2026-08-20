@@ -191,7 +191,7 @@ export default function HeroVisuals() {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <ImageUploadField
-                  label="Hero Image"
+                  label={t('dashboard.heroVisuals.fields.heroImage')}
                   value={newHeroVisual.imageUrl || ""}
                   onChange={(v) => setNewHeroVisual({ ...newHeroVisual, imageUrl: v })}
                   folder="hero-visuals"

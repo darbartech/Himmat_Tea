@@ -127,7 +127,7 @@ export default function Sourcing() {
               Four checkpoints stand between a Himalayan farm and your cup. Here&apos;s what each one does.
             </p>
             <p className="text-sm text-[#78746e] mt-4">
-              <Link href="/about" className="underline hover:text-[#2d5a3d]">About our team →</Link>
+              <Link href="/about" className="underline hover:text-[#2d5a3d]">{t('sourcing.aboutOurTeam')}</Link>
             </p>
           </div>
 

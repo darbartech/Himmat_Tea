@@ -216,7 +216,7 @@ export default function FAQs() {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="faq-question">Question *</Label>
+                  <Label htmlFor="faq-question">{t('dashboard.faqs.fields.question')}</Label>
                   <Input
                     id="faq-question"
                     value={newFAQ.question || ""}
@@ -225,7 +225,7 @@ export default function FAQs() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="faq-answer">Answer *</Label>
+                  <Label htmlFor="faq-answer">{t('dashboard.faqs.fields.answer')}</Label>
                   <Textarea
                     id="faq-answer"
                     rows={6}

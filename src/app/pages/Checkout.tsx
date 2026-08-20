@@ -241,11 +241,11 @@ export default function Checkout() {
     if (e) e.preventDefault();
     const code = couponInput.trim();
     if (!code) {
-      toast.error("Please enter a coupon code.");
+      toast.error(t('checkout.coupon.enterCodeRequired'));
       return;
     }
     if (subtotal <= 0) {
-      toast.error("Add items to your cart before applying a coupon.");
+      toast.error(t('checkout.coupon.cartEmptyForApply'));
       return;
     }
     setIsApplyingCoupon(true);
@@ -255,7 +255,7 @@ export default function Checkout() {
         const couponData: AppliedCoupon = res.data;
         setAppliedCoupon(couponData);
         setCouponInput("");
-        toast.success(`Coupon "${couponData.code}" applied — ${currency} ${couponData.discountAmount.toLocaleString()} off!`);
+        toast.success(t('checkout.coupon.appliedWithDiscount', { code: couponData.code, currency, amount: couponData.discountAmount.toLocaleString() }));
       } else {
         toast.error(res?.error || "Invalid coupon code.");
       }
@@ -270,7 +270,7 @@ export default function Checkout() {
     const code = appliedCoupon?.code;
     setAppliedCoupon(null);
     if (code) {
-      toast.info(`Coupon "${code}" removed.`);
+      toast.info(t('checkout.coupon.removed', { code }));
     }
   }
 
@@ -278,13 +278,13 @@ export default function Checkout() {
     setSubmitError(null);
 
     if (cart.length === 0) {
-      setSubmitError("Your cart is empty. Please add items before placing an order.");
+      setSubmitError(t('checkout.submit.cartEmpty'));
       return;
     }
 
     const invalidItems = cart.filter(item => !item.productId || isNaN(item.productId));
     if (invalidItems.length > 0) {
-      setSubmitError("One or more items in your cart are invalid. Please remove them and try again.");
+      setSubmitError(t('checkout.submit.invalidItems'));
       return;
     }
 
@@ -327,16 +327,16 @@ export default function Checkout() {
             setSubmitError(error.message || "Invalid order details. Please review and try again.");
             break;
           case 401:
-            setSubmitError("Your session has expired. Please sign in again.");
+            setSubmitError(t('checkout.submit.sessionExpired'));
             break;
           case 403:
-            setSubmitError("You are not authorized to place this order.");
+            setSubmitError(t('checkout.submit.unauthorized'));
             break;
           case 409:
             setSubmitError(error.message || "Stock or conflict error. Please review your cart and try again.");
             break;
           case 404:
-            setSubmitError("A product or customer record was not found.");
+            setSubmitError(t('checkout.submit.recordNotFound'));
             break;
           default:
             setSubmitError(
@@ -466,7 +466,7 @@ export default function Checkout() {
                         label={t('checkout.fields.emailAddress')}
                         name="email"
                         type="email"
-                        placeholder="aarav@example.com"
+                        placeholder={t('checkout.placeholders.email')}
                         value={formData.email}
                         onChange={handleInputChange}
                         error={errors.email}
@@ -475,7 +475,7 @@ export default function Checkout() {
                         label={t('checkout.fields.phoneNumber')}
                         name="phone"
                         type="tel"
-                        placeholder="+977 98XXXXXXXX"
+                        placeholder={t('checkout.placeholders.phone')}
                         value={formData.phone}
                         onChange={handleInputChange}
                         error={errors.phone}
@@ -511,7 +511,7 @@ export default function Checkout() {
                       <Field
                         label={t('checkout.fields.postalCode')}
                         name="postal"
-                        placeholder="44600 (optional)"
+                        placeholder={t('checkout.placeholders.postalCode')}
                         value={formData.postal}
                         onChange={handleInputChange}
                         error={errors.postal}
@@ -738,7 +738,7 @@ export default function Checkout() {
                               type="text"
                               value={couponInput}
                               onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                              placeholder="ENTER CODE"
+                              placeholder={t('checkout.placeholders.couponCode')}
                               disabled={isApplyingCoupon || cart.length === 0}
                               className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[rgba(28,25,23,0.12)] bg-[#f9f7f4] text-[#1c1917] placeholder:text-[#78746e]/40 focus:outline-none focus:border-[#2d5a3d] text-sm font-medium tracking-wider disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             />
@@ -772,7 +772,7 @@ export default function Checkout() {
                             type="button"
                             onClick={handleRemoveCoupon}
                             className="p-1 rounded-md text-[#78746e] hover:text-red-600 hover:bg-red-50 transition-colors"
-                            aria-label="Remove coupon"
+                            aria-label={t('checkout.a11y.removeCoupon')}
                           >
                             <X className="h-4 w-4" />
                           </button>
