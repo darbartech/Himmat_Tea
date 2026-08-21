@@ -23,7 +23,7 @@ export default function Cart() {
   const { cart, updateQuantity, removeFromCart, cartTotal } = useCart();
   const [promo, setPromo] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
-  const { formatPrice } = useCurrency();
+  const { formatPrice, formatSecondaryPrice } = useCurrency();
 
   const shippingFree = cartTotal >= 3000;
 
@@ -257,6 +257,11 @@ export default function Cart() {
                       <span>{t('dashboard.invoice.total')}</span>
                       <span>{formatPrice(cartTotal)}</span>
                     </div>
+                    {formatSecondaryPrice(cartTotal) && (
+                      <p className="text-xs text-right text-[#78746e]">
+                        {formatSecondaryPrice(cartTotal)}
+                      </p>
+                    )}
                   </div>
 
                   <Link

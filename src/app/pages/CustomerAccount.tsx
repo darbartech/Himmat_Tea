@@ -16,12 +16,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/components/ui/dropdown-menu";
-import { 
-  LogOut, 
-  ShoppingBag, 
-  User, 
-  MapPin, 
-  Mail, 
+import {
+  LogOut,
+  ShoppingBag,
+  User,
+  MapPin,
+  Mail,
   Phone,
   Star,
   History,
@@ -67,7 +67,11 @@ interface Order {
   estimatedDeliveryDate?: string | Date;
   customerEmail?: string;
   customerName?: string;
-  trackingHistory?: { status: string; date: string; description: string }[];
+  trackingHistory?: {
+    status: string;
+    date: string;
+    description: string;
+  }[];
 }
 
 interface ApiResponse<T> {
@@ -77,172 +81,393 @@ interface ApiResponse<T> {
 
 export default function CustomerAccount() {
   const [activeTab, setActiveTab] = useState<'orders' | 'profile'>('orders');
-  const { currentUser, userType, logout, isLoading: authLoading, isLoggedIn } = useAuth();
+
+  const {
+    currentUser,
+    userType,
+    logout,
+    isLoading: authLoading,
+    isLoggedIn
+  } = useAuth();
+
   const router = useRouter();
+
+  // IMPORTANT:
+  // Hooks must always be called at the top level of the component.
+  const { t } = useTranslation();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+
   const ordersPerPage = 5;
-  const { t } = useTranslation();
 
   const [notifications, setNotifications] = useState<CustomerNotification[]>([]);
-  const [seenNotificationIds, setSeenNotificationIds] = useState<Set<number>>(new Set());
+  const [seenNotificationIds, setSeenNotificationIds] = useState<Set<number>>(
+    new Set()
+  );
 
+  /*
+   * Redirect unauthenticated users.
+   */
   useEffect(() => {
     if (authLoading) return;
+
     if (!isLoggedIn || !currentUser || userType !== 'customer') {
       router.replace('/customer-auth?redirect=/account');
     }
-  }, [isLoggedIn, currentUser, userType, authLoading, router]);
+  }, [
+    isLoggedIn,
+    currentUser,
+    userType,
+    authLoading,
+    router
+  ]);
 
-  // Notification "seen" state is tracked client-side only, scoped per
-  // customer, so it never mutates the shared record admins rely on for
-  // their own unread badge.
-  const seenStorageKey = currentUser && 'id' in currentUser
-    ? `himmat-customer-${(currentUser as any).id}-seen-notifications`
-    : null;
+  /*
+   * Customer-specific notification storage key.
+   */
+  const seenStorageKey =
+    currentUser && 'id' in currentUser
+      ? `himmat-customer-${(currentUser as any).id}-seen-notifications`
+      : null;
 
+  /*
+   * Load locally seen notification IDs.
+   */
   useEffect(() => {
     if (!seenStorageKey) return;
+
     try {
       const raw = localStorage.getItem(seenStorageKey);
+
       if (raw) {
-        setSeenNotificationIds(new Set(JSON.parse(raw)));
+        setSeenNotificationIds(
+          new Set<number>(JSON.parse(raw))
+        );
       }
     } catch {
-      /* noop */
+      // Ignore invalid localStorage data.
     }
   }, [seenStorageKey]);
 
+  /*
+   * Mark all notifications as seen.
+   */
   const markAllNotificationsSeen = () => {
     if (!seenStorageKey) return;
-    const allIds = new Set(notifications.map(n => n.id));
+
+    const allIds = new Set(
+      notifications.map((notification) => notification.id)
+    );
+
     setSeenNotificationIds(allIds);
+
     try {
-      localStorage.setItem(seenStorageKey, JSON.stringify(Array.from(allIds)));
+      localStorage.setItem(
+        seenStorageKey,
+        JSON.stringify(Array.from(allIds))
+      );
     } catch {
-      /* noop */
+      // Ignore localStorage errors.
     }
   };
 
+  /*
+   * Fetch customer notifications.
+   */
   useEffect(() => {
-    if (authLoading || !isLoggedIn || !currentUser || userType !== 'customer') return;
+    if (
+      authLoading ||
+      !isLoggedIn ||
+      !currentUser ||
+      userType !== 'customer'
+    ) {
+      return;
+    }
 
     let cancelled = false;
+
     const fetchNotifications = async () => {
       try {
-        const result = await api.get<{ success: boolean; data: CustomerNotification[] }>('/customer/notifications');
-        if (!cancelled && result?.success && Array.isArray(result.data)) {
+        const result = await api.get<{
+          success: boolean;
+          data: CustomerNotification[];
+        }>('/customer/notifications');
+
+        if (
+          !cancelled &&
+          result?.success &&
+          Array.isArray(result.data)
+        ) {
           setNotifications(result.data);
         }
-      } catch (_err) {
-        // silent — transient errors, will retry on next interval
+      } catch {
+        // Silent failure. Retry on next interval.
       }
     };
+
     fetchNotifications();
-    const id = setInterval(fetchNotifications, 25_000);
+
+    const id = setInterval(
+      fetchNotifications,
+      25_000
+    );
+
     return () => {
       cancelled = true;
       clearInterval(id);
     };
-  }, [authLoading, isLoggedIn, currentUser, userType]);
+  }, [
+    authLoading,
+    isLoggedIn,
+    currentUser,
+    userType
+  ]);
 
-  const unseenNotificationsCount = notifications.filter(n => !seenNotificationIds.has(n.id)).length;
+  const unseenNotificationsCount = notifications.filter(
+    (notification) =>
+      !seenNotificationIds.has(notification.id)
+  ).length;
 
+  /*
+   * Fetch customer orders.
+   */
   const fetchOrders = async () => {
     try {
       setOrdersLoading(true);
       setError(null);
-      const response = await api.get<ApiResponse<Order[]>>('/orders');
+
+      const response = await api.get<ApiResponse<Order[]>>(
+        '/orders'
+      );
+
       if (response.success && response.data) {
         setOrders(response.data);
       }
     } catch (err: any) {
-      console.error('Failed to fetch orders:', err);
-      setError(err.message || 'Failed to load orders. Please try again.');
+      console.error(
+        'Failed to fetch orders:',
+        err
+      );
+
+      setError(
+        err?.message ||
+          'Failed to load orders. Please try again.'
+      );
     } finally {
       setOrdersLoading(false);
     }
   };
 
+  /*
+   * Fetch orders after authentication is ready.
+   */
   useEffect(() => {
-    if (!authLoading && currentUser && userType === 'customer') {
+    if (
+      !authLoading &&
+      currentUser &&
+      userType === 'customer'
+    ) {
       fetchOrders();
     }
-  }, [currentUser, userType, authLoading]);
+  }, [
+    currentUser,
+    userType,
+    authLoading
+  ]);
 
+  /*
+   * Loading state.
+   */
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#f9f7f4] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2d5a3d]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2d5a3d]" />
       </div>
     );
   }
 
-  if (!isLoggedIn || !currentUser || userType !== 'customer') {
+  /*
+   * Unauthorized state.
+   */
+  if (
+    !isLoggedIn ||
+    !currentUser ||
+    userType !== 'customer'
+  ) {
     return null;
   }
 
   const customer = currentUser as any;
 
+  /*
+   * Order status colors.
+   */
   const statusColors: Record<string, string> = {
-    'AWAITING_PAYMENT': 'bg-yellow-100 text-yellow-800',
-    'CONFIRMED': 'bg-emerald-100 text-emerald-800',
-    'PROCESSING': 'bg-blue-100 text-blue-800',
-    'SHIPPED': 'bg-purple-100 text-purple-800',
-    'DELIVERED': 'bg-green-100 text-green-800',
-    'CANCELLED': 'bg-red-100 text-red-800',
-    'REFUNDED': 'bg-gray-100 text-gray-800'
+    AWAITING_PAYMENT:
+      'bg-yellow-100 text-yellow-800',
+
+    CONFIRMED:
+      'bg-emerald-100 text-emerald-800',
+
+    PROCESSING:
+      'bg-blue-100 text-blue-800',
+
+    SHIPPED:
+      'bg-purple-100 text-purple-800',
+
+    DELIVERED:
+      'bg-green-100 text-green-800',
+
+    CANCELLED:
+      'bg-red-100 text-red-800',
+
+    REFUNDED:
+      'bg-gray-100 text-gray-800'
   };
 
+  /*
+   * IMPORTANT:
+   *
+   * DO NOT call useTranslation() inside this function.
+   *
+   * `t` comes from the top-level CustomerAccount hook:
+   *
+   * const { t } = useTranslation();
+   *
+   * This keeps React Hook order stable.
+   */
   const trackingSteps = (status: string) => {
-    const { t } = useTranslation();
-
-    const steps = [
-      { id: 1, label: 'Order Placed', status: 'completed', icon: CheckCircle2 },
-      { id: 2, label: 'Payment Verified', status: ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'REFUNDED'].includes(status) ? 'completed' : 'pending', icon: CheckCircle2 },
-      { id: 3, label: 'Processing', status: ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'].includes(status) ? 'completed' : 'pending', icon: Clock },
-      { id: 4, label: 'Shipped', status: ['SHIPPED', 'DELIVERED'].includes(status) ? 'completed' : 'pending', icon: Truck },
-      { id: 5, label: 'Delivered', status: status === 'DELIVERED' ? 'completed' : 'pending', icon: PackageCheck },
+    const paymentVerifiedStatuses = [
+      'CONFIRMED',
+      'PROCESSING',
+      'SHIPPED',
+      'DELIVERED',
+      'REFUNDED'
     ];
-    return steps;
+
+    const processingStatuses = [
+      'CONFIRMED',
+      'PROCESSING',
+      'SHIPPED',
+      'DELIVERED'
+    ];
+
+    const shippedStatuses = [
+      'SHIPPED',
+      'DELIVERED'
+    ];
+
+    return [
+      {
+        id: 1,
+        label: t('account.tracking.orderPlaced'),
+        status: 'completed',
+        icon: CheckCircle2
+      },
+      {
+        id: 2,
+        label: t('account.tracking.paymentVerified'),
+        status: paymentVerifiedStatuses.includes(status)
+          ? 'completed'
+          : 'pending',
+        icon: CheckCircle2
+      },
+      {
+        id: 3,
+        label: t('account.tracking.processing'),
+        status: processingStatuses.includes(status)
+          ? 'completed'
+          : 'pending',
+        icon: Clock
+      },
+      {
+        id: 4,
+        label: t('account.tracking.shipped'),
+        status: shippedStatuses.includes(status)
+          ? 'completed'
+          : 'pending',
+        icon: Truck
+      },
+      {
+        id: 5,
+        label: t('account.tracking.delivered'),
+        status:
+          status === 'DELIVERED'
+            ? 'completed'
+            : 'pending',
+        icon: PackageCheck
+      }
+    ];
   };
 
-  const indexOfLastOrder = currentPage * ordersPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
-  const totalPages = Math.ceil(orders.length / ordersPerPage);
+  /*
+   * Pagination.
+   */
+  const indexOfLastOrder =
+    currentPage * ordersPerPage;
+
+  const indexOfFirstOrder =
+    indexOfLastOrder - ordersPerPage;
+
+  const currentOrders = orders.slice(
+    indexOfFirstOrder,
+    indexOfLastOrder
+  );
+
+  const totalPages = Math.ceil(
+    orders.length / ordersPerPage
+  );
 
   return (
-    <div className="min-h-screen bg-[#f9f7f4]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div
+      className="min-h-screen bg-[#f9f7f4]"
+      style={{
+        fontFamily: "'DM Sans', sans-serif"
+      }}
+    >
       <Navigation />
+
       <main className="pt-[180px] pb-24">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
+
           {/* Page Header */}
           <div className="mb-10 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-widest text-[#c8a96e] font-semibold mb-3">
                 My Account
               </p>
-              <h1 
+
+              <h1
                 className="text-[clamp(2rem,4vw,3rem)] leading-[1.1] font-semibold text-[#1c1917]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                style={{
+                  fontFamily: "'Playfair Display', serif"
+                }}
               >
                 Hello, {customer.name}!
               </h1>
             </div>
 
             {/* Notifications */}
-            <DropdownMenu onOpenChange={(open) => { if (open) markAllNotificationsSeen(); }}>
+            <DropdownMenu
+              onOpenChange={(open) => {
+                if (open) {
+                  markAllNotificationsSeen();
+                }
+              }}
+            >
               <DropdownMenuTrigger asChild>
                 <button
                   className="relative p-3 rounded-xl bg-white border border-[rgba(28,25,23,0.06)] hover:bg-[#f9f7f4] transition-colors text-[#1c1917] shrink-0"
-                  aria-label={t('customerAccount.a11y.notifications')}
+                  aria-label={t(
+                    'customerAccount.a11y.notifications'
+                  )}
                 >
                   <Bell className="h-5 w-5" />
+
                   {unseenNotificationsCount > 0 && (
                     <span className="absolute top-1.5 right-1.5 h-5 w-5 bg-[#c8a96e] rounded-full border border-white flex items-center justify-center text-xs font-bold text-[#1c1917]">
                       {unseenNotificationsCount}
@@ -250,36 +475,60 @@ export default function CustomerAccount() {
                   )}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-96">
+
+              <DropdownMenuContent
+                align="end"
+                className="w-[calc(100vw-2rem)] sm:w-96"
+              >
                 <div className="p-4">
                   <DropdownMenuLabel className="font-semibold text-[#1c1917] p-0 m-0">
-                    {t('customerAccount.notifications.label')}
+                    {t(
+                      'customerAccount.notifications.label'
+                    )}
                   </DropdownMenuLabel>
                 </div>
+
                 <DropdownMenuSeparator />
+
                 <div className="max-h-[400px] overflow-y-auto p-2">
                   {notifications.length === 0 ? (
                     <div className="text-center py-8">
-                      <p className="text-[#78746e]">{t('customerAccount.notifications.empty')}</p>
+                      <p className="text-[#78746e]">
+                        {t(
+                          'customerAccount.notifications.empty'
+                        )}
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-1">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className={`p-3 rounded-lg text-sm ${
-                            seenNotificationIds.has(notification.id)
-                              ? "hover:bg-[#f9f7f4]"
-                              : "bg-[#f0f9f4] hover:bg-[#e8f5ed]"
-                          }`}
-                        >
-                          <p className="font-medium text-[#1c1917]">{notification.title}</p>
-                          <p className="text-[#78746e] text-xs mt-0.5">{notification.message}</p>
-                          <p className="text-[#78746e] text-xs mt-1">
-                            {new Date(notification.timestamp).toLocaleString()}
-                          </p>
-                        </div>
-                      ))}
+                      {notifications.map(
+                        (notification) => (
+                          <div
+                            key={notification.id}
+                            className={`p-3 rounded-lg text-sm ${
+                              seenNotificationIds.has(
+                                notification.id
+                              )
+                                ? 'hover:bg-[#f9f7f4]'
+                                : 'bg-[#f0f9f4] hover:bg-[#e8f5ed]'
+                            }`}
+                          >
+                            <p className="font-medium text-[#1c1917]">
+                              {notification.title}
+                            </p>
+
+                            <p className="text-[#78746e] text-xs mt-0.5">
+                              {notification.message}
+                            </p>
+
+                            <p className="text-[#78746e] text-xs mt-1">
+                              {new Date(
+                                notification.timestamp
+                              ).toLocaleString()}
+                            </p>
+                          </div>
+                        )
+                      )}
                     </div>
                   )}
                 </div>
@@ -288,20 +537,30 @@ export default function CustomerAccount() {
           </div>
 
           <div className="grid lg:grid-cols-[280px_1fr] gap-10">
+
             {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-2xl border border-[rgba(28,25,23,0.06)] overflow-hidden sticky top-32">
+
                 <div className="p-6 border-b border-[rgba(28,25,23,0.06)]">
                   <div className="w-16 h-16 rounded-full bg-[#2d5a3d] flex items-center justify-center mb-4">
                     <span className="text-2xl font-semibold text-white">
                       {customer.name.charAt(0)}
                     </span>
                   </div>
-                  <p className="font-semibold text-[#1c1917]">{customer.name}</p>
-                  <p className="text-sm text-[#78746e]">{customer.email}</p>
+
+                  <p className="font-semibold text-[#1c1917]">
+                    {customer.name}
+                  </p>
+
+                  <p className="text-sm text-[#78746e]">
+                    {customer.email}
+                  </p>
+
                   {customer.tier && (
                     <div className="mt-3 inline-flex items-center gap-1 px-3 py-1 bg-[#c8a96e]/10 rounded-full">
                       <Star className="h-3 w-3 text-[#c8a96e]" />
+
                       <span className="text-xs font-semibold text-[#c8a96e]">
                         {customer.tier} Member
                       </span>
@@ -310,8 +569,11 @@ export default function CustomerAccount() {
                 </div>
 
                 <nav className="p-4 space-y-1">
+
                   <button
-                    onClick={() => setActiveTab('orders')}
+                    onClick={() =>
+                      setActiveTab('orders')
+                    }
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                       activeTab === 'orders'
                         ? 'bg-[#2d5a3d] text-white'
@@ -321,8 +583,11 @@ export default function CustomerAccount() {
                     <History className="h-4 w-4" />
                     Order History
                   </button>
+
                   <button
-                    onClick={() => setActiveTab('profile')}
+                    onClick={() =>
+                      setActiveTab('profile')
+                    }
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                       activeTab === 'profile'
                         ? 'bg-[#2d5a3d] text-white'
@@ -346,20 +611,31 @@ export default function CustomerAccount() {
                     <LogOut className="h-4 w-4" />
                     Sign Out
                   </button>
+
                 </nav>
               </div>
             </div>
 
             {/* Main Content */}
             <div className="lg:col-span-1">
+
               {/* Orders Tab */}
               {activeTab === 'orders' && (
                 <div className="space-y-5">
+
                   <div className="bg-white rounded-2xl border border-[rgba(28,25,23,0.06)] p-8">
+
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-xl font-semibold text-[#1c1917]" style={{ fontFamily: "'Playfair Display', serif" }}>
+
+                      <h2
+                        className="text-xl font-semibold text-[#1c1917]"
+                        style={{
+                          fontFamily: "'Playfair Display', serif"
+                        }}
+                      >
                         Order History
                       </h2>
+
                       <LoadingButton
                         onClick={fetchOrders}
                         isLoading={ordersLoading}
@@ -371,16 +647,30 @@ export default function CustomerAccount() {
                         <RefreshCw className="h-4 w-4" />
                         Refresh
                       </LoadingButton>
+
                     </div>
 
+                    {/* Loading */}
                     {ordersLoading ? (
                       <div className="text-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2d5a3d] mx-auto mb-4"></div>
-                        <p className="text-lg font-medium text-[#1c1917]">{t('account.loadingOrders')}</p>
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2d5a3d] mx-auto mb-4" />
+
+                        <p className="text-lg font-medium text-[#1c1917]">
+                          {t(
+                            'account.loadingOrders'
+                          )}
+                        </p>
                       </div>
+
                     ) : error ? (
+
+                      /* Error */
                       <div className="text-center py-12">
-                        <p className="text-lg font-medium text-red-600 mb-4">{error}</p>
+
+                        <p className="text-lg font-medium text-red-600 mb-4">
+                          {error}
+                        </p>
+
                         <button
                           onClick={fetchOrders}
                           className="inline-flex items-center gap-2 px-6 py-3 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] transition-colors"
@@ -388,23 +678,46 @@ export default function CustomerAccount() {
                           <RefreshCw className="h-4 w-4" />
                           Try Again
                         </button>
+
                       </div>
+
                     ) : orders.length === 0 ? (
+
+                      /* No Orders */
                       <div className="text-center py-12">
+
                         <ShoppingBag className="h-12 w-12 text-[#78746e] mx-auto mb-4" />
-                        <p className="text-lg font-medium text-[#1c1917] mb-2">{t('account.noOrdersYet')}</p>
-                        <p className="text-sm text-[#78746e] mb-6">{t('account.noOrdersDesc')}</p>
-                        <Link 
+
+                        <p className="text-lg font-medium text-[#1c1917] mb-2">
+                          {t(
+                            'account.noOrdersYet'
+                          )}
+                        </p>
+
+                        <p className="text-sm text-[#78746e] mb-6">
+                          {t(
+                            'account.noOrdersDesc'
+                          )}
+                        </p>
+
+                        <Link
                           href="/products"
                           className="inline-flex items-center gap-2 px-6 py-3 bg-[#2d5a3d] text-white font-semibold rounded-xl hover:bg-[#234832] transition-colors"
                         >
                           Shop Now
                         </Link>
+
                       </div>
+
                     ) : selectedOrder ? (
+
+                      /* Selected Order */
                       <div className="space-y-6">
+
                         <button
-                          onClick={() => setSelectedOrder(null)}
+                          onClick={() =>
+                            setSelectedOrder(null)
+                          }
                           className="flex items-center gap-2 text-sm font-medium text-[#2d5a3d] hover:underline"
                         >
                           <ChevronLeft className="h-4 w-4" />
@@ -412,206 +725,463 @@ export default function CustomerAccount() {
                         </button>
 
                         <div className="border border-[rgba(28,25,23,0.08)] rounded-xl overflow-hidden">
+
                           <div className="p-5 bg-[#f9f7f4] flex items-center justify-between flex-wrap gap-3">
+
                             <div>
                               <p className="text-sm font-semibold text-[#1c1917]">
-                                Order {selectedOrder.orderNumber || selectedOrder.id}
+                                Order{' '}
+                                {selectedOrder.orderNumber ||
+                                  selectedOrder.id}
                               </p>
+
                               <p className="text-xs text-[#78746e]">
-                                {new Date(selectedOrder.orderDate).toLocaleDateString('en-IN', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric'
-                                })}
+                                {new Date(
+                                  selectedOrder.orderDate
+                                ).toLocaleDateString(
+                                  'en-IN',
+                                  {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                  }
+                                )}
                               </p>
                             </div>
+
                             <div className="flex items-center gap-4">
+
                               <div>
-                                <p className="text-xs text-[#78746e]">{t('dashboard.invoice.total')}</p>
+                                <p className="text-xs text-[#78746e]">
+                                  {t(
+                                    'dashboard.invoice.total'
+                                  )}
+                                </p>
+
                                 <p className="font-semibold text-[#1c1917]">
-                                  Rs. {(selectedOrder.grandTotal || selectedOrder.total || 0).toLocaleString()}
+                                  Rs.{' '}
+                                  {(
+                                    selectedOrder.grandTotal ||
+                                    selectedOrder.total ||
+                                    0
+                                  ).toLocaleString()}
                                 </p>
                               </div>
-                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[selectedOrder.status] || 'bg-gray-100 text-gray-800'}`}>
+
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                  statusColors[
+                                    selectedOrder.status
+                                  ] ||
+                                  'bg-gray-100 text-gray-800'
+                                }`}
+                              >
                                 {selectedOrder.status}
                               </span>
+
                             </div>
                           </div>
 
                           <div className="p-5 space-y-6">
-                            {/* Order Tracking Timeline */}
+
+                            {/* Tracking */}
                             <div>
-                              <h3 className="text-sm font-semibold text-[#1c1917] mb-4">{t('account.orderTracking')}</h3>
+
+                              <h3 className="text-sm font-semibold text-[#1c1917] mb-4">
+                                {t(
+                                  'account.orderTracking'
+                                )}
+                              </h3>
+
                               <div className="relative">
-                                <div className="absolute top-5 left-[15px] bottom-5 w-0.5 bg-[rgba(28,25,23,0.1)]"></div>
-                                {trackingSteps(selectedOrder.status).map((step, index, arr) => {
-                                  const Icon = step.icon;
-                                  const isLast = index === arr.length - 1;
-                                  return (
-                                    <div key={step.id} className="relative flex gap-4 mb-6 last:mb-0">
-                                      <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 ${
-                                        step.status === 'completed' ? 'bg-[#2d5a3d] text-white' : 'bg-gray-200 text-gray-400'
-                                      }`}>
-                                        <Icon className="h-4 w-4" />
-                                      </div>
-                                      <div>
-                                        <p className={`text-sm font-medium ${step.status === 'completed' ? 'text-[#1c1917]' : 'text-gray-400'}`}>
-                                          {step.label}
-                                        </p>
-                                        {step.status === 'completed' && (
-                                          <p className="text-xs text-[#78746e] mt-1">
-                                            {step.id === 1 ? new Date(selectedOrder.orderDate).toLocaleString('en-IN') : 
-                                             step.id === 4 ? 'Delivered successfully!' : 'In progress'}
+
+                                <div className="absolute top-5 left-[15px] bottom-5 w-0.5 bg-[rgba(28,25,23,0.1)]" />
+
+                                {trackingSteps(
+                                  selectedOrder.status
+                                ).map(
+                                  (
+                                    step,
+                                    index,
+                                    arr
+                                  ) => {
+                                    const Icon =
+                                      step.icon;
+
+                                    return (
+                                      <div
+                                        key={step.id}
+                                        className="relative flex gap-4 mb-6 last:mb-0"
+                                      >
+
+                                        <div
+                                          className={`w-8 h-8 rounded-full flex items-center justify-center z-10 ${
+                                            step.status ===
+                                            'completed'
+                                              ? 'bg-[#2d5a3d] text-white'
+                                              : 'bg-gray-200 text-gray-400'
+                                          }`}
+                                        >
+                                          <Icon className="h-4 w-4" />
+                                        </div>
+
+                                        <div>
+
+                                          <p
+                                            className={`text-sm font-medium ${
+                                              step.status ===
+                                              'completed'
+                                                ? 'text-[#1c1917]'
+                                                : 'text-gray-400'
+                                            }`}
+                                          >
+                                            {step.label}
                                           </p>
-                                        )}
+
+                                          {step.status ===
+                                            'completed' && (
+                                            <p className="text-xs text-[#78746e] mt-1">
+                                              {step.id ===
+                                              1
+                                                ? new Date(
+                                                    selectedOrder.orderDate
+                                                  ).toLocaleString(
+                                                    'en-IN'
+                                                  )
+                                                : step.id ===
+                                                    4
+                                                  ? 'Delivered successfully!'
+                                                  : 'In progress'}
+                                            </p>
+                                          )}
+
+                                        </div>
+
                                       </div>
-                                    </div>
-                                  );
-                                })}
+                                    );
+                                  }
+                                )}
+
                               </div>
                             </div>
 
                             {/* Order Items */}
                             <div>
-                              <h3 className="text-sm font-semibold text-[#1c1917] mb-4">{t('account.orderItems')}</h3>
+
+                              <h3 className="text-sm font-semibold text-[#1c1917] mb-4">
+                                {t(
+                                  'account.orderItems'
+                                )}
+                              </h3>
+
                               <div className="space-y-3">
-                                {(selectedOrder.items || []).map((item) => (
-                                  <div key={item.id} className="flex items-center justify-between">
+
+                                {(
+                                  selectedOrder.items ||
+                                  []
+                                ).map((item) => (
+
+                                  <div
+                                    key={item.id}
+                                    className="flex items-center justify-between"
+                                  >
+
                                     <div className="flex items-center gap-3">
+
                                       <div className="w-10 h-10 rounded-lg bg-[#2d5a3d]/10 flex items-center justify-center shrink-0">
                                         <span className="text-sm font-semibold text-[#2d5a3d]">
-                                          {(item.productName || item.name || '').charAt(0)}
+                                          {(
+                                            item.productName ||
+                                            item.name ||
+                                            ''
+                                          ).charAt(0)}
                                         </span>
                                       </div>
+
                                       <div>
+
                                         <p className="text-sm font-medium text-[#1c1917]">
-                                          {item.productName || item.name}
+                                          {item.productName ||
+                                            item.name}
                                         </p>
+
                                         <p className="text-xs text-[#78746e]">
-                                          Qty: {item.quantity} × Rs. {item.price?.toLocaleString()}
+                                          Qty:{' '}
+                                          {
+                                            item.quantity
+                                          }{' '}
+                                          × Rs.{' '}
+                                          {item.price?.toLocaleString()}
                                         </p>
+
                                       </div>
+
                                     </div>
+
                                     <p className="text-sm font-semibold text-[#1c1917]">
-                                      Rs. {((item.price || 0) * (item.quantity || 0)).toLocaleString()}
+                                      Rs.{' '}
+                                      {(
+                                        (item.price ||
+                                          0) *
+                                        (item.quantity ||
+                                          0)
+                                      ).toLocaleString()}
                                     </p>
+
                                   </div>
+
                                 ))}
+
                               </div>
                             </div>
 
-                            {/* Shipping Address */}
+                            {/* Shipping */}
                             {selectedOrder.shippingAddress && (
                               <div className="pt-4 border-t border-[rgba(28,25,23,0.08)]">
+
                                 <p className="text-xs font-semibold text-[#78746e] uppercase tracking-wider mb-2">
                                   Shipping Address
                                 </p>
+
                                 <p className="text-sm text-[#1c1917]">
-                                  {selectedOrder.shippingAddress}
+                                  {
+                                    selectedOrder.shippingAddress
+                                  }
                                 </p>
+
                               </div>
                             )}
+
                           </div>
                         </div>
                       </div>
+
                     ) : (
+
+                      /* Order List */
                       <>
                         <div className="space-y-5">
-                          {currentOrders.map((order) => (
-                            <div key={order.id} className="border border-[rgba(28,25,23,0.08)] rounded-xl overflow-hidden">
-                              <div className="p-5 bg-[#f9f7f4] flex items-center justify-between flex-wrap gap-3">
-                                <div>
-                                  <p className="text-sm font-semibold text-[#1c1917]">
-                                    Order {order.orderNumber || order.id}
-                                  </p>
-                                  <p className="text-xs text-[#78746e]">
-                                    {new Date(order.orderDate).toLocaleDateString('en-IN', {
-                                      year: 'numeric',
-                                      month: 'long',
-                                      day: 'numeric'
-                                    })}
-                                  </p>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  <div>
-                                    <p className="text-xs text-[#78746e]">{t('dashboard.invoice.total')}</p>
-                                    <p className="font-semibold text-[#1c1917]">
-                                      Rs. {(order.grandTotal || order.total || 0).toLocaleString()}
-                                    </p>
-                                  </div>
-                                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[order.status] || 'bg-gray-100 text-gray-800'}`}>
-                                    {order.status}
-                                  </span>
-                                </div>
-                              </div>
 
-                              <div className="p-5">
-                                <div className="flex items-center justify-between">
-                                  <div className="space-y-3">
-                                    {(order.items || []).slice(0, 2).map((item) => (
-                                      <div key={item.id} className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-[#2d5a3d]/10 flex items-center justify-center shrink-0">
-                                          <span className="text-xs font-semibold text-[#2d5a3d]">
-                                            {(item.productName || item.name || '').charAt(0)}
-                                          </span>
-                                        </div>
-                                        <p className="text-sm font-medium text-[#1c1917]">
-                                          {item.productName || item.name}
-                                        </p>
-                                      </div>
-                                    ))}
-                                    {order.items && order.items.length > 2 && (
-                                      <p className="text-xs text-[#78746e]">
-                                        +{order.items.length - 2} more items
-                                      </p>
-                                    )}
+                          {currentOrders.map(
+                            (order) => (
+
+                              <div
+                                key={order.id}
+                                className="border border-[rgba(28,25,23,0.08)] rounded-xl overflow-hidden"
+                              >
+
+                                <div className="p-5 bg-[#f9f7f4] flex items-center justify-between flex-wrap gap-3">
+
+                                  <div>
+
+                                    <p className="text-sm font-semibold text-[#1c1917]">
+                                      Order{' '}
+                                      {order.orderNumber ||
+                                        order.id}
+                                    </p>
+
+                                    <p className="text-xs text-[#78746e]">
+                                      {new Date(
+                                        order.orderDate
+                                      ).toLocaleDateString(
+                                        'en-IN',
+                                        {
+                                          year: 'numeric',
+                                          month: 'long',
+                                          day: 'numeric'
+                                        }
+                                      )}
+                                    </p>
+
                                   </div>
-                                  <button
-                                    onClick={() => setSelectedOrder(order)}
-                                    className="px-4 py-2 text-sm font-medium text-[#2d5a3d] hover:bg-[#2d5a3d]/5 rounded-lg transition-colors"
-                                  >
-                                    View Details
-                                  </button>
+
+                                  <div className="flex items-center gap-4">
+
+                                    <div>
+
+                                      <p className="text-xs text-[#78746e]">
+                                        {t(
+                                          'dashboard.invoice.total'
+                                        )}
+                                      </p>
+
+                                      <p className="font-semibold text-[#1c1917]">
+                                        Rs.{' '}
+                                        {(
+                                          order.grandTotal ||
+                                          order.total ||
+                                          0
+                                        ).toLocaleString()}
+                                      </p>
+
+                                    </div>
+
+                                    <span
+                                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                        statusColors[
+                                          order.status
+                                        ] ||
+                                        'bg-gray-100 text-gray-800'
+                                      }`}
+                                    >
+                                      {order.status}
+                                    </span>
+
+                                  </div>
+
                                 </div>
+
+                                <div className="p-5">
+
+                                  <div className="flex items-center justify-between">
+
+                                    <div className="space-y-3">
+
+                                      {(
+                                        order.items ||
+                                        []
+                                      )
+                                        .slice(0, 2)
+                                        .map(
+                                          (item) => (
+                                            <div
+                                              key={
+                                                item.id
+                                              }
+                                              className="flex items-center gap-3"
+                                            >
+
+                                              <div className="w-8 h-8 rounded-lg bg-[#2d5a3d]/10 flex items-center justify-center shrink-0">
+
+                                                <span className="text-xs font-semibold text-[#2d5a3d]">
+                                                  {(
+                                                    item.productName ||
+                                                    item.name ||
+                                                    ''
+                                                  ).charAt(
+                                                    0
+                                                  )}
+                                                </span>
+
+                                              </div>
+
+                                              <p className="text-sm font-medium text-[#1c1917]">
+                                                {item.productName ||
+                                                  item.name}
+                                              </p>
+
+                                            </div>
+                                          )
+                                        )}
+
+                                      {order.items &&
+                                        order.items.length >
+                                          2 && (
+                                          <p className="text-xs text-[#78746e]">
+                                            +
+                                            {order
+                                              .items
+                                              .length -
+                                              2}{' '}
+                                            more items
+                                          </p>
+                                        )}
+
+                                    </div>
+
+                                    <button
+                                      onClick={() =>
+                                        setSelectedOrder(
+                                          order
+                                        )
+                                      }
+                                      className="px-4 py-2 text-sm font-medium text-[#2d5a3d] hover:bg-[#2d5a3d]/5 rounded-lg transition-colors"
+                                    >
+                                      View Details
+                                    </button>
+
+                                  </div>
+
+                                </div>
+
                               </div>
-                            </div>
-                          ))}
+                            )
+                          )}
+
                         </div>
 
                         {/* Pagination */}
                         {totalPages > 1 && (
                           <div className="flex items-center justify-center gap-2 mt-8 pt-6 border-t border-[rgba(28,25,23,0.08)]">
+
                             <button
-                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                              disabled={currentPage === 1}
+                              onClick={() =>
+                                setCurrentPage(
+                                  (prev) =>
+                                    Math.max(
+                                      prev - 1,
+                                      1
+                                    )
+                                )
+                              }
+                              disabled={
+                                currentPage === 1
+                              }
                               className="w-10 h-10 flex items-center justify-center rounded-lg border border-[rgba(28,25,23,0.1)] text-[#78746e] hover:text-[#1c1917] hover:border-[#2d5a3d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <ChevronLeft className="h-4 w-4" />
                             </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+
+                            {Array.from(
+                              {
+                                length: totalPages
+                              },
+                              (_, i) => i + 1
+                            ).map((page) => (
+
                               <button
                                 key={page}
-                                onClick={() => setCurrentPage(page)}
+                                onClick={() =>
+                                  setCurrentPage(
+                                    page
+                                  )
+                                }
                                 className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-                                  currentPage === page
+                                  currentPage ===
+                                  page
                                     ? 'bg-[#2d5a3d] text-white'
                                     : 'text-[#78746e] hover:text-[#1c1917] hover:bg-[#f9f7f4]'
                                 }`}
                               >
                                 {page}
                               </button>
+
                             ))}
+
                             <button
-                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                              disabled={currentPage === totalPages}
+                              onClick={() =>
+                                setCurrentPage(
+                                  (prev) =>
+                                    Math.min(
+                                      prev + 1,
+                                      totalPages
+                                    )
+                                )
+                              }
+                              disabled={
+                                currentPage ===
+                                totalPages
+                              }
                               className="w-10 h-10 flex items-center justify-center rounded-lg border border-[rgba(28,25,23,0.1)] text-[#78746e] hover:text-[#1c1917] hover:border-[#2d5a3d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <ChevronRight className="h-4 w-4" />
                             </button>
+
                           </div>
                         )}
                       </>
                     )}
+
                   </div>
                 </div>
               )}
@@ -619,66 +1189,133 @@ export default function CustomerAccount() {
               {/* Profile Tab */}
               {activeTab === 'profile' && (
                 <div className="bg-white rounded-2xl border border-[rgba(28,25,23,0.06)] p-8">
-                  <h2 className="text-xl font-semibold text-[#1c1917] mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+
+                  <h2
+                    className="text-xl font-semibold text-[#1c1917] mb-6"
+                    style={{
+                      fontFamily: "'Playfair Display', serif"
+                    }}
+                  >
                     Profile Details
                   </h2>
 
                   <div className="space-y-6">
+
                     <div className="grid sm:grid-cols-2 gap-6">
+
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-[#78746e] text-sm">
                           <User className="h-4 w-4" />
-                          <span>{t('checkout.fields.fullName')}</span>
+                          <span>
+                            {t(
+                              'checkout.fields.fullName'
+                            )}
+                          </span>
                         </div>
-                        <p className="font-semibold text-[#1c1917]">{customer.name}</p>
+
+                        <p className="font-semibold text-[#1c1917]">
+                          {customer.name}
+                        </p>
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-[#78746e] text-sm">
                           <Mail className="h-4 w-4" />
-                          <span>{t('dashboard.customers.email')}</span>
+                          <span>
+                            {t(
+                              'dashboard.customers.email'
+                            )}
+                          </span>
                         </div>
-                        <p className="font-semibold text-[#1c1917]">{customer.email}</p>
+
+                        <p className="font-semibold text-[#1c1917]">
+                          {customer.email}
+                        </p>
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-[#78746e] text-sm">
                           <Phone className="h-4 w-4" />
-                          <span>{t('dashboard.settings.phoneNumber')}</span>
+                          <span>
+                            {t(
+                              'dashboard.settings.phoneNumber'
+                            )}
+                          </span>
                         </div>
-                        <p className="font-semibold text-[#1c1917]">{customer.phone || 'Not set'}</p>
+
+                        <p className="font-semibold text-[#1c1917]">
+                          {customer.phone ||
+                            'Not set'}
+                        </p>
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-[#78746e] text-sm">
                           <MapPin className="h-4 w-4" />
-                          <span>{t('dashboard.settings.address')}</span>
+                          <span>
+                            {t(
+                              'dashboard.settings.address'
+                            )}
+                          </span>
                         </div>
-                        <p className="font-semibold text-[#1c1917]">{customer.address || 'Not set'}</p>
+
+                        <p className="font-semibold text-[#1c1917]">
+                          {customer.address ||
+                            'Not set'}
+                        </p>
                       </div>
+
                     </div>
 
-                    {customer.loyaltyPoints !== undefined && (
+                    {customer.loyaltyPoints !==
+                      undefined && (
                       <div className="p-5 bg-[#c8a96e]/10 rounded-xl border border-[#c8a96e]/20">
+
                         <div className="flex items-center justify-between">
+
                           <div>
-                            <p className="text-sm font-medium text-[#1c1917]">{t('account.loyaltyPoints')}</p>
-                            <p className="text-3xl font-bold text-[#c8a96e]">{customer.loyaltyPoints}</p>
+                            <p className="text-sm font-medium text-[#1c1917]">
+                              {t(
+                                'account.loyaltyPoints'
+                              )}
+                            </p>
+
+                            <p className="text-3xl font-bold text-[#c8a96e]">
+                              {
+                                customer.loyaltyPoints
+                              }
+                            </p>
                           </div>
+
                           <div className="text-right">
-                            <p className="text-xs text-[#78746e]">{t('account.memberTier')}</p>
-                            <p className="font-semibold text-[#1c1917]">{customer.tier || 'Bronze'}</p>
+
+                            <p className="text-xs text-[#78746e]">
+                              {t(
+                                'account.memberTier'
+                              )}
+                            </p>
+
+                            <p className="font-semibold text-[#1c1917]">
+                              {customer.tier ||
+                                'Bronze'}
+                            </p>
+
                           </div>
+
                         </div>
+
                       </div>
                     )}
+
                   </div>
                 </div>
               )}
+
             </div>
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );

@@ -199,6 +199,20 @@ model Order {
   discountAmount  Float          @default(0)
   couponCode      String?
   grandTotal      Float
+  // --- Multi-currency snapshot -------------------------------------------
+  // All fields above (total, tax, shippingCost, discountAmount, grandTotal)
+  // remain the source-of-truth accounting values in NPR (baseCurrency).
+  // The fields below are a point-in-time snapshot of what the customer saw
+  // and was charged in their own currency, captured at order-creation time
+  // so historical orders never change if exchange rates move later.
+  baseCurrency            String  @default("NPR")
+  customerCurrency        String  @default("NPR")
+  exchangeRate            Float   @default(1)
+  convertedTotal          Float   @default(0)
+  convertedTax            Float   @default(0)
+  convertedShippingCost   Float   @default(0)
+  convertedDiscountAmount Float   @default(0)
+  convertedGrandTotal     Float   @default(0)
   status          String         @default("AWAITING_PAYMENT")
   idempotencyKey  String
   orderDate       DateTime       @default(now())

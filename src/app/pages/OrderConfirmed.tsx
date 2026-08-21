@@ -14,6 +14,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { api } from "@/lib/api-client";
+import { formatCurrency } from "@/lib/currency";
 
 import { useTranslation } from '../../context/TranslationContext';
 interface OrderItem {
@@ -48,6 +49,14 @@ interface Order {
   orderDate: string;
   items: OrderItem[];
   payment?: Payment | null;
+  // Multi-currency snapshot — all of the above remain NPR (base currency,
+  // and the actual amount transferred via bank/wallet QR). These are only
+  // for showing the customer what they saw at checkout in their own
+  // currency; they never change even if exchange rates move later.
+  baseCurrency?: string;
+  customerCurrency?: string;
+  exchangeRate?: number;
+  convertedGrandTotal?: number;
 }
 
 interface Settings {
@@ -72,6 +81,15 @@ export default function OrderConfirmed() {
   const [copied, setCopied] = useState(false);
 
   const currency = settings?.currency || "₹";
+
+  const hasForeignCurrency =
+    !!order?.customerCurrency &&
+    order.customerCurrency !== (order.baseCurrency || "NPR") &&
+    typeof order.convertedGrandTotal === "number";
+
+  const secondaryTotalLine = order && hasForeignCurrency
+    ? `≈ ${formatCurrency(order.convertedGrandTotal as number, order.customerCurrency as string)} at checkout`
+    : null;
 
   /**
    * Load order.
@@ -372,6 +390,12 @@ export default function OrderConfirmed() {
                   {order.grandTotal.toLocaleString()}
                 </p>
 
+                {secondaryTotalLine && (
+                  <p className="text-xs text-[#78746e] -mt-4 mb-6">
+                    {secondaryTotalLine}
+                  </p>
+                )}
+
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between gap-4">
                     <span className="text-[#78746e]">
@@ -489,6 +513,11 @@ export default function OrderConfirmed() {
                   {order.grandTotal.toLocaleString()}
                 </span>
               </div>
+              {secondaryTotalLine && (
+                <div className="flex justify-end text-xs text-[#78746e]">
+                  {secondaryTotalLine}
+                </div>
+              )}
             </div>
           </div>
         </div>

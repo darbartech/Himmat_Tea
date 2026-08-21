@@ -111,6 +111,21 @@ export const TranslationProvider = ({ children }: { children: ReactNode }) => {
     setLang(languageForCountry(country));
   }, [setLang]);
 
+  // If the visitor manually changes their country elsewhere (the
+  // country/currency picker in Navigation, backed by CurrencyContext), keep
+  // the suggested language in sync with it — but only when they haven't
+  // manually picked a language of their own, since language and country are
+  // meant to be independently overridable.
+  useEffect(() => {
+    function handleCountryChange(e: Event) {
+      if (localStorage.getItem("himmat_lang")) return;
+      const detail = (e as CustomEvent<{ country?: string }>).detail;
+      setLang(languageForCountry(detail?.country));
+    }
+    window.addEventListener("himmat:countrychange", handleCountryChange);
+    return () => window.removeEventListener("himmat:countrychange", handleCountryChange);
+  }, [setLang]);
+
   const t = useCallback(
     (key: string, params?: Record<string, string | number>) => {
       let text = getNested(translations, key) ?? getNested(en, key) ?? key;

@@ -6,6 +6,8 @@ import { getCurrentUser, getCurrentAdmin } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { sendAdminOrderAlertEmail } from '@/lib/email'
 import { getWeightAdjustedPrice, VALID_WEIGHTS } from '@/lib/pricing'
+import { BASE_CURRENCY, SUPPORTED_CURRENCIES, roundForCurrency } from '@/lib/currency'
+import { resolveRate } from '@/lib/exchange-rates'
 import { z } from 'zod'
 
 const ORDER_STATUSES = ['AWAITING_PAYMENT', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'] as const
@@ -31,6 +33,13 @@ const createOrderSchema = z.object({
   orderNumber: z.string().min(1).optional(),
   status: z.enum(ORDER_STATUSES).optional(),
   couponCode: z.string().max(50).optional().nullable(),
+  // Customer's selected display currency at checkout. The actual accounting
+  // math above is always done in NPR — this only controls which currency
+  // snapshot gets stored alongside the order. `clientExchangeRate` is
+  // accepted but never trusted for the stored number; the server always
+  // re-resolves the authoritative rate itself (see resolveRate()).
+  currency: z.enum(SUPPORTED_CURRENCIES).optional(),
+  clientExchangeRate: z.number().positive().optional(),
 }).strip()
 
 function round2(n: number): number {
@@ -242,6 +251,14 @@ export async function GET() {
       shippingCost: order.shippingCost,
       tax: order.tax,
       grandTotal: order.grandTotal,
+      baseCurrency: 'baseCurrency' in order ? order.baseCurrency : undefined,
+      customerCurrency: 'customerCurrency' in order ? order.customerCurrency : undefined,
+      exchangeRate: 'exchangeRate' in order ? order.exchangeRate : undefined,
+      convertedTotal: 'convertedTotal' in order ? order.convertedTotal : undefined,
+      convertedTax: 'convertedTax' in order ? order.convertedTax : undefined,
+      convertedShippingCost: 'convertedShippingCost' in order ? order.convertedShippingCost : undefined,
+      convertedDiscountAmount: 'convertedDiscountAmount' in order ? order.convertedDiscountAmount : undefined,
+      convertedGrandTotal: 'convertedGrandTotal' in order ? order.convertedGrandTotal : undefined,
       status: order.status,
       orderDate: order.orderDate,
       trackingNumber: order.trackingNumber,
@@ -386,6 +403,20 @@ export async function POST(request: NextRequest) {
     const total = subtotal
     const grandTotal = round2(taxable + tax + shippingCost)
 
+    // --- Multi-currency snapshot ---------------------------------------
+    // Resolve the customer's selected display currency and the
+    // authoritative NPR exchange rate for it (never trust the client's
+    // `clientExchangeRate` for the stored figure — always re-derive from
+    // the same cached rate source the storefront itself reads from, so a
+    // tampered client value can't produce a misleading order record).
+    const customerCurrency = data.currency && data.currency !== BASE_CURRENCY ? data.currency : BASE_CURRENCY
+    const exchangeRate = await resolveRate(customerCurrency)
+    const convertedTotal = roundForCurrency(subtotal * exchangeRate, customerCurrency)
+    const convertedTax = roundForCurrency(tax * exchangeRate, customerCurrency)
+    const convertedShippingCost = roundForCurrency(shippingCost * exchangeRate, customerCurrency)
+    const convertedDiscountAmount = roundForCurrency(discountAmount * exchangeRate, customerCurrency)
+    const convertedGrandTotal = roundForCurrency(grandTotal * exchangeRate, customerCurrency)
+
     const now = new Date()
     let orderNumber = data.orderNumber || await generateOrderNumber(now)
     let orderUniqAttempts = 0
@@ -454,6 +485,14 @@ export async function POST(request: NextRequest) {
           tax,
           discountAmount,
           grandTotal,
+          baseCurrency: BASE_CURRENCY,
+          customerCurrency,
+          exchangeRate,
+          convertedTotal,
+          convertedTax,
+          convertedShippingCost,
+          convertedDiscountAmount,
+          convertedGrandTotal,
           status: initialStatus,
           idempotencyKey: data.idempotencyKey,
           items: {

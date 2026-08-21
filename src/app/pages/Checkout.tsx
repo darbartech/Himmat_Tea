@@ -9,6 +9,7 @@ import { ArrowRight, Check, Lock, User, AlertTriangle, RefreshCw, ShoppingBag, Q
 import { useCart, AppliedCoupon } from "@/context/CartContext";
 import { useStore } from "@/context/StoreContext";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { api, ApiError } from "@/lib/api-client";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -82,6 +83,7 @@ export default function Checkout() {
   const { cart, cartTotal, clearCart, appliedCoupon, setAppliedCoupon } = useCart();
   const { settings: fallbackSettings } = useStore();
   const { isLoggedIn, userType, currentUser } = useAuth();
+  const { formatPrice, formatSecondaryPrice, currency: selectedCurrency, exchangeRate } = useCurrency();
   const [step, setStep] = useState(1);
   const [saveAddress, setSaveAddress] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -94,7 +96,7 @@ export default function Checkout() {
 
   const taxRate = liveSettings?.taxRate ?? fallbackSettings.taxRate ?? 18;
   const shippingFlatRate = liveSettings?.shippingFlatRate ?? fallbackSettings.shippingFlatRate ?? 0;
-  const currency = liveSettings?.currency ?? fallbackSettings.currency ?? "Rs.";
+  const currencySymbol = liveSettings?.currency ?? fallbackSettings.currency ?? "Rs.";
 
   const subtotal = cartTotal;
   const discountAmount = appliedCoupon?.discountAmount ?? 0;
@@ -255,7 +257,7 @@ export default function Checkout() {
         const couponData: AppliedCoupon = res.data;
         setAppliedCoupon(couponData);
         setCouponInput("");
-        toast.success(t('checkout.coupon.appliedWithDiscount', { code: couponData.code, currency, amount: couponData.discountAmount.toLocaleString() }));
+        toast.success(t('checkout.coupon.appliedWithDiscount', { code: couponData.code, currency: currencySymbol, amount: couponData.discountAmount.toLocaleString() }));
       } else {
         toast.error(res?.error || "Invalid coupon code.");
       }
@@ -310,6 +312,8 @@ export default function Checkout() {
         shippingAddress: fullAddress,
         idempotencyKey: idempotencyKeyRef.current,
         couponCode: appliedCoupon?.code ?? null,
+        currency: selectedCurrency,
+        clientExchangeRate: exchangeRate,
       };
 
       const response: any = await api.post('/orders', orderData);
@@ -623,7 +627,7 @@ export default function Checkout() {
                             <span className="text-[#78746e] ml-2">{item.weight} × {item.quantity}</span>
                           </p>
                           <span className="font-semibold text-[#1c1917] shrink-0">
-                            {currency}&nbsp;{(item.price * item.quantity).toLocaleString()}
+                            {formatPrice(item.price * item.quantity)}
                           </span>
                         </div>
                       ))}
@@ -662,11 +666,17 @@ export default function Checkout() {
                       </>
                     ) : (
                       <>
-                        Place Order — {currency}&nbsp;{grandTotal.toLocaleString()}
+                        Place Order — {formatPrice(grandTotal)}
                         <ArrowRight className="h-5 w-5" />
                       </>
                     )}
                   </button>
+
+                  {formatSecondaryPrice(grandTotal) && (
+                    <p className="text-xs text-center text-[#78746e] mt-2">
+                      {formatSecondaryPrice(grandTotal)}
+                    </p>
+                  )}
 
                   <p className="text-xs text-center text-[#78746e] mt-4 flex items-center justify-center gap-1">
                     <span>🔒</span>
@@ -717,8 +727,7 @@ export default function Checkout() {
                             </p>
                           </div>
                           <span className="text-sm font-semibold text-[#1c1917] shrink-0">
-                            {currency}&nbsp;
-                            {(item.price * item.quantity).toLocaleString()}
+                            {formatPrice(item.price * item.quantity)}
                           </span>
                         </div>
                       ))}
@@ -779,9 +788,9 @@ export default function Checkout() {
                         </div>
                         <p className="text-xs text-[#78746e]">
                           {appliedCoupon.discountType === 'percent'
-                            ? `${appliedCoupon.discountValue}% off${appliedCoupon.maxDiscount > 0 ? ` (max ${currency} ${appliedCoupon.maxDiscount.toLocaleString()})` : ''}`
-                            : `${currency} ${appliedCoupon.discountValue.toLocaleString()} off`}
-                          {appliedCoupon.minOrderAmount > 0 && ` · Min ${currency} ${appliedCoupon.minOrderAmount.toLocaleString()}`}
+                            ? `${appliedCoupon.discountValue}% off${appliedCoupon.maxDiscount > 0 ? ` (max ${formatPrice(appliedCoupon.maxDiscount)})` : ''}`
+                            : `${formatPrice(appliedCoupon.discountValue)} off`}
+                          {appliedCoupon.minOrderAmount > 0 && ` · Min ${formatPrice(appliedCoupon.minOrderAmount)}`}
                         </p>
                       </div>
                     )}
@@ -789,7 +798,7 @@ export default function Checkout() {
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between text-sm text-[#78746e]">
                         <span>{t('dashboard.invoice.subtotal')}</span>
-                        <span>{currency}&nbsp;{subtotal.toLocaleString()}</span>
+                        <span>{formatPrice(subtotal)}</span>
                       </div>
                       {appliedCoupon && discountAmount > 0 && (
                         <div className="flex justify-between text-sm text-[#2d5a3d] font-medium">
@@ -797,17 +806,17 @@ export default function Checkout() {
                             Discount
                             <span className="text-[10px] uppercase tracking-wider text-[#2d5a3d]/70">({appliedCoupon.code})</span>
                           </span>
-                          <span>− {currency}&nbsp;{discountAmount.toLocaleString()}</span>
+                          <span>− {formatPrice(discountAmount)}</span>
                         </div>
                       )}
                       <div className="flex justify-between text-sm text-[#78746e]">
                         <span>Tax ({taxRate}%)</span>
-                        <span>{currency}&nbsp;{taxAmount.toLocaleString()}</span>
+                        <span>{formatPrice(taxAmount)}</span>
                       </div>
                       <div className="flex justify-between text-sm text-[#78746e]">
                         <span>{t('cart.shipping')}</span>
                         <span className={shippingFlatRate > 0 ? "text-[#1c1917] font-semibold" : "text-[#2d5a3d] font-semibold"}>
-                          {shippingFlatRate > 0 ? `${currency} ${shippingFlatRate.toLocaleString()}` : t('checkout.summary.free')}
+                          {shippingFlatRate > 0 ? formatPrice(shippingFlatRate) : t('checkout.summary.free')}
                         </span>
                       </div>
                     </div>
@@ -816,8 +825,13 @@ export default function Checkout() {
 
                     <div className="flex justify-between text-lg font-bold text-[#1c1917]">
                       <span>{t('dashboard.invoice.total')}</span>
-                      <span>{currency}&nbsp;{grandTotal.toLocaleString()}</span>
+                      <span>{formatPrice(grandTotal)}</span>
                     </div>
+                    {formatSecondaryPrice(grandTotal) && (
+                      <p className="text-xs text-right text-[#78746e] mt-1">
+                        {formatSecondaryPrice(grandTotal)}
+                      </p>
+                    )}
                   </>
                 )}
               </div>

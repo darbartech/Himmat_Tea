@@ -31,6 +31,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useStore } from "@/context/StoreContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import { SUPPORTED_CURRENCIES, CURRENCY_NAMES, COUNTRY_LIST } from "@/lib/currency";
 import { BRAND } from "@/config/brand";
 import { AuthModal } from "@/modules/auth";
 import { Button } from "@/app/components/ui/button";
@@ -155,6 +156,10 @@ export default function Navigation() {
 
   const {
     formatPrice,
+    currency: selectedCurrency,
+    setCurrency,
+    country: selectedCountry,
+    setCountry,
   } = useCurrency();
 
   /* ============================================================
@@ -782,6 +787,42 @@ export default function Navigation() {
                       ),
                     )}
 
+                    <div className="h-px bg-border my-1.5" />
+
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-semibold px-3 pt-1 pb-2">
+                      {t('nav.currencyDropdown') !== 'nav.currencyDropdown' ? t('nav.currencyDropdown') : 'Currency'}
+                    </p>
+
+                    <select
+                      value={selectedCurrency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                      className="w-full px-3 py-2 mb-1.5 rounded-[var(--radius-md)] text-sm bg-secondary text-foreground border-0 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+                      aria-label={t('a11y.selectCurrency') !== 'a11y.selectCurrency' ? t('a11y.selectCurrency') : 'Select currency'}
+                    >
+                      {SUPPORTED_CURRENCIES.map((code) => (
+                        <option key={code} value={code}>
+                          {code} — {CURRENCY_NAMES[code]}
+                        </option>
+                      ))}
+                    </select>
+
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-semibold px-3 pt-1 pb-2">
+                      {t('nav.countryDropdown') !== 'nav.countryDropdown' ? t('nav.countryDropdown') : 'Country'}
+                    </p>
+
+                    <select
+                      value={selectedCountry}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="w-full px-3 py-2 rounded-[var(--radius-md)] text-sm bg-secondary text-foreground border-0 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+                      aria-label={t('a11y.selectCountry') !== 'a11y.selectCountry' ? t('a11y.selectCountry') : 'Select country'}
+                    >
+                      {COUNTRY_LIST.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+
                   </div>
                 )}
 
@@ -1233,6 +1274,42 @@ export default function Navigation() {
                     </button>
                   ),
                 )}
+
+                <div className="h-px bg-border my-1.5" />
+
+                <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-semibold px-3 pt-1 pb-2">
+                  {t('nav.currencyDropdown') !== 'nav.currencyDropdown' ? t('nav.currencyDropdown') : 'Currency'}
+                </p>
+
+                <select
+                  value={selectedCurrency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="w-full px-3 py-2 mb-1.5 rounded-[var(--radius-md)] text-sm bg-card text-foreground border-0 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+                  aria-label={t('a11y.selectCurrency') !== 'a11y.selectCurrency' ? t('a11y.selectCurrency') : 'Select currency'}
+                >
+                  {SUPPORTED_CURRENCIES.map((code) => (
+                    <option key={code} value={code}>
+                      {code} — {CURRENCY_NAMES[code]}
+                    </option>
+                  ))}
+                </select>
+
+                <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-semibold px-3 pt-1 pb-2">
+                  {t('nav.countryDropdown') !== 'nav.countryDropdown' ? t('nav.countryDropdown') : 'Country'}
+                </p>
+
+                <select
+                  value={selectedCountry}
+                  onChange={(e) => setCountry(e.target.value)}
+                  className="w-full px-3 py-2 rounded-[var(--radius-md)] text-sm bg-card text-foreground border-0 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+                  aria-label={t('a11y.selectCountry') !== 'a11y.selectCountry' ? t('a11y.selectCountry') : 'Select country'}
+                >
+                  {COUNTRY_LIST.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
 
               </div>
             )}
