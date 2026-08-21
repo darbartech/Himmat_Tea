@@ -200,38 +200,6 @@ export default function Cart() {
 
                   <div className="h-px bg-[rgba(28,25,23,0.08)] mb-5" />
 
-                  {/* Promo code */}
-                  <div className="mb-5">
-                    <label className="flex items-center gap-1.5 text-sm font-semibold text-[#1c1917] mb-2">
-                      <Tag className="h-3.5 w-3.5" />
-                      Promo Code
-                    </label>
-                    {promoApplied ? (
-                      <div className="flex items-center gap-2 text-sm text-[#2d5a3d] bg-[#2d5a3d]/10 px-4 py-2.5 rounded-xl">
-                        <span>✓</span>
-                        <span className="font-medium">{t('cart.promoApplied')}</span>
-                      </div>
-                    ) : (
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          placeholder={t('auth.verifyResetPage.eyebrow')}
-                          value={promo}
-                          onChange={(e) => setPromo(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && applyPromo()}
-                          className="flex-1 px-4 py-2.5 border border-[rgba(28,25,23,0.1)] rounded-xl text-sm focus:outline-none focus:border-[#2d5a3d] transition-colors"
-                        />
-                        <button
-                          onClick={applyPromo}
-                          className="px-4 py-2.5 bg-[#1c1917] text-white text-sm font-medium rounded-xl hover:bg-[#333] transition-colors"
-                        >
-                          Apply
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="h-px bg-[rgba(28,25,23,0.08)] mb-4" />
 
                   {/* Totals */}
                   <div className="space-y-3 mb-6">

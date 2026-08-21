@@ -8,8 +8,6 @@ import {
   X,
   ShoppingBag,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Search,
   Check,
   LayoutDashboard,
@@ -461,19 +459,6 @@ export default function Navigation() {
      ANNOUNCEMENT CONTROLS
   ============================================================ */
 
-  const prev = () =>
-    setAnnouncementIdx(
-      (index) =>
-        (index - 1 + ANNOUNCEMENTS.length) %
-        ANNOUNCEMENTS.length,
-    );
-
-  const next = () =>
-    setAnnouncementIdx(
-      (index) =>
-        (index + 1) % ANNOUNCEMENTS.length,
-    );
-
   const current =
     ANNOUNCEMENTS[announcementIdx];
 
@@ -504,6 +489,7 @@ export default function Navigation() {
         style={{
           fontFamily: "'DM Sans', sans-serif",
         }}
+        suppressHydrationWarning
       >
 
         {/* ====================================================
@@ -511,7 +497,7 @@ export default function Navigation() {
         ==================================================== */}
 
         {!dismissed && (
-          <div className="relative bg-primary text-primary-foreground select-none overflow-hidden">
+          <div className="relative bg-primary text-primary-foreground select-none overflow-hidden" suppressHydrationWarning>
 
             <div
               className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:14px_14px]"
@@ -522,15 +508,7 @@ export default function Navigation() {
 
               <div className="flex items-center h-9">
 
-                <button
-                  onClick={prev}
-                  aria-label={t('a11y.previousAnnouncement')}
-                  className="shrink-0 p-1.5 rounded-[var(--radius-sm)] hover:bg-white/15 transition-colors duration-[var(--duration-fast)] mr-2.5"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                </button>
-
-                <div className="flex-1 flex items-center justify-center gap-2.5 min-w-0">
+                <div className="flex-1 flex items-center justify-center gap-2.5 min-w-0 pl-6">
 
                   <span className="shrink-0 w-5 h-5 rounded-full bg-white/12 flex items-center justify-center ring-1 ring-white/20">
                     <current.icon className="h-3 w-3 text-primary-foreground" />
@@ -539,12 +517,13 @@ export default function Navigation() {
                   <Link
                     href={current.link}
                     className="text-[12.5px] font-light tracking-wide truncate hover:text-primary-foreground/80 transition-colors duration-[var(--duration-fast)]"
+                    suppressHydrationWarning
                   >
                     {t(current.textKey)}
                   </Link>
 
                   {current.codeKey && (
-                    <span className="shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-[var(--radius-sm)] bg-accent/15 border border-accent/40 text-[10.5px] font-bold tracking-[0.12em] text-accent">
+                    <span className="shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-[var(--radius-sm)] bg-accent/15 border border-accent/40 text-[10.5px] font-bold tracking-[0.12em] text-accent" suppressHydrationWarning>
                       {t(current.codeKey)}
                     </span>
                   )}
@@ -552,17 +531,9 @@ export default function Navigation() {
                 </div>
 
                 <button
-                  onClick={next}
-                  aria-label={t('a11y.nextAnnouncement')}
-                  className="shrink-0 p-1.5 rounded-[var(--radius-sm)] hover:bg-white/15 transition-colors duration-[var(--duration-fast)] ml-2.5"
-                >
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-
-                <button
                   onClick={() => setDismissed(true)}
-                  aria-label={t('a11y.dismiss')}
-                  className="shrink-0 p-1.5 rounded-[var(--radius-sm)] hover:bg-white/15 transition-colors duration-[var(--duration-fast)] ml-1"
+                  aria-label={mounted ? t('a11y.dismiss') : 'Dismiss'}
+                  className="shrink-0 p-1.5 rounded-[var(--radius-sm)] hover:bg-white/15 transition-colors duration-[var(--duration-fast)]"
                 >
                   <X className="h-3.5 w-3.5 opacity-70" />
                 </button>
@@ -595,7 +566,7 @@ export default function Navigation() {
             MAIN NAV
         ==================================================== */}
 
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8" suppressHydrationWarning>
 
           <div className="flex items-center justify-between h-16">
 
@@ -607,6 +578,7 @@ export default function Navigation() {
               href="/"
               className="flex items-center gap-2.5 shrink-0 group"
               onClick={() => setMobileOpen(false)}
+              suppressHydrationWarning
             >
               <Image
                 src="/logo.svg"
@@ -615,6 +587,7 @@ export default function Navigation() {
                 height={100}
                 className="w-[150px] h-[100%]"
                 priority
+                suppressHydrationWarning
               />
             </Link>
 
@@ -622,7 +595,7 @@ export default function Navigation() {
                 DESKTOP NAV
             ================================================== */}
 
-            <nav className="hidden lg:flex items-center gap-0.5">
+            <nav className="hidden lg:flex items-center gap-0.5" suppressHydrationWarning>
 
               {navLinks.map((link) => {
 
@@ -648,6 +621,7 @@ export default function Navigation() {
                           ? "text-primary after:w-5"
                           : "text-foreground hover:text-primary after:w-0 hover:after:w-5"
                       }`}
+                      suppressHydrationWarning
                     >
                       {link.label}
 

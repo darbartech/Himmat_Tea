@@ -34,17 +34,17 @@ function useInView<T extends HTMLElement>() {
 
 const FEATURES = [
   {
-    label: "Direct from\nFarms",
+    label: "Direct from Farms",
     icon: (
       <path d="M4 14c0-6 4-10 10-10 5 0 6 5 4 8-3 4-9 5-14 2z M4 14c4-1 8-3 10-6" />
     ),
   },
   {
-    label: "Lab-Tested\nQuality",
+    label: "Lab-Tested Quality",
     icon: <path d="M12 7.5v9M8 12h8 M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17" />,
   },
   {
-    label: "Ships\nWorldwide",
+    label: "Ships Worldwide",
     icon: (
       <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
     ),
@@ -77,6 +77,7 @@ export default function Hero() {
     <section
       className="bg-[#f9f7f4] py-16 md:py-20"
       style={{ fontFamily: "'DM Sans', sans-serif" }}
+      suppressHydrationWarning
     >
       <style jsx global>{`
         @keyframes sway {
@@ -90,9 +91,9 @@ export default function Hero() {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 items-center gap-10 md:grid-cols-2">
-        <div className="order-2 max-w-xl py-12 md:order-1 md:py-16">
-          <div className="flex items-center gap-2.5 mb-5">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 items-center gap-8 md:gap-10 md:grid-cols-2">
+        <div className="order-1 max-w-xl pt-12 pb-8 md:order-1 md:py-16">
+          <div className="flex items-center gap-2.5 mb-5 mt-4 md:mt-0">
             <div
               aria-hidden
               style={{
@@ -126,21 +127,21 @@ export default function Hero() {
             every tin carries a quiet ritual from soil to cup.
           </p>
 
-          <ul className="flex flex-wrap mb-11">
+          <ul className="flex flex-nowrap gap-2 mb-11 sm:gap-0">
             {FEATURES.map((f, i) => (
               <li
                 key={f.label}
-                className={`min-w-[35%] flex-1 px-4 py-2 first:pl-0 sm:min-w-0 ${
+                className={`flex-1 px-2 sm:px-4 py-2 first:pl-0 ${
                   i === 0 ? "border-l-0" : "border-l border-[#e5e1d9]"
                 }`}
               >
-                <div className="group flex flex-col items-start gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[#c8a96e] text-[#c8a96e] transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:border-[#c8a96e] group-hover:bg-[#c8a96e] group-hover:text-[#f9f7f4] group-hover:shadow-[0_8px_18px_rgba(200,169,110,0.28)]">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="h-[19px] w-[19px]">
+                <div className="group flex flex-col items-start gap-2 sm:gap-3">
+                  <span className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-[#c8a96e] text-[#c8a96e] transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:border-[#c8a96e] group-hover:bg-[#c8a96e] group-hover:text-[#f9f7f4] group-hover:shadow-[0_8px_18px_rgba(200,169,110,0.28)] shrink-0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]">
                       {f.icon}
                     </svg>
                   </span>
-                  <span className="whitespace-pre-line text-[10.5px] font-semibold uppercase leading-relaxed tracking-[0.06em] text-[#1c1917]">
+                  <span className="whitespace-nowrap text-[9px] sm:text-[10.5px] font-semibold uppercase leading-snug tracking-[0.05em] sm:tracking-[0.06em] text-[#1c1917]">
                     {f.label}
                   </span>
                 </div>
@@ -168,7 +169,7 @@ export default function Hero() {
         </div>
 
         <div
-          className="order-1 flex max-h-[400px] w-full items-end justify-center md:order-2 md:h-[600px] md:max-h-[600px]"
+          className="order-2 flex max-h-[340px] w-full items-center justify-center md:order-2 md:h-[600px] md:max-h-[600px]"
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
         >

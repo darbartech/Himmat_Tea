@@ -141,7 +141,7 @@ function SliderContent({ products }: { products: Product[] }) {
         ))}
       </CarouselContent>
       <div className="flex justify-center mt-6 md:hidden">
-        <CustomNavigation />
+        {/* <CustomNavigation /> */}
       </div>
     </>
   );

@@ -50,6 +50,7 @@ export const TranslationProvider = ({ children }: { children: ReactNode }) => {
   const [lang, setLangState] = useState('en');
   const [translations, setTranslations] = useState<Translations>(en);
   const [isLoading, setIsLoading] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const isValidCache = (data: Translations): boolean => {
     const sampleKeys = [
@@ -62,7 +63,8 @@ export const TranslationProvider = ({ children }: { children: ReactNode }) => {
     return sampleKeys.every(key => getNested(data, key) !== undefined);
   };
 
-  const setLang = useCallback(async (newLang: string) => {
+  const setLang = useCallback(async (newLang: string, { force = false }: { force?: boolean } = {}) => {
+    if (!force && !isHydrated) return;
     setLangState(newLang);
 
     if (newLang === 'en') {
@@ -99,32 +101,32 @@ export const TranslationProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isHydrated]);
 
   useEffect(() => {
+    setIsHydrated(true);
+
     const manualChoice = localStorage.getItem("himmat_lang");
     if (manualChoice) {
-      setLang(manualChoice);
+      setLang(manualChoice, { force: true });
       return;
     }
     const country = readCookie("himmat_country");
-    setLang(languageForCountry(country));
+    setLang(languageForCountry(country), { force: true });
   }, [setLang]);
 
-  // If the visitor manually changes their country elsewhere (the
-  // country/currency picker in Navigation, backed by CurrencyContext), keep
-  // the suggested language in sync with it — but only when they haven't
-  // manually picked a language of their own, since language and country are
-  // meant to be independently overridable.
   useEffect(() => {
     function handleCountryChange(e: Event) {
+      if (!isHydrated) return;
       if (localStorage.getItem("himmat_lang")) return;
       const detail = (e as CustomEvent<{ country?: string }>).detail;
       setLang(languageForCountry(detail?.country));
     }
-    window.addEventListener("himmat:countrychange", handleCountryChange);
-    return () => window.removeEventListener("himmat:countrychange", handleCountryChange);
-  }, [setLang]);
+    if (typeof window !== 'undefined') {
+      window.addEventListener("himmat:countrychange", handleCountryChange);
+      return () => window.removeEventListener("himmat:countrychange", handleCountryChange);
+    }
+  }, [setLang, isHydrated]);
 
   const t = useCallback(
     (key: string, params?: Record<string, string | number>) => {

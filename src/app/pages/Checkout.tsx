@@ -696,7 +696,7 @@ export default function Checkout() {
                 </h3>
 
                 {cart.length === 0 ? (
-                  <p className="text-sm text-[#78746e]">{t('checkout.emptyCart')}</p>
+                  <p className="text-sm text-[#78746e]">{t('cxheckout.emptyCart')}</p>
                 ) : (
                   <>
                     <div className="space-y-4 mb-5">
