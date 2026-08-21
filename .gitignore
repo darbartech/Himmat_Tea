@@ -18,3 +18,5 @@ dist/
 .DS_Store
 /zip/
 .zip/
+zip/
+.zip
