@@ -8,6 +8,7 @@ import Footer from "@/app/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api-client";
 import { useTranslation } from "@/hooks/useTranslation";
+import { formatCurrency, BASE_CURRENCY } from "@/lib/currency";
 import { LoadingButton } from "@/app/components/ui/loading-button";
 import {
   DropdownMenu,
@@ -72,6 +73,30 @@ interface Order {
     date: string;
     description: string;
   }[];
+  // Multi-currency snapshot captured at order-creation time — see
+  // src/lib/currency.ts / src/lib/exchange-rates.ts. Falls back to the
+  // base currency for historical orders placed before this was added.
+  baseCurrency?: string;
+  customerCurrency?: string;
+  exchangeRate?: number;
+  convertedTotal?: number;
+  convertedGrandTotal?: number;
+}
+
+/** Currency + already-converted amount an order was placed/paid in. */
+function orderCurrency(order: Pick<Order, "customerCurrency" | "baseCurrency">): string {
+  return order.customerCurrency || order.baseCurrency || BASE_CURRENCY;
+}
+
+/** Format an order's grand total in the currency the customer actually paid. */
+function formatOrderTotal(order: Order): string {
+  const amount = order.convertedGrandTotal ?? order.grandTotal ?? order.total ?? 0;
+  return formatCurrency(amount, orderCurrency(order));
+}
+
+/** Format a line item's unit/line amount, converted at the order's stored exchange rate. */
+function formatOrderItemAmount(order: Order, amount: number): string {
+  return formatCurrency(amount * (order.exchangeRate ?? 1), orderCurrency(order));
 }
 
 interface ApiResponse<T> {
@@ -759,12 +784,7 @@ export default function CustomerAccount() {
                                 </p>
 
                                 <p className="font-semibold text-[#1c1917]">
-                                  Rs.{' '}
-                                  {(
-                                    selectedOrder.grandTotal ||
-                                    selectedOrder.total ||
-                                    0
-                                  ).toLocaleString()}
+                                  {formatOrderTotal(selectedOrder)}
                                 </p>
                               </div>
 
@@ -910,8 +930,7 @@ export default function CustomerAccount() {
                                           {
                                             item.quantity
                                           }{' '}
-                                          × Rs.{' '}
-                                          {item.price?.toLocaleString()}
+                                          × {formatOrderItemAmount(selectedOrder, item.price ?? 0)}
                                         </p>
 
                                       </div>
@@ -919,13 +938,10 @@ export default function CustomerAccount() {
                                     </div>
 
                                     <p className="text-sm font-semibold text-[#1c1917]">
-                                      Rs.{' '}
-                                      {(
-                                        (item.price ||
-                                          0) *
-                                        (item.quantity ||
-                                          0)
-                                      ).toLocaleString()}
+                                      {formatOrderItemAmount(
+                                        selectedOrder,
+                                        (item.price || 0) * (item.quantity || 0)
+                                      )}
                                     </p>
 
                                   </div>
@@ -1006,12 +1022,7 @@ export default function CustomerAccount() {
                                       </p>
 
                                       <p className="font-semibold text-[#1c1917]">
-                                        Rs.{' '}
-                                        {(
-                                          order.grandTotal ||
-                                          order.total ||
-                                          0
-                                        ).toLocaleString()}
+                                        {formatOrderTotal(order)}
                                       </p>
 
                                     </div>

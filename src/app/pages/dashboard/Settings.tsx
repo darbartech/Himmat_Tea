@@ -408,11 +408,11 @@ export default function Settings() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="₹">{t('dashboard.settings.indianRupee')}</SelectItem>
+                          <SelectItem value="₹">{t('dashboard.settings.storeInformation.currencies.indianRupee')}</SelectItem>
                           <SelectItem value="Rs.">{t('dashboard.settings.nepaleseRupee')}</SelectItem>
-                          <SelectItem value="$">{t('dashboard.settings.usDollar')}</SelectItem>
-                          <SelectItem value="€">{t('dashboard.settings.euro')}</SelectItem>
-                          <SelectItem value="£">{t('dashboard.settings.britishPound')}</SelectItem>
+                          <SelectItem value="$">{t('dashboard.settings.storeInformation.currencies.usDollar')}</SelectItem>
+                          <SelectItem value="€">{t('dashboard.settings.storeInformation.currencies.euro')}</SelectItem>
+                          <SelectItem value="£">{t('dashboard.settings.storeInformation.currencies.britishPound')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

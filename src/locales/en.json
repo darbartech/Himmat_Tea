@@ -1265,10 +1265,6 @@
       "generalSettings": "General Settings"
     },
     "settings": {
-      "indianRupee": "Indian Rupee (₹)",
-      "usDollar": "US Dollar ($)",
-      "euro": "Euro (€)",
-      "britishPound": "British Pound (£)",
       "localization": {
         "timeZones": {
           "nepal": "Nepal Standard Time (UTC+5:45)",
