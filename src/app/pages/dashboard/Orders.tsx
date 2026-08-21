@@ -9,6 +9,7 @@ import { notify } from "@/lib/notify";
 import { useStore } from "../../../context/StoreContext";
 import { useTranslation } from "@/hooks/useTranslation";
 import { api, ApiError } from "../../../lib/api-client";
+import { formatCurrency, BASE_CURRENCY, CURRENCY_NAMES, isSupportedCurrency } from "@/lib/currency";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "../../components/ui/dialog";
@@ -91,6 +92,27 @@ interface Order {
   refundAmount?: number;
   createdAt?: string;
   updatedAt?: string;
+  // Multi-currency snapshot captured at order-creation time — see
+  // src/lib/currency.ts / src/lib/exchange-rates.ts. `total`/`tax`/
+  // `shippingCost`/`discountAmount`/`grandTotal` above remain the NPR
+  // (baseCurrency) accounting values; the fields below are what the
+  // customer actually saw/paid, frozen at that point in time so
+  // historical orders never change if exchange rates move later.
+  // Orders placed before this feature existed fall back safely to NPR.
+  baseCurrency?: string;
+  customerCurrency?: string;
+  exchangeRate?: number;
+  convertedTotal?: number;
+  convertedTax?: number;
+  convertedShippingCost?: number;
+  convertedDiscountAmount?: number;
+  convertedGrandTotal?: number;
+}
+
+/** Currency an order was placed/paid in, falling back safely to the base currency. */
+function orderCurrency(order: Pick<Order, "customerCurrency" | "baseCurrency">): string {
+  const code = order.customerCurrency || order.baseCurrency || BASE_CURRENCY;
+  return isSupportedCurrency(code) ? code : BASE_CURRENCY;
 }
 
 interface CreateOrderItem {
@@ -162,9 +184,6 @@ function noteTs(note: InternalNote): string {
   return note.timestamp || note.createdAt || new Date().toISOString();
 }
 
-const fmt = (n: number) =>
-  n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
 function isNewOrder(order: Order): boolean {
   const processedStatuses = new Set(["DELIVERED", "CANCELLED", "REFUNDED", "SHIPPED", "Delivered", "Cancelled", "Refunded", "Shipped"]);
   if (processedStatuses.has(order.status)) return false;
@@ -211,15 +230,34 @@ function OrderInvoice({
   settings: any;
 }) {
   const { t } = useTranslation();
-  const cgstRate = settings.taxRate / 2;
-  const sgstRate = settings.taxRate / 2;
-  const cgstAmount = order.total * (cgstRate / 100);
-  const sgstAmount = order.total * (sgstRate / 100);
-  const subtotal = order.total;
+
+  // Currency this order was actually placed/paid in (falls back to the
+  // base currency for orders predating the multi-currency snapshot).
+  const currency = orderCurrency(order);
+  const rate = order.exchangeRate ?? 1;
+  const money = (amount: number) => formatCurrency(amount, currency);
+
+  // Prefer the customer-currency snapshot captured at order time; fall
+  // back to the NPR base values (and a 1:1 rate) for older orders.
+  const subtotal = order.convertedTotal ?? order.total;
+  const discountAmount = order.convertedDiscountAmount ?? order.discountAmount ?? 0;
+  const taxAmount = order.convertedTax ?? order.tax;
+  const grandTotal = order.convertedGrandTotal ?? order.grandTotal;
+
+  // Tax is always split from the order's OWN stored tax amount, never
+  // recalculated from today's global tax rate — that would silently
+  // change a historical invoice's totals whenever the store's tax rate
+  // setting is edited later.
+  const cgstAmount = taxAmount / 2;
+  const sgstAmount = taxAmount / 2;
+  const effectiveTaxRatePct = subtotal > 0 ? (taxAmount / subtotal) * 100 : 0;
+  const cgstRate = effectiveTaxRatePct / 2;
+  const sgstRate = effectiveTaxRatePct / 2;
 
   const invoiceDate = new Date(order.orderDate);
   const dueDateObj = new Date(invoiceDate);
-  dueDateObj.setDate(dueDateObj.getDate() + 30);
+  const dueDays = typeof settings.invoiceDueDays === "number" ? settings.invoiceDueDays : 30;
+  dueDateObj.setDate(dueDateObj.getDate() + dueDays);
 
   const fmtDate = (d: Date) =>
     d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -489,13 +527,13 @@ function OrderInvoice({
                   {item.quantity}
                 </td>
                 <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", paddingRight: "0", fontSize: "12px", color: "#555555", verticalAlign: "top", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                  ₹{fmt(itemPrice(item))}
+                  {money(itemPrice(item) * rate)}
                 </td>
                 <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", paddingRight: "0", fontSize: "12px", color: "#aaaaaa", verticalAlign: "top", whiteSpace: "nowrap" }}>
                   —
                 </td>
                 <td style={{ textAlign: "right", paddingTop: "13px", paddingBottom: "13px", paddingLeft: "8px", paddingRight: "0", fontSize: "13px", fontWeight: 700, color: "#1a1a1a", verticalAlign: "top", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                  ₹{fmt(itemAmount(item))}
+                  {money(itemAmount(item) * rate)}
                 </td>
               </tr>
             ))}
@@ -529,7 +567,7 @@ function OrderInvoice({
                     Amount in Words
                   </div>
                   <div style={{ fontSize: "13px", fontWeight: 600, color: "#14532d", lineHeight: "1.5", wordBreak: "break-word" }}>
-                    {numberToWords(order.grandTotal)} Rupees Only
+                    {numberToWords(grandTotal)} {CURRENCY_NAMES[currency] || currency} Only
                   </div>
                 </div>
               </td>
@@ -547,29 +585,29 @@ function OrderInvoice({
                   <tbody>
                     <tr>
                       <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t('dashboard.invoice.subtotal')}</td>
-                      <td style={{ fontSize: "13px", textAlign: "right", fontWeight: 500, color: "#1a1a1a", paddingBottom: "8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>₹{fmt(subtotal)}</td>
+                      <td style={{ fontSize: "13px", textAlign: "right", fontWeight: 500, color: "#1a1a1a", paddingBottom: "8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>{money(subtotal)}</td>
                     </tr>
                     <tr>
                       <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t('common.discount')}</td>
-                      <td style={{ fontSize: "13px", textAlign: "right", color: (order.discountAmount ?? 0) > 0 ? "#16a34a" : "#1a1a1a", paddingBottom: "8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                        {(order.discountAmount ?? 0) > 0 ? `− ₹${fmt(order.discountAmount ?? 0)}` : `₹${fmt(0)}`}
+                      <td style={{ fontSize: "13px", textAlign: "right", color: discountAmount > 0 ? "#16a34a" : "#1a1a1a", paddingBottom: "8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                        {discountAmount > 0 ? `− ${money(discountAmount)}` : money(0)}
                       </td>
                     </tr>
                     {settings.gstNumber ? (
                       <>
                         <tr>
-                          <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>CGST ({cgstRate}%)</td>
-                          <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>₹{fmt(cgstAmount)}</td>
+                          <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>CGST ({cgstRate.toFixed(1)}%)</td>
+                          <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>{money(cgstAmount)}</td>
                         </tr>
                         <tr>
-                          <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>SGST ({sgstRate}%)</td>
-                          <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "12px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>₹{fmt(sgstAmount)}</td>
+                          <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>SGST ({sgstRate.toFixed(1)}%)</td>
+                          <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "12px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>{money(sgstAmount)}</td>
                         </tr>
                       </>
                     ) : (
                       <tr>
-                        <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tax ({settings.taxRate}%)</td>
-                        <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "12px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>₹{fmt(order.tax)}</td>
+                        <td style={{ fontSize: "12px", color: "#666666", paddingBottom: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tax ({effectiveTaxRatePct.toFixed(1)}%)</td>
+                        <td style={{ fontSize: "13px", textAlign: "right", color: "#1a1a1a", paddingBottom: "12px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>{money(taxAmount)}</td>
                       </tr>
                     )}
                     <tr>
@@ -583,7 +621,7 @@ function OrderInvoice({
                         fontSize: "18px", fontWeight: 800, textAlign: "right",
                         color: "#1a3a2a", paddingTop: "12px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums",
                       }}>
-                        ₹{fmt(order.grandTotal)}
+                        {money(grandTotal)}
                       </td>
                     </tr>
                   </tbody>
@@ -631,7 +669,7 @@ function OrderInvoice({
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                   {[
                     "Goods once sold cannot be returned without prior approval.",
-                    "Payment is due within 30 days of the invoice date.",
+                    `Payment is due within ${dueDays} days of the invoice date.`,
                     "Subject to local jurisdiction.",
                   ].map((t, i) => (
                     <li key={i} style={{ fontSize: "11px", color: "#666666", marginBottom: "3px", lineHeight: "1.5", wordBreak: "break-word" }}>
@@ -1572,7 +1610,7 @@ export default function Orders() {
                       {order.items.length} {order.items.length > 1 ? t("dashboard.home.products") : t("dashboard.invoice.item")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap font-semibold text-[#1c1917]">
-                      ₹{order.grandTotal.toFixed(2)}
+                      {formatCurrency(order.convertedGrandTotal ?? order.grandTotal, orderCurrency(order))}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${meta?.pill ?? "bg-gray-100 text-gray-700 border-gray-200"}`}>
@@ -2136,7 +2174,7 @@ export default function Orders() {
                             <SelectContent>
                               {allProducts.filter((p: any) => p.isActive !== false).map((p: any) => (
                                 <SelectItem key={p.id} value={String(p.id)}>
-                                  #{p.id} · {p.name} {typeof p.price === "number" ? ` (₹${p.price.toFixed(2)})` : ""}
+                                  #{p.id} · {p.name} {typeof p.price === "number" ? ` (${formatCurrency(p.price, BASE_CURRENCY)})` : ""}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -2168,7 +2206,7 @@ export default function Orders() {
                           />
                         </td>
                         <td className="px-3 py-3 align-top text-right font-medium text-[#1c1917] tabular-nums">
-                          ₹{fmt(((it.price ?? 0) * it.quantity))}
+                          {formatCurrency((it.price ?? 0) * it.quantity, BASE_CURRENCY)}
                         </td>
                         <td className="px-3 py-3 align-top text-right">
                           <Button
@@ -2195,19 +2233,19 @@ export default function Orders() {
                 <div className="w-full sm:w-[300px] bg-[#f9f7f4] rounded-xl p-4 border border-[#2d5a3d]/10 space-y-2 text-sm">
                   <div className="flex justify-between text-[#78746e]">
                     <span>{t('dashboard.invoice.subtotal')}</span>
-                    <span className="tabular-nums">₹{fmt(createSubtotal)}</span>
+                    <span className="tabular-nums">{formatCurrency(createSubtotal, BASE_CURRENCY)}</span>
                   </div>
                   <div className="flex justify-between text-[#78746e]">
                     <span>{t('dashboard.orders.shippingFlatRate')}</span>
-                    <span className="tabular-nums">₹{fmt(createShipping)}</span>
+                    <span className="tabular-nums">{formatCurrency(createShipping, BASE_CURRENCY)}</span>
                   </div>
                   <div className="flex justify-between text-[#78746e]">
                     <span>Tax ({settings.taxRate ?? 0}%)</span>
-                    <span className="tabular-nums">₹{fmt(createTax)}</span>
+                    <span className="tabular-nums">{formatCurrency(createTax, BASE_CURRENCY)}</span>
                   </div>
                   <div className="pt-2 border-t border-[#2d5a3d]/15 flex justify-between font-bold text-[#1c1917] text-base">
                     <span>{t('dashboard.orders.grandTotal')}</span>
-                    <span className="tabular-nums">₹{fmt(createGrandTotal)}</span>
+                    <span className="tabular-nums">{formatCurrency(createGrandTotal, BASE_CURRENCY)}</span>
                   </div>
                 </div>
               </div>

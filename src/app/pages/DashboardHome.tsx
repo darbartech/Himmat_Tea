@@ -30,7 +30,13 @@ import {
 import { api } from "../../../lib/api-client";
 import { useTranslation } from "../../../hooks/useTranslation";
 import { BRAND } from "../../../config/brand";
-import { formatCurrency, BASE_CURRENCY } from "../../../lib/currency";
+import { formatCurrency, BASE_CURRENCY, isSupportedCurrency } from "../../../lib/currency";
+
+/** Currency an order was placed/paid in, falling back safely to the base currency. */
+const orderCurrency = (order: any): string => {
+  const code = order?.customerCurrency || order?.baseCurrency || BASE_CURRENCY;
+  return isSupportedCurrency(code) ? code : BASE_CURRENCY;
+};
 
 const getMonthDate = (monthsAgo: number) => {
   const date = new Date();
@@ -110,7 +116,7 @@ const downloadReport = (orders: any[]) => {
     return order.paymentStatus || 'Unpaid';
   };
 
-  const headers = ["Order Number", "Customer Name", "Email", "Phone", "Order Date", "Total (₹)", "Order Status", "Payment Status"];
+  const headers = ["Order Number", "Customer Name", "Email", "Phone", "Order Date", `Total (${BASE_CURRENCY})`, "Order Status", "Payment Status"];
   const rows = orders.map(order => [
     order.id,
     order.customerName,
@@ -539,7 +545,7 @@ export default function DashboardHome() {
                           <span className="text-sm text-[#5e5b53] font-medium">{new Date(order.orderDate || order.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                         </td>
                         <td className="px-7 py-5">
-                          <span className="font-bold text-[#1c1917] text-lg">₹{(Number(order.grandTotal) || 0).toFixed(2)}</span>
+                          <span className="font-bold text-[#1c1917] text-lg">{formatCurrency(Number(order.convertedGrandTotal ?? order.grandTotal) || 0, orderCurrency(order))}</span>
                         </td>
                         <td className="px-7 py-5">
                           <span className={`inline-flex items-center px-3.5 py-1.5 rounded-xl text-xs font-bold ${getStatusStyles(order.status)}`}>
@@ -594,7 +600,7 @@ export default function DashboardHome() {
                               {product.name}
                             </p>
                             <p className="text-xs text-[#78746e] mt-0.5 font-medium">
-                              ₹{product.totalRevenue.toLocaleString()} · {product.totalSold} sold
+                              {formatCurrency(product.totalRevenue, BASE_CURRENCY)} · {product.totalSold} sold
                             </p>
                           </div>
                         </div>
